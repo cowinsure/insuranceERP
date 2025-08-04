@@ -38,11 +38,11 @@ const navItems = [
     url: "/applications",
     icon: Send,
   },
-  {
-    title: "Alerts",
-    url: "/notifications",
-    icon: Bell,
-  },
+  // {
+  //   title: "Alerts",
+  //   url: "/notifications",
+  //   icon: Bell,
+  // },
 ];
 
 const MobileNav = () => {

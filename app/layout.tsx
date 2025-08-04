@@ -5,6 +5,7 @@ import { Urbanist } from "next/font/google";
 import "./globals.css";
 import DesktopSideBar from "@/components/Navigation/DesktopSideBar";
 import MobileNav from "@/components/Navigation/MobileNav";
+import "animate.css";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -27,7 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head></head>
-      <body className={`${urbanist.className}`}>
+      <body
+        className={`${urbanist.className} bg-gradient-to-br from-lime-50 via-green-100 to-amber-50
+
+
+`}
+      >
         <div className="flex min-h-screen">
           <aside className="hidden lg:block">
             <DesktopSideBar />

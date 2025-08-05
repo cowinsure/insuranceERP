@@ -61,7 +61,7 @@ export default function ClaimsPage() {
     // </SidebarProvider>
 
     <>
-      <div className="flex-1 space-y-6 p-6 bg-gray-50">
+      <div className="flex-1 space-y-6 p-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             Claims Management
@@ -75,7 +75,7 @@ export default function ClaimsPage() {
         <ClaimsFilters />
         <ClaimsManagementTable />
       </div>
-      <div className="flex-1 space-y-6 p-6 bg-gray-50">
+      <div className="flex-1 space-y-6 p-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             Claims Management

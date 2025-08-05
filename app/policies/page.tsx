@@ -41,7 +41,7 @@ export default function PoliciesPage() {
     //   </SidebarInset>
     // </SidebarProvider>
 
-    <div className="flex-1 space-y-6 p-6 bg-gray-50">
+    <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -51,10 +51,10 @@ export default function PoliciesPage() {
             Create and manage agricultural insurance policies
           </p>
         </div>
-        <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+        {/* <Button className="bg-blue-500 hover:bg-blue-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Create Policy
-        </Button>
+        </Button> */}
       </div>
 
       <PolicyStats />

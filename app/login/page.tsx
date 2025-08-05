@@ -9,6 +9,8 @@ import { toast } from "sonner";
 // import AOS from "aos";
 // import "aos/dist/aos.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import useApi from "@/hooks/use_api";
+import { useAuth } from "@/core/context/AuthContext";
 
 interface LoginProps {
   logoSrc: string;
@@ -29,6 +31,10 @@ const Login: React.FC<LoginProps> = ({
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
+
+  const { get, post, loading, error } = useApi();
+
 
   //   useEffect(() => {
   //     AOS.init({ duration: 800, once: true });
@@ -53,27 +59,23 @@ const Login: React.FC<LoginProps> = ({
       return;
     }
 
-    try {
-      const response = await fetch(`${apiUrl}/auth/public/login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mobile_number: phoneInput,
-          password: passwordInput,
-        }),
+      try {
+      const response = await post("/auth/public/login/", {
+        mobile_number: phoneInput,
+        password: passwordInput,
       });
+      console.log("Login response:", response);
+      
+      const data = await response.data;
+      const { role: userId, access_token: accessToken } = data;
 
-      if (!response.ok) throw new Error("Login failed");
-
-      const data = await response.json();
-      const { role: userId, access_token: accessToken } = data.data;
-
-      //   login(userId, phoneInput, accessToken);
-      //   toast.success("Login successful!");
-      //   router.push(redirectUrl);
+      login(userId, phoneInput, accessToken);
+      toast.success("Login successful!"); // ✅ sonner success
+      router.push("/");
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Login failed. Please check your credentials and try again.");
+      toast.error("Login failed. Please check your credentials and try again."); // ✅
+      return;
     }
   };
 

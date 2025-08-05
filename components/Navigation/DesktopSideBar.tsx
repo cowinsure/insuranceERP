@@ -62,6 +62,7 @@ const mainMenuItems = [
 const DesktopSideBar = () => {
   const pathname = usePathname();
   const [pinned, setPinned] = useState(false);
+  const isLogin = pathname === "/login"
 
   // Shared styles
   const sidebarBase =
@@ -70,7 +71,7 @@ const DesktopSideBar = () => {
   const iconSize = pinned ? "w-6 h-6" : "w-6 h-6"; // Slightly larger when collapsed
 
   return (
-    <div className={`${sidebarBase} ${sidebarWidth}`}>
+    <div className={`${sidebarBase} ${sidebarWidth} ${isLogin && "hidden"}`}>
       <div className="bg-white rounded-r-lg p-4 h-full overflow-hidden transition-all duration-300 flex flex-col">
         {/* Toggle Button */}
         <div className="flex justify-end mb-4 group">

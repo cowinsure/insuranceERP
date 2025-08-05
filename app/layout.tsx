@@ -6,6 +6,7 @@ import "./globals.css";
 import DesktopSideBar from "@/components/Navigation/DesktopSideBar";
 import MobileNav from "@/components/Navigation/MobileNav";
 import "animate.css";
+import { AuthProvider } from "@/core/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -29,11 +30,9 @@ export default function RootLayout({
     <html lang="en">
       <head></head>
       <body
-        className={`${urbanist.className} bg-gradient-to-br from-lime-50 via-green-100 to-amber-50
-
-
-`}
+        className={`${urbanist.className} bg-gradient-to-br from-lime-50 via-green-100 to-amber-50`}
       >
+        <AuthProvider>
         <div className="flex min-h-screen">
           <aside className="hidden lg:block">
             <DesktopSideBar />
@@ -45,6 +44,8 @@ export default function RootLayout({
             <MobileNav />
           </div>
         </div>
+
+      </AuthProvider>
       </body>
     </html>
   );

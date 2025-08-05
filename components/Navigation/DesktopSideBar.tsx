@@ -23,7 +23,7 @@ import { FaLockOpen, FaLock } from "react-icons/fa";
 const mainMenuItems = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/dashboard",
     icon: MdOutlineSpaceDashboard,
     activeIcon: MdSpaceDashboard,
   },
@@ -64,6 +64,8 @@ const DesktopSideBar = () => {
   const [pinned, setPinned] = useState(false);
   const isLogin = pathname === "/login"
 
+  console.log(pathname);
+
   // Shared styles
   const sidebarBase =
     "group sticky top-5 h-[95vh] z-40 transition-all duration-300 ease-in-out drop-shadow-xl";
@@ -72,7 +74,7 @@ const DesktopSideBar = () => {
 
   return (
     <div className={`${sidebarBase} ${sidebarWidth} ${isLogin && "hidden"}`}>
-      <div className="bg-white rounded-r-lg p-4 h-full overflow-hidden transition-all duration-300 flex flex-col">
+      <div className="bg-sky-50 rounded-r-lg p-4 h-full overflow-hidden transition-all duration-300 flex flex-col">
         {/* Toggle Button */}
         <div className="flex justify-end mb-4 group">
           <button
@@ -82,7 +84,7 @@ const DesktopSideBar = () => {
             }`}
           >
             {pinned ? (
-              <FaLock title="Pin menu" className="text-green-500" />
+              <FaLock title="Pin menu" className="text-blue-500" />
             ) : (
               <FaLockOpen title="Unpin menu" className="text-teal-600" />
             )}
@@ -101,13 +103,13 @@ const DesktopSideBar = () => {
                 <div
                   className={`flex items-center w-full py-2.5 px-2 rounded-md cursor-pointer transition-all duration-200 ${
                     isActive
-                      ? "bg-green-950 text-green-400 drop-shadow-lg font-bold"
-                      : "hover:bg-gray-100 text-gray-500 hover:text-green-600 hover:scale-105 font-medium"
+                      ? "bg-blue-950 text-blue-300 drop-shadow-lg font-bold"
+                      : "hover:bg-gray-100 text-gray-500 hover:text-blue-600 hover:scale-105 font-medium"
                   }`}
                 >
                   <IconToRender
                     className={`${iconSize} min-w-[25px] transition-colors ${
-                      isActive ? "text-green-400" : "hover:text-green-600 "
+                      isActive ? "text-blue-300" : "hover:text-blue-600 "
                     }`}
                   />
                   <span

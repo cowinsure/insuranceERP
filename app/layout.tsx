@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <head></head>
       <body
-        className={`${urbanist.className} bg-gradient-to-br from-lime-50 via-green-100 to-amber-50`}
+        className={`${urbanist.className} bg-gradient-to-br from-sky-50 via-blue-100 to-amber-50`}
       >
         <AuthProvider>
         <div className="flex min-h-screen">

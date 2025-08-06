@@ -100,7 +100,7 @@ const Notifications = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate__animated animate__fadeIn">
           {mockStats.map((stat, index) => (
             <StatCard
               key={index}
@@ -112,14 +112,14 @@ const Notifications = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate__animated animate__fadeIn">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="activity-logs">Activity Logs</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="notifications" className="mt-">
+          <TabsContent value="notifications" className="animate__animated animate__fadeIn">
             <div className="space-y-6 bg-white p-6 rounded-xl shadow">
               <div>
                 <h2 className="text-xl font-semibold text-foreground mb-2">
@@ -137,7 +137,7 @@ const Notifications = () => {
               </div>
             </div>
           </TabsContent>
-          <TabsContent value="activity-logs" className="mt-">
+          <TabsContent value="activity-logs" className="animate__animated animate__fadeIn">
             <div className="bg-white p-6 rounded-xl shadow space-y-6">
               <div>
                 <h2 className="text-2xl font-semibold text-foreground mb-1">
@@ -210,7 +210,7 @@ const Notifications = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="messages" className="mt-">
+          <TabsContent value="messages" className="animate__animated animate__fadeIn">
             <div className="bg-white p-6 rounded-xl shadow space-y-6">
               <div>
                 <h2 className="text-2xl font-semibold text-foreground mb-1">

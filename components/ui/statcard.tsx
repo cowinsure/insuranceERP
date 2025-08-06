@@ -1,6 +1,11 @@
 "use client";
-import { Card } from "@/components/ui/card";
-import { Bell, AlertTriangle, MessageSquare, CheckCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Bell,
+  AlertTriangle,
+  MessageSquare,
+  CheckCircle,
+} from "lucide-react";
 
 interface StatCardProps {
   type: "unread" | "priority" | "messages" | "activities";
@@ -10,41 +15,41 @@ interface StatCardProps {
 
 const statStyles = {
   unread: {
-    icon: <Bell className="h-5 w-5" />,
-    bg: "bg-blue-100",
-    text: "text-blue-600",
+    icon: Bell,
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-100",
   },
   priority: {
-    icon: <AlertTriangle className="h-5 w-5" />,
-    bg: "bg-red-100",
-    text: "text-red-600",
+    icon: AlertTriangle,
+    iconColor: "text-red-600",
+    bgColor: "bg-red-100",
   },
   messages: {
-    icon: <MessageSquare className="h-5 w-5" />,
-    bg: "bg-green-100",
-    text: "text-green-600",
+    icon: MessageSquare,
+    iconColor: "text-green-600",
+    bgColor: "bg-green-100",
   },
   activities: {
-    icon: <CheckCircle className="h-5 w-5" />,
-    bg: "bg-yellow-100",
-    text: "text-yellow-600",
+    icon: CheckCircle,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-100",
   },
 };
 
 export const StatCard = ({ type, count, label }: StatCardProps) => {
-  const { icon, bg, text } = statStyles[type] ?? statStyles.unread;
+  const { icon: Icon, iconColor, bgColor } = statStyles[type] ?? statStyles.unread;
 
   return (
-    <Card className="p-6 hover:shadow-md transition-all">
-      <div className="flex items-center gap-3">
-        <div className={`p-3 rounded-xl ${bg} ${text}`}>
-          {icon}
+    <Card className="border border-gray-200">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm font-medium text-gray-600">{label}</span>
+          <div className={`w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center`}>
+            <Icon className={`w-5 h-5 ${iconColor}`} />
+          </div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-foreground">{count}</div>
-          <div className="text-sm text-muted-foreground">{label}</div>
-        </div>
-      </div>
+        <div className="text-2xl font-bold text-gray-900">{count}</div>
+      </CardContent>
     </Card>
   );
 };

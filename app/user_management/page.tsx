@@ -305,66 +305,66 @@ export default function UserManagementPage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="border-l-4 border-l-green-500">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 animate__animated animate__fadeIn">
+            <Card className="border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-gray-600">
+                    Active Users
+                  </span>
+                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
                     <UserCheck className="w-5 h-5 text-green-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Active Users</p>
-                    <p className="text-2xl font-semibold text-gray-900">24</p>
-                  </div>
                 </div>
+                <div className="text-2xl font-bold text-gray-900">24</div>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+            <Card className="border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-gray-600">
+                    Administrators
+                  </span>
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                     <Shield className="w-5 h-5 text-blue-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Administrators</p>
-                    <p className="text-2xl font-semibold text-gray-900">3</p>
-                  </div>
                 </div>
+                <div className="text-2xl font-bold text-gray-900">3</div>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+            <Card className="border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-gray-600">
+                    Field Officers
+                  </span>
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                     <Users className="w-5 h-5 text-blue-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Field Officers</p>
-                    <p className="text-2xl font-semibold text-gray-900">12</p>
-                  </div>
                 </div>
+                <div className="text-2xl font-bold text-gray-900">12</div>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-yellow-500">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
+            <Card className="border border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-gray-600">
+                    Online Now
+                  </span>
+                  <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
                     <Star className="w-5 h-5 text-yellow-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Online Now</p>
-                    <p className="text-2xl font-semibold text-gray-900">8</p>
-                  </div>
                 </div>
+                <div className="text-2xl font-bold text-gray-900">8</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Search & Filter */}
-          <Card className="mb-6 py-6">
+          <Card className="mb-6 py-6 animate__animated animate__fadeIn">
             <CardHeader>
               <CardTitle className="text-xl">Search & Filter</CardTitle>
             </CardHeader>
@@ -415,7 +415,7 @@ export default function UserManagementPage() {
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* System Users */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 animate__animated animate__fadeIn">
               <Card className="py-6">
                 <CardHeader>
                   <CardTitle className="text-xl">System Users</CardTitle>
@@ -519,7 +519,7 @@ export default function UserManagementPage() {
             </div>
 
             {/* Role Permissions */}
-            <div>
+            <div className="animate__animated animate__fadeIn">
               <Card className="py-6">
                 <CardHeader>
                   <CardTitle className="text-xl">Role Permissions</CardTitle>

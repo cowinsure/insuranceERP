@@ -109,7 +109,7 @@ export default function SettingsPage() {
           {/* Top Section: Premium Rules & General Info */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Premium Rules */}
-            <Card className="py-6">
+            <Card className="py-6 animate__animated animate__fadeIn">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-gray-600" />
@@ -161,7 +161,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* General Settings */}
-            <Card className="py-6">
+            <Card className="py-6 animate__animated animate__fadeIn">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-gray-600" />
@@ -258,7 +258,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Livestock Categories */}
-          <Card className="py-6">
+          <Card className="py-6 animate__animated animate__fadeIn">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>

@@ -71,7 +71,7 @@ const Login: React.FC<LoginProps> = ({
 
       login(userId, phoneInput, accessToken);
       toast.success("Login successful!"); // ✅ sonner success
-      router.push("/");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Login failed. Please check your credentials and try again."); // ✅

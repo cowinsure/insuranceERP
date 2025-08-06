@@ -58,7 +58,7 @@ export default function FarmersPage() {
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900">
             Farmers Management
           </h1>
           <p className="text-gray-600">
@@ -70,9 +70,12 @@ export default function FarmersPage() {
           Add Farmer
         </Button> */}
       </div>
-
-      <FarmersFilters />
-      <FarmersTable />
+      <div className="animate__animated animate__fadeIn">
+        <FarmersFilters />
+      </div>
+      <div className="animate__animated animate__fadeIn">
+        <FarmersTable />
+      </div>
     </div>
   );
 }

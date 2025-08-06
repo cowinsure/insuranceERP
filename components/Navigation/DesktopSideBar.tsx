@@ -64,8 +64,6 @@ const DesktopSideBar = () => {
   const [pinned, setPinned] = useState(false);
   const isLogin = pathname === "/login"
 
-  console.log(pathname);
-
   // Shared styles
   const sidebarBase =
     "group sticky top-5 h-[95vh] z-40 transition-all duration-300 ease-in-out drop-shadow-xl";
@@ -81,8 +79,7 @@ const DesktopSideBar = () => {
             onClick={() => setPinned((prev) => !prev)}
             className={`text-xs px-2 py-1 rounded hover:bg-gray-300 transition cursor-pointer ${
               pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            }`}
-          >
+            }`}>
             {pinned ? (
               <FaLock title="Pin menu" className="text-blue-500" />
             ) : (

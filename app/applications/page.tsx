@@ -52,15 +52,17 @@ export default function ApplicationsPage() {
 
     <div className="flex-1 space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Application Review</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Application Review</h1>
         <p className="text-gray-600">
           Review and process incoming insurance applications from farmers
         </p>
       </div>
 
-      <ApplicationsStats />
-      <ApplicationsSearch />
-      <ApplicationsTable />
+      <div className="animate__animated animate__fadeIn flex flex-col gap-7">
+        <ApplicationsStats />
+        <ApplicationsSearch />
+        <ApplicationsTable />
+      </div>
     </div>
   );
 }

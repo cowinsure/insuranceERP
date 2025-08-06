@@ -37,7 +37,7 @@ export function ClaimsChart() {
                 stroke="#ef4444"
                 strokeWidth={2}
                 dot={{ fill: "#ef4444", strokeWidth: 2, r: 4 }}
-                name="Claims ($)"
+                name="Claims (৳)"
               />
               <Line
                 type="monotone"
@@ -45,7 +45,7 @@ export function ClaimsChart() {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                name="Premium ($)"
+                name="Premium (৳)"
               />
               <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="line" />
             </LineChart>

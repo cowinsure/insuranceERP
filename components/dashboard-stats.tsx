@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { FileText, AlertCircle, Clock, DollarSign } from "lucide-react"
+import { FileText, AlertCircle, Clock, DollarSign, HandCoins } from "lucide-react"
 
 const stats = [
   {
@@ -28,10 +28,10 @@ const stats = [
   },
   {
     title: "Premium Collected",
-    value: "$1,247,390",
+    value: "৳1,247,390",
     change: "-18% from last month",
     changeType: "negative" as const,
-    icon: DollarSign,
+    icon: HandCoins,
     iconColor: "text-blue-500",
   },
 ]

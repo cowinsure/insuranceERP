@@ -1,8 +1,12 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Eye, Mail, Phone, MapPin } from "lucide-react"
+import { useState } from "react"
+import GenericModal from "./ui/GenericMOdal"
+
 
 const farmers = [
   {
@@ -87,8 +91,12 @@ const getStatusBadge = (status: string) => {
 }
 
 export function FarmersTable() {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
-    <Card className="border border-gray-200">
+<>
+    <Card className="border border-gray-200 py-6">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">Registered Farmers</CardTitle>
         <p className="text-sm text-gray-600">{farmers.length} farmers found</p>
@@ -158,16 +166,20 @@ export function FarmersTable() {
                     <span className="text-sm text-gray-600">{farmer.joinDate}</span>
                   </td>
                   <td className="py-4 px-4">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
+                    <Button variant="ghost" size="sm" onClick={() => setIsModalOpen(true)}>
+                      <Eye className="w-4 h-4" />s
                     </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+                    {/* <GenericModal closeModal={() => setIsModalOpen(false)}></GenericModal> */}
+
         </div>
       </CardContent>
     </Card>
+
+    </>
   )
 }

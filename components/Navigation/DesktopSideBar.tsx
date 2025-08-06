@@ -14,6 +14,8 @@ import {
   MdChecklist,
   MdOutlineSend,
   MdSend,
+  MdOutlineNotifications,
+  MdNotifications,
   // MdOutlineNotifications,
   // MdNotifications,
 } from "react-icons/md";
@@ -51,12 +53,12 @@ const mainMenuItems = [
     icon: MdOutlineSend,
     activeIcon: MdSend,
   },
-  // {
-  //   title: "Notifications",
-  //   url: "/notifications",
-  //   icon: MdOutlineNotifications,
-  //   activeIcon: MdNotifications,
-  // },
+  {
+    title: "Notifications",
+    url: "/notifications",
+    icon: MdOutlineNotifications,
+    activeIcon: MdNotifications,
+  },
 ];
 
 const DesktopSideBar = () => {

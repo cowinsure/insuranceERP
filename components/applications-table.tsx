@@ -58,7 +58,7 @@ const getStatusBadge = (status: string) => {
 
 export function ApplicationsTable() {
   return (
-    <Card className="border border-gray-200">
+    <Card className="border border-gray-200 py-6">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">Insurance Applications</CardTitle>
         <p className="text-sm text-gray-600">{applications.length} applications found</p>

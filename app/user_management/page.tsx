@@ -18,6 +18,7 @@ import {
   Shield,
   Star,
   UserCheck,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,102 +32,106 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import GenericModal from "@/components/ui/GenericModal";
 
 export default function UserManagementPage() {
-    const [users, setUsers] = useState([
-        {
-          id: 1,
-          name: "Arefin Rahman",
-          email: "arefin.rahman@agrocover.com.bd",
-          role: "Admin",
-          department: "Dhaka HQ",
-          status: "active",
-          lastLogin: "2024-02-10 14:30",
-          avatar: "AR",
-        },
-        {
-          id: 2,
-          name: "Shanta Akter",
-          email: "shanta.akter@agrocover.com.bd",
-          role: "Claims Officer",
-          department: "Rajshahi Division",
-          status: "active",
-          lastLogin: "2024-02-10 12:15",
-          avatar: "SA",
-        },
-        {
-          id: 3,
-          name: "Rafiq Hossain",
-          email: "rafiq.hossain@agrocover.com.bd",
-          role: "Field Assessor",
-          department: "Barisal Region",
-          status: "active",
-          lastLogin: "2024-02-09 16:45",
-          avatar: "RH",
-        },
-        {
-          id: 4,
-          name: "Maliha Islam",
-          email: "maliha.islam@agrocover.com.bd",
-          role: "Policy Officer",
-          department: "Chattogram Branch",
-          status: "inactive",
-          lastLogin: "2024-01-28 10:20",
-          avatar: "MI",
-        },
-        {
-          id: 5,
-          name: "Kamrul Hasan",
-          email: "kamrul.hasan@agrocover.com.bd",
-          role: "Manager",
-          department: "Sylhet Division",
-          status: "active",
-          lastLogin: "2024-02-10 09:00",
-          avatar: "KH",
-        },
-      ]);
-    
-      const rolePermissions = {
-        Admin: {
-          color: "text-red-600",
-          permissions: [
-            "Full Access",
-            "User Management",
-            "System Settings",
-            "Reports",
-          ],
-        },
-        Manager: {
-          color: "text-blue-600",
-          permissions: [
-            "Team Management",
-            "Reports",
-            "Policy Approval",
-            "Claims Review",
-          ],
-        },
-        "Claims Officer": {
-          color: "text-blue-600",
-          permissions: [
-            "Claims Processing",
-            "Farmer Communication",
-            "Document Review",
-          ],
-        },
-        "Policy Officer": {
-          color: "text-yellow-600",
-          permissions: ["Policy Creation", "Risk Assessment", "Application Review"],
-        },
-        "Field Assessor": {
-          color: "text-green-600",
-          permissions: [
-            "Field Inspection",
-            "Damage Assessment",
-            "Report Submission",
-          ],
-        },
-      };
-    
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      name: "Arefin Rahman",
+      email: "arefin.rahman@agrocover.com.bd",
+      role: "Admin",
+      department: "Dhaka HQ",
+      status: "active",
+      lastLogin: "2024-02-10 14:30",
+      avatar: "AR",
+    },
+    {
+      id: 2,
+      name: "Shanta Akter",
+      email: "shanta.akter@agrocover.com.bd",
+      role: "Claims Officer",
+      department: "Rajshahi Division",
+      status: "active",
+      lastLogin: "2024-02-10 12:15",
+      avatar: "SA",
+    },
+    {
+      id: 3,
+      name: "Rafiq Hossain",
+      email: "rafiq.hossain@agrocover.com.bd",
+      role: "Field Assessor",
+      department: "Barisal Region",
+      status: "active",
+      lastLogin: "2024-02-09 16:45",
+      avatar: "RH",
+    },
+    {
+      id: 4,
+      name: "Maliha Islam",
+      email: "maliha.islam@agrocover.com.bd",
+      role: "Policy Officer",
+      department: "Chattogram Branch",
+      status: "inactive",
+      lastLogin: "2024-01-28 10:20",
+      avatar: "MI",
+    },
+    {
+      id: 5,
+      name: "Kamrul Hasan",
+      email: "kamrul.hasan@agrocover.com.bd",
+      role: "Manager",
+      department: "Sylhet Division",
+      status: "active",
+      lastLogin: "2024-02-10 09:00",
+      avatar: "KH",
+    },
+  ]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
+
+  const rolePermissions = {
+    Admin: {
+      color: "text-red-600",
+      permissions: [
+        "Full Access",
+        "User Management",
+        "System Settings",
+        "Reports",
+      ],
+    },
+    Manager: {
+      color: "text-blue-600",
+      permissions: [
+        "Team Management",
+        "Reports",
+        "Policy Approval",
+        "Claims Review",
+      ],
+    },
+    "Claims Officer": {
+      color: "text-blue-600",
+      permissions: [
+        "Claims Processing",
+        "Farmer Communication",
+        "Document Review",
+      ],
+    },
+    "Policy Officer": {
+      color: "text-yellow-600",
+      permissions: ["Policy Creation", "Risk Assessment", "Application Review"],
+    },
+    "Field Assessor": {
+      color: "text-green-600",
+      permissions: [
+        "Field Inspection",
+        "Damage Assessment",
+        "Report Submission",
+      ],
+    },
+  };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -286,14 +291,14 @@ export default function UserManagementPage() {
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 User Management
               </h1>
               <p className="text-gray-600 mt-1">
                 Manage insurance officers and their access permissions
               </p>
             </div>
-            <Button className="bg-blue-500 hover:bg-blue-600">
+            <Button className="bg-blue-500 hover:bg-blue-600" onClick={onOpen}>
               <Plus className="w-4 h-4 mr-2" />
               Add User
             </Button>
@@ -549,6 +554,31 @@ export default function UserManagementPage() {
           </div>
         </div>
       </main>
+      {isOpen && (
+        <GenericModal closeModal={onClose}>
+          <div className="w-full mx-auto text-center p-6 space-y-5">
+            {/* Icon */}
+            <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 shadow-lg">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold text-gray-900">
+              Upgrade to Premium
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Unlock the full power of the app with a{" "}
+              <span className="font-bold text-gray-800">
+                Premium subscription
+              </span>
+              . Enjoy exclusive features, faster performance, and tools designed
+              to help you get the most out of your usage.
+            </p>
+          </div>
+        </GenericModal>
+      )}
     </div>
   );
 }

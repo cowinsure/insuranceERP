@@ -16,6 +16,10 @@ import {
   MdSend,
   MdOutlineNotifications,
   MdNotifications,
+  MdOutlineManageAccounts,
+  MdManageAccounts,
+  MdOutlineSettings,
+  MdSettings,
   // MdOutlineNotifications,
   // MdNotifications,
 } from "react-icons/md";
@@ -60,6 +64,18 @@ const mainMenuItems = [
     url: "/notifications",
     icon: MdOutlineNotifications,
     activeIcon: MdNotifications,
+  },
+  {
+    title: "User Management",
+    url: "/user_management",
+    icon: MdOutlineManageAccounts,
+    activeIcon: MdManageAccounts,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: MdOutlineSettings,
+    activeIcon: MdSettings,
   },
 ];
 
@@ -146,9 +162,7 @@ const DesktopSideBar = () => {
               <LogOut className="w-5 h-5" />
               <span
                 className={`transition-all duration-200 ${
-                  pinned
-                    ? "opacity-100"
-                    : "hidden group-hover:block"
+                  pinned ? "opacity-100" : "hidden group-hover:block"
                 } whitespace-nowrap`}
               >
                 Logout

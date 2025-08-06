@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Card } from "@/components/ui/card";
 import { Bell, AlertTriangle, MessageSquare, CheckCircle } from "lucide-react";
 
@@ -8,57 +8,37 @@ interface StatCardProps {
   label: string;
 }
 
-const getStatIcon = (type: string) => {
-  switch (type) {
-    case "unread":
-      return <Bell className="h-5 w-5" />;
-    case "priority":
-      return <AlertTriangle className="h-5 w-5" />;
-    case "messages":
-      return <MessageSquare className="h-5 w-5" />;
-    case "activities":
-      return <CheckCircle className="h-5 w-5" />;
-    default:
-      return <Bell className="h-5 w-5" />;
-  }
-};
-
-const getStatColor = (type: string) => {
-  switch (type) {
-    case "unread":
-      return "text-stat-unread";
-    case "priority":
-      return "text-stat-priority";
-    case "messages":
-      return "text-stat-messages";
-    case "activities":
-      return "text-stat-activities";
-    default:
-      return "text-muted-foreground";
-  }
-};
-
-const getStatBg = (type: string) => {
-  switch (type) {
-    case "unread":
-      return "bg-stat-unread/10";
-    case "priority":
-      return "bg-stat-priority/10";
-    case "messages":
-      return "bg-stat-messages/10";
-    case "activities":
-      return "bg-stat-activities/10";
-    default:
-      return "bg-muted/10";
-  }
+const statStyles = {
+  unread: {
+    icon: <Bell className="h-5 w-5" />,
+    bg: "bg-blue-100",
+    text: "text-blue-600",
+  },
+  priority: {
+    icon: <AlertTriangle className="h-5 w-5" />,
+    bg: "bg-red-100",
+    text: "text-red-600",
+  },
+  messages: {
+    icon: <MessageSquare className="h-5 w-5" />,
+    bg: "bg-green-100",
+    text: "text-green-600",
+  },
+  activities: {
+    icon: <CheckCircle className="h-5 w-5" />,
+    bg: "bg-yellow-100",
+    text: "text-yellow-600",
+  },
 };
 
 export const StatCard = ({ type, count, label }: StatCardProps) => {
+  const { icon, bg, text } = statStyles[type] ?? statStyles.unread;
+
   return (
     <Card className="p-6 hover:shadow-md transition-all">
       <div className="flex items-center gap-3">
-        <div className={`p-3 rounded-xl ${getStatBg(type)} ${getStatColor(type)}`}>
-          {getStatIcon(type)}
+        <div className={`p-3 rounded-xl ${bg} ${text}`}>
+          {icon}
         </div>
         <div>
           <div className="text-2xl font-bold text-foreground">{count}</div>

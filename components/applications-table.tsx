@@ -230,12 +230,12 @@ export function ApplicationsTable() {
                     <p className="text-gray-500">Asset Type</p>
                     <p className="text-gray-900">{selectedapplication.asset}</p>
                   </div>
-                  <div>
+                  {/* <div>
                     <p className="text-gray-500">Area</p>
                     <p className="text-gray-900">
                       {selectedapplication.acreage}
                     </p>
-                  </div>
+                  </div> */}
                   <div>
                     <p className="text-gray-500">Requested Coverage</p>
                     <p className="text-gray-900">

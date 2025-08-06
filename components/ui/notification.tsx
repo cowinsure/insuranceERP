@@ -1,6 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bell, AlertTriangle, MessageSquare, CheckCircle, FileText, Shield, Clock, AlertCircle } from "lucide-react";
+import {
+  Bell,
+  AlertTriangle,
+  MessageSquare,
+  CheckCircle,
+  FileText,
+  Shield,
+  Clock,
+} from "lucide-react";
 
 interface NotificationCardProps {
   id: string;
@@ -12,51 +20,38 @@ interface NotificationCardProps {
   isRead?: boolean;
 }
 
-const getNotificationIcon = (type: string) => {
-  switch (type) {
-    case "claim":
-      return <FileText className="h-5 w-5" />;
-    case "approval":
-      return <CheckCircle className="h-5 w-5" />;
-    case "payment":
-      return <AlertTriangle className="h-5 w-5" />;
-    case "message":
-      return <MessageSquare className="h-5 w-5" />;
-    case "policy":
-      return <Shield className="h-5 w-5" />;
-    default:
-      return <Bell className="h-5 w-5" />;
-  }
+const notificationStyles = {
+  claim: {
+    icon: <FileText className="h-5 w-5" />,
+    iconColor: "text-red-600",
+    bgColor: "bg-red-100",
+  },
+  approval: {
+    icon: <CheckCircle className="h-5 w-5" />,
+    iconColor: "text-green-600",
+    bgColor: "bg-green-100",
+  },
+  payment: {
+    icon: <AlertTriangle className="h-5 w-5" />,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-100",
+  },
+  message: {
+    icon: <MessageSquare className="h-5 w-5" />,
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-100",
+  },
+  policy: {
+    icon: <Shield className="h-5 w-5" />,
+    iconColor: "text-purple-600",
+    bgColor: "bg-purple-100",
+  },
 };
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "high":
-      return "bg-notification-high text-white";
-    case "medium":
-      return "bg-notification-medium text-white";
-    case "low":
-      return "bg-notification-low text-white";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
-
-const getIconColor = (type: string) => {
-  switch (type) {
-    case "claim":
-      return "text-notification-high";
-    case "approval":
-      return "text-notification-success";
-    case "payment":
-      return "text-notification-high";
-    case "message":
-      return "text-notification-low";
-    case "policy":
-      return "text-notification-medium";
-    default:
-      return "text-muted-foreground";
-  }
+const priorityStyles = {
+  high: "bg-red-500 text-white",
+  medium: "bg-yellow-500 text-white",
+  low: "bg-blue-500 text-white",
 };
 
 export const NotificationCard = ({
@@ -65,34 +60,33 @@ export const NotificationCard = ({
   description,
   priority,
   timestamp,
-  isRead = false
+  isRead = false,
 }: NotificationCardProps) => {
+  const { icon, iconColor, bgColor } = notificationStyles[type] ?? notificationStyles.message;
+  const priorityColor = priorityStyles[priority] ?? "bg-gray-200 text-gray-600";
+
   return (
-    <Card className={`p-4 transition-all hover:shadow-md ${
-      !isRead ? "" : ""
-    }`}>
+    <Card className={`p-4 transition-all hover:shadow-md`}>
       <div className="flex items-start gap-3">
-        <div className={`flex-shrink-0 p-2 rounded-lg bg-muted/50 ${getIconColor(type)}`}>
-          {getNotificationIcon(type)}
+        <div className={`flex-shrink-0 p-2 rounded-lg ${bgColor} ${iconColor}`}>
+          {icon}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h4 className="font-medium text-foreground leading-tight">{title}</h4>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Badge className={`text-xs px-2 py-1 ${getPriorityColor(priority)}`}>
+              <Badge className={`text-xs px-2 py-1 ${priorityColor}`}>
                 {priority}
               </Badge>
-              {!isRead && (
-                <div className="w-2 h-2 bg-primary rounded-full" />
-              )}
+              {/* {!isRead && <div className="w-2 h-2 bg-primary rounded-full" />} */}
             </div>
           </div>
-          
+
           <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
             {description}
           </p>
-          
+
           <div className="flex items-center text-xs text-muted-foreground">
             <Clock className="h-3 w-3 mr-1" />
             {timestamp}

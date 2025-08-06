@@ -1,5 +1,6 @@
 "use client";
 import { createBaseRequest } from "@/core/model/createBaseRequest";
+import { redirect, useRouter } from "next/navigation";
 
 import React from "react";
 import {
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   // // Load auth data from localStorage (or cookies) on initial render
   useEffect(() => {
@@ -103,6 +105,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("phoneNumber");
     localStorage.removeItem("accessToken");
     setIsLoading(true);
+
+    // alert("Log out successful")
+    router.push ("/login");
   };
 
   return (

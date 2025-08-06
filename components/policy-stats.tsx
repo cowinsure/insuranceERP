@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { FileText, Calendar, DollarSign, Tag } from "lucide-react"
+import { FileText, Calendar, DollarSign, Tag, HandCoins } from "lucide-react"
 
 const stats = [
   {
@@ -18,13 +18,13 @@ const stats = [
   },
   {
     title: "Total Coverage",
-    value: "$2.1M",
-    icon: DollarSign,
+    value: "৳2.1M",
+    icon: HandCoins,
     iconColor: "text-blue-500",
     bgColor: "bg-blue-50",
   },
   {
-    title: "Crop Types",
+    title: "Cattle Types",
     value: "12",
     icon: Tag,
     iconColor: "text-purple-500",

@@ -53,7 +53,6 @@ const policies = [
   },
 ];
 
-
 const getStatusBadge = (status: string) => {
   const variants = {
     active: "bg-green-100 text-green-800 hover:bg-green-100",
@@ -67,7 +66,9 @@ const getStatusBadge = (status: string) => {
 };
 
 export function PoliciesTable() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectedPolicy, setSelectedPolicy] = useState<
+    (typeof policies)[0] | null
+  >(null);
 
   return (
     <Card className="border border-gray-200 py-6">
@@ -169,7 +170,7 @@ export function PoliciesTable() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setIsOpen(true)}
+                        onClick={() => setSelectedPolicy(policy)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -184,12 +185,89 @@ export function PoliciesTable() {
           </table>
         </div>
       </CardContent>
-      {isOpen && (
-        <GenericModal
-          closeModal={() => setIsOpen(false)}
-          title="Confirm Action"
-        >
-          <p>Are you sure you want to proceed?</p>
+      {selectedPolicy && (
+        <GenericModal closeModal={() => setSelectedPolicy(null)}>
+          <div className="w-full rounded-xl">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Policy Details - {selectedPolicy.policyNumber}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  View policy information and coverage summary
+                </p>
+              </div>
+            </div>
+
+            <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
+              {/* 📄 Policy Info */}
+              <div className="border rounded-md p-4">
+                <p className="font-medium text-gray-800 mb-2">
+                  📄 Basic Information
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Policy ID</p>
+                    <p className="text-gray-900">{selectedPolicy.policyId}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Duration</p>
+                    <p className="text-gray-900">{selectedPolicy.duration}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Date Range</p>
+                    <p className="text-gray-900">{selectedPolicy.dateRange}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <span
+                      className={`text-sm px-2 py-1 rounded-full font-medium 
+                ${getStatusBadge(selectedPolicy.status)}`}
+                    >
+                      {selectedPolicy.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 👩‍🌾 Farmer Info */}
+              <div className="border rounded-md p-4">
+                <p className="font-medium text-gray-800 mb-2">👩‍🌾 Farmer Info</p>
+                <div className="text-sm">
+                  <p className="text-gray-500">Name</p>
+                  <p className="text-gray-900">{selectedPolicy.farmer}</p>
+                </div>
+              </div>
+
+              {/* 🐄 Asset Info */}
+              <div className="border rounded-md p-4">
+                <p className="font-medium text-gray-800 mb-2">
+                  🐄 Asset Coverage
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Asset Type</p>
+                    <p className="text-gray-900">{selectedPolicy.assetType}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Coverage Amount</p>
+                    <p className="text-gray-900">{selectedPolicy.coverage}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Premium</p>
+                    <p className="text-gray-900">{selectedPolicy.premium}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Optional action buttons */}
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setSelectedPolicy(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
         </GenericModal>
       )}
     </Card>

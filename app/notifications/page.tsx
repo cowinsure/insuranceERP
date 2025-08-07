@@ -12,8 +12,7 @@ const mockNotifications = [
     id: "1",
     type: "claim" as const,
     title: "New Claim Submitted",
-    description:
-      "Rajesh Kumar has submitted a new claim for flood damage (CLM001)",
+    description: "Rahim Uddin has submitted a new claim for cattle (CLM001)",
     priority: "high" as const,
     timestamp: "2 hours ago",
     isRead: false,
@@ -40,7 +39,7 @@ const mockNotifications = [
     id: "4",
     type: "message" as const,
     title: "Message from Field Assessor",
-    description: "Dr. Sarah Johnson: Field assessment completed for CLM002",
+    description: "Dr. Nusrat Jahan Field assessment completed for CLM002",
     priority: "low" as const,
     timestamp: "1 day ago",
     isRead: true,
@@ -112,14 +111,21 @@ const Notifications = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate__animated animate__fadeIn">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full animate__animated animate__fadeIn"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="activity-logs">Activity Logs</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="notifications" className="animate__animated animate__fadeIn">
+          <TabsContent
+            value="notifications"
+            className="animate__animated animate__fadeIn"
+          >
             <div className="space-y-6 bg-white p-6 rounded-xl shadow">
               <div>
                 <h2 className="text-xl font-semibold text-foreground mb-2">
@@ -137,7 +143,10 @@ const Notifications = () => {
               </div>
             </div>
           </TabsContent>
-          <TabsContent value="activity-logs" className="animate__animated animate__fadeIn">
+          <TabsContent
+            value="activity-logs"
+            className="animate__animated animate__fadeIn"
+          >
             <div className="bg-white p-6 rounded-xl shadow space-y-6">
               <div>
                 <h2 className="text-2xl font-semibold text-foreground mb-1">
@@ -151,25 +160,25 @@ const Notifications = () => {
               <div className="space-y-4">
                 {[
                   {
-                    user: "John Doe",
+                    user: "Karim Uddin",
                     action: "approved claim",
-                    item: "CLM002 - Wheat Crop Damage",
+                    item: "CLM002 - Cattle",
                     time: "Today at 10:30 AM",
                   },
                   {
-                    user: "Sarah Johnson",
+                    user: "Nusrat Jahan",
                     action: "completed assessment",
-                    item: "Field inspection for Priya Patel",
+                    item: "Field inspection for Shahida Begum",
                     time: "Yesterday at 2:15 PM",
                   },
                   {
-                    user: "Mike Chen",
+                    user: "Md. Javed",
                     action: "created policy",
-                    item: "POL005 - Tomato Crop Insurance",
+                    item: "POL005 - Cattle Insurance",
                     time: "Yesterday at 4:45 PM",
                   },
                   {
-                    user: "David Wilson",
+                    user: "Shaidul Islam",
                     action: "updated settings",
                     item: "Premium calculation rules",
                     time: "Yesterday at 9:20 AM",
@@ -210,7 +219,10 @@ const Notifications = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="messages" className="animate__animated animate__fadeIn">
+          <TabsContent
+            value="messages"
+            className="animate__animated animate__fadeIn"
+          >
             <div className="bg-white p-6 rounded-xl shadow space-y-6">
               <div>
                 <h2 className="text-2xl font-semibold text-foreground mb-1">
@@ -224,29 +236,29 @@ const Notifications = () => {
               <div className="space-y-4">
                 {[
                   {
-                    name: "Dr. Sarah Johnson",
+                    name: "Dr. Nazmul Huda",
                     role: "Field Assessor",
-                    subject: "Assessment Report - CLM001",
+                    subject: "Assessment Report - CCL021",
                     message:
-                      "I've completed the field assessment for the rice crop damage. The loss is confirmed at 80%...",
+                      "I've completed the field assessment for the cattle disease outbreak. The loss is confirmed at 70%...",
                     time: "2 hours ago",
                     unread: true,
                   },
                   {
-                    name: "Rajesh Kumar",
+                    name: "Abdul Karim",
                     role: "Farmer",
-                    subject: "Additional Documents for Claim",
+                    subject: "Supporting Documents for Cow Claim",
                     message:
-                      "I'm submitting additional weather reports as requested for my flood damage claim...",
+                      "I'm submitting the vaccination records and veterinary reports as requested for my cow insurance claim...",
                     time: "5 hours ago",
                     unread: true,
                   },
                   {
-                    name: "Mike Chen",
+                    name: "Fatema Begum",
                     role: "Field Assessor",
-                    subject: "Weekly Assessment Summary",
+                    subject: "Weekly Cattle Health Summary",
                     message:
-                      "Here's the summary of all field assessments completed this week. Total assessments: 12...",
+                      "Here's the summary of cattle health assessments completed this week. Total cases reviewed: 9...",
                     time: "1 day ago",
                     unread: false,
                   },

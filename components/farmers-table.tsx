@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Eye, Mail, Phone, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
+import useApi from "@/hooks/use_api";
 
 const farmers = [
   {
@@ -95,6 +96,43 @@ export function FarmersTable() {
   const [selectedFarmer, setSelectedFarmer] = useState<
     (typeof farmers)[0] | null
   >(null);
+      const [farmers, setFarmers] = useState<FarmerProfile[]>([]); // new line
+    const { get, post, loading, error } = useApi();
+
+      useEffect(() => {
+        const fetchData = async () => {
+    
+          try {
+              const response = await get("ims/farmer-service/", {
+                
+    
+          });
+          console.log("Response from API:", response.status);
+          
+          if(response.status === "success"){
+            setFarmers(response.data);
+          }
+          console.log(response.data.length + " farmers found");
+          
+          // for (let index = 0; index < response.date.length; index++) {
+          //   const element = response.data[index];
+            
+          //   console.log("Fetching applications from API..." + element);
+          // }
+                  console.log("Fetching applications from API..." + response?.data[12]?.mobile_number);
+        
+          } catch (error) {
+                console.log("Error fetching applications from API...");
+          }
+        
+        };
+    
+        fetchData();
+    
+      }, []);
+
+      console.log("Farmers data:", farmers);
+      
   return (
     <>
       <Card className="border border-gray-200 py-6">
@@ -126,47 +164,48 @@ export function FarmersTable() {
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                     Policies
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                     Status
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  </th> */}
+                  {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                     Join Date
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600"></th>
+                  </th> */}
+                  {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">action</th> */}
                 </tr>
               </thead>
               <tbody>
                 {farmers.map((farmer) => (
                   <tr
-                    key={farmer.id}
+                    key={farmer.user_id}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
+                   
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className={`w-10 h-10 ${farmer.avatarColor}`}>
+                        {/* <Avatar className={`w-10 h-10 ${farmer.avatarColor}`}>
                           <AvatarFallback className="text-white font-medium">
                             {farmer.initials}
                           </AvatarFallback>
-                        </Avatar>
+                        </Avatar> */}
                         <div>
                           <div className="font-medium text-gray-900">
-                            {farmer.name}
+                            {farmer.farmer_name}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {farmer.id}
-                          </div>
+                          {/* <div className="text-sm text-black-500">
+                            {farmer.user_id}
+                          </div> */}
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {/* <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Mail className="w-4 h-4" />
                           {farmer.email}
-                        </div>
+                        </div> */}
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Phone className="w-4 h-4" />
-                          {farmer.phone}
+                          {farmer.mobile_number}
                         </div>
                       </div>
                     </td>
@@ -176,9 +215,9 @@ export function FarmersTable() {
                           <MapPin className="w-4 h-4 text-gray-400" />
                           {farmer.location}
                         </div>
-                        <div className="text-sm text-gray-500 ml-6">
+                        {/* <div className="text-sm text-gray-500 ml-6">
                           {farmer.region}
-                        </div>
+                        </div> */}
                       </div>
                     </td>
                     <td className="py-4 px-4">
@@ -197,7 +236,7 @@ export function FarmersTable() {
                         {farmer.policies}
                       </span>
                     </td>
-                    <td className="py-4 px-4">
+                    {/* <td className="py-4 px-4">
                       <Badge className={getStatusBadge(farmer.status)}>
                         {farmer.status}
                       </Badge>
@@ -206,8 +245,8 @@ export function FarmersTable() {
                       <span className="text-sm text-gray-600">
                         {farmer.joinDate}
                       </span>
-                    </td>
-                    <td className="py-4 px-4">
+                    </td> */}
+                    {/* <td className="py-4 px-4">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -215,114 +254,115 @@ export function FarmersTable() {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
             </table>
             {selectedFarmer && (
-              <GenericModal closeModal={() => setSelectedFarmer(null)}>
-                <div className="w-full rounded-xl">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h1 className="text-xl font-semibold text-gray-900">
-                        Farmer Profile - {selectedFarmer.id}
-                      </h1>
-                      <p className="text-sm text-gray-500">
-                        View farmer details and activity summary
-                      </p>
-                    </div>
-                  </div>
+              // <GenericModal closeModal={() => setSelectedFarmer(null)}>
+              //   <div className="w-full rounded-xl">
+              //     <div className="flex justify-between items-start mb-4">
+              //       <div>
+              //         <h1 className="text-xl font-semibold text-gray-900">
+              //           Farmer Profile - {selectedFarmer.id}
+              //         </h1>
+              //         <p className="text-sm text-gray-500">
+              //           View farmer details and activity summary
+              //         </p>
+              //       </div>
+              //     </div>
 
-                  <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
-                    {/* Farmer Info */}
-                    <div className="border rounded-md p-4">
-                      <p className="font-medium text-gray-800 mb-2">
-                        👨‍🌾 Personal Details
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-500">Name</p>
-                          <p className="text-gray-900">{selectedFarmer.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Farmer ID</p>
-                          <p className="text-gray-900">
-                            {selectedFarmer.id}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Email</p>
-                          <p className="text-gray-900">
-                            {selectedFarmer.email}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Phone</p>
-                          <p className="text-gray-900">
-                            {selectedFarmer.phone}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+              //     <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
+              //       {/* Farmer Info */}
+              //       <div className="border rounded-md p-4">
+              //         <p className="font-medium text-gray-800 mb-2">
+              //           👨‍🌾 Personal Details
+              //         </p>
+              //         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              //           <div>
+              //             <p className="text-gray-500">Name</p>
+              //             <p className="text-gray-900">{selectedFarmer.name}</p>
+              //           </div>
+              //           <div>
+              //             <p className="text-gray-500">Farmer ID</p>
+              //             <p className="text-gray-900">
+              //               {selectedFarmer.id}
+              //             </p>
+              //           </div>
+              //           <div>
+              //             <p className="text-gray-500">Email</p>
+              //             <p className="text-gray-900">
+              //               {selectedFarmer.email}
+              //             </p>
+              //           </div>
+              //           <div>
+              //             <p className="text-gray-500">Phone</p>
+              //             <p className="text-gray-900">
+              //               {selectedFarmer.phone}
+              //             </p>
+              //           </div>
+              //         </div>
+              //       </div>
 
-                    {/* Location Info */}
-                    <div className="border rounded-md p-4">
-                      <p className="font-medium text-gray-800 mb-2">
-                        📍 Location
-                      </p>
-                      <div className="text-sm">
-                        <p className="text-gray-500">Region</p>
-                        <p className="text-gray-900">
-                          {selectedFarmer.location}
-                        </p>
-                      </div>
-                    </div>
+              //       {/* Location Info */}
+              //       <div className="border rounded-md p-4">
+              //         <p className="font-medium text-gray-800 mb-2">
+              //           📍 Location
+              //         </p>
+              //         <div className="text-sm">
+              //           <p className="text-gray-500">Region</p>
+              //           <p className="text-gray-900">
+              //             {selectedFarmer.location}
+              //           </p>
+              //         </div>
+              //       </div>
 
-                    {/* Activity Summary */}
-                    <div className="border rounded-md p-4">
-                      <p className="font-medium text-gray-800 mb-2">
-                        📊 Summary
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-500">Assets</p>
-                          <p className="text-gray-900">
-                            {selectedFarmer.assets}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Policies</p>
-                          <p className="text-gray-900">
-                            {selectedFarmer.policies}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Join Date</p>
-                          <p className="text-gray-900">
-                            {selectedFarmer.joinDate}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Status</p>
-                          <span
-                            className={`text-sm px-2 py-1 rounded-full font-medium 
-              ${
-                selectedFarmer.status === "active"
-                  ? "bg-green-100 text-green-700"
-                  : selectedFarmer.status === "inactive"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
-                          >
-                            {selectedFarmer.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </GenericModal>
+              //       {/* Activity Summary */}
+              //       <div className="border rounded-md p-4">
+              //         <p className="font-medium text-gray-800 mb-2">
+              //           📊 Summary
+              //         </p>
+              //         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              //           <div>
+              //             <p className="text-gray-500">Assets</p>
+              //             <p className="text-gray-900">
+              //               {selectedFarmer.assets}
+              //             </p>
+              //           </div>
+              //           <div>
+              //             <p className="text-gray-500">Policies</p>
+              //             <p className="text-gray-900">
+              //               {selectedFarmer.policies}
+              //             </p>
+              //           </div>
+              //           <div>
+              //             <p className="text-gray-500">Join Date</p>
+              //             <p className="text-gray-900">
+              //               {selectedFarmer.joinDate}
+              //             </p>
+              //           </div>
+              //           <div>
+              //             <p className="text-gray-500">Status</p>
+              //             <span
+              //               className={`text-sm px-2 py-1 rounded-full font-medium 
+              // ${
+              //   selectedFarmer.status === "active"
+              //     ? "bg-green-100 text-green-700"
+              //     : selectedFarmer.status === "inactive"
+              //     ? "bg-red-100 text-red-700"
+              //     : "bg-yellow-100 text-yellow-700"
+              // }`}
+              //             >
+              //               {selectedFarmer.status}
+              //             </span>
+              //           </div>
+              //         </div>
+              //       </div>
+              //     </div>
+              //   </div>
+              // </GenericModal>
+              <></>
             )}
           </div>
         </CardContent>

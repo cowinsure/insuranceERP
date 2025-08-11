@@ -3,8 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Eye, FileText, MapPin, XCircle } from "lucide-react";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
+import useApi from "@/hooks/use_api";
+import { json } from "stream/consumers";
+import { DateUtils } from "./utils/DateUtils";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+
+
 
 const applications = [
   {
@@ -49,11 +56,21 @@ const applications = [
   },
 ];
 
+const statusOptions = [
+  { value: "under-review", label: "Under Review", color: "text-blue-600" },
+  { value: "pending-documents", label: "Pending Documents", color: "text-yellow-600" },
+  { value: "approved", label: "Approved", color: "text-green-600" },
+  { value: "rejected", label: "Rejected", color: "text-red-600" },
+  { value: "on-hold", label: "On Hold", color: "text-orange-600" },
+  { value: "requires-revision", label: "Requires Revision", color: "text-purple-600" },
+]
+
 const getStatusBadge = (status: string) => {
   const variants = {
     pending: "bg-orange-100 text-orange-800 hover:bg-orange-100",
-    "under review": "bg-blue-100 text-blue-800 hover:bg-blue-100",
+    under_review: "bg-blue-100 text-blue-800 hover:bg-blue-100",
     approved: "bg-green-100 text-green-800 hover:bg-green-100",
+    active: "bg-green-100 text-green-800 hover:bg-green-100",
     rejected: "bg-red-100 text-red-800 hover:bg-red-100",
   };
   return (
@@ -65,6 +82,72 @@ export function ApplicationsTable() {
   const [selectedapplication, setSelectedApplication] = useState<
     (typeof applications)[0] | null
   >(null);
+  const [insuranceApplications, setInsuranceApplications] = useState<LivestockInsurance[]>([]); // new line
+  const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]); // new line
+  const { get, post, loading, error } = useApi();
+  const [selectedStatus, setSelectedStatus] = useState<string>("")
+
+  const getStatusColor = (status: string) => {
+    const option = statusOptions.find((opt) => opt.value === status)
+    return option?.color || "text-gray-600"
+  }
+  const handlesubmit = async () => {
+    if (!selectedStatus) {
+      alert("Please select a status to update.");
+      return;
+    }
+    try {
+
+    } catch (error) {
+
+    }
+  }
+
+  // 
+  useEffect(() => {
+    const fetchData = async () => {
+
+      try {
+        const response = await get("ims/insurance-application-service/", {
+
+
+        });
+        console.log("Response from API:", response.status);
+
+        if (response.status === "success") {
+          setInsuranceApplications(response.data);
+        }
+        console.log("Fetching applications from API..." + response.data);
+        console.log("Error fetching applications from API...");
+      } catch (error) {
+        console.log("Error fetching applications from API...", error);
+      }
+
+    };
+
+    const fetchInsuranceStatus = async () => {
+
+      try {
+        const response = await get("ims/insurance-status-service/", {
+
+
+        });
+        console.log("Response from API:", response.status);
+
+        if (response.status === "success") {
+          setInsuranceStatus(response.data);
+        }
+        console.log("Fetching applications from API..." + response.data);
+        console.log("Error fetching applications from API...");
+      } catch (error) {
+        console.log("Error fetching applications from API...", error);
+      }
+
+    };
+fetchInsuranceStatus()
+    fetchData();
+
+  }, []);
 
   return (
     <Card className="border border-gray-200 py-6">
@@ -73,7 +156,7 @@ export function ApplicationsTable() {
           Insurance Applications
         </CardTitle>
         <p className="text-sm text-gray-600">
-          {applications.length} applications found
+          {insuranceApplications.length} applications found
         </p>
       </CardHeader>
       <CardContent>
@@ -84,11 +167,11 @@ export function ApplicationsTable() {
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Application ID
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Farmer Details
-                </th>
+                </th> */}
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Cattle Information
+                  Asset Info
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Coverage Requested
@@ -105,20 +188,20 @@ export function ApplicationsTable() {
               </tr>
             </thead>
             <tbody>
-              {applications.map((application) => (
+              {insuranceApplications.map((application) => (
                 <tr
-                  key={application.applicationId}
+                  key={application.id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="py-4 px-4">
                     <span className="font-medium text-blue-600">
-                      {application.applicationId}
+                      {application.insurance_number}
                     </span>
                   </td>
-                  <td className="py-4 px-4">
-                    <div>
+                  {/* <td className="py-4 px-4"> */}
+                  {/* <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {application.farmer}
+                        {application.}
                       </div>
                       <div className="flex items-center gap-1 mt-1">
                         <MapPin className="w-3 h-3 text-gray-400" />
@@ -126,38 +209,40 @@ export function ApplicationsTable() {
                           {application.location}
                         </span>
                       </div>
-                    </div>
-                  </td>
+                    </div> */}
+                  {/* </td> */}
                   <td className="py-4 px-4">
                     <div>
                       <div className="text-sm text-gray-900">
-                        {application.asset}
+                        {application.name}-{application.color}
                       </div>
-                      {/* <div className="text-sm text-gray-600">
-                        {application.acreage}
-                      </div> */}
+
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <span className="text-sm font-medium text-gray-900">
-                      {application.coverage}
+                      {application.insurance_type_name}
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <Badge className={getStatusBadge(application.status)}>
-                      {application.status}
+                    <Badge className={getStatusBadge(application.insurance_status)}>
+                      {application.insurance_status}
                     </Badge>
                   </td>
                   <td className="py-4 px-4">
                     <span className="text-sm text-gray-600">
-                      {application.dateSubmitted}
+                      {DateUtils.formatToDayMonthYear(application.created_at)}
+                      {/* {application.created_at} */}
                     </span>
                   </td>
                   <td className="py-4 px-4">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedApplication(application)}
+                      onClick={() =>
+                        setSelectedApplication(applications[0])
+
+                      }
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -297,16 +382,55 @@ export function ApplicationsTable() {
                   placeholder="Add your review comments here..."
                 />
               </div>
+              <div className="border rounded-md p-4">
+                {/* Status Update Section */}
+                <div className="space-y-4  pt-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="status" className="text-sm font-medium text-gray-900">
+                      Update Application Status
+                    </Label>
+                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select new status..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {insuranceStatus.map((option) => (
+                          <SelectItem key={option.insurance_status_id} value={option.insurance_status_id.toString()}>
+                            <span >{option.status_name}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {selectedStatus && (
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      <p className="text-sm text-gray-600">
+                        Status will be updated to:{" "}
+                        <span className={`font-medium ${getStatusColor(selectedStatus)}`}>
+                          {statusOptions.find((opt) => opt.value === selectedStatus)?.label}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+
+                </div>
+              </div>
             </div>
             <div className="flex justify-between gap-2 mt-4 flex-wrap">
-              <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
-                <CheckCircle className="w-4 h-4 mr-2" /> Approve Application
+              <Button onClick={
+                () => {
+
+                }
+              }
+
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+                <CheckCircle className="w-4 h-4 mr-2" /> Update Status
               </Button>
               <Button
                 variant="outline"
                 className="w-full sm:w-auto border-red-600 text-red-600 hover:bg-red-50"
               >
-                <XCircle className="w-4 h-4 mr-2" /> Reject Application
+                <XCircle className="w-4 h-4 mr-2" /> Cancel
               </Button>
             </div>
           </div>

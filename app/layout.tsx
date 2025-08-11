@@ -9,9 +9,9 @@ import "animate.css";
 import { AuthProvider } from "@/core/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.dev",
+  title: "Insurance ERP",
+  description: "",
+  generator: "",
 };
 
 export const urbanist = Urbanist({

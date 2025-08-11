@@ -60,7 +60,7 @@ const Login: React.FC<LoginProps> = ({
     }
 
       try {
-      const response = await post("/auth/public/login/", {
+      const response = await post("v1/auth/public/login/", {
         mobile_number: phoneInput,
         password: passwordInput,
       });

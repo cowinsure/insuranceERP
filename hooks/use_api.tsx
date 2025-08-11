@@ -13,7 +13,7 @@ const apiClient = axios.create({
 // Add interceptor for auth token
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
         if (token) {
             config.headers = {
                 ...config.headers,

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Eye, FileText, MapPin, XCircle } from "lucide-react";
+import { CheckCircle, Eye, FileText, Banknote , XCircle } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
@@ -10,6 +10,8 @@ import { json } from "stream/consumers";
 import { DateUtils } from "./utils/DateUtils";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import TransactionDetailsDialog from "./dialogs/applications/TransactionDetailsDialog";
+import { is } from "date-fns/locale";
 
 
 
@@ -82,10 +84,12 @@ export function ApplicationsTable() {
   const [selectedapplication, setSelectedApplication] = useState<
     (typeof applications)[0] | null
   >(null);
+  const [selectedapplications, setSelectedapplications] = useState<string>("");
   const [insuranceApplications, setInsuranceApplications] = useState<LivestockInsurance[]>([]); // new line
   const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]); // new line
   const { get, post, loading, error } = useApi();
   const [selectedStatus, setSelectedStatus] = useState<string>("")
+    const [open, setOpen] = useState(false)
 
   const getStatusColor = (status: string) => {
     const option = statusOptions.find((opt) => opt.value === status)
@@ -240,11 +244,23 @@ fetchInsuranceStatus()
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setSelectedApplication(applications[0])
+                        // setSelectedApplication(applications[0])
+                        setSelectedapplications(application.id.toString())
 
                       }
                     >
                       <Eye className="w-4 h-4" />
+                    </Button>
+                     <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setOpen(true)
+
+                      }
+                    >
+                      <Banknote className="w-4 h-4" />
+                    
                     </Button>
                   </td>
                 </tr>
@@ -407,7 +423,7 @@ fetchInsuranceStatus()
                       <p className="text-sm text-gray-600">
                         Status will be updated to:{" "}
                         <span className={`font-medium ${getStatusColor(selectedStatus)}`}>
-                          {statusOptions.find((opt) => opt.value === selectedStatus)?.label}
+                          {insuranceStatus.find((opt) => opt.insurance_status_id.toString() === selectedStatus)?.status_name}
                         </span>
                       </p>
                     </div>
@@ -419,23 +435,31 @@ fetchInsuranceStatus()
             <div className="flex justify-between gap-2 mt-4 flex-wrap">
               <Button onClick={
                 () => {
-
                 }
               }
-
-                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
                 <CheckCircle className="w-4 h-4 mr-2" /> Update Status
               </Button>
               <Button
                 variant="outline"
+                onClick={() => setSelectedApplication(null)}
                 className="w-full sm:w-auto border-red-600 text-red-600 hover:bg-red-50"
               >
+
                 <XCircle className="w-4 h-4 mr-2" /> Cancel
               </Button>
             </div>
           </div>
         </GenericModal>
       )}
+
+      {open &&   (
+        <GenericModal closeModal={() => setOpen(false)}>
+          <TransactionDetailsDialog isOpen={open} onClose={() => setOpen(false)} /> 
+
+      </GenericModal>)}
+      
+
     </Card>
   );
 }

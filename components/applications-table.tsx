@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Eye, FileText, Banknote , XCircle } from "lucide-react";
+import { CheckCircle, Eye, FileText, Banknote, XCircle } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
@@ -84,12 +84,17 @@ export function ApplicationsTable() {
   const [selectedapplication, setSelectedApplication] = useState<
     (typeof applications)[0] | null
   >(null);
+  const [selectedApplicationDialog, setSelectedApplicationDialog] = useState<LivestockInsurance | null>(null);
   const [selectedapplications, setSelectedapplications] = useState<string>("");
+  const [selectedapplicationsStatus, setSelectedapplicationsStatus] = useState<string>("");
   const [insuranceApplications, setInsuranceApplications] = useState<LivestockInsurance[]>([]); // new line
   const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]); // new line
-  const { get, post, loading, error } = useApi();
+  const { get: allapplication, } = useApi();
+  const { get: fetchStatus, } = useApi();
+  const { put: postData, loading: postDataLoading, error: postError } = useApi();
+  const [formData, setFormData] = useState({});
   const [selectedStatus, setSelectedStatus] = useState<string>("")
-    const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const getStatusColor = (status: string) => {
     const option = statusOptions.find((opt) => opt.value === status)
@@ -106,13 +111,40 @@ export function ApplicationsTable() {
 
     }
   }
+  // const handleStatusChange = async () => {
+
+  //   // Handle status change logic here  
+  //   console.log("Form Data to be sent:", formData);
+  //   try {
+  //     const response = await postData("ims/insurance-status-history-service/", {
+  //       id: assetInsuranceId,
+  //       remarks: formData.remarks,
+  //       current_status_id: selectedStatus
+  //     });
+  //     console.log("Response from API:", JSON.stringify(response));
+
+  //     if (response.status === "success") {
+  //       onClose(); // Close the dialog on success
+  //       toast.success("Status updated successfully!");
+  //       // setInsuranceStatus(response.data);
+  //     }
+  //     console.log("Updating Status applications from API..." + response.data);
+
+  //   } catch (error) {
+  //     console.log("Error Updating Status applications from API...", error);
+  //   }
+
+
+
+
+  // }
 
   // 
   useEffect(() => {
     const fetchData = async () => {
 
       try {
-        const response = await get("ims/insurance-application-service/", {
+        const response = await allapplication("ims/insurance-application-service/", {
 
 
         });
@@ -132,7 +164,7 @@ export function ApplicationsTable() {
     const fetchInsuranceStatus = async () => {
 
       try {
-        const response = await get("ims/insurance-status-service/", {
+        const response = await fetchStatus("ims/insurance-status-service/", {
 
 
         });
@@ -148,7 +180,7 @@ export function ApplicationsTable() {
       }
 
     };
-fetchInsuranceStatus()
+    fetchInsuranceStatus()
     fetchData();
 
   }, []);
@@ -243,24 +275,29 @@ fetchInsuranceStatus()
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
-                        // setSelectedApplication(applications[0])
+                      onClick={() => {
                         setSelectedapplications(application.id.toString())
+                        setSelectedApplicationDialog(insuranceApplications[application.id])
+                      }
+                        // setSelectedApplication(applications[0])
 
                       }
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
-                     <Button
+                    <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
+                      onClick={() => {
                         setOpen(true)
+                        setSelectedapplications(application.id.toString())
+                        setSelectedapplicationsStatus(application.insurance_status)
+                      }
 
                       }
                     >
                       <Banknote className="w-4 h-4" />
-                    
+
                     </Button>
                   </td>
                 </tr>
@@ -269,13 +306,13 @@ fetchInsuranceStatus()
           </table>
         </div>
       </CardContent>
-      {selectedapplication && (
+      {selectedApplicationDialog && (
         <GenericModal closeModal={() => setSelectedApplication(null)}>
           <div className="w-full rounded-xl">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  Application Review - {selectedapplication.applicationId}
+                  Application Review - {selectedApplicationDialog.asset_id}
                 </h1>
                 <p className="text-sm text-gray-500">
                   Review application details and supporting documents
@@ -284,7 +321,7 @@ fetchInsuranceStatus()
             </div>
 
             <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
-              <div className="border rounded-md p-4">
+              {/* <div className="border rounded-md p-4">
                 <p className="font-medium text-gray-800 mb-2">
                   👨‍🌾 Farmer Information
                 </p>
@@ -292,7 +329,7 @@ fetchInsuranceStatus()
                   <div>
                     <p className="text-gray-500">Name</p>
                     <p className="text-gray-900">
-                      {selectedapplication.farmer}
+                      {selectedApplicationDialog.farmer}
                     </p>
                   </div>
                   <div>
@@ -320,7 +357,7 @@ fetchInsuranceStatus()
                     <p className="text-gray-900">15 years farming experience</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="border rounded-md p-4">
                 <p className="font-medium text-gray-800 mb-2">
@@ -329,7 +366,7 @@ fetchInsuranceStatus()
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Asset Type</p>
-                    <p className="text-gray-900">{selectedapplication.asset}</p>
+                    <p className="text-gray-900">{selectedApplicationDialog.asset_type}</p>
                   </div>
                   {/* <div>
                     <p className="text-gray-500">Area</p>
@@ -340,13 +377,13 @@ fetchInsuranceStatus()
                   <div>
                     <p className="text-gray-500">Requested Coverage</p>
                     <p className="text-gray-900">
-                      {selectedapplication.coverage}
+                      {selectedApplicationDialog.insurance_type_name}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-500">Application Date</p>
                     <p className="text-gray-900">
-                      {selectedapplication.dateSubmitted}
+                      {selectedApplicationDialog.insurance_start_date}
                     </p>
                   </div>
                 </div>
@@ -405,7 +442,11 @@ fetchInsuranceStatus()
                     <Label htmlFor="status" className="text-sm font-medium text-gray-900">
                       Update Application Status
                     </Label>
-                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <Select value={selectedStatus} 
+                      onValueChange={(value) => {
+                      setSelectedStatus(value);
+                      setFormData({ ...formData, current_status_id: value });
+                    }}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select new status..." />
                       </SelectTrigger>
@@ -437,7 +478,7 @@ fetchInsuranceStatus()
                 () => {
                 }
               }
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
                 <CheckCircle className="w-4 h-4 mr-2" /> Update Status
               </Button>
               <Button
@@ -453,12 +494,12 @@ fetchInsuranceStatus()
         </GenericModal>
       )}
 
-      {open &&   (
+      {open && (
         <GenericModal closeModal={() => setOpen(false)}>
-          <TransactionDetailsDialog isOpen={open} onClose={() => setOpen(false)} /> 
+          <TransactionDetailsDialog isOpen={open} onClose={() => setOpen(false)} assetInsuranceId={selectedapplications?.toString()} applicationStatus={selectedapplicationsStatus} />
 
-      </GenericModal>)}
-      
+        </GenericModal>)}
+
 
     </Card>
   );

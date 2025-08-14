@@ -65,7 +65,7 @@ export default function PoliciesPage() {
       </div>
 
       <div className="animate__animated animate__fadeIn flex flex-col gap-7">
-        <PolicyStats />
+        {/* <PolicyStats /> */}
         <PolicyFilters />
         <PoliciesTable />
       </div>

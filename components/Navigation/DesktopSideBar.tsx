@@ -8,8 +8,6 @@ import {
   MdSpaceDashboard,
   MdOutlineGroups,
   MdGroups,
-  MdOutlineArticle,
-  MdArticle,
   MdOutlineChecklist,
   MdChecklist,
   MdOutlineSend,
@@ -23,6 +21,7 @@ import {
   // MdOutlineNotifications,
   // MdNotifications,
 } from "react-icons/md";
+import { AiOutlineProduct, AiFillProduct  } from "react-icons/ai";
 import { FaLockOpen, FaLock } from "react-icons/fa";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/core/context/AuthContext";
@@ -42,10 +41,10 @@ const mainMenuItems = [
     activeIcon: MdGroups,
   },
   {
-    title: "Policies",
-    url: "/policies",
-    icon: MdOutlineArticle,
-    activeIcon: MdArticle,
+    title: "Products",
+    url: "/products",
+    icon: AiOutlineProduct,
+    activeIcon: AiFillProduct,
   },
   {
     title: "Claims",

@@ -13,7 +13,7 @@ export function PolicyFilters() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input placeholder="Search by policy number or farmer name..." className="pl-10 bg-white border-gray-200" />
           </div>
-          <div className="flex gap-4">
+          {/* <div className="flex gap-4">
             <Select defaultValue="all-status">
               <SelectTrigger className="w-32 bg-white border-gray-200">
                 <SelectValue />
@@ -39,7 +39,7 @@ export function PolicyFilters() {
                 <SelectItem value="tomato">Tomato Crop</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>

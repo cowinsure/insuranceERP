@@ -14,7 +14,7 @@ export function ClaimsFilters() {
             <Input placeholder="Search by claim ID or farmer name..." className="pl-10 bg-white border-gray-200" />
           </div>
           <div className="flex gap-4">
-            <Select defaultValue="all-status">
+            {/* <Select defaultValue="all-status">
               <SelectTrigger className="w-32 bg-white border-gray-200">
                 <SelectValue />
               </SelectTrigger>
@@ -36,7 +36,7 @@ export function ClaimsFilters() {
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
         </div>
       </CardContent>

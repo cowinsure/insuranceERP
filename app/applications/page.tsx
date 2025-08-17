@@ -62,6 +62,7 @@ export default function ApplicationsPage() {
         {/* <ApplicationsStats /> */}
         <ApplicationsSearch />
         <ApplicationsTable />
+        
       </div>
     </div>
   );

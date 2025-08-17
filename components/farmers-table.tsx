@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 
-
 const getStatusBadge = (status: string) => {
   const variants = {
     active: "bg-green-100 text-green-800 hover:bg-green-100",
@@ -61,6 +60,24 @@ export function FarmersTable() {
   return (
     <>
       <Card className="border border-gray-200 py-6">
+        {/* this commented part is for removing the search and adding it with the table header. To use this, replace the Cardheader with this */}
+        {/* <CardHeader className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Registered Farmers
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              {farmers.length} farmers found
+            </p>
+          </div>
+          <div className="relative w-[20%]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search by name or location..."
+              className="pl-10 bg-white border-gray-200"
+            />
+          </div>
+        </CardHeader> */}
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">
             Registered Farmers

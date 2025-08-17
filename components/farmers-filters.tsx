@@ -1,19 +1,28 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search } from "lucide-react";
 
 export function FarmersFilters() {
   return (
     <Card className="border border-gray-200">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filter</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Search</h3>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input placeholder="Search by name or location..." className="pl-10 bg-white border-gray-200" />
+            <Input
+              placeholder="Search by name or location..."
+              className="pl-10 bg-white border-gray-200"
+            />
           </div>
-          <div className="flex gap-4">
+          {/* <div className="flex gap-4">
             <Select defaultValue="all-regions">
               <SelectTrigger className="w-40 bg-white border-gray-200">
                 <SelectValue />
@@ -38,9 +47,9 @@ export function FarmersFilters() {
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

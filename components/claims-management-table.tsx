@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 import { InsuranceClaim } from "./model/claim/InsuranceClaim";
+import ClaimDetailsModal from "./ui/ClaimDetailsModal";
 
 const claims = [
   {
@@ -92,9 +93,9 @@ const getPriorityBadge = (priority: string) => {
 };
 
 export function ClaimsManagementTable() {
-  // const [selectedClaim, setSelectedClaim] = useState<(typeof claims)[0] | null>(
-  //   null
-  // );
+  const [selectedClaim, setSelectedClaim] = useState<InsuranceClaim | null>(
+    null
+  );
   const [claimData, setClaimData] = useState<InsuranceClaim[]>([]);
   const { get, post, loading, error } = useApi();
   console.log(claimData);
@@ -131,7 +132,7 @@ export function ClaimsManagementTable() {
 
     fetchData();
   }, []);
-
+  console.log(selectedClaim);
   return (
     <Card className="border border-gray-200 py-6">
       <CardHeader>
@@ -171,9 +172,9 @@ export function ClaimsManagementTable() {
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Insurance Type
                 </th>
-                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Actions
-                </th> */}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -212,7 +213,7 @@ export function ClaimsManagementTable() {
                       {claim.insurance_type_name}
                     </span>
                   </td>
-                  {/* <td className="py-4 px-4">
+                  <td className="py-4 px-4">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -220,7 +221,7 @@ export function ClaimsManagementTable() {
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
-                  </td> */}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -338,6 +339,11 @@ export function ClaimsManagementTable() {
           </div>
         </GenericModal>
       )} */}
+      {selectedClaim && (
+        <GenericModal closeModal={() => setSelectedClaim(null)}>
+          <ClaimDetailsModal data={selectedClaim} />
+        </GenericModal>
+      )}
     </Card>
   );
 }

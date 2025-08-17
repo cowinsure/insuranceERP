@@ -13,4 +13,5 @@ export interface Transaction {
   insurance_status: string; // e.g., "under_review"
   asset_insurance_id: number;
   insurance_company_name: string;
+  transaction_document: string;
 }

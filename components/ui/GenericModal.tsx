@@ -72,7 +72,7 @@ const GenericModal = ({
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-6 w-full max-w-md animate__animated min-w-3xl ${
+        className={`bg-white rounded-xl shadow-2xl p-6 w-full max-w-md animate__animated min-w-5xl ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"
         }`}
       >

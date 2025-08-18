@@ -27,7 +27,10 @@ interface ModalProps {
 }
 
 export default function ClaimDetailsModal({ data }: ModalProps) {
-  const [imgSrc, setImgSrc] = useState(data.claim_doc_file || placeholder);
+  const [imgSrc, setImgSrc] = useState(
+    `https://insuranceportal-backend.insurecow.com/media/${data.claim_doc_file}` ||
+      placeholder
+  );
   return (
     <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-5 overflow-x-hidden overflow-y-auto md:overflow-y-hidden max-h-[80vh] md:max-h-auto w-full">
@@ -41,7 +44,7 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
                   alt={data.claim_file_name}
                   width={256}
                   height={256}
-                  className="object-cover w-full h-full"
+                  className="object-contain w-32 h-full -rotate-90"
                   onError={() => setImgSrc(placeholder)}
                 />
               ) : (
@@ -281,15 +284,15 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
               icon={<HiDocumentText className="text-yellow-600" />}
               header="Claim Document"
             />
-            <div className="mt-4">
-              <a
-                href={data.claim_doc_file}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline"
-              >
-                {data.claim_file_name}
-              </a>
+            <div className="mt-4 flex items-center justify-center">
+              <Image
+                src={imgSrc}
+                alt={data.claim_doc_file}
+                width={256}
+                height={256}
+                className="object-cover w-48 h-full rounded-lg"
+                onError={() => setImgSrc(placeholder)}
+              />
             </div>
           </div>
         </div>

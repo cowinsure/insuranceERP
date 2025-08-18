@@ -92,6 +92,23 @@ const getPriorityBadge = (priority: string) => {
   );
 };
 
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+
+  const day = date.toLocaleDateString("en-GB", { day: "2-digit" });
+  const month = date.toLocaleDateString("en-GB", { month: "short" });
+  const year = date.toLocaleDateString("en-GB", { year: "2-digit" });
+
+  return `${day}-${month}-${year}`;
+}
+
+export function formatMoney(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export function ClaimsManagementTable() {
   const [selectedClaim, setSelectedClaim] = useState<InsuranceClaim | null>(
     null
@@ -185,7 +202,7 @@ export function ClaimsManagementTable() {
                 >
                   <td className="py-4 px-4 text-sm">
                     <div className="font-medium text-blue-600">
-                      {claim.claim_date}
+                      {formatDate(claim.claim_date)}
                     </div>
                   </td>
                   <td className="py-4 px-4 text-sm">
@@ -196,16 +213,17 @@ export function ClaimsManagementTable() {
 
                   <td className="py-4 px-4 text-sm">
                     <span className=" font-medium text-gray-900">
-                      ৳ {claim.sum_insured}
+                      ৳ {formatMoney(claim.sum_insured)}
                     </span>
                   </td>
                   <td className="py-4 px-4 text-sm">
-                    ৳ {claim.premium_amount}
+                    ৳ {formatMoney(claim.premium_amount)}
                   </td>
                   <td className="py-4 px-4 text-sm">
                     {claim.period_name}
                     <p className="text-xs text-gray-500">
-                      {claim.insurance_start_date} to {claim.insurance_end_date}
+                      {formatDate(claim.insurance_start_date)} to{" "}
+                      {formatDate(claim.insurance_end_date)}
                     </p>
                   </td>
                   <td className="py-4 px-4 text-sm">
@@ -340,7 +358,7 @@ export function ClaimsManagementTable() {
         </GenericModal>
       )} */}
       {selectedClaim && (
-        <GenericModal closeModal={() => setSelectedClaim(null)}>
+        <GenericModal closeModal={() => setSelectedClaim(null)} title="Claim Details">
           <ClaimDetailsModal data={selectedClaim} />
         </GenericModal>
       )}

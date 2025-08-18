@@ -1,7 +1,7 @@
 "use client"
 import { AppSidebar } from "@/components/app-sidebar";
-import { PolicyStats } from "@/components/policy-stats";
-import { PolicyFilters } from "@/components/policy-filters";
+import { ProductStats } from "@/components/policy-stats";
+import { ProductFilters } from "@/components/policy-filters";
 import { PoliciesTable } from "@/components/policies-table";
 import {
   SidebarInset,
@@ -52,21 +52,21 @@ export default function PoliciesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Policy Management
+            Product Management
           </h1>
           <p className="text-gray-600">
-            Create and manage agricultural insurance policies
+            Create and manage insurance products
           </p>
         </div>
         <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={onOpen}>
           <Plus className="w-4 h-4" />
-          Create Policy
+          Create Product
         </Button>
       </div>
 
       <div className="animate__animated animate__fadeIn flex flex-col gap-7">
-        {/* <PolicyStats /> */}
-        <PolicyFilters />
+        {/* <ProductStats /> */}
+        <ProductFilters />
         <PoliciesTable />
       </div>
       {isOpen && (

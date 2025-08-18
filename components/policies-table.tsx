@@ -22,7 +22,7 @@ const getStatusBadge = (status: string) => {
 };
 
 export function PoliciesTable() {
-  // const [selectedPolicy, setSelectedPolicy] = useState<
+  // const [selectedProduct, setSelectedProduct] = useState<
   //   (typeof policies)[0] | null
   // >(null);
   const [productData, setProductData] = useState<InsuranceProduct[]>([]);
@@ -65,10 +65,10 @@ export function PoliciesTable() {
     <Card className="border border-gray-200 py-6">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">
-          Insurance Policies
+          Insurance Products
         </CardTitle>
         <p className="text-sm text-gray-600">
-          {productData.length} policies found
+          {productData.length} products found
         </p>
       </CardHeader>
       <CardContent>
@@ -124,28 +124,29 @@ export function PoliciesTable() {
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="text-sm font-medium text-gray-900 flex items-center gap-1">
-                      {product.premium_percentage} <TbPercentage className="text-gray-500"/>
+                    <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
+                      {product.premium_percentage}{" "}
+                      <TbPercentage className="text-gray-500" />
                     </span>
                   </td>
                   {/* <td className="py-4 px-4">
                     <span className="text-sm text-gray-900">
-                      {policy.premium}
+                      {product.premium}
                     </span>
                   </td>
                   <td className="py-4 px-4">
                     <div>
                       <div className="text-sm text-gray-900">
-                        {policy.duration}
+                        {product.duration}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {policy.dateRange}
+                        {product.dateRange}
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <Badge className={getStatusBadge(policy.status)}>
-                      {policy.status}
+                    <Badge className={getStatusBadge(product.status)}>
+                      {product.status}
                     </Badge>
                   </td> */}
                   {/* <td className="py-4 px-4">
@@ -153,7 +154,7 @@ export function PoliciesTable() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setSelectedPolicy(policy)}
+                        onClick={() => setSelectedProduct(product)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -168,16 +169,16 @@ export function PoliciesTable() {
           </table>
         </div>
       </CardContent>
-      {/* {selectedPolicy && (
-        <GenericModal closeModal={() => setSelectedPolicy(null)}>
+      {/* {selectedProduct && (
+        <GenericModal closeModal={() => setSelectedProduct(null)}>
           <div className="w-full rounded-xl">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  Policy Details - {selectedPolicy.policyNumber}
+                  Product Details - {selectedProduct.productNumber}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  View policy information and coverage summary
+                  View product information and coverage summary
                 </p>
               </div>
             </div>
@@ -190,24 +191,24 @@ export function PoliciesTable() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500">Policy ID</p>
-                    <p className="text-gray-900">{selectedPolicy.policyId}</p>
+                    <p className="text-gray-500">Product ID</p>
+                    <p className="text-gray-900">{selectedProduct.productId}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Duration</p>
-                    <p className="text-gray-900">{selectedPolicy.duration}</p>
+                    <p className="text-gray-900">{selectedProduct.duration}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Date Range</p>
-                    <p className="text-gray-900">{selectedPolicy.dateRange}</p>
+                    <p className="text-gray-900">{selectedProduct.dateRange}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Status</p>
                     <span
                       className={`text-sm px-2 py-1 rounded-full font-medium 
-                ${getStatusBadge(selectedPolicy.status)}`}
+                ${getStatusBadge(selectedProduct.status)}`}
                     >
-                      {selectedPolicy.status}
+                      {selectedProduct.status}
                     </span>
                   </div>
                 </div>
@@ -218,7 +219,7 @@ export function PoliciesTable() {
                 <p className="font-medium text-gray-800 mb-2">👩‍🌾 Farmer Info</p>
                 <div className="text-sm">
                   <p className="text-gray-500">Name</p>
-                  <p className="text-gray-900">{selectedPolicy.farmer}</p>
+                  <p className="text-gray-900">{selectedProduct.farmer}</p>
                 </div>
               </div>
 
@@ -229,15 +230,15 @@ export function PoliciesTable() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Asset Type</p>
-                    <p className="text-gray-900">{selectedPolicy.assetType}</p>
+                    <p className="text-gray-900">{selectedProduct.assetType}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Coverage Amount</p>
-                    <p className="text-gray-900">{selectedPolicy.coverage}</p>
+                    <p className="text-gray-900">{selectedProduct.coverage}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Premium</p>
-                    <p className="text-gray-900">{selectedPolicy.premium}</p>
+                    <p className="text-gray-900">{selectedProduct.premium}</p>
                   </div>
                 </div>
               </div>
@@ -245,7 +246,7 @@ export function PoliciesTable() {
 
 
             <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={() => setSelectedPolicy(null)}>
+              <Button variant="outline" onClick={() => setSelectedProduct(null)}>
                 Close
               </Button>
             </div>

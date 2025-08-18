@@ -70,7 +70,7 @@ export default function UserManagementPage() {
       id: 4,
       name: "Maliha Islam",
       email: "maliha.islam@agrocover.com.bd",
-      role: "Policy Officer",
+      role: "Product Officer",
       department: "Chattogram Branch",
       status: "inactive",
       lastLogin: "2024-01-28 10:20",
@@ -107,7 +107,7 @@ export default function UserManagementPage() {
       permissions: [
         "Team Management",
         "Reports",
-        "Policy Approval",
+        "Product Approval",
         "Claims Review",
       ],
     },
@@ -119,9 +119,9 @@ export default function UserManagementPage() {
         "Document Review",
       ],
     },
-    "Policy Officer": {
+    "Product Officer": {
       color: "text-yellow-600",
-      permissions: ["Policy Creation", "Risk Assessment", "Application Review"],
+      permissions: ["Product Creation", "Risk Assessment", "Application Review"],
     },
     "Field Assessor": {
       color: "text-green-600",
@@ -141,7 +141,7 @@ export default function UserManagementPage() {
         return "bg-blue-100 text-blue-700";
       case "Claims Officer":
         return "bg-blue-100 text-blue-700";
-      case "Policy Officer":
+      case "Product Officer":
         return "bg-yellow-100 text-yellow-700";
       case "Field Assessor":
         return "bg-green-100 text-green-700";
@@ -390,8 +390,8 @@ export default function UserManagementPage() {
                     <SelectItem value="claims-officer">
                       Claims Officer
                     </SelectItem>
-                    <SelectItem value="policy-officer">
-                      Policy Officer
+                    <SelectItem value="product-officer">
+                      Product Officer
                     </SelectItem>
                     <SelectItem value="field-assessor">
                       Field Assessor

@@ -17,7 +17,7 @@ interface LivestockInsurance {
   view_count: number;
   period_name: string;
   sum_insured: number;
-  policy_terms: string | null;
+  product_terms: string | null;
   reference_id: string;
   special_mark: string;
   age_in_months: number;

@@ -18,6 +18,7 @@ import {
 } from "./ui/select";
 import TransactionDetailsDialog from "./dialogs/applications/TransactionDetailsDialog";
 import ApplicationDetailsModal from "./ui/ApplicationDetailsModal";
+import { formatDate } from "./claims-management-table";
 
 
 const applications = [
@@ -300,7 +301,7 @@ export function ApplicationsTable() {
                   </td>
                   <td className="py-4 px-4">
                     <span className="text-sm text-gray-600">
-                      {DateUtils.formatToDayMonthYear(application.created_at)}
+                      {formatDate(application.created_at)}
                       {/* {application.created_at} */}
                     </span>
                   </td>

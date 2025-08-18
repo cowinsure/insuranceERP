@@ -1,16 +1,5 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { ClaimsStats } from "@/components/claims-stats";
 import { ClaimsFilters } from "@/components/claims-filters";
 import { ClaimsManagementTable } from "@/components/claims-management-table";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
-import { Bell, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function ClaimsPage() {
   return (

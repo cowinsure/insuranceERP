@@ -11,7 +11,7 @@ export interface InsuranceClaim {
   sum_insured: number;
   claim_muzzle: string;
   claim_status: "claim_pending" | "claim_approved" | "claim_rejected" | string;
-  policy_terms: string | null;
+  product_terms: string | null;
   reference_id: string;
   created_by_id: number;
   updated_by_id: number | null;

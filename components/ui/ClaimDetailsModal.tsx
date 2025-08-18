@@ -1,32 +1,48 @@
 "use client";
 
-import React from "react";
-import { FaDollarSign, FaUser, FaBuilding, FaPercentage } from "react-icons/fa";
+import React, { useState } from "react";
+import {
+  FaDollarSign,
+  FaPercentage,
+  FaStamp,
+  FaRegCheckCircle,
+  FaRegQuestionCircle,
+  FaRegCommentDots,
+  FaRegBuilding,
+  FaRegUser,
+} from "react-icons/fa";
 import { MdOutlineCalendarToday } from "react-icons/md";
-import { HiOutlineDocumentText } from "react-icons/hi";
+import { HiDocumentText, HiOutlineDocumentText } from "react-icons/hi";
 import { RxIdCard } from "react-icons/rx";
 import Image from "next/image";
 import { InsuranceClaim } from "../model/claim/InsuranceClaim";
+import { formatDate, formatMoney } from "../claims-management-table";
+import { TbListDetails } from "react-icons/tb";
+import { CgTimer } from "react-icons/cg";
+import { AiOutlineNumber } from "react-icons/ai";
+import placeholder from "../../public/document_placeholder.jpg";
 
 interface ModalProps {
   data: InsuranceClaim;
 }
 
 export default function ClaimDetailsModal({ data }: ModalProps) {
+  const [imgSrc, setImgSrc] = useState(data.claim_doc_file || placeholder);
   return (
     <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-5 overflow-x-hidden overflow-y-auto md:overflow-y-hidden max-h-[80vh] md:max-h-auto w-full">
         {/* Left Sticky Panel */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 md:col-span-2 shadow-xs md:sticky md:top-0 md:self-start">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 md:col-span-2 shadow-xs md:sticky md:top-0 h-full md:self-start">
           <div className="flex flex-col gap-8 items-center">
-            <div className="w-64 h-64 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden">
+            <div className=" bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden w-full">
               {data.claim_doc_file ? (
                 <Image
-                  src={data.claim_doc_file}
+                  src={imgSrc}
                   alt={data.claim_file_name}
                   width={256}
                   height={256}
                   className="object-cover w-full h-full"
+                  onError={() => setImgSrc(placeholder)}
                 />
               ) : (
                 <span className="text-sm text-gray-400">
@@ -42,23 +58,39 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
               />
               <CowCardData
                 label="Claim Status"
-                value={data.claim_status}
-                icon={<FaUser />}
+                value={
+                  data.claim_status === "claim_pending"
+                    ? "Pending"
+                    : data.claim_status
+                }
+                icon={<FaRegCheckCircle />}
               />
               <CowCardData
                 label="Reason"
-                value={data.reason}
-                icon={<FaUser />}
+                value={
+                  data.reason.charAt(0).toUpperCase() + data.reason.slice(1)
+                }
+                icon={<FaRegQuestionCircle />}
               />
               <CowCardData
                 label="Remarks"
-                value={data.remarks || "N/A"}
-                icon={<FaUser />}
+                value={
+                  data.remarks
+                    ? data.remarks.charAt(0).toUpperCase() +
+                      data.remarks.slice(1)
+                    : "N/A"
+                }
+                icon={<FaRegCommentDots />}
               />
               <CowCardData
                 label="Is Claimed"
                 value={data.is_claimed ? "Yes" : "No"}
-                icon={<RxIdCard />}
+                icon={<FaStamp />}
+                className={`${
+                  data.is_claimed
+                    ? "bg-green-100 text-green-600 border-green-300"
+                    : "text-red-600 bg-red-100 border-red-300"
+                }`}
               />
             </div>
           </div>
@@ -69,19 +101,22 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
           {/* Insurance Details */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
             <ModalHeader
-              icon={<HiOutlineDocumentText className="text-purple-600" />}
+              icon={<HiDocumentText className="text-purple-600" />}
               header="Insurance Details"
             />
             <div className="grid sm:grid-cols-2 gap-8 mt-4">
               <DetailBadge
                 label="Insurance Number"
                 value={data.insurance_number}
-                icon={<RxIdCard />}
+                icon={<AiOutlineNumber />}
                 className="text-purple-600 bg-purple-100"
               />
               <DetailBadge
                 label="Insurance Status"
-                value={data.insurance_status}
+                value={
+                  data.insurance_status.charAt(0).toUpperCase() +
+                  data.insurance_status.slice(1)
+                }
                 icon={<RxIdCard />}
                 className="text-purple-600 bg-purple-100"
               />
@@ -100,36 +135,36 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
               <DetailBadge
                 label="Company Name"
                 value={data.insurance_company_name}
-                icon={<FaBuilding />}
+                icon={<FaRegBuilding />}
                 className="text-purple-600 bg-purple-100"
               />
               <DetailBadge
                 label="Insurance Agent"
                 value={data.insurance_agent || "N/A"}
-                icon={<FaUser />}
+                icon={<FaRegUser />}
                 className="text-purple-600 bg-purple-100"
               />
               <DetailBadge
                 label="Start Date"
-                value={data.insurance_start_date}
+                value={formatDate(data.insurance_start_date)}
                 icon={<MdOutlineCalendarToday />}
                 className="text-purple-600 bg-purple-100"
               />
               <DetailBadge
                 label="End Date"
-                value={data.insurance_end_date}
+                value={formatDate(data.insurance_end_date)}
                 icon={<MdOutlineCalendarToday />}
                 className="text-purple-600 bg-purple-100"
               />
               <DetailBadge
                 label="Period"
                 value={data.period_name}
-                icon={<HiOutlineDocumentText />}
+                icon={<CgTimer size={20} />}
                 className="text-purple-600 bg-purple-100"
               />
               <DetailBadge
-                label="Policy Terms"
-                value={data.policy_terms || "N/A"}
+                label="Product Terms"
+                value={data.product_terms || "N/A"}
                 icon={<HiOutlineDocumentText />}
                 className="text-purple-600 bg-purple-100"
               />
@@ -145,13 +180,13 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
             <div className="grid sm:grid-cols-2 gap-8 mt-4">
               <DetailBadge
                 label="Sum Insured"
-                value={data.sum_insured}
+                value={formatMoney(data.sum_insured)}
                 icon={<FaDollarSign />}
                 className="text-green-600 bg-green-100"
               />
               <DetailBadge
                 label="Premium Amount"
-                value={data.premium_amount}
+                value={formatMoney(data.premium_amount)}
                 icon={<FaDollarSign />}
                 className="text-green-600 bg-green-100"
               />
@@ -179,22 +214,22 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
           {/* Asset Details */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
             <ModalHeader
-              icon={<RxIdCard className="text-pink-600" />}
+              icon={<TbListDetails className="text-pink-600" />}
               header="Asset Details"
             />
             <div className="grid sm:grid-cols-2 gap-8 mt-4">
               <DetailBadge
                 label="Asset ID"
-                value={data.insured_asset_id}
+                value={data.reference_id}
                 icon={<RxIdCard />}
                 className="text-pink-600 bg-pink-100"
               />
-              <DetailBadge
+              {/* <DetailBadge
                 label="Asset Insurance ID"
                 value={data.asset_insurance_id}
                 icon={<RxIdCard />}
                 className="text-pink-600 bg-pink-100"
-              />
+              /> */}
             </div>
           </div>
 
@@ -243,7 +278,7 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
           {/* Claim Document */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
             <ModalHeader
-              icon={<HiOutlineDocumentText className="text-yellow-600" />}
+              icon={<HiDocumentText className="text-yellow-600" />}
               header="Claim Document"
             />
             <div className="mt-4">
@@ -266,7 +301,7 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
 /* --- Sub Components --- */
 interface BadgeProps {
   label: string;
-  value: string | number;
+  value: string | number | boolean;
   icon?: React.ReactNode;
   className?: string;
 }
@@ -300,7 +335,7 @@ const ModalHeader = ({ icon, header }: HeaderProps) => (
   </div>
 );
 
-const CowCardData = ({ icon, label, value }: BadgeProps) => (
+const CowCardData = ({ icon, label, value, className }: BadgeProps) => (
   <div className="flex items-center gap-2">
     {icon && (
       <span className="text-green-700 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
@@ -309,8 +344,10 @@ const CowCardData = ({ icon, label, value }: BadgeProps) => (
     )}
     <div className="flex justify-between items-center w-full px-1">
       <label className="text-sm font-medium text-gray-500">{label}</label>
-      <span className="font-semibold text-gray-700">
-        <span className="px-3 py-1 border border-gray-200 rounded-full">
+      <span className="font-semibold ">
+        <span
+          className={`px-3 py-1 border border-gray-200 text-gray-700 rounded-full ${className}`}
+        >
           {value}
         </span>
       </span>

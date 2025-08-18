@@ -132,13 +132,20 @@ export function ApplicationsTable() {
   // =============================
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
+  const [pageSize, setPageSize] = useState<number | "All">(6);
 
-  const totalPages = Math.ceil(insuranceApplications.length / pageSize);
-  const paginatedApplications = insuranceApplications.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const totalPages =
+    pageSize === "All"
+      ? 1
+      : Math.ceil(insuranceApplications.length / (pageSize as number));
+
+  const paginatedApplications =
+    pageSize === "All"
+      ? insuranceApplications
+      : insuranceApplications.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
   // =============================
 
   // =============================
@@ -354,11 +361,16 @@ export function ApplicationsTable() {
             </tbody>
           </table>
           {totalPages > 1 && (
-            <div className="mt-4">
+            <div className="">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1); // reset page to 1
+                }}
               />
             </div>
           )}

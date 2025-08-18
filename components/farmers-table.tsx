@@ -31,13 +31,16 @@ export function FarmersTable() {
   // =============================
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
-
-  const totalPages = Math.ceil(farmers.length / pageSize);
-  const paginatedFarmers = farmers.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+  const totalPages =
+    pageSize === "All" ? 1 : Math.ceil(farmers.length / (pageSize as number));
+  const paginatedFarmers =
+    pageSize === "All"
+      ? farmers
+      : farmers.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -216,11 +219,16 @@ export function FarmersTable() {
               </tbody>
             </table>
             {totalPages > 1 && (
-              <div className="mt-4">
+              <div className="">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={setCurrentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1); // reset page to 1
+                  }}
                 />
               </div>
             )}

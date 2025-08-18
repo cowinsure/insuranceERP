@@ -13,11 +13,7 @@ interface GenericModalProps {
   onConfirm?: () => void;
 }
 
-const GenericModal = ({
-  closeModal,
-  title ,
-  children,
-}: GenericModalProps) => {
+const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const modalWrapperRef = useRef<HTMLDivElement>(null);
@@ -72,7 +68,7 @@ const GenericModal = ({
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-6 w-full max-w-md animate__animated min-w-3xl ${
+        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 w-full max-w-5xl animate__animated min-w-md ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"
         }`}
       >
@@ -83,7 +79,7 @@ const GenericModal = ({
             className="text-gray-500 hover:text-gray-800 transition"
             aria-label="Close Modal"
           >
-            <MdClose/>
+            <MdClose size={20} className="hover:text-red-600 cursor-pointer" />
           </button>
         </div>
         <div className="text-sm text-gray-700">

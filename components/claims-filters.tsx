@@ -7,14 +7,14 @@ export function ClaimsFilters() {
   return (
     <Card className="border border-gray-200">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filter</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Search</h3>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input placeholder="Search by claim ID or farmer name..." className="pl-10 bg-white border-gray-200" />
           </div>
           <div className="flex gap-4">
-            <Select defaultValue="all-status">
+            {/* <Select defaultValue="all-status">
               <SelectTrigger className="w-32 bg-white border-gray-200">
                 <SelectValue />
               </SelectTrigger>
@@ -36,7 +36,7 @@ export function ClaimsFilters() {
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
         </div>
       </CardContent>

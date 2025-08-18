@@ -26,7 +26,7 @@ export default function SettingsPage() {
       rate: "-1.5%",
     },
     {
-      factor: "Multiple Cattle Policy",
+      factor: "Multiple Cattle Product",
       description: "Discount for insuring 3 or more cows",
       rate: "-1.0%",
     },
@@ -101,7 +101,7 @@ export default function SettingsPage() {
               Settings
             </h1>
             <p className="text-gray-600 mt-1">
-              Manage premium rules and livestock policy categories for cattle
+              Manage premium rules and livestock product categories for cattle
               insurance
             </p>
           </div>

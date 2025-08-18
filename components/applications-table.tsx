@@ -9,10 +9,16 @@ import useApi from "@/hooks/use_api";
 import { json } from "stream/consumers";
 import { DateUtils } from "./utils/DateUtils";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import TransactionDetailsDialog from "./dialogs/applications/TransactionDetailsDialog";
-import { is } from "date-fns/locale";
-
+import ApplicationDetailsModal from "./ui/ApplicationDetailsModal";
+import { formatDate } from "./claims-management-table";
 
 
 const applications = [
@@ -60,12 +66,20 @@ const applications = [
 
 const statusOptions = [
   { value: "under-review", label: "Under Review", color: "text-blue-600" },
-  { value: "pending-documents", label: "Pending Documents", color: "text-yellow-600" },
+  {
+    value: "pending-documents",
+    label: "Pending Documents",
+    color: "text-yellow-600",
+  },
   { value: "approved", label: "Approved", color: "text-green-600" },
   { value: "rejected", label: "Rejected", color: "text-red-600" },
   { value: "on-hold", label: "On Hold", color: "text-orange-600" },
-  { value: "requires-revision", label: "Requires Revision", color: "text-purple-600" },
-]
+  {
+    value: "requires-revision",
+    label: "Requires Revision",
+    color: "text-purple-600",
+  },
+];
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -81,39 +95,74 @@ const getStatusBadge = (status: string) => {
 };
 
 export function ApplicationsTable() {
+  // =============================
+  // State Management
+  // =============================
+
   const [selectedapplication, setSelectedApplication] = useState<
     (typeof applications)[0] | null
   >(null);
-  const [selectedApplicationDialog, setSelectedApplicationDialog] = useState<LivestockInsurance | null>(null);
+
+  const [selectedApplicationDialog, setSelectedApplicationDialog] =
+    useState<LivestockInsurance | null>(null);
+
+  const [
+    selectedApplicationDetailsDialog,
+    setSelectedApplicationDetailsDialog,
+  ] = useState<LivestockInsurance | null>(null);
+
   const [selectedapplications, setSelectedapplications] = useState<string>("");
-  const [selectedapplicationsStatus, setSelectedapplicationsStatus] = useState<string>("");
-  const [insuranceApplications, setInsuranceApplications] = useState<LivestockInsurance[]>([]); // new line
-  const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]); // new line
-  const { get: allapplication, } = useApi();
-  const { get: fetchStatus, } = useApi();
-  const { put: postData, loading: postDataLoading, error: postError } = useApi();
+
+  const [selectedapplicationView, setSelectedapplicationView] =
+    useState<LivestockInsurance | null>(null);
+
+  const [selectedapplicationsStatus, setSelectedapplicationsStatus] =
+    useState<string>("");
+
+  const [insuranceApplications, setInsuranceApplications] = useState<
+    LivestockInsurance[]
+  >([]);
+
+  const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]);
+
   const [formData, setFormData] = useState({});
-  const [selectedStatus, setSelectedStatus] = useState<string>("")
-  const [open, setOpen] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  console.log(selectedApplicationDetailsDialog);
+
+  // =============================
+  // API Setup
+  // =============================
+  const { get: allapplication } = useApi();
+  const { get: fetchStatus } = useApi();
+  const {
+    put: postData,
+    loading: postDataLoading,
+    error: postError,
+  } = useApi();
+
+  // =============================
+  // Utility Functions
+  // =============================
 
   const getStatusColor = (status: string) => {
-    const option = statusOptions.find((opt) => opt.value === status)
-    return option?.color || "text-gray-600"
-  }
+    const option = statusOptions.find((opt) => opt.value === status);
+    return option?.color || "text-gray-600";
+  };
+
   const handlesubmit = async () => {
     if (!selectedStatus) {
       alert("Please select a status to update.");
       return;
     }
     try {
-
+      // ...
     } catch (error) {
-
+      // ...
     }
-  }
-  // const handleStatusChange = async () => {
+  };
 
-  //   // Handle status change logic here  
+  // const handleStatusChange = async () => {
   //   console.log("Form Data to be sent:", formData);
   //   try {
   //     const response = await postData("ims/insurance-status-history-service/", {
@@ -122,67 +171,47 @@ export function ApplicationsTable() {
   //       current_status_id: selectedStatus
   //     });
   //     console.log("Response from API:", JSON.stringify(response));
-
   //     if (response.status === "success") {
-  //       onClose(); // Close the dialog on success
+  //       onClose();
   //       toast.success("Status updated successfully!");
-  //       // setInsuranceStatus(response.data);
   //     }
-  //     console.log("Updating Status applications from API..." + response.data);
-
   //   } catch (error) {
   //     console.log("Error Updating Status applications from API...", error);
   //   }
+  // };
 
+  // =============================
+  // Fetch Data on Mount
+  // =============================
 
-
-
-  // }
-
-  // 
   useEffect(() => {
     const fetchData = async () => {
-
       try {
-        const response = await allapplication("ims/insurance-application-service/", {
-
-
-        });
-        console.log("Response from API:", response.status);
-
+        const response = await allapplication(
+          "ims/insurance-application-service/",
+          {}
+        );
         if (response.status === "success") {
           setInsuranceApplications(response.data);
         }
-        console.log("Fetching applications from API..." + response.data);
-        console.log("Error fetching applications from API...");
       } catch (error) {
-        console.log("Error fetching applications from API...", error);
+        console.error("Error fetching applications:", error);
       }
-
     };
 
     const fetchInsuranceStatus = async () => {
-
       try {
-        const response = await fetchStatus("ims/insurance-status-service/", {
-
-
-        });
-        console.log("Response from API:", response.status);
-
+        const response = await fetchStatus("ims/insurance-status-service/", {});
         if (response.status === "success") {
           setInsuranceStatus(response.data);
         }
-        console.log("Fetching applications from API..." + response.data);
-        console.log("Error fetching applications from API...");
       } catch (error) {
-        console.log("Error fetching applications from API...", error);
+        console.error("Error fetching status:", error);
       }
-
     };
-    fetchInsuranceStatus()
-    fetchData();
 
+    fetchInsuranceStatus();
+    fetchData();
   }, []);
 
   return (
@@ -252,7 +281,6 @@ export function ApplicationsTable() {
                       <div className="text-sm text-gray-900">
                         {application.name}-{application.color}
                       </div>
-
                     </div>
                   </td>
                   <td className="py-4 px-4">
@@ -261,13 +289,19 @@ export function ApplicationsTable() {
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <Badge className={getStatusBadge(application.insurance_status)}>
-                      {application.insurance_status}
+                    <Badge
+                      className={getStatusBadge(application.insurance_status)}
+                    >
+                      {application.insurance_status === "active"
+                        ? "Active"
+                        : application.insurance_status === "pending"
+                        ? "Pending"
+                        : "Under Review"}
                     </Badge>
                   </td>
                   <td className="py-4 px-4">
                     <span className="text-sm text-gray-600">
-                      {DateUtils.formatToDayMonthYear(application.created_at)}
+                      {formatDate(application.created_at)}
                       {/* {application.created_at} */}
                     </span>
                   </td>
@@ -276,12 +310,9 @@ export function ApplicationsTable() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setSelectedapplications(application.id.toString())
-                        setSelectedApplicationDialog(insuranceApplications[application.id])
-                      }
-                        // setSelectedApplication(applications[0])
-
-                      }
+                        setSelectedapplicationView(application);
+                        setSelectedApplicationDetailsDialog(application);
+                      }}
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -289,15 +320,14 @@ export function ApplicationsTable() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setOpen(true)
-                        setSelectedapplications(application.id.toString())
-                        setSelectedapplicationsStatus(application.insurance_status)
-                      }
-
-                      }
+                        setOpen(true);
+                        setSelectedapplications(application.id.toString());
+                        setSelectedapplicationsStatus(
+                          application.insurance_status
+                        );
+                      }}
                     >
                       <Banknote className="w-4 h-4" />
-
                     </Button>
                   </td>
                 </tr>
@@ -366,7 +396,9 @@ export function ApplicationsTable() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Asset Type</p>
-                    <p className="text-gray-900">{selectedApplicationDialog.asset_type}</p>
+                    <p className="text-gray-900">
+                      {selectedApplicationDialog.asset_type}
+                    </p>
                   </div>
                   {/* <div>
                     <p className="text-gray-500">Area</p>
@@ -439,21 +471,29 @@ export function ApplicationsTable() {
                 {/* Status Update Section */}
                 <div className="space-y-4  pt-4">
                   <div className="space-y-3">
-                    <Label htmlFor="status" className="text-sm font-medium text-gray-900">
+                    <Label
+                      htmlFor="status"
+                      className="text-sm font-medium text-gray-900"
+                    >
                       Update Application Status
                     </Label>
-                    <Select value={selectedStatus} 
+                    <Select
+                      value={selectedStatus}
                       onValueChange={(value) => {
-                      setSelectedStatus(value);
-                      setFormData({ ...formData, current_status_id: value });
-                    }}>
+                        setSelectedStatus(value);
+                        setFormData({ ...formData, current_status_id: value });
+                      }}
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select new status..." />
                       </SelectTrigger>
                       <SelectContent>
                         {insuranceStatus.map((option) => (
-                          <SelectItem key={option.insurance_status_id} value={option.insurance_status_id.toString()}>
-                            <span >{option.status_name}</span>
+                          <SelectItem
+                            key={option.insurance_status_id}
+                            value={option.insurance_status_id.toString()}
+                          >
+                            <span>{option.status_name}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -463,22 +503,30 @@ export function ApplicationsTable() {
                     <div className="p-3 bg-gray-50 rounded-lg border">
                       <p className="text-sm text-gray-600">
                         Status will be updated to:{" "}
-                        <span className={`font-medium ${getStatusColor(selectedStatus)}`}>
-                          {insuranceStatus.find((opt) => opt.insurance_status_id.toString() === selectedStatus)?.status_name}
+                        <span
+                          className={`font-medium ${getStatusColor(
+                            selectedStatus
+                          )}`}
+                        >
+                          {
+                            insuranceStatus.find(
+                              (opt) =>
+                                opt.insurance_status_id.toString() ===
+                                selectedStatus
+                            )?.status_name
+                          }
                         </span>
                       </p>
                     </div>
                   )}
-
                 </div>
               </div>
             </div>
             <div className="flex justify-between gap-2 mt-4 flex-wrap">
-              <Button onClick={
-                () => {
-                }
-              }
-                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+              <Button
+                onClick={() => {}}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+              >
                 <CheckCircle className="w-4 h-4 mr-2" /> Update Status
               </Button>
               <Button
@@ -486,21 +534,33 @@ export function ApplicationsTable() {
                 onClick={() => setSelectedApplication(null)}
                 className="w-full sm:w-auto border-red-600 text-red-600 hover:bg-red-50"
               >
-
                 <XCircle className="w-4 h-4 mr-2" /> Cancel
               </Button>
             </div>
           </div>
         </GenericModal>
       )}
+      {selectedApplicationDetailsDialog && (
+        <GenericModal
+          closeModal={() => setSelectedApplicationDetailsDialog(null)}
+          title="Application Details"
+        >
+          <ApplicationDetailsModal
+            application={selectedApplicationDetailsDialog}
+          />
+        </GenericModal>
+      )}
 
       {open && (
         <GenericModal closeModal={() => setOpen(false)}>
-          <TransactionDetailsDialog isOpen={open} onClose={() => setOpen(false)} assetInsuranceId={selectedapplications?.toString()} applicationStatus={selectedapplicationsStatus} />
-
-        </GenericModal>)}
-
-
+          <TransactionDetailsDialog
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            assetInsuranceId={selectedapplications?.toString()}
+            applicationStatus={selectedapplicationsStatus}
+          />
+        </GenericModal>
+      )}
     </Card>
   );
 }

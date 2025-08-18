@@ -8,79 +8,6 @@ import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 
-const farmers = [
-  {
-    id: "F001",
-    name: "Rahim Uddin",
-    initials: "RU",
-    email: "rahim.uddin@email.com.bd",
-    phone: "+880 1711 123456",
-    location: "Rangpur, Bangladesh",
-    region: "North Bengal",
-    assets: 3,
-    policies: 2,
-    status: "active",
-    joinDate: "2023-03-15",
-    avatarColor: "bg-blue-500",
-  },
-  {
-    id: "F002",
-    name: "Fatema Begum",
-    initials: "FB",
-    email: "fatema.begum@email.com.bd",
-    phone: "+880 1812 654321",
-    location: "Rajshahi, Bangladesh",
-    region: "Northwest Region",
-    assets: 5,
-    policies: 4,
-    status: "active",
-    joinDate: "2023-01-22",
-    avatarColor: "bg-purple-500",
-  },
-  {
-    id: "F003",
-    name: "Shahidul Islam",
-    initials: "SI",
-    email: "shahidul.islam@email.com.bd",
-    phone: "+880 1911 223344",
-    location: "Mymensingh, Bangladesh",
-    region: "Central Region",
-    assets: 2,
-    policies: 0,
-    status: "inactive",
-    joinDate: "2022-11-08",
-    avatarColor: "bg-blue-600",
-  },
-  {
-    id: "F004",
-    name: "Hasina Akhter",
-    initials: "HA",
-    email: "hasina.akhter@email.com.bd",
-    phone: "+880 1611 334455",
-    location: "Barisal, Bangladesh",
-    region: "Southern Region",
-    assets: 4,
-    policies: 3,
-    status: "active",
-    joinDate: "2023-06-12",
-    avatarColor: "bg-blue-500",
-  },
-  {
-    id: "F005",
-    name: "Jahirul Haque",
-    initials: "JH",
-    email: "jahirul.haque@email.com.bd",
-    phone: "+880 1515 998877",
-    location: "Sylhet, Bangladesh",
-    region: "Northeast Region",
-    assets: 1,
-    policies: 0,
-    status: "pending",
-    joinDate: "2024-01-30",
-    avatarColor: "bg-purple-600",
-  },
-];
-
 const getStatusBadge = (status: string) => {
   const variants = {
     active: "bg-green-100 text-green-800 hover:bg-green-100",
@@ -96,46 +23,61 @@ export function FarmersTable() {
   const [selectedFarmer, setSelectedFarmer] = useState<
     (typeof farmers)[0] | null
   >(null);
-      const [farmers, setFarmers] = useState<FarmerProfile[]>([]); // new line
-    const { get, post, loading, error } = useApi();
 
-      useEffect(() => {
-        const fetchData = async () => {
-    
-          try {
-              const response = await get("ims/farmer-service/", {
-                
-    
-          });
-          console.log("Response from API:", response.status);
-          
-          if(response.status === "success"){
-            setFarmers(response.data);
-          }
-          console.log(response.data.length + " farmers found");
-          
-          // for (let index = 0; index < response.date.length; index++) {
-          //   const element = response.data[index];
-            
-          //   console.log("Fetching applications from API..." + element);
-          // }
-                  console.log("Fetching applications from API..." + response?.data[12]?.mobile_number);
-        
-          } catch (error) {
-                console.log("Error fetching applications from API...");
-          }
-        
-        };
-    
-        fetchData();
-    
-      }, []);
+  const [farmers, setFarmers] = useState<FarmerProfile[]>([]); // new line
+  const { get, post, loading, error } = useApi();
 
-      console.log("Farmers data:", farmers);
-      
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await get("ims/farmer-service/", {});
+        console.log("Response from API:", response.status);
+
+        if (response.status === "success") {
+          setFarmers(response.data);
+        }
+        console.log(response.data.length + " farmers found");
+
+        // for (let index = 0; index < response.date.length; index++) {
+        //   const element = response.data[index];
+
+        //   console.log("Fetching applications from API..." + element);
+        // }
+        console.log(
+          "Fetching applications from API..." +
+            response?.data[12]?.mobile_number
+        );
+      } catch (error) {
+        console.log("Error fetching applications from API...");
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  console.log("Farmers data:", farmers);
+
   return (
     <>
       <Card className="border border-gray-200 py-6">
+        {/* this commented part is for removing the search and adding it with the table header. To use this, replace the Cardheader with this */}
+        {/* <CardHeader className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Registered Farmers
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              {farmers.length} farmers found
+            </p>
+          </div>
+          <div className="relative w-[20%]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search by name or location..."
+              className="pl-10 bg-white border-gray-200"
+            />
+          </div>
+        </CardHeader> */}
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">
             Registered Farmers
@@ -179,7 +121,6 @@ export function FarmersTable() {
                     key={farmer.user_id}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
-                   
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
                         {/* <Avatar className={`w-10 h-10 ${farmer.avatarColor}`}>
@@ -259,111 +200,111 @@ export function FarmersTable() {
                 ))}
               </tbody>
             </table>
-            {selectedFarmer && (
-              // <GenericModal closeModal={() => setSelectedFarmer(null)}>
-              //   <div className="w-full rounded-xl">
-              //     <div className="flex justify-between items-start mb-4">
-              //       <div>
-              //         <h1 className="text-xl font-semibold text-gray-900">
-              //           Farmer Profile - {selectedFarmer.id}
-              //         </h1>
-              //         <p className="text-sm text-gray-500">
-              //           View farmer details and activity summary
-              //         </p>
-              //       </div>
-              //     </div>
+            {/* {selectedFarmer && (
+              <GenericModal closeModal={() => setSelectedFarmer(null)}>
+                <div className="w-full rounded-xl">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h1 className="text-xl font-semibold text-gray-900">
+                        Farmer Profile - {selectedFarmer.id}
+                      </h1>
+                      <p className="text-sm text-gray-500">
+                        View farmer details and activity summary
+                      </p>
+                    </div>
+                  </div>
 
-              //     <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
-              //       {/* Farmer Info */}
-              //       <div className="border rounded-md p-4">
-              //         <p className="font-medium text-gray-800 mb-2">
-              //           👨‍🌾 Personal Details
-              //         </p>
-              //         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              //           <div>
-              //             <p className="text-gray-500">Name</p>
-              //             <p className="text-gray-900">{selectedFarmer.name}</p>
-              //           </div>
-              //           <div>
-              //             <p className="text-gray-500">Farmer ID</p>
-              //             <p className="text-gray-900">
-              //               {selectedFarmer.id}
-              //             </p>
-              //           </div>
-              //           <div>
-              //             <p className="text-gray-500">Email</p>
-              //             <p className="text-gray-900">
-              //               {selectedFarmer.email}
-              //             </p>
-              //           </div>
-              //           <div>
-              //             <p className="text-gray-500">Phone</p>
-              //             <p className="text-gray-900">
-              //               {selectedFarmer.phone}
-              //             </p>
-              //           </div>
-              //         </div>
-              //       </div>
+                  <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
+                    Farmer Info
+                    <div className="border rounded-md p-4">
+                      <p className="font-medium text-gray-800 mb-2">
+                        👨‍🌾 Personal Details
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Name</p>
+                          <p className="text-gray-900">{selectedFarmer.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Farmer ID</p>
+                          <p className="text-gray-900">
+                            {selectedFarmer.id}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Email</p>
+                          <p className="text-gray-900">
+                            {selectedFarmer.email}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Phone</p>
+                          <p className="text-gray-900">
+                            {selectedFarmer.phone}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-              //       {/* Location Info */}
-              //       <div className="border rounded-md p-4">
-              //         <p className="font-medium text-gray-800 mb-2">
-              //           📍 Location
-              //         </p>
-              //         <div className="text-sm">
-              //           <p className="text-gray-500">Region</p>
-              //           <p className="text-gray-900">
-              //             {selectedFarmer.location}
-              //           </p>
-              //         </div>
-              //       </div>
+                    Location Info
+                    <div className="border rounded-md p-4">
+                      <p className="font-medium text-gray-800 mb-2">
+                        📍 Location
+                      </p>
+                      <div className="text-sm">
+                        <p className="text-gray-500">Region</p>
+                        <p className="text-gray-900">
+                          {selectedFarmer.location}
+                        </p>
+                      </div>
+                    </div>
 
-              //       {/* Activity Summary */}
-              //       <div className="border rounded-md p-4">
-              //         <p className="font-medium text-gray-800 mb-2">
-              //           📊 Summary
-              //         </p>
-              //         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              //           <div>
-              //             <p className="text-gray-500">Assets</p>
-              //             <p className="text-gray-900">
-              //               {selectedFarmer.assets}
-              //             </p>
-              //           </div>
-              //           <div>
-              //             <p className="text-gray-500">Policies</p>
-              //             <p className="text-gray-900">
-              //               {selectedFarmer.policies}
-              //             </p>
-              //           </div>
-              //           <div>
-              //             <p className="text-gray-500">Join Date</p>
-              //             <p className="text-gray-900">
-              //               {selectedFarmer.joinDate}
-              //             </p>
-              //           </div>
-              //           <div>
-              //             <p className="text-gray-500">Status</p>
-              //             <span
-              //               className={`text-sm px-2 py-1 rounded-full font-medium 
-              // ${
-              //   selectedFarmer.status === "active"
-              //     ? "bg-green-100 text-green-700"
-              //     : selectedFarmer.status === "inactive"
-              //     ? "bg-red-100 text-red-700"
-              //     : "bg-yellow-100 text-yellow-700"
-              // }`}
-              //             >
-              //               {selectedFarmer.status}
-              //             </span>
-              //           </div>
-              //         </div>
-              //       </div>
-              //     </div>
-              //   </div>
-              // </GenericModal>
+                    Activity Summary
+                    <div className="border rounded-md p-4">
+                      <p className="font-medium text-gray-800 mb-2">
+                        📊 Summary
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Assets</p>
+                          <p className="text-gray-900">
+                            {selectedFarmer.assets}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Policies</p>
+                          <p className="text-gray-900">
+                            {selectedFarmer.policies}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Join Date</p>
+                          <p className="text-gray-900">
+                            {selectedFarmer.joinDate}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Status</p>
+                          <span
+                            className={`text-sm px-2 py-1 rounded-full font-medium
+              ${
+                selectedFarmer.status === "active"
+                  ? "bg-green-100 text-green-700"
+                  : selectedFarmer.status === "inactive"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
+                          >
+                            {selectedFarmer.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </GenericModal>
               <></>
-            )}
+            )} */}
           </div>
         </CardContent>
       </Card>

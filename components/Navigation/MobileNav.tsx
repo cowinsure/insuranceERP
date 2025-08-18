@@ -24,8 +24,8 @@ const navItems = [
     icon: Users,
   },
   {
-    title: "Policies",
-    url: "/policies",
+    title: "Products",
+    url: "/products",
     icon: FileText,
   },
   {

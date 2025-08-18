@@ -46,8 +46,8 @@ const mockNotifications = [
   },
   {
     id: "5",
-    type: "policy" as const,
-    title: "Policy Renewal Reminder",
+    type: "product" as const,
+    title: "Product Renewal Reminder",
     description: "5 policies are due for renewal in the next 30 days",
     priority: "medium" as const,
     timestamp: "1 day ago",
@@ -173,7 +173,7 @@ const Notifications = () => {
                   },
                   {
                     user: "Md. Javed",
-                    action: "created policy",
+                    action: "created product",
                     item: "POL005 - Cattle Insurance",
                     time: "Yesterday at 4:45 PM",
                   },

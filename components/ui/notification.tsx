@@ -12,7 +12,7 @@ import {
 
 interface NotificationCardProps {
   id: string;
-  type: "claim" | "approval" | "payment" | "message" | "policy";
+  type: "claim" | "approval" | "payment" | "message" | "product";
   title: string;
   description: string;
   priority: "high" | "medium" | "low";
@@ -41,7 +41,7 @@ const notificationStyles = {
     iconColor: "text-blue-600",
     bgColor: "bg-blue-100",
   },
-  policy: {
+  product: {
     icon: <Shield className="h-5 w-5" />,
     iconColor: "text-purple-600",
     bgColor: "bg-purple-100",

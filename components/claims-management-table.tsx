@@ -12,8 +12,11 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
+import useApi from "@/hooks/use_api";
+import { InsuranceClaim } from "./model/claim/InsuranceClaim";
+import ClaimDetailsModal from "./ui/ClaimDetailsModal";
 
 const claims = [
   {
@@ -89,18 +92,76 @@ const getPriorityBadge = (priority: string) => {
   );
 };
 
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+
+  const day = date.toLocaleDateString("en-GB", { day: "2-digit" });
+  const month = date.toLocaleDateString("en-GB", { month: "short" });
+  const year = date.toLocaleDateString("en-GB", { year: "2-digit" });
+
+  return `${day}-${month}-${year}`;
+}
+
+export function formatMoney(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export function ClaimsManagementTable() {
-  const [selectedClaim, setSelectedClaim] = useState<(typeof claims)[0] | null>(
+  const [selectedClaim, setSelectedClaim] = useState<InsuranceClaim | null>(
     null
   );
+  const [claimData, setClaimData] = useState<InsuranceClaim[]>([]);
+  const { get, post, loading, error } = useApi();
+  console.log(claimData);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await get("ims/insurance-claim-service/", {
+          params: {
+            start_record: 1,
+            page_size: 10,
+            asset_insurance_id: -1,
+          },
+        });
+        console.log("Response from API:", response.status);
 
+        if (response.status === "success") {
+          setClaimData(response.data);
+        }
+        // console.log(response.data.length + " farmers found");
+
+        // for (let index = 0; index < response.date.length; index++) {
+        //   const element = response.data[index];
+
+        //   console.log("Fetching applications from API..." + element);
+        // }
+        // console.log(
+        //   "Fetching applications from API..." +
+        //     response?.data[12]?.mobile_number
+        // );
+      } catch (error) {
+        console.log("Error fetching applications from API...");
+      }
+    };
+
+    fetchData();
+  }, []);
+  console.log(selectedClaim);
   return (
     <Card className="border border-gray-200 py-6">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">
           Insurance Claims
         </CardTitle>
-        <p className="text-sm text-gray-600">{claims.length} claims found</p>
+        <p className="text-sm text-gray-600">
+          {claimData.length > 1
+            ? `${claimData.length} claims`
+            : `${claimData.length} claim`}{" "}
+          found
+        </p>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -108,25 +169,25 @@ export function ClaimsManagementTable() {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Claim Details
+                  Claim Date
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Farmer
+                  Insurance No.
                 </th>
                 {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Asset & Damage
                 </th> */}
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Amount
+                  Sum Insured
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Status
+                  Premium Amount
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Priority
+                  Period
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Assessor
+                  Insurance Type
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Actions
@@ -134,58 +195,40 @@ export function ClaimsManagementTable() {
               </tr>
             </thead>
             <tbody>
-              {claims.map((claim) => (
+              {claimData.map((claim) => (
                 <tr
-                  key={claim.claimId}
+                  key={claim.id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
-                  <td className="py-4 px-4">
-                    <div>
-                      <div className="font-medium text-blue-600">
-                        {claim.claimId}
-                      </div>
-                      <div className="text-sm text-gray-500">{claim.date}</div>
+                  <td className="py-4 px-4 text-sm">
+                    <div className="font-medium text-blue-600">
+                      {formatDate(claim.claim_date)}
                     </div>
                   </td>
-                  <td className="py-4 px-4">
-                    <div>
-                      <div className="text-sm text-gray-900">
-                        {claim.farmer}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {claim.farmerId}
-                      </div>
+                  <td className="py-4 px-4 text-sm">
+                    <div className=" text-gray-900">
+                      {claim.insurance_number}
                     </div>
                   </td>
-                  {/* <td className="py-4 px-4">
-                    <div>
-                      <div className="text-sm text-gray-900">{claim.asset}</div>
-                      <div className="flex items-center gap-1 mt-1">
-                        <AlertTriangle className="w-3 h-3 text-orange-500" />
-                        <span className="text-sm text-gray-600">
-                          {claim.damage}
-                        </span>
-                      </div>
-                    </div>
-                  </td> */}
-                  <td className="py-4 px-4">
-                    <span className="text-sm font-medium text-gray-900">
-                      {claim.amount}
+
+                  <td className="py-4 px-4 text-sm">
+                    <span className=" font-medium text-gray-900">
+                      ৳ {formatMoney(claim.sum_insured)}
                     </span>
                   </td>
-                  <td className="py-4 px-4">
-                    <Badge className={getStatusBadge(claim.status)}>
-                      {claim.status}
-                    </Badge>
+                  <td className="py-4 px-4 text-sm">
+                    ৳ {formatMoney(claim.premium_amount)}
                   </td>
-                  <td className="py-4 px-4">
-                    <Badge className={getPriorityBadge(claim.priority)}>
-                      {claim.priority}
-                    </Badge>
+                  <td className="py-4 px-4 text-sm">
+                    {claim.period_name}
+                    <p className="text-xs text-gray-500">
+                      {formatDate(claim.insurance_start_date)} to{" "}
+                      {formatDate(claim.insurance_end_date)}
+                    </p>
                   </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm text-gray-900">
-                      {claim.assessor}
+                  <td className="py-4 px-4 text-sm">
+                    <span className=" text-gray-900">
+                      {claim.insurance_type_name}
                     </span>
                   </td>
                   <td className="py-4 px-4">
@@ -203,7 +246,7 @@ export function ClaimsManagementTable() {
           </table>
         </div>
       </CardContent>
-      {selectedClaim && (
+      {/* {selectedClaim && (
         <GenericModal closeModal={() => setSelectedClaim(null)}>
           <div className="w-full rounded-xl">
             <div className="flex justify-between items-start mb-4">
@@ -254,7 +297,6 @@ export function ClaimsManagementTable() {
                   Description
                 </p>
                 <p className="text-base text-gray-900 mt-1">
-                  {/* Add description from your API if available */}
                   No additional description provided.
                 </p>
               </div>
@@ -264,7 +306,6 @@ export function ClaimsManagementTable() {
                   Supporting Documents
                 </p>
                 <div className="space-y-3">
-                  {/* Replace this with actual document data from claim if available */}
                   {[
                     { name: "assessment_report.pdf", type: "pdf" },
                     { name: "satellite_images.jpg", type: "image" },
@@ -314,6 +355,11 @@ export function ClaimsManagementTable() {
               </Button>
             </div>
           </div>
+        </GenericModal>
+      )} */}
+      {selectedClaim && (
+        <GenericModal closeModal={() => setSelectedClaim(null)} title="Claim Details">
+          <ClaimDetailsModal data={selectedClaim} />
         </GenericModal>
       )}
     </Card>

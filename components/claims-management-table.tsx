@@ -195,10 +195,11 @@ export function ClaimsManagementTable() {
               </tr>
             </thead>
             <tbody>
-              {claimData.map((claim) => (
+              {claimData.map((claim, idx) => (
                 <tr
                   key={claim.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <td className="py-4 px-4 text-sm">
                     <div className="font-medium text-blue-600">
@@ -358,7 +359,10 @@ export function ClaimsManagementTable() {
         </GenericModal>
       )} */}
       {selectedClaim && (
-        <GenericModal closeModal={() => setSelectedClaim(null)} title="Claim Details">
+        <GenericModal
+          closeModal={() => setSelectedClaim(null)}
+          title="Claim Details"
+        >
           <ClaimDetailsModal data={selectedClaim} />
         </GenericModal>
       )}

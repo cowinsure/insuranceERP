@@ -19,7 +19,7 @@ import {
 import TransactionDetailsDialog from "./dialogs/applications/TransactionDetailsDialog";
 import ApplicationDetailsModal from "./ui/ApplicationDetailsModal";
 import { formatDate } from "./claims-management-table";
-
+import Pagination from "./utils/Pagination";
 
 const applications = [
   {
@@ -128,7 +128,18 @@ export function ApplicationsTable() {
   const [formData, setFormData] = useState({});
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [open, setOpen] = useState(false);
-  console.log(selectedApplicationDetailsDialog);
+
+  // =============================
+  // Pagination functions
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
+
+  const totalPages = Math.ceil(insuranceApplications.length / pageSize);
+  const paginatedApplications = insuranceApplications.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  // =============================
 
   // =============================
   // API Setup
@@ -189,7 +200,9 @@ export function ApplicationsTable() {
       try {
         const response = await allapplication(
           "ims/insurance-application-service/",
-          {}
+          {
+            params: { start_record: 1 },
+          }
         );
         if (response.status === "success") {
           setInsuranceApplications(response.data);
@@ -210,9 +223,14 @@ export function ApplicationsTable() {
       }
     };
 
-    fetchInsuranceStatus();
     fetchData();
+    fetchInsuranceStatus();
   }, []);
+
+  // Reset page if data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [insuranceApplications]);
 
   return (
     <Card className="border border-gray-200 py-6">
@@ -252,11 +270,12 @@ export function ApplicationsTable() {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {insuranceApplications.map((application) => (
+            <tbody className="overflow-hidden">
+              {paginatedApplications.map((application, idx) => (
                 <tr
                   key={application.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <td className="py-4 px-4">
                     <span className="font-medium text-blue-600">
@@ -334,6 +353,15 @@ export function ApplicationsTable() {
               ))}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
       {selectedApplicationDialog && (

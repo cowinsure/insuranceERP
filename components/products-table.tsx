@@ -21,7 +21,7 @@ const getStatusBadge = (status: string) => {
   );
 };
 
-export function PoliciesTable() {
+export function ProductsTable() {
   // const [selectedProduct, setSelectedProduct] = useState<
   //   (typeof policies)[0] | null
   // >(null);
@@ -80,6 +80,9 @@ export function PoliciesTable() {
                   Insurance Category
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Insurance Company
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Insurance Type
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
@@ -103,14 +106,20 @@ export function PoliciesTable() {
               </tr>
             </thead>
             <tbody>
-              {productData.map((product) => (
+              {productData.map((product, idx) => (
                 <tr
                   key={product.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <td className="py-4 px-4">
                     <div className="font-medium text-blue-600">
                       {product.insurance_category}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="text-sm text-gray-900">
+                      {product.insurance_company_name}
                     </div>
                   </td>
                   <td className="py-4 px-4">

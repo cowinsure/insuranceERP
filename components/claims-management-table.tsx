@@ -17,6 +17,7 @@ import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 import { InsuranceClaim } from "./model/claim/InsuranceClaim";
 import ClaimDetailsModal from "./ui/ClaimDetailsModal";
+import Pagination from "./utils/Pagination";
 
 const claims = [
   {
@@ -115,14 +116,30 @@ export function ClaimsManagementTable() {
   );
   const [claimData, setClaimData] = useState<InsuranceClaim[]>([]);
   const { get, post, loading, error } = useApi();
-  console.log(claimData);
+
+  // =============================
+  // Pagination functions
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+
+  const totalPages =
+    pageSize === "All" ? 1 : Math.ceil(claimData.length / (pageSize as number));
+
+  const paginatedClaims =
+    pageSize === "All"
+      ? claimData
+      : claimData.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
+  // =============================
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await get("ims/insurance-claim-service/", {
           params: {
             start_record: 1,
-            page_size: 10,
             asset_insurance_id: -1,
           },
         });
@@ -195,7 +212,7 @@ export function ClaimsManagementTable() {
               </tr>
             </thead>
             <tbody>
-              {claimData.map((claim, idx) => (
+              {paginatedClaims.map((claim, idx) => (
                 <tr
                   key={claim.id}
                   className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
@@ -245,6 +262,20 @@ export function ClaimsManagementTable() {
               ))}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1); // reset page to 1
+                }}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
       {/* {selectedClaim && (

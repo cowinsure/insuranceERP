@@ -8,6 +8,7 @@ import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 import { InsuranceProduct } from "./model/products/ProductsData";
 import { TbPercentage } from "react-icons/tb";
+import Pagination from "./utils/Pagination";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -27,15 +28,30 @@ export function ProductsTable() {
   // >(null);
   const [productData, setProductData] = useState<InsuranceProduct[]>([]);
   const { get, post, loading, error } = useApi();
-  console.log(productData);
+
+  // Pagination functions
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+
+  const totalPages =
+    pageSize === "All"
+      ? 1
+      : Math.ceil(productData.length / (pageSize as number));
+
+  const paginatedProducts =
+    pageSize === "All"
+      ? productData
+      : productData.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
+  // =============================
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await get("ims/insurance-product-service/", {
-          params: {
-            start_record: 1,
-            page_size: 10,
-          },
+          params: { start_record: 1 },
         });
         console.log("Response from API:", response.status);
 
@@ -106,7 +122,7 @@ export function ProductsTable() {
               </tr>
             </thead>
             <tbody>
-              {productData.map((product, idx) => (
+              {paginatedProducts.map((product, idx) => (
                 <tr
                   key={product.id}
                   className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
@@ -176,6 +192,20 @@ export function ProductsTable() {
               ))}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1); // reset page to 1
+                }}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
       {/* {selectedProduct && (

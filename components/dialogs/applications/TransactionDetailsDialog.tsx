@@ -80,6 +80,7 @@ export default function TransactionDetailsDialog({
     current_status_id: selectedStatus,
     remarks: "",
   });
+console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${paymentData[0]?.transaction_document.toString()} `);
 
   const getStatusColor = (status: string) => {
     const option = statusOptions.find((opt) => opt.value === status);
@@ -376,7 +377,7 @@ export default function TransactionDetailsDialog({
                 <div className="p-4 bg-white">
                   <img
                     src={
-                      paymentData[0]?.transaction_document || "/placeholder.svg"
+                     `${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${paymentData[0]?.transaction_document} `|| "/placeholder.svg"
                     }
                     alt={paymentData[0]?.transaction_document}
                     className="w-full max-w-md mx-auto rounded-lg shadow-sm border border-gray-200"

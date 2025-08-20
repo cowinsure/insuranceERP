@@ -38,7 +38,7 @@ interface ModalProps {
 export default function ApplicationDetailsModal({ application }: ModalProps) {
   const [imgSrc, setImgSrc] = useState(application.special_mark || placeholder);
   console.log(imgSrc);
-  console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}${imgSrc.src}`);
+  console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`);
   
   
   return (
@@ -51,7 +51,7 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
             <div className="bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden w-full">
               {application.special_mark ? (
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}${imgSrc}`}
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`}
                   alt={"Image"}
                   width={256}
                   height={256}

@@ -26,7 +26,6 @@ import {
 import { FaPercentage } from "react-icons/fa";
 import Image from "next/image";
 import { formatDate, formatMoney } from "../claims-management-table";
-import { ApplicationsTable } from "../applications-table";
 import { useState } from "react";
 import placeholder from "/public/document_placeholder.jpg";
 
@@ -38,6 +37,10 @@ interface ModalProps {
 
 export default function ApplicationDetailsModal({ application }: ModalProps) {
   const [imgSrc, setImgSrc] = useState(application.special_mark || placeholder);
+  console.log(imgSrc);
+  console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`);
+  
+  
   return (
     <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-5 overflow-x-hidden overflow-y-auto md:overflow-y-hidden max-h-[80vh] md:max-h-auto w-full">
@@ -48,7 +51,7 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
             <div className="bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden w-full">
               {application.special_mark ? (
                 <Image
-                  src={imgSrc}
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`}
                   alt={"Image"}
                   width={256}
                   height={256}

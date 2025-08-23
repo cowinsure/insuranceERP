@@ -17,7 +17,7 @@ import {
 import { RxIdCard } from "react-icons/rx";
 import { LuSyringe } from "react-icons/lu";
 import { AiOutlineNumber } from "react-icons/ai";
-import { BsBarChartFill, BsInfoCircle } from "react-icons/bs";
+import { BsTextIndentRight, BsInfoCircle } from "react-icons/bs";
 import {
   HiDocumentText,
   HiOutlineCube,
@@ -38,24 +38,25 @@ interface ModalProps {
 export default function ApplicationDetailsModal({ application }: ModalProps) {
   const [imgSrc, setImgSrc] = useState(application.special_mark || placeholder);
   console.log(imgSrc);
-  console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`);
-  
-  
+  console.log(
+    `${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`
+  );
+
   return (
     <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-5 overflow-x-hidden overflow-y-auto md:overflow-y-hidden max-h-[80vh] md:max-h-auto w-full">
         {/* Left Sticky Panel */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 md:col-span-2 shadow-xs md:sticky md:top-0 h-full md:self-start">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 md:col-span-2 shadow-xs md:sticky md:top-0 h-full md:self-start overflow-y-scroll md:max-h-[80vh]">
           <div className="flex flex-col gap-8 items-center h-full">
             {/* Image */}
-            <div className="bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden w-full">
+            <div className="bg-gray-100 flex items-center justify-center rounded-lg w-full">
               {application.special_mark ? (
                 <Image
                   src={`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`}
                   alt={"Image"}
                   width={256}
                   height={256}
-                  className="object-cover w-full h-full"
+                  className="object-contain w-32 h-72"
                   onError={() => setImgSrc(placeholder)}
                 />
               ) : (
@@ -438,6 +439,21 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
                             /> */}
             </div>
           </div>
+          {/* Remarks
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
+            <ModalHeader
+              icon={<BsTextIndentRight className="text-yellow-600" />}
+              header="Remarks"
+            />
+            <div className="grid sm:grid-cols-2 gap-8 mt-8">
+              <DetailsSection
+                label="Remarks"
+                value={application.remarks || "N/A"}
+                icon={<BsTextIndentRight />}
+                className="text-yellow-700 bg-yellow-200"
+              />
+            </div>
+          </div> */}
         </div>
       </div>
     </div>

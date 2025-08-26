@@ -28,6 +28,15 @@ import Image from "next/image";
 import { formatDate, formatMoney } from "../claims-management-table";
 import { useState } from "react";
 import placeholder from "/public/document_placeholder.jpg";
+import { Label } from "./label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
+import InputField from "./InputField";
 
 interface ModalProps {
   isOpen?: boolean;
@@ -439,21 +448,75 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
                             /> */}
             </div>
           </div>
-          {/* Remarks
+
+          {/* Status Update Section */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
             <ModalHeader
               icon={<BsTextIndentRight className="text-yellow-600" />}
               header="Remarks"
             />
-            <div className="grid sm:grid-cols-2 gap-8 mt-8">
-              <DetailsSection
+
+            <div className="space-y-4  pt-4">
+              <div className="space-y-3">
+                <Label
+                  htmlFor="status"
+                  className="text-sm font-medium text-gray-900"
+                >
+                  Update Application Status
+                </Label>
+                <Select
+                  value={""}
+                  onValueChange={(value) => {
+                    // setSelectedStatus(value);
+                    // setFormData({ ...formData, current_status_id: value });
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select new status..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* {insuranceStatus?.map((option: InsuranceStatus) => (
+                        <SelectItem
+                          key={option.insurance_status_id}
+                          value={option.insurance_status_id.toString()}
+                        >
+                          <span>{option.status_name}</span>
+                        </SelectItem>
+                      ))} */}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* {selectedStatus && (
+                  <div className="p-3 bg-gray-50 rounded-lg border">
+                    <p className="text-sm text-gray-600">
+                      Status will be updated to:{" "}
+                      <span
+                        className={`font-medium ${getStatusColor(
+                          selectedStatus
+                        )}`}
+                      >
+                        {
+                          insuranceStatus.find(
+                            (opt: InsuranceStatus) =>
+                              opt.insurance_status_id.toString() ===
+                              selectedStatus
+                          )?.status_name
+                        }
+                      </span>
+                    </p>
+                  </div>
+                )} */}
+              <InputField
+                id="remarks"
                 label="Remarks"
-                value={application.remarks || "N/A"}
-                icon={<BsTextIndentRight />}
-                className="text-yellow-700 bg-yellow-200"
+                name="remarks"
+                onChange={(e) => console.log(e)}
+                value={""}
+                placeholder="Write something"
+                type="text"
               />
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>

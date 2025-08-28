@@ -8,6 +8,7 @@ import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 import { InsuranceProduct } from "./model/products/ProductsData";
 import { TbPercentage } from "react-icons/tb";
+import Pagination from "./utils/Pagination";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -21,21 +22,36 @@ const getStatusBadge = (status: string) => {
   );
 };
 
-export function PoliciesTable() {
+export function ProductsTable() {
   // const [selectedProduct, setSelectedProduct] = useState<
   //   (typeof policies)[0] | null
   // >(null);
   const [productData, setProductData] = useState<InsuranceProduct[]>([]);
   const { get, post, loading, error } = useApi();
-  console.log(productData);
+
+  // Pagination functions
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+
+  const totalPages =
+    pageSize === "All"
+      ? 1
+      : Math.ceil(productData.length / (pageSize as number));
+
+  const paginatedProducts =
+    pageSize === "All"
+      ? productData
+      : productData.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
+  // =============================
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await get("ims/insurance-product-service/", {
-          params: {
-            start_record: 1,
-            page_size: 10,
-          },
+          params: { start_record: 1 },
         });
         console.log("Response from API:", response.status);
 
@@ -80,6 +96,9 @@ export function PoliciesTable() {
                   Insurance Category
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Insurance Company
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Insurance Type
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
@@ -103,14 +122,20 @@ export function PoliciesTable() {
               </tr>
             </thead>
             <tbody>
-              {productData.map((product) => (
+              {paginatedProducts.map((product, idx) => (
                 <tr
                   key={product.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <td className="py-4 px-4">
                     <div className="font-medium text-blue-600">
                       {product.insurance_category}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="text-sm text-gray-900">
+                      {product.insurance_company_name}
                     </div>
                   </td>
                   <td className="py-4 px-4">
@@ -167,6 +192,20 @@ export function PoliciesTable() {
               ))}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1); // reset page to 1
+                }}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
       {/* {selectedProduct && (

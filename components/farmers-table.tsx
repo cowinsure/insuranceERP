@@ -7,6 +7,7 @@ import { Eye, Mail, Phone, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
+import Pagination from "./utils/Pagination";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -27,10 +28,26 @@ export function FarmersTable() {
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]); // new line
   const { get, post, loading, error } = useApi();
 
+  // =============================
+  // Pagination functions
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+  const totalPages =
+    pageSize === "All" ? 1 : Math.ceil(farmers.length / (pageSize as number));
+  const paginatedFarmers =
+    pageSize === "All"
+      ? farmers
+      : farmers.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await get("ims/farmer-service/", {});
+        const response = await get("ims/farmer-service/", {
+          params: { start_record: 1 },
+        });
         console.log("Response from API:", response.status);
 
         if (response.status === "success") {
@@ -116,10 +133,11 @@ export function FarmersTable() {
                 </tr>
               </thead>
               <tbody>
-                {farmers.map((farmer) => (
+                {paginatedFarmers.map((farmer, idx) => (
                   <tr
                     key={farmer.user_id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                    style={{ animationDelay: `${idx * 100}ms` }}
                   >
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
@@ -200,6 +218,20 @@ export function FarmersTable() {
                 ))}
               </tbody>
             </table>
+            {totalPages > 1 && (
+              <div className="">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1); // reset page to 1
+                  }}
+                />
+              </div>
+            )}
             {/* {selectedFarmer && (
               <GenericModal closeModal={() => setSelectedFarmer(null)}>
                 <div className="w-full rounded-xl">

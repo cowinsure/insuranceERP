@@ -1,8 +1,7 @@
-"use client"
+"use client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ProductStats } from "@/components/policy-stats";
 import { ProductFilters } from "@/components/policy-filters";
-import { PoliciesTable } from "@/components/policies-table";
 import {
   SidebarInset,
   SidebarProvider,
@@ -14,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GenericModal from "@/components/ui/GenericModal";
 import { useState } from "react";
+import { ProductsTable } from "@/components/products-table";
 
 export default function PoliciesPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,11 +54,12 @@ export default function PoliciesPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             Product Management
           </h1>
-          <p className="text-gray-600">
-            Create and manage insurance products
-          </p>
+          <p className="text-gray-600">Create and manage insurance products</p>
         </div>
-        <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={onOpen}>
+        <Button
+          className="bg-blue-500 hover:bg-blue-600 text-white"
+          onClick={onOpen}
+        >
           <Plus className="w-4 h-4" />
           Create Product
         </Button>
@@ -67,7 +68,7 @@ export default function PoliciesPage() {
       <div className="animate__animated animate__fadeIn flex flex-col gap-7">
         {/* <ProductStats /> */}
         <ProductFilters />
-        <PoliciesTable />
+        <ProductsTable />
       </div>
       {isOpen && (
         <GenericModal closeModal={onClose}>

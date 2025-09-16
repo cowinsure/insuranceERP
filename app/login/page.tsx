@@ -29,53 +29,62 @@ const Login: React.FC<LoginProps> = ({
   redirectUrl = "/profile",
 }) => {
   const router = useRouter();
+  const { login } = useAuth();
+  const { post } = useApi();
 
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
 
-  const { get, post, loading, error } = useApi();
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
 
+  const [phoneError, setPhoneError] = useState<string | boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | boolean>(false);
 
-  //   useEffect(() => {
-  //     AOS.init({ duration: 800, once: true });
-  //   }, []);
+  // useEffect(() => {
+  //   AOS.init({ duration: 800, once: true });
+  // }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const phoneInput = (document.getElementById("phone") as HTMLInputElement)
-      .value;
-    const passwordInput = (
-      document.getElementById("password") as HTMLInputElement
-    ).value;
+    // Reset errors before validation
+    setPhoneError(false);
+    setPasswordError(false);
 
-    if (!/^[0-9]{11}$/.test(phoneInput)) {
-      toast.error("Please enter a valid 11-digit phone number.");
-      return;
+    let valid = true;
+
+    if (!phone) {
+      setPhoneError("Phone number cannot be empty.");
+      valid = false;
+    } else if (!/^[0-9]{11}$/.test(phone)) {
+      setPhoneError("Please enter a valid 11-digit phone number.");
+      valid = false;
     }
 
-    if (passwordInput.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
-      return;
+    if (!password) {
+      setPasswordError("Password cannot be empty.");
+      valid = false;
     }
 
-      try {
+    if (!valid) return;
+
+    try {
       const response = await post("v1/auth/public/login/", {
-        mobile_number: phoneInput,
-        password: passwordInput,
+        mobile_number: phone,
+        password,
       });
-      console.log("Login response:", response);
-      
+
       const data = await response.data;
       const { role: userId, access_token: accessToken } = data;
 
-      login(userId, phoneInput, accessToken);
-      toast.success("Login successful!"); // ✅ sonner success
-      router.push("/dashboard");
+      login(userId, phone, accessToken);
+      toast.success("Login successful!");
+      router.push(redirectUrl);
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Login failed. Please check your credentials and try again."); // ✅
-      return;
+      toast.error("Login failed. Please check your credentials and try again.");
+      setPhoneError(true);
+      setPasswordError(true);
     }
   };
 
@@ -124,55 +133,85 @@ const Login: React.FC<LoginProps> = ({
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="relative" data-aos="fade-in" data-aos-delay="100">
-              <label
-                htmlFor="phone"
-                className="block text-lg font-bold text-blue-500"
-              >
-                Phone
-              </label>
-              <span className="absolute inset-y-0 top-8 left-0 pl-3 flex items-center pointer-events-none text-blue-800">
-                <FaMobile />
-              </span>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                pattern="[0-9]{11}"
-                required
-                onInput={(e) => {
-                  const input = e.target as HTMLInputElement;
-                  input.value = input.value.replace(/[^0-9]/g, "");
-                }}
-                className="mt-1 w-full px-9 py-2 border-2 border-[#0E5829] rounded-md bg-white font-semibold text-base shadow-md"
-                placeholder="Enter phone number"
-              />
+            <div>
+              <div className="relative" data-aos="fade-in" data-aos-delay="100">
+                <label
+                  htmlFor="phone"
+                  className="block text-lg font-bold text-blue-500"
+                >
+                  Phone
+                </label>
+                <span className="absolute inset-y-0 top-8 left-0 pl-3 flex items-center pointer-events-none text-blue-800">
+                  <FaMobile />
+                </span>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    setPhone(val);
+                    if (val.trim() !== "") setPhoneError(false);
+                  }}
+                  className={`mt-1 w-full px-9 py-2 border-2 rounded-md font-semibold text-base shadow-md ${
+                    phoneError
+                      ? "border-red-600 bg-red-50"
+                      : "border-[#0E5829] bg-white"
+                  }`}
+                  placeholder="Enter phone number"
+                />
+              </div>
+              {phoneError && (
+                <p className="text-red-600 text-sm mt-1">
+                  {typeof phoneError === "string"
+                    ? phoneError
+                    : "Invalid phone number."}
+                </p>
+              )}
             </div>
 
-            <div className="relative" data-aos="fade-in" data-aos-delay="200">
-              <label
-                htmlFor="password"
-                className="block text-lg font-bold text-blue-500"
-              >
-                Password
-              </label>
-              <span className="absolute inset-y-0 top-8 left-0 pl-3 flex items-center pointer-events-none text-blue-800">
-                <FaUnlockAlt />
-              </span>
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                required
-                className="mt-1 w-full px-9 py-2 border-2 border-[#0E5829] rounded-md bg-white font-semibold text-base shadow-md"
-                placeholder="Enter your password"
-              />
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-11.5 right-3 text-blue-700 cursor-pointer"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+            <div>
+              <div className="relative" data-aos="fade-in" data-aos-delay="200">
+                <label
+                  htmlFor="password"
+                  className="block text-lg font-bold text-blue-500"
+                >
+                  Password
+                </label>
+                <span className="absolute inset-y-0 top-8 left-0 pl-3 flex items-center pointer-events-none text-blue-800">
+                  <FaUnlockAlt />
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (e.target.value.trim() !== "") setPasswordError(false);
+                  }}
+                  className={`mt-1 w-full px-9 py-2 border-2 rounded-md font-semibold text-base shadow-md ${
+                    passwordError
+                      ? "border-red-600 bg-red-50"
+                      : "border-[#0E5829] bg-white"
+                  }`}
+                  placeholder="Enter your password"
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute top-11.5 right-3 text-blue-700 cursor-pointer"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              {passwordError && (
+                <p className="text-red-600 text-sm mt-1">
+                  {typeof passwordError === "string"
+                    ? passwordError
+                    : "Invalid password."}
+                </p>
+              )}
             </div>
 
             <button

@@ -26,7 +26,7 @@ import {
 import { FaPercentage } from "react-icons/fa";
 import Image from "next/image";
 import { formatDate, formatMoney } from "../claims-management-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import placeholder from "/public/document_placeholder.jpg";
 import { Label } from "./label";
 import {
@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "./select";
 import InputField from "./InputField";
+import useApi from "@/hooks/use_api";
 
 interface ModalProps {
   isOpen?: boolean;
@@ -45,11 +46,36 @@ interface ModalProps {
 }
 
 export default function ApplicationDetailsModal({ application }: ModalProps) {
+  const { get } = useApi();
+
   const [imgSrc, setImgSrc] = useState(application.special_mark || placeholder);
-  console.log(imgSrc);
-  console.log(
-    `${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`
-  );
+  const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [formData, setFormData] = useState<FormData>();
+  // console.log(imgSrc);
+  // console.log(
+  //   `${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`
+  // );
+
+  console.log(application);
+
+  useEffect(() => {
+    const fetchInsuranceStatus = async () => {
+      try {
+        const response = await get("ims/insurance-status-service/", {});
+        console.log("Response from API:", response.status);
+
+        if (response.status === "success") {
+          setInsuranceStatus(response.data);
+        }
+        console.log("Fetching applications from API..." + response.data);
+      } catch (error) {
+        console.log("Error fetching applications from API...", error);
+      }
+    };
+
+    fetchInsuranceStatus();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
@@ -465,24 +491,25 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
                   Update Application Status
                 </Label>
                 <Select
-                  value={""}
+                  value={selectedStatus}
                   onValueChange={(value) => {
-                    // setSelectedStatus(value);
+                    setSelectedStatus(value);
                     // setFormData({ ...formData, current_status_id: value });
                   }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select new status..." />
                   </SelectTrigger>
+
                   <SelectContent>
-                    {/* {insuranceStatus?.map((option: InsuranceStatus) => (
-                        <SelectItem
-                          key={option.insurance_status_id}
-                          value={option.insurance_status_id.toString()}
-                        >
-                          <span>{option.status_name}</span>
-                        </SelectItem>
-                      ))} */}
+                    {insuranceStatus?.map((option: InsuranceStatus) => (
+                      <SelectItem
+                        key={option.insurance_status_id}
+                        value={option.insurance_status_id.toString()}
+                      >
+                        <span>{option.status_name}</span>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

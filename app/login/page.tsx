@@ -26,7 +26,7 @@ const Login: React.FC<LoginProps> = ({
   logoSrc,
   backgroundImages,
   apiUrl,
-  redirectUrl = "/profile",
+  redirectUrl = "/dashboard",
 }) => {
   const router = useRouter();
   const { login } = useAuth();

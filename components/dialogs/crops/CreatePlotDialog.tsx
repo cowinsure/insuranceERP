@@ -158,7 +158,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       
 
       // Make the API call
-      const response = await fetch("https://cropploting.dev.insurecow.com/landmap/generate/landmap/generate", {
+      const response = await fetch("https://cropploting.dev.insurecow.com/landmap/generate/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

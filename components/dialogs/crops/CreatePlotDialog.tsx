@@ -53,6 +53,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [watchId, setWatchId] = useState<number | null>(null);
   const [apiPayload, setApiPayload] = useState<any>(null);
   const { toast } = useToast()
+  const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -144,7 +145,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
     }
 
     setIsGenerating(true)
-
+ setApiErrorMessage(null);
     try {
       // Prepare the request body with land area coordinates
       const requestBody = {
@@ -168,7 +169,22 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+         let errorMsg = "Failed to generate plot. Please try again.";
+        let errorJson: any = null;
+        try {
+          errorJson = await response.json();
+          if (errorJson?.message) {
+            errorMsg = errorJson.message;
+          }
+        } catch {}
+        setApiErrorMessage(errorMsg);
+        toast({
+          title: "Generation failed",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        setIsGenerating(false);
+        return;
       }
 
       const data = await response.json();
@@ -263,7 +279,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-h-[95vh] overflow-y-auto">
+      <DialogContent className="w-screen max-w-none max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
@@ -606,6 +622,18 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                   </GoogleMap>
                 </CardContent>
               </Card>
+            </div>
+          )}
+          {/* API error message */}
+          {apiErrorMessage && (
+            <div className="mt-4 text-center text-sm text-red-600">
+              {apiErrorMessage}
+            </div>
+          )}
+          {/* Area message at bottom */}
+          {plotData?.area && (
+            <div className="mt-2 text-center text-sm text-blue-700 font-semibold">
+              Area: {plotData.area}
             </div>
           )}
         </div>

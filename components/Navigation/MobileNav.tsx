@@ -3,6 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PiFlowerTulipFill } from "react-icons/pi";
+
 import {
   LayoutDashboard,
   Users,
@@ -23,6 +25,12 @@ const navItems = [
     url: "/farmers",
     icon: Users,
   },
+     {
+      title: "Crops",
+      url: "/crop",
+      icon: PiFlowerTulipFill,
+     
+    },
   {
     title: "Products",
     url: "/products",

@@ -70,7 +70,7 @@ export default function CropPage() {
       })) ?? [];
     const area =
       typeof apiPayload?.area === "number"
-        ? `${apiPayload.area.toFixed(2)} acres`
+        ? `${apiPayload.area.toFixed(2)} meters²`
         : "N/A";
     const imageUrl = apiPayload?.data?.image ?? "";
     const newPlot: Plot = {

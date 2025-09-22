@@ -27,6 +27,12 @@ const mainMenuItems = [
     icon: Users,
     isActive: false,
   },
+   {
+    title: "Crops",
+    url: "/crop",
+    icon: Users,
+    isActive: false,
+  },
   {
     title: "Policies",
     url: "/policies",

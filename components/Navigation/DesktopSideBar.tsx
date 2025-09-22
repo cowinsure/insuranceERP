@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PiFlowerTulipFill } from "react-icons/pi";
 import {
   MdOutlineSpaceDashboard,
+
   MdSpaceDashboard,
   MdOutlineGroups,
   MdGroups,
@@ -39,6 +41,12 @@ const mainMenuItems = [
     url: "/farmers",
     icon: MdOutlineGroups,
     activeIcon: MdGroups,
+  },
+    {
+    title: "Crops",
+    url: "/crop",
+    icon: PiFlowerTulipFill,
+    activeIcon: PiFlowerTulipFill,
   },
   {
     title: "Products",

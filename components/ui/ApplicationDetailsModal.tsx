@@ -38,27 +38,35 @@ import {
 } from "./select";
 import InputField from "./InputField";
 import useApi from "@/hooks/use_api";
+import { Button } from "./button";
+import { CheckCircle } from "lucide-react";
+import { toast, Toaster } from "sonner";
 
 interface ModalProps {
   isOpen?: boolean;
   onClose?: () => void;
   application: LivestockInsurance;
+  onSuccess?: () => void;
 }
 
-export default function ApplicationDetailsModal({ application }: ModalProps) {
-  const { get } = useApi();
+interface FormData {
+  current_status_id?: number;
+  remarks?: string;
+}
+
+export default function ApplicationDetailsModal({
+  application,
+  onSuccess,
+}: ModalProps) {
+  const { get, put } = useApi();
 
   const [imgSrc, setImgSrc] = useState(application.special_mark || placeholder);
   const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+
   const [formData, setFormData] = useState<FormData>();
-  // console.log(imgSrc);
-  // console.log(
-  //   `${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${application.special_mark}`
-  // );
 
-  console.log(application);
-
+  // Fetching Insurance application status
   useEffect(() => {
     const fetchInsuranceStatus = async () => {
       try {
@@ -68,7 +76,7 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
         if (response.status === "success") {
           setInsuranceStatus(response.data);
         }
-        console.log("Fetching applications from API..." + response.data);
+        // console.log("Fetching applications from API..." + response.data);
       } catch (error) {
         console.log("Error fetching applications from API...", error);
       }
@@ -76,6 +84,36 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
 
     fetchInsuranceStatus();
   }, []);
+
+  // 🟢 Handle update
+  const handleStatusUpdate = async () => {
+    if (!selectedStatus) {
+      toast.error("Please select a status.");
+      return;
+    }
+
+    const payload = {
+      current_status_id: parseInt(selectedStatus),
+      remarks: formData?.remarks,
+      id: application.id,
+    };
+
+    try {
+      const response = await put(
+        "ims/insurance-status-history-service/",
+        payload
+      );
+      if (response.status === "success") {
+        toast.success("Application status updated successfully!");
+        if (onSuccess) return onSuccess();
+      } else {
+        toast.error("Failed to update status.");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("An error occurred while updating status.");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
@@ -479,10 +517,10 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
             <ModalHeader
               icon={<BsTextIndentRight className="text-yellow-600" />}
-              header="Remarks"
+              header="Application Review"
             />
 
-            <div className="space-y-4  pt-4">
+            <div className="space-y-4 pt-4">
               <div className="space-y-3">
                 <Label
                   htmlFor="status"
@@ -494,7 +532,6 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
                   value={selectedStatus}
                   onValueChange={(value) => {
                     setSelectedStatus(value);
-                    // setFormData({ ...formData, current_status_id: value });
                   }}
                 >
                   <SelectTrigger className="w-full">
@@ -513,39 +550,32 @@ export default function ApplicationDetailsModal({ application }: ModalProps) {
                   </SelectContent>
                 </Select>
               </div>
-              {/* {selectedStatus && (
-                  <div className="p-3 bg-gray-50 rounded-lg border">
-                    <p className="text-sm text-gray-600">
-                      Status will be updated to:{" "}
-                      <span
-                        className={`font-medium ${getStatusColor(
-                          selectedStatus
-                        )}`}
-                      >
-                        {
-                          insuranceStatus.find(
-                            (opt: InsuranceStatus) =>
-                              opt.insurance_status_id.toString() ===
-                              selectedStatus
-                          )?.status_name
-                        }
-                      </span>
-                    </p>
-                  </div>
-                )} */}
+
               <InputField
                 id="remarks"
                 label="Remarks"
                 name="remarks"
-                onChange={(e) => console.log(e)}
-                value={""}
                 placeholder="Write something"
                 type="text"
+                value={formData?.remarks ?? ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, remarks: e.target.value }))
+                }
               />
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleStatusUpdate}
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle className="w-4 h-4" /> Update Status
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <Toaster richColors position="top-center" />
     </div>
   );
 }

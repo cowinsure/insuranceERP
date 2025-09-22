@@ -202,34 +202,34 @@ export function ApplicationsTable() {
   // Fetch Data on Mount
   // =============================
 
+  const fetchData = async () => {
+    try {
+      const response = await allapplication(
+        "ims/insurance-application-service/",
+        {
+          params: { start_record: 1 },
+        }
+      );
+      if (response.status === "success") {
+        setInsuranceApplications(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    }
+  };
+
+  const fetchInsuranceStatus = async () => {
+    try {
+      const response = await fetchStatus("ims/insurance-status-service/", {});
+      if (response.status === "success") {
+        setInsuranceStatus(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching status:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await allapplication(
-          "ims/insurance-application-service/",
-          {
-            params: { start_record: 1 },
-          }
-        );
-        if (response.status === "success") {
-          setInsuranceApplications(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching applications:", error);
-      }
-    };
-
-    const fetchInsuranceStatus = async () => {
-      try {
-        const response = await fetchStatus("ims/insurance-status-service/", {});
-        if (response.status === "success") {
-          setInsuranceStatus(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching status:", error);
-      }
-    };
-
     fetchData();
     fetchInsuranceStatus();
   }, []);
@@ -238,6 +238,10 @@ export function ApplicationsTable() {
   useEffect(() => {
     setCurrentPage(1);
   }, [insuranceApplications]);
+
+  const refreshTable = () => {
+    fetchData();
+  };
 
   return (
     <Card className="border border-gray-200 py-6">
@@ -587,6 +591,7 @@ export function ApplicationsTable() {
         >
           <ApplicationDetailsModal
             application={selectedApplicationDetailsDialog}
+            onSuccess={refreshTable}
           />
         </GenericModal>
       )}

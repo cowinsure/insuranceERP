@@ -67,7 +67,7 @@ export default function PoliciesPage() {
 
       <div className="animate__animated animate__fadeIn flex flex-col gap-7">
         {/* <ProductStats /> */}
-        <ProductFilters />
+        {/* <ProductFilters /> */}
         <ProductsTable />
       </div>
       {isOpen && (

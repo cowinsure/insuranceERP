@@ -20,6 +20,7 @@ import TransactionDetailsDialog from "./dialogs/applications/TransactionDetailsD
 import ApplicationDetailsModal from "./ui/ApplicationDetailsModal";
 import { formatDate } from "./claims-management-table";
 import Pagination from "./utils/Pagination";
+import { SearchFilter } from "./utils/SearchFilter"; // ✅ integrated search component
 
 const applications = [
   {
@@ -122,6 +123,9 @@ export function ApplicationsTable() {
   const [insuranceApplications, setInsuranceApplications] = useState<
     LivestockInsurance[]
   >([]);
+  const [filteredApplications, setFilteredApplications] = useState<
+    LivestockInsurance[]
+  >([]); // ✅ for search filter
 
   const [insuranceStatus, setInsuranceStatus] = useState<InsuranceStatus[]>([]);
 
@@ -137,12 +141,12 @@ export function ApplicationsTable() {
   const totalPages =
     pageSize === "All"
       ? 1
-      : Math.ceil(insuranceApplications.length / (pageSize as number));
+      : Math.ceil(filteredApplications.length / (pageSize as number));
 
   const paginatedApplications =
     pageSize === "All"
-      ? insuranceApplications
-      : insuranceApplications.slice(
+      ? filteredApplications
+      : filteredApplications.slice(
           (currentPage - 1) * (pageSize as number),
           currentPage * (pageSize as number)
         );
@@ -180,24 +184,6 @@ export function ApplicationsTable() {
     }
   };
 
-  // const handleStatusChange = async () => {
-  //   console.log("Form Data to be sent:", formData);
-  //   try {
-  //     const response = await postData("ims/insurance-status-history-service/", {
-  //       id: assetInsuranceId,
-  //       remarks: formData.remarks,
-  //       current_status_id: selectedStatus
-  //     });
-  //     console.log("Response from API:", JSON.stringify(response));
-  //     if (response.status === "success") {
-  //       onClose();
-  //       toast.success("Status updated successfully!");
-  //     }
-  //   } catch (error) {
-  //     console.log("Error Updating Status applications from API...", error);
-  //   }
-  // };
-
   // =============================
   // Fetch Data on Mount
   // =============================
@@ -212,6 +198,7 @@ export function ApplicationsTable() {
       );
       if (response.status === "success") {
         setInsuranceApplications(response.data);
+        setFilteredApplications(response.data); // ✅ also set filtered data initially
       }
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -237,64 +224,79 @@ export function ApplicationsTable() {
   // Reset page if data changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [insuranceApplications]);
+  }, [filteredApplications]);
 
   const refreshTable = () => {
     fetchData();
   };
 
   return (
-    <Card className="border border-gray-200 py-6">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">
-          Insurance Applications
-        </CardTitle>
-        <p className="text-sm text-gray-600">
-          {insuranceApplications.length} applications found
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Application ID
-                </th>
-                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+    <>
+      <div className="">
+        <SearchFilter
+          placeholder="Search by Insurance No., Name, Color or Type"
+          data={insuranceApplications}
+          setFilteredData={setFilteredApplications}
+          searchKeys={[
+            "insurance_number",
+            "name",
+            "color",
+            "insurance_type_name",
+          ]}
+        />
+      </div>
+
+      <Card className="border border-gray-200 py-6">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Insurance Applications
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            {filteredApplications.length} applications found
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Application ID
+                  </th>
+                  {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Farmer Details
                 </th> */}
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Asset Info
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Coverage Requested
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Date Submitted
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="overflow-hidden">
-              {paginatedApplications.map((application, idx) => (
-                <tr
-                  key={application.id}
-                  className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <td className="py-4 px-4">
-                    <span className="font-medium text-blue-600">
-                      {application.insurance_number}
-                    </span>
-                  </td>
-                  {/* <td className="py-4 px-4"> */}
-                  {/* <div>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Asset Info
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Coverage Requested
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Status
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Date Submitted
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="overflow-hidden">
+                {paginatedApplications.map((application, idx) => (
+                  <tr
+                    key={application.id}
+                    className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <td className="py-4 px-4">
+                      <span className="font-medium text-blue-600">
+                        {application.insurance_number}
+                      </span>
+                    </td>
+                    {/* <td className="py-4 px-4"> */}
+                    {/* <div>
                       <div className="text-sm font-medium text-gray-900">
                         {application.}
                       </div>
@@ -305,97 +307,97 @@ export function ApplicationsTable() {
                         </span>
                       </div>
                     </div> */}
-                  {/* </td> */}
-                  <td className="py-4 px-4">
-                    <div>
-                      <div className="text-sm text-gray-900">
-                        {application.name}-{application.color}
+                    {/* </td> */}
+                    <td className="py-4 px-4">
+                      <div>
+                        <div className="text-sm text-gray-900">
+                          {application.name}-{application.color}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm font-medium text-gray-900">
-                      {application.insurance_type_name}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <Badge
-                      className={getStatusBadge(application.insurance_status)}
-                    >
-                      {application.insurance_status === "active"
-                        ? "Active"
-                        : application.insurance_status === "pending"
-                        ? "Pending"
-                        : "Under Review"}
-                    </Badge>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm text-gray-600">
-                      {formatDate(application.created_at)}
-                      {/* {application.created_at} */}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedapplicationView(application);
-                        setSelectedApplicationDetailsDialog(application);
-                      }}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setOpen(true);
-                        setSelectedapplications(application.id.toString());
-                        setSelectedapplicationsStatus(
-                          application.insurance_status
-                        );
-                      }}
-                    >
-                      <Banknote className="w-4 h-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {totalPages > 1 && (
-            <div className="">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={pageSize}
-                onPageSizeChange={(size) => {
-                  setPageSize(size);
-                  setCurrentPage(1); // reset page to 1
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </CardContent>
-      {selectedApplicationDialog && (
-        <GenericModal closeModal={() => setSelectedApplication(null)}>
-          <div className="w-full rounded-xl">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Application Review - {selectedApplicationDialog.asset_id}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Review application details and supporting documents
-                </p>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm font-medium text-gray-900">
+                        {application.insurance_type_name}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <Badge
+                        className={getStatusBadge(application.insurance_status)}
+                      >
+                        {application.insurance_status === "active"
+                          ? "Active"
+                          : application.insurance_status === "pending"
+                          ? "Pending"
+                          : "Under Review"}
+                      </Badge>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-600">
+                        {formatDate(application.created_at)}
+                        {/* {application.created_at} */}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedapplicationView(application);
+                          setSelectedApplicationDetailsDialog(application);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setOpen(true);
+                          setSelectedapplications(application.id.toString());
+                          setSelectedapplicationsStatus(
+                            application.insurance_status
+                          );
+                        }}
+                      >
+                        <Banknote className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {totalPages > 1 && (
+              <div className="">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1); // reset page to 1
+                  }}
+                />
               </div>
-            </div>
+            )}
+          </div>
+        </CardContent>
+        {selectedApplicationDialog && (
+          <GenericModal closeModal={() => setSelectedApplication(null)}>
+            <div className="w-full rounded-xl">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h1 className="text-xl font-semibold text-gray-900">
+                    Application Review - {selectedApplicationDialog.asset_id}
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    Review application details and supporting documents
+                  </p>
+                </div>
+              </div>
 
-            <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
-              {/* <div className="border rounded-md p-4">
+              <div className="max-h-[65vh] pr-2 space-y-6 overflow-auto">
+                {/* <div className="border rounded-md p-4">
                 <p className="font-medium text-gray-800 mb-2">
                   👨‍🌾 Farmer Information
                 </p>
@@ -433,179 +435,183 @@ export function ApplicationsTable() {
                 </div>
               </div> */}
 
-              <div className="border rounded-md p-4">
-                <p className="font-medium text-gray-800 mb-2">
-                  📋 Asset Details
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">Asset Type</p>
-                    <p className="text-gray-900">
-                      {selectedApplicationDialog.asset_type}
-                    </p>
-                  </div>
-                  {/* <div>
+                <div className="border rounded-md p-4">
+                  <p className="font-medium text-gray-800 mb-2">
+                    📋 Asset Details
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Asset Type</p>
+                      <p className="text-gray-900">
+                        {selectedApplicationDialog.asset_type}
+                      </p>
+                    </div>
+                    {/* <div>
                     <p className="text-gray-500">Area</p>
                     <p className="text-gray-900">
                       {selectedapplication.acreage}
                     </p>
                   </div> */}
-                  <div>
-                    <p className="text-gray-500">Requested Coverage</p>
-                    <p className="text-gray-900">
-                      {selectedApplicationDialog.insurance_type_name}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Application Date</p>
-                    <p className="text-gray-900">
-                      {selectedApplicationDialog.insurance_start_date}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-md p-4">
-                <p className="font-medium text-gray-800 mb-2">
-                  📎 Supporting Documents
-                </p>
-                <div className="space-y-3">
-                  {["land_records.pdf", "soil_test.pdf", "nid_card.pdf"].map(
-                    (doc, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3 bg-gray-50"
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-blue-500" />
-                          <span className="text-sm text-gray-800">{doc}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-sm px-4"
-                          >
-                            Preview
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-sm px-4"
-                          >
-                            Download
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              <div className="border rounded-md p-4">
-                <p className="font-medium text-gray-800 mb-2">
-                  📝 Review Comments
-                </p>
-                <textarea
-                  className="w-full border rounded-md p-2 text-sm min-h-[100px]"
-                  placeholder="Add your review comments here..."
-                />
-              </div>
-              <div className="border rounded-md p-4">
-                {/* Status Update Section */}
-                <div className="space-y-4  pt-4">
-                  <div className="space-y-3">
-                    <Label
-                      htmlFor="status"
-                      className="text-sm font-medium text-gray-900"
-                    >
-                      Update Application Status
-                    </Label>
-                    <Select
-                      value={selectedStatus}
-                      onValueChange={(value) => {
-                        setSelectedStatus(value);
-                        setFormData({ ...formData, current_status_id: value });
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select new status..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {insuranceStatus.map((option) => (
-                          <SelectItem
-                            key={option.insurance_status_id}
-                            value={option.insurance_status_id.toString()}
-                          >
-                            <span>{option.status_name}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {selectedStatus && (
-                    <div className="p-3 bg-gray-50 rounded-lg border">
-                      <p className="text-sm text-gray-600">
-                        Status will be updated to:{" "}
-                        <span
-                          className={`font-medium ${getStatusColor(
-                            selectedStatus
-                          )}`}
-                        >
-                          {
-                            insuranceStatus.find(
-                              (opt) =>
-                                opt.insurance_status_id.toString() ===
-                                selectedStatus
-                            )?.status_name
-                          }
-                        </span>
+                    <div>
+                      <p className="text-gray-500">Requested Coverage</p>
+                      <p className="text-gray-900">
+                        {selectedApplicationDialog.insurance_type_name}
                       </p>
                     </div>
-                  )}
+                    <div>
+                      <p className="text-gray-500">Application Date</p>
+                      <p className="text-gray-900">
+                        {selectedApplicationDialog.insurance_start_date}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-md p-4">
+                  <p className="font-medium text-gray-800 mb-2">
+                    📎 Supporting Documents
+                  </p>
+                  <div className="space-y-3">
+                    {["land_records.pdf", "soil_test.pdf", "nid_card.pdf"].map(
+                      (doc, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3 bg-gray-50"
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-500" />
+                            <span className="text-sm text-gray-800">{doc}</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-sm px-4"
+                            >
+                              Preview
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-sm px-4"
+                            >
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                <div className="border rounded-md p-4">
+                  <p className="font-medium text-gray-800 mb-2">
+                    📝 Review Comments
+                  </p>
+                  <textarea
+                    className="w-full border rounded-md p-2 text-sm min-h-[100px]"
+                    placeholder="Add your review comments here..."
+                  />
+                </div>
+                <div className="border rounded-md p-4">
+                  {/* Status Update Section */}
+                  <div className="space-y-4  pt-4">
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="status"
+                        className="text-sm font-medium text-gray-900"
+                      >
+                        Update Application Status
+                      </Label>
+                      <Select
+                        value={selectedStatus}
+                        onValueChange={(value) => {
+                          setSelectedStatus(value);
+                          setFormData({
+                            ...formData,
+                            current_status_id: value,
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select new status..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {insuranceStatus.map((option) => (
+                            <SelectItem
+                              key={option.insurance_status_id}
+                              value={option.insurance_status_id.toString()}
+                            >
+                              <span>{option.status_name}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {selectedStatus && (
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm text-gray-600">
+                          Status will be updated to:{" "}
+                          <span
+                            className={`font-medium ${getStatusColor(
+                              selectedStatus
+                            )}`}
+                          >
+                            {
+                              insuranceStatus.find(
+                                (opt) =>
+                                  opt.insurance_status_id.toString() ===
+                                  selectedStatus
+                              )?.status_name
+                            }
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+              <div className="flex justify-between gap-2 mt-4 flex-wrap">
+                <Button
+                  onClick={() => {}}
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" /> Update Status
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedApplication(null)}
+                  className="w-full sm:w-auto border-red-600 text-red-600 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-2" /> Cancel
+                </Button>
+              </div>
             </div>
-            <div className="flex justify-between gap-2 mt-4 flex-wrap">
-              <Button
-                onClick={() => {}}
-                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
-              >
-                <CheckCircle className="w-4 h-4 mr-2" /> Update Status
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedApplication(null)}
-                className="w-full sm:w-auto border-red-600 text-red-600 hover:bg-red-50"
-              >
-                <XCircle className="w-4 h-4 mr-2" /> Cancel
-              </Button>
-            </div>
-          </div>
-        </GenericModal>
-      )}
-      {selectedApplicationDetailsDialog && (
-        <GenericModal
-          closeModal={() => setSelectedApplicationDetailsDialog(null)}
-          title="Application Details"
-        >
-          <ApplicationDetailsModal
-            application={selectedApplicationDetailsDialog}
-            onSuccess={refreshTable}
-          />
-        </GenericModal>
-      )}
+          </GenericModal>
+        )}
+        {selectedApplicationDetailsDialog && (
+          <GenericModal
+            closeModal={() => setSelectedApplicationDetailsDialog(null)}
+            title="Application Details"
+          >
+            <ApplicationDetailsModal
+              application={selectedApplicationDetailsDialog}
+              onSuccess={refreshTable}
+            />
+          </GenericModal>
+        )}
 
-      {open && (
-        <GenericModal closeModal={() => setOpen(false)}>
-          <TransactionDetailsDialog
-            isOpen={open}
-            onClose={() => setOpen(false)}
-            assetInsuranceId={selectedapplications?.toString()}
-            applicationStatus={selectedapplicationsStatus}
-          />
-        </GenericModal>
-      )}
-    </Card>
+        {open && (
+          <GenericModal closeModal={() => setOpen(false)}>
+            <TransactionDetailsDialog
+              isOpen={open}
+              onClose={() => setOpen(false)}
+              assetInsuranceId={selectedapplications?.toString()}
+              applicationStatus={selectedapplicationsStatus}
+            />
+          </GenericModal>
+        )}
+      </Card>
+    </>
   );
 }

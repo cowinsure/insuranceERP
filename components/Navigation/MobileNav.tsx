@@ -25,12 +25,11 @@ const navItems = [
     url: "/farmers",
     icon: Users,
   },
-     {
-      title: "Crops",
-      url: "/crop",
-      icon: PiFlowerTulipFill,
-     
-    },
+  {
+    title: "Crops",
+    url: "/crop",
+    icon: PiFlowerTulipFill,
+  },
   {
     title: "Products",
     url: "/products",
@@ -64,10 +63,16 @@ const MobileNav = () => {
           const Icon = item.icon;
 
           return (
-            <Link key={item.url} href={item.url} className="flex flex-col items-center text-xs group transition-all">
+            <Link
+              key={item.url}
+              href={item.url}
+              className="flex flex-col items-center text-xs group transition-all"
+            >
               <div
                 className={`flex flex-col items-center justify-center px-3 py-1 rounded-md transition-all duration-200 ${
-                  isActive ? "text-green-600" : "text-gray-500"
+                  isActive
+                    ? "bg-blue-950 text-blue-300 drop-shadow-lg font-bold"
+                    : "text-gray-500"
                 }`}
               >
                 <Icon

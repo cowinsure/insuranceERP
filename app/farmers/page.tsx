@@ -28,7 +28,10 @@ export default function FarmersPage() {
           </p>
         </div>
         <div className="flex">
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white"      onClick={onOpen}>
+          <Button
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+            onClick={onOpen}
+          >
             <Plus className="w-4 h-4" />
             Add Farmer
           </Button>
@@ -36,7 +39,7 @@ export default function FarmersPage() {
       </div>
 
       <div className="animate__animated animate__fadeIn">
-        <FarmersFilters />
+        {/* <FarmersFilters /> */}
       </div>
       <div className="animate__animated animate__fadeIn">
         <FarmersTable />
@@ -62,8 +65,8 @@ export default function FarmersPage() {
               <span className="font-bold text-gray-800">
                 Premium subscription
               </span>
-              . Enjoy exclusive features, faster performance, and tools
-              designed to help you get the most out of your usage.
+              . Enjoy exclusive features, faster performance, and tools designed
+              to help you get the most out of your usage.
             </p>
           </div>
         </GenericModal>

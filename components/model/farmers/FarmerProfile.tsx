@@ -7,4 +7,5 @@ interface FarmerProfile {
   join_date: string; // ISO date string
   farmer_name: string;
   mobile_number: string;
+  status: string;
 }

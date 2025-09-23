@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 import Pagination from "./utils/Pagination";
+import { SearchFilter } from "./utils/SearchFilter";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -25,19 +26,26 @@ export function FarmersTable() {
     (typeof farmers)[0] | null
   >(null);
 
-  const [farmers, setFarmers] = useState<FarmerProfile[]>([]); // new line
+  const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
+  const [filteredFarmers, setFilteredFarmers] = useState<FarmerProfile[]>([]);
   const { get, post, loading, error } = useApi();
 
   // =============================
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number | "All">(6);
+  const [pageSize, setPageSize] = useState<number | "All">(10);
+
+  const dataToPaginate = filteredFarmers.length > 0 ? filteredFarmers : farmers;
+
   const totalPages =
-    pageSize === "All" ? 1 : Math.ceil(farmers.length / (pageSize as number));
+    pageSize === "All"
+      ? 1
+      : Math.ceil(dataToPaginate.length / (pageSize as number));
+
   const paginatedFarmers =
     pageSize === "All"
-      ? farmers
-      : farmers.slice(
+      ? dataToPaginate
+      : dataToPaginate.slice(
           (currentPage - 1) * (pageSize as number),
           currentPage * (pageSize as number)
         );
@@ -45,13 +53,14 @@ export function FarmersTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await get("ims/farmer-service/", {
+        const response = await get(`ims/farmer-service`, {
           params: { start_record: 1 },
         });
         console.log("Response from API:", response.status);
 
         if (response.status === "success") {
           setFarmers(response.data);
+          setFilteredFarmers(response.data);
         }
         console.log(response.data.length + " farmers found");
 
@@ -76,31 +85,21 @@ export function FarmersTable() {
 
   return (
     <>
+      <div className="mb-4">
+        <SearchFilter
+          placeholder="Search farmers by Name, Location or Phone"
+          data={farmers}
+          setFilteredData={setFilteredFarmers}
+          searchKeys={["farmer_name", "location", "mobile_number"]}
+        />
+      </div>
       <Card className="border border-gray-200 py-6">
-        {/* this commented part is for removing the search and adding it with the table header. To use this, replace the Cardheader with this */}
-        {/* <CardHeader className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Registered Farmers
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              {farmers.length} farmers found
-            </p>
-          </div>
-          <div className="relative w-[20%]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search by name or location..."
-              className="pl-10 bg-white border-gray-200"
-            />
-          </div>
-        </CardHeader> */}
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">
             Registered Farmers
           </CardTitle>
           <p className="text-sm text-gray-600">
-            {farmers.length} farmers found
+            {dataToPaginate.length} farmers found
           </p>
         </CardHeader>
         <CardContent>
@@ -232,7 +231,17 @@ export function FarmersTable() {
                 />
               </div>
             )}
-            {/* {selectedFarmer && (
+            {/* Here was the commented code - #001 */}
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+// #001
+{
+  /* {selectedFarmer && (
               <GenericModal closeModal={() => setSelectedFarmer(null)}>
                 <div className="w-full rounded-xl">
                   <div className="flex justify-between items-start mb-4">
@@ -336,10 +345,5 @@ export function FarmersTable() {
                 </div>
               </GenericModal>
               <></>
-            )} */}
-          </div>
-        </CardContent>
-      </Card>
-    </>
-  );
+            )} */
 }

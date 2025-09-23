@@ -60,7 +60,7 @@ export default function ApplicationsPage() {
 
       <div className="animate__animated animate__fadeIn flex flex-col gap-7">
         {/* <ApplicationsStats /> */}
-        <ApplicationsSearch />
+        {/* <ApplicationsSearch /> */}
         <ApplicationsTable />
         
       </div>

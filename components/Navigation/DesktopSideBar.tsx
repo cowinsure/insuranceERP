@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { PiFlowerTulipFill } from "react-icons/pi";
 import {
   MdOutlineSpaceDashboard,
-
   MdSpaceDashboard,
   MdOutlineGroups,
   MdGroups,
@@ -23,7 +22,7 @@ import {
   // MdOutlineNotifications,
   // MdNotifications,
 } from "react-icons/md";
-import { AiOutlineProduct, AiFillProduct  } from "react-icons/ai";
+import { AiOutlineProduct, AiFillProduct } from "react-icons/ai";
 import { FaLockOpen, FaLock } from "react-icons/fa";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/core/context/AuthContext";
@@ -42,7 +41,7 @@ const mainMenuItems = [
     icon: MdOutlineGroups,
     activeIcon: MdGroups,
   },
-    {
+  {
     title: "Crops",
     url: "/crop",
     icon: PiFlowerTulipFill,

@@ -9,6 +9,7 @@ import useApi from "@/hooks/use_api";
 import { InsuranceProduct } from "./model/products/ProductsData";
 import { TbPercentage } from "react-icons/tb";
 import Pagination from "./utils/Pagination";
+import { SearchFilter } from "./utils/SearchFilter";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -18,7 +19,7 @@ const getStatusBadge = (status: string) => {
     cancelled: "bg-gray-100 text-gray-800 hover:bg-gray-100",
   };
   return (
-    variants[status as keyof typeof variants] || "bg-gray-100 text-gray-800"
+    variants[status as keyof typeof variants] || "bg_gray-100 text-gray-800"
   );
 };
 
@@ -27,21 +28,30 @@ export function ProductsTable() {
   //   (typeof policies)[0] | null
   // >(null);
   const [productData, setProductData] = useState<InsuranceProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<InsuranceProduct[]>(
+    []
+  );
   const { get, post, loading, error } = useApi();
 
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(6);
 
+  // Pick data to show: filtered if non-empty (or even empty if search but 0 matches), else full list
+  const dataToPaginate =
+    filteredProducts.length || filteredProducts.length === 0
+      ? filteredProducts
+      : productData;
+
   const totalPages =
     pageSize === "All"
       ? 1
-      : Math.ceil(productData.length / (pageSize as number));
+      : Math.ceil(dataToPaginate.length / (pageSize as number));
 
   const paginatedProducts =
     pageSize === "All"
-      ? productData
-      : productData.slice(
+      ? dataToPaginate
+      : dataToPaginate.slice(
           (currentPage - 1) * (pageSize as number),
           currentPage * (pageSize as number)
         );
@@ -57,6 +67,7 @@ export function ProductsTable() {
 
         if (response.status === "success") {
           setProductData(response.data);
+          setFilteredProducts(response.data); // initialize filtered
         }
         // console.log(response.data.length + " farmers found");
 
@@ -65,10 +76,6 @@ export function ProductsTable() {
 
         //   console.log("Fetching applications from API..." + element);
         // }
-        // console.log(
-        //   "Fetching applications from API..." +
-        //     response?.data[12]?.mobile_number
-        // );
       } catch (error) {
         console.log("Error fetching applications from API...");
       }
@@ -78,137 +85,128 @@ export function ProductsTable() {
   }, []);
 
   return (
-    <Card className="border border-gray-200 py-6">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">
-          Insurance Products
-        </CardTitle>
-        <p className="text-sm text-gray-600">
-          {productData.length} products found
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Insurance Category
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Insurance Company
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Insurance Type
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Insurance Period
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Premium Percentage
-                </th>
-                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Premium
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Duration
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Actions
-                </th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProducts.map((product, idx) => (
-                <tr
-                  key={product.id}
-                  className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <td className="py-4 px-4">
-                    <div className="font-medium text-blue-600">
-                      {product.insurance_category}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="text-sm text-gray-900">
-                      {product.insurance_company_name}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm text-gray-900">
-                      {product.insurance_type_name}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm text-gray-900">
-                      {product.period_name}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
-                      {product.premium_percentage}{" "}
-                      <TbPercentage className="text-gray-500" />
-                    </span>
-                  </td>
-                  {/* <td className="py-4 px-4">
-                    <span className="text-sm text-gray-900">
-                      {product.premium}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div>
-                      <div className="text-sm text-gray-900">
-                        {product.duration}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {product.dateRange}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <Badge className={getStatusBadge(product.status)}>
-                      {product.status}
-                    </Badge>
-                  </td> */}
-                  {/* <td className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedProduct(product)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td> */}
+    <>
+      <div className="">
+        <SearchFilter
+          placeholder="Search products by Category, Company, Type or Period"
+          data={productData}
+          setFilteredData={setFilteredProducts}
+          searchKeys={[
+            "insurance_category",
+            "insurance_company_name",
+            "insurance_type_name",
+            "period_name",
+          ]}
+        />
+      </div>
+      <Card className="border border-gray-200 py-6">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Insurance Products
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            {dataToPaginate.length} product
+            {dataToPaginate.length !== 1 ? "s" : ""} found
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Insurance Category
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Insurance Company
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Insurance Type
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Insurance Period
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Premium Percentage
+                  </th>
+                  {/* Commented code #003 */}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {totalPages > 1 && (
-            <div className="">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={pageSize}
-                onPageSizeChange={(size) => {
-                  setPageSize(size);
-                  setCurrentPage(1); // reset page to 1
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </CardContent>
-      {/* {selectedProduct && (
+              </thead>
+              <tbody>
+                {paginatedProducts.map((product, idx) => (
+                  <tr
+                    key={product.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <td className="py-4 px-4">
+                      <div className="font-medium text-blue-600">
+                        {product.insurance_category}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="text-sm text-gray-900">
+                        {product.insurance_company_name}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-900">
+                        {product.insurance_type_name}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-900">
+                        {product.period_name}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
+                        {product.premium_percentage}{" "}
+                        <TbPercentage className="text-gray-500" />
+                      </span>
+                    </td>
+                    {/* Commented code #002 */}
+                  </tr>
+                ))}
+
+                {/* If filtered results are empty AND search was made, show a row/message */}
+                {dataToPaginate.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="py-4 px-4 text-center text-sm text-gray-500"
+                    >
+                      No products found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            {totalPages > 1 && (
+              <div className="">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrentPage(1); // reset page to 1
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </CardContent>
+        {/* Comment code #001 */}
+      </Card>
+    </>
+  );
+}
+
+{
+  // #001
+  /* {selectedProduct && (
         <GenericModal closeModal={() => setSelectedProduct(null)}>
           <div className="w-full rounded-xl">
             <div className="flex justify-between items-start mb-4">
@@ -291,7 +289,59 @@ export function ProductsTable() {
             </div>
           </div>
         </GenericModal>
-      )} */}
-    </Card>
-  );
+      )} */
+}
+
+{
+  // #002
+  /* <td className="py-4 px-4">
+                    <span className="text-sm text-gray-900">
+                      {product.premium}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div>
+                      <div className="text-sm text-gray-900">
+                        {product.duration}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {product.dateRange}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <Badge className={getStatusBadge(product.status)}>
+                      {product.status}
+                    </Badge>
+                </td> */
+  /* <td className="py-4 px-4">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedProduct(product)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </td> */
+}
+
+{
+  // #003
+  /* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Premium
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Duration
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Status
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Actions
+                </th> */
 }

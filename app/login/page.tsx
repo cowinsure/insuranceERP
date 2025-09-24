@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaMobile, FaUnlockAlt } from "react-icons/fa";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 // import AOS from "aos";
 // import "aos/dist/aos.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
@@ -47,7 +47,6 @@ const Login: React.FC<LoginProps> = ({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Reset errors before validation
     setPhoneError(false);
     setPasswordError(false);
 
@@ -69,22 +68,38 @@ const Login: React.FC<LoginProps> = ({
     if (!valid) return;
 
     try {
-      const response = await post("v1/auth/public/login/", {
+      const data = await post("v1/auth/public/login/", {
         mobile_number: phone,
         password,
       });
 
-      const data = await response.data;
       const { role: userId, access_token: accessToken } = data;
 
-      login(userId, phone, accessToken);
+      await login(userId, phone, accessToken);
       toast.success("Login successful!");
       router.push(redirectUrl);
-    } catch (error) {
-      console.error("Login failed:", error);
-      toast.error("Login failed. Please check your credentials and try again.");
-      setPhoneError(true);
-      setPasswordError(true);
+    } catch (error: any) {
+      // Axios error
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message;
+
+        if (status === 400 || status === 401) {
+          toast.error("Invalid phone number or password.");
+          setPhoneError(" ");
+          setPasswordError(" ");
+        } else if (status >= 500) {
+          toast.error("Server error. Please try again later.");
+        } else {
+          toast.error(message || "Something went wrong.");
+        }
+      } else if (error.request) {
+        // No response from server (CORS, network issue)
+        toast.error("Network error! Please try again later.");
+      } else {
+        // Something else went wrong
+        toast.error("Unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -258,6 +273,7 @@ const Login: React.FC<LoginProps> = ({
           © {new Date().getFullYear()} InsureCow. All rights reserved.
         </span>
       </div>
+      <Toaster richColors />
     </div>
   );
 };

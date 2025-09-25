@@ -9,6 +9,7 @@ import { InsuranceClaim } from "./model/claim/InsuranceClaim";
 import ClaimDetailsModal from "./ui/ClaimDetailsModal";
 import Pagination from "./utils/Pagination";
 import { SearchFilter } from "@/components/utils/SearchFilter"; // ✅ Import it
+import Loading from "./utils/Loading";
 
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -31,6 +32,7 @@ export function ClaimsManagementTable() {
   );
   const [claimData, setClaimData] = useState<InsuranceClaim[]>([]);
   const [filteredClaims, setFilteredClaims] = useState<InsuranceClaim[]>([]); // ✅
+  const [loading, setLoading] = useState(false);
   const { get } = useApi();
 
   // Pagination states
@@ -53,6 +55,7 @@ export function ClaimsManagementTable() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await get("ims/insurance-claim-service/", {
           params: {
@@ -67,6 +70,8 @@ export function ClaimsManagementTable() {
         }
       } catch (error) {
         console.error("Error fetching insurance claims:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -129,47 +134,57 @@ export function ClaimsManagementTable() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedClaims.map((claim, idx) => (
-                  <tr
-                    key={claim.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <td className="py-4 px-4 text-sm">
-                      <div className="font-medium text-blue-600">
-                        {formatDate(claim.claim_date)}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-sm text-gray-900">
-                      {claim.insurance_number}
-                    </td>
-                    <td className="py-4 px-4 text-sm font-medium text-gray-900">
-                      ৳ {formatMoney(claim.sum_insured)}
-                    </td>
-                    <td className="py-4 px-4 text-sm">
-                      ৳ {formatMoney(claim.premium_amount)}
-                    </td>
-                    <td className="py-4 px-4 text-sm">
-                      {claim.period_name}
-                      <p className="text-xs text-gray-500">
-                        {formatDate(claim.insurance_start_date)} to{" "}
-                        {formatDate(claim.insurance_end_date)}
-                      </p>
-                    </td>
-                    <td className="py-4 px-4 text-sm text-gray-900">
-                      {claim.insurance_type_name}
-                    </td>
-                    <td className="py-4 px-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedClaim(claim)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                {loading || paginatedClaims.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center">
+                      <Loading />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  <>
+                    {paginatedClaims.map((claim, idx) => (
+                      <tr
+                        key={claim.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
+                        <td className="py-4 px-4 text-sm">
+                          <div className="font-medium text-blue-600">
+                            {formatDate(claim.claim_date)}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-900">
+                          {claim.insurance_number}
+                        </td>
+                        <td className="py-4 px-4 text-sm font-medium text-gray-900">
+                          ৳ {formatMoney(claim.sum_insured)}
+                        </td>
+                        <td className="py-4 px-4 text-sm">
+                          ৳ {formatMoney(claim.premium_amount)}
+                        </td>
+                        <td className="py-4 px-4 text-sm">
+                          {claim.period_name}
+                          <p className="text-xs text-gray-500">
+                            {formatDate(claim.insurance_start_date)} to{" "}
+                            {formatDate(claim.insurance_end_date)}
+                          </p>
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-900">
+                          {claim.insurance_type_name}
+                        </td>
+                        <td className="py-4 px-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedClaim(claim)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
+                )}
               </tbody>
             </table>
 

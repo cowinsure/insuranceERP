@@ -9,6 +9,7 @@ import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
 import Pagination from "./utils/Pagination";
 import { SearchFilter } from "./utils/SearchFilter";
+import Loading from "./utils/Loading";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -28,12 +29,14 @@ export function FarmersTable() {
 
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
   const [filteredFarmers, setFilteredFarmers] = useState<FarmerProfile[]>([]);
-  const { get, post, loading, error } = useApi();
+  const [loading, setLoading] = useState(false);
+
+  const { get, post, error } = useApi();
 
   // =============================
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number | "All">(10);
+  const [pageSize, setPageSize] = useState<number | "All">(5);
 
   const dataToPaginate = filteredFarmers.length > 0 ? filteredFarmers : farmers;
 
@@ -52,6 +55,7 @@ export function FarmersTable() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await get(`ims/farmer-service`, {
           params: { start_record: 1 },
@@ -75,6 +79,8 @@ export function FarmersTable() {
         );
       } catch (error) {
         console.log("Error fetching applications from API...");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -132,69 +138,77 @@ export function FarmersTable() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedFarmers.map((farmer, idx) => (
-                  <tr
-                    key={farmer.user_id}
-                    className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        {/* <Avatar className={`w-10 h-10 ${farmer.avatarColor}`}>
+                {loading || paginatedFarmers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center">
+                      <Loading />
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {paginatedFarmers.map((farmer, idx) => (
+                      <tr
+                        key={farmer.user_id}
+                        className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            {/* <Avatar className={`w-10 h-10 ${farmer.avatarColor}`}>
                           <AvatarFallback className="text-white font-medium">
                             {farmer.initials}
                           </AvatarFallback>
                         </Avatar> */}
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {farmer.farmer_name}
-                          </div>
-                          {/* <div className="text-sm text-black-500">
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {farmer.farmer_name}
+                              </div>
+                              {/* <div className="text-sm text-black-500">
                             {farmer.user_id}
                           </div> */}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="space-y-1">
-                        {/* <div className="flex items-center gap-2 text-sm text-gray-600">
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="space-y-1">
+                            {/* <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Mail className="w-4 h-4" />
                           {farmer.email}
                         </div> */}
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Phone className="w-4 h-4" />
-                          {farmer.mobile_number}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-900">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          {farmer.location}
-                        </div>
-                        {/* <div className="text-sm text-gray-500 ml-6">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Phone className="w-4 h-4" />
+                              {farmer.mobile_number}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-900">
+                              <MapPin className="w-4 h-4 text-gray-400" />
+                              {farmer.location}
+                            </div>
+                            {/* <div className="text-sm text-gray-500 ml-6">
                           {farmer.region}
                         </div> */}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm font-medium text-gray-900">
-                        {farmer.assets}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`text-sm font-medium ${
-                          farmer.policies > 0
-                            ? "text-blue-600"
-                            : "text-gray-900"
-                        }`}
-                      >
-                        {farmer.policies}
-                      </span>
-                    </td>
-                    {/* <td className="py-4 px-4">
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm font-medium text-gray-900">
+                            {farmer.assets}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span
+                            className={`text-sm font-medium ${
+                              farmer.policies > 0
+                                ? "text-blue-600"
+                                : "text-gray-900"
+                            }`}
+                          >
+                            {farmer.policies}
+                          </span>
+                        </td>
+                        {/* <td className="py-4 px-4">
                       <Badge className={getStatusBadge(farmer.status)}>
                         {farmer.status}
                       </Badge>
@@ -204,7 +218,7 @@ export function FarmersTable() {
                         {farmer.joinDate}
                       </span>
                     </td> */}
-                    {/* <td className="py-4 px-4">
+                        {/* <td className="py-4 px-4">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -213,8 +227,10 @@ export function FarmersTable() {
                         <Eye className="w-4 h-4" />
                       </Button>
                     </td> */}
-                  </tr>
-                ))}
+                      </tr>
+                    ))}
+                  </>
+                )}
               </tbody>
             </table>
             {totalPages > 1 && (

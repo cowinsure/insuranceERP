@@ -21,6 +21,7 @@ import ApplicationDetailsModal from "./ui/ApplicationDetailsModal";
 import { formatDate } from "./claims-management-table";
 import Pagination from "./utils/Pagination";
 import { SearchFilter } from "./utils/SearchFilter"; // ✅ integrated search component
+import Loading from "./utils/Loading";
 
 const applications = [
   {
@@ -82,16 +83,48 @@ const statusOptions = [
   },
 ];
 
-const getStatusBadge = (status: string) => {
-  const variants = {
-    pending: "bg-orange-100 text-orange-800 hover:bg-orange-100",
-    under_review: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-    approved: "bg-green-100 text-green-800 hover:bg-green-100",
-    active: "bg-green-100 text-green-800 hover:bg-green-100",
-    rejected: "bg-red-100 text-red-800 hover:bg-red-100",
+type StatusInfo = {
+  label: string;
+  className: string;
+};
+
+const getStatusBadge = (status: string): StatusInfo => {
+  const variants: Record<string, StatusInfo> = {
+    pending: {
+      label: "Pending",
+      className: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+    },
+    under_review: {
+      label: "Under Review",
+      className: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+    },
+    active: {
+      label: "Active",
+      className: "bg-green-100 text-green-800 hover:bg-green-100",
+    },
+    canceled: {
+      label: "Canceled",
+      className: "bg-red-100 text-red-800 hover:bg-red-100",
+    },
+    payment_pending: {
+      label: "Payment Pending",
+      className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+    },
+    pending_payment_verification: {
+      label: "Verifying Payment",
+      className: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+    },
+    claim_pending: {
+      label: "Claim Pending",
+      className: "bg-indigo-100 text-indigo-800 hover:bg-indigo-100",
+    },
   };
+
   return (
-    variants[status as keyof typeof variants] || "bg-gray-100 text-gray-800"
+    variants[status] || {
+      label: "Unknown",
+      className: "bg-gray-100 text-gray-800",
+    }
   );
 };
 
@@ -132,11 +165,12 @@ export function ApplicationsTable() {
   const [formData, setFormData] = useState({});
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // =============================
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number | "All">(6);
+  const [pageSize, setPageSize] = useState<number | "All">(5);
 
   const totalPages =
     pageSize === "All"
@@ -189,6 +223,7 @@ export function ApplicationsTable() {
   // =============================
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const response = await allapplication(
         "ims/insurance-application-service/",
@@ -198,10 +233,12 @@ export function ApplicationsTable() {
       );
       if (response.status === "success") {
         setInsuranceApplications(response.data);
-        setFilteredApplications(response.data); // ✅ also set filtered data initially
+        setFilteredApplications(response.data);
       }
     } catch (error) {
       console.error("Error fetching applications:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -252,7 +289,9 @@ export function ApplicationsTable() {
             Insurance Applications
           </CardTitle>
           <p className="text-sm text-gray-600">
-            {filteredApplications.length} applications found
+            {paginatedApplications.length === 0
+              ? ""
+              : `${filteredApplications.length} applications found`}
           </p>
         </CardHeader>
         <CardContent>
@@ -284,86 +323,79 @@ export function ApplicationsTable() {
                 </tr>
               </thead>
               <tbody className="overflow-hidden">
-                {paginatedApplications.map((application, idx) => (
-                  <tr
-                    key={application.id}
-                    className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <td className="py-4 px-4">
-                      <span className="font-medium text-blue-600">
-                        {application.insurance_number}
-                      </span>
+                {loading || paginatedApplications.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center">
+                      <Loading />
                     </td>
-                    {/* <td className="py-4 px-4"> */}
-                    {/* <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {application.}
-                      </div>
-                      <div className="flex items-center gap-1 mt-1">
-                        <MapPin className="w-3 h-3 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {application.location}
+                  </tr>
+                ) : (
+                  paginatedApplications.map((application, idx) => (
+                    <tr
+                      key={application.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                      style={{ animationDelay: `${idx * 100}ms` }}
+                    >
+                      <td className="py-4 px-4">
+                        <span className="font-medium text-blue-600">
+                          {application.insurance_number}
                         </span>
-                      </div>
-                    </div> */}
-                    {/* </td> */}
-                    <td className="py-4 px-4">
-                      <div>
+                      </td>
+                      <td className="py-4 px-4">
                         <div className="text-sm text-gray-900">
                           {application.name}-{application.color}
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm font-medium text-gray-900">
-                        {application.insurance_type_name}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <Badge
-                        className={getStatusBadge(application.insurance_status)}
-                      >
-                        {application.insurance_status === "active"
-                          ? "Active"
-                          : application.insurance_status === "pending"
-                          ? "Pending"
-                          : "Under Review"}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
-                        {formatDate(application.created_at)}
-                        {/* {application.created_at} */}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedapplicationView(application);
-                          setSelectedApplicationDetailsDialog(application);
-                        }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setOpen(true);
-                          setSelectedapplications(application.id.toString());
-                          setSelectedapplicationsStatus(
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm font-medium text-gray-900">
+                          {application.insurance_type_name}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        {(() => {
+                          const statusInfo = getStatusBadge(
                             application.insurance_status
                           );
-                        }}
-                      >
-                        <Banknote className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                          return (
+                            <Badge className={statusInfo.className}>
+                              {statusInfo.label}
+                            </Badge>
+                          );
+                        })()}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm text-gray-600">
+                          {formatDate(application.created_at)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedapplicationView(application);
+                            setSelectedApplicationDetailsDialog(application);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setOpen(true);
+                            setSelectedapplications(application.id.toString());
+                            setSelectedapplicationsStatus(
+                              application.insurance_status
+                            );
+                          }}
+                        >
+                          <Banknote className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
             {totalPages > 1 && (

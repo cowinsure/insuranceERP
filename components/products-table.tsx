@@ -10,6 +10,7 @@ import { InsuranceProduct } from "./model/products/ProductsData";
 import { TbPercentage } from "react-icons/tb";
 import Pagination from "./utils/Pagination";
 import { SearchFilter } from "./utils/SearchFilter";
+import Loading from "./utils/Loading";
 
 const getStatusBadge = (status: string) => {
   const variants = {
@@ -31,7 +32,8 @@ export function ProductsTable() {
   const [filteredProducts, setFilteredProducts] = useState<InsuranceProduct[]>(
     []
   );
-  const { get, post, loading, error } = useApi();
+  const [loading, setLoading] = useState(false);
+  const { get, post, error } = useApi();
 
   // Pagination functions
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +61,7 @@ export function ProductsTable() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await get("ims/insurance-product-service/", {
           params: { start_record: 1 },
@@ -78,6 +81,8 @@ export function ProductsTable() {
         // }
       } catch (error) {
         console.log("Error fetching applications from API...");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -133,41 +138,51 @@ export function ProductsTable() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedProducts.map((product, idx) => (
-                  <tr
-                    key={product.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <td className="py-4 px-4">
-                      <div className="font-medium text-blue-600">
-                        {product.insurance_category}
-                      </div>
+                {loading || paginatedProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center">
+                      <Loading />
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="text-sm text-gray-900">
-                        {product.insurance_company_name}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-900">
-                        {product.insurance_type_name}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-900">
-                        {product.period_name}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
-                        {product.premium_percentage}{" "}
-                        <TbPercentage className="text-gray-500" />
-                      </span>
-                    </td>
-                    {/* Commented code #002 */}
                   </tr>
-                ))}
+                ) : (
+                  <>
+                    {paginatedProducts.map((product, idx) => (
+                      <tr
+                        key={product.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-blue-600">
+                            {product.insurance_category}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-sm text-gray-900">
+                            {product.insurance_company_name}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm text-gray-900">
+                            {product.insurance_type_name}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm text-gray-900">
+                            {product.period_name}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
+                            {product.premium_percentage}{" "}
+                            <TbPercentage className="text-gray-500" />
+                          </span>
+                        </td>
+                        {/* Commented code #002 */}
+                      </tr>
+                    ))}
+                  </>
+                )}
 
                 {/* If filtered results are empty AND search was made, show a row/message */}
                 {dataToPaginate.length === 0 && (

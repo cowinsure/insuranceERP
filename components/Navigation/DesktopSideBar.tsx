@@ -26,6 +26,7 @@ import { AiOutlineProduct, AiFillProduct } from "react-icons/ai";
 import { FaLockOpen, FaLock } from "react-icons/fa";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/core/context/AuthContext";
+import { BsClipboardCheck, BsClipboardCheckFill } from "react-icons/bs";
 
 // Menu configuration
 const mainMenuItems = [
@@ -34,6 +35,12 @@ const mainMenuItems = [
     url: "/dashboard",
     icon: MdOutlineSpaceDashboard,
     activeIcon: MdSpaceDashboard,
+  },
+  {
+    title: "Asset Management",
+    url: "/asset_management",
+    icon: BsClipboardCheck,
+    activeIcon: BsClipboardCheckFill,
   },
   {
     title: "Farmers",

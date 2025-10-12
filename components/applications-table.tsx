@@ -323,10 +323,16 @@ export function ApplicationsTable() {
                 </tr>
               </thead>
               <tbody className="overflow-hidden">
-                {loading || paginatedApplications.length === 0 ? (
+                {loading ? (
                   <tr>
                     <td colSpan={6} className="py-6 text-center">
                       <Loading />
+                    </td>
+                  </tr>
+                ) : paginatedApplications.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-gray-500">
+                      No applications found.
                     </td>
                   </tr>
                 ) : (

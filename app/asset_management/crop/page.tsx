@@ -23,7 +23,7 @@ const CropsPage = () => {
             </h1>
           </div>
           <p className="text-gray-500 mt-1">
-            Register your land and crop details for tracking and management.
+            Register your land and crop details for tracking and management
           </p>
         </div>
         <div className="flex">
@@ -42,7 +42,7 @@ const CropsPage = () => {
       </div>
       {isModal && (
         <GenericModal
-          title="Add Land & Crop"
+          title="Register New Land & Crop"
           closeModal={() => setIsModal(false)}
         >
           <AddCrop />

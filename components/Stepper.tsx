@@ -19,11 +19,11 @@ export const Stepper: React.FC<StepperProps> = ({
   return (
     <div className="relative w-full my-5 lg:w-[70%] mx-auto">
       {/* Line background behind the steps */}
-      <div className="absolute top-3 left-0 right-0 h-5 bg-gray-300 rounded-full z-0 " />
+      <div className="absolute top-2 left-0 right-0 h-5 bg-gray-300 rounded-full z-0 " />
 
       {/* Progress line */}
       <div
-        className="absolute top-3 left-0 h-5 bg-gradient-to-r from-green-500 to-green-900 rounded-full z-10 transition-all duration-300"
+        className="absolute top-2 left-0 h-5 bg-gradient-to-r from-blue-500 to-blue-900 rounded-full z-10 transition-all duration-300"
         style={{ width: `${progressPercent}%` }}
       />
 
@@ -40,12 +40,12 @@ export const Stepper: React.FC<StepperProps> = ({
             >
               <div
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors custom-hover ${
-                  isCompleted && "bg-green-400 text-white"
+                  isCompleted && "bg-blue-400 text-white"
                 }
                 ${
                   isCurrent
-                    ? "bg-green-800 text-white scale-125 border-4 border-green-400"
-                    : "bg-gray-300 text-gray-600"
+                    ? "bg-blue-800 text-white scale-125 border-4 border-blue-400"
+                    : "bg-gray-300 text-gray-700"
                 }`}
               >
                 {isCompleted ? <Check size={30} /> : index + 1}

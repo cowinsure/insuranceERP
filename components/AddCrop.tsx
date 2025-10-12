@@ -76,7 +76,7 @@ export default function AddCrop() {
   };
 
   return (
-    <div className="p-4 md:px-6 mb-10">
+    <div className="">
       {/* Stepper */}
       <div className="bg-white rounded-xl mb-4">
         <Stepper
@@ -100,7 +100,7 @@ export default function AddCrop() {
         {currentStep !== 0 && (
           <button
             onClick={handlePrev}
-            className="px-4 py-2 border border-green-700 text-green-700 rounded-lg hover:bg-green-100 flex items-center gap-1"
+            className="cursor-pointer px-4 py-2 border border-blue-700 text-blue-700 rounded-lg hover:bg-blue-100 flex items-center gap-1"
           >
             <IoIosArrowBack /> Prev
           </button>
@@ -110,14 +110,14 @@ export default function AddCrop() {
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 flex items-center gap-1"
+            className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
             <FaCircleCheck /> {isLoading ? "Submitting..." : "Submit"}
           </button>
         ) : (
           <button
             onClick={handleNext}
-            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 flex items-center gap-1"
+            className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
             Next <IoIosArrowForward />
           </button>

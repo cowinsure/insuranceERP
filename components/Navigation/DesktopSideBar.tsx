@@ -43,7 +43,7 @@ const mainMenuItems = [
     activeIcon: BsClipboardCheckFill,
     children: [
       {
-        title: "Crop",
+        title: "Land & Crop",
         url: "/asset_management/crop",
         icon: <PiFlowerTulipFill size={20} />,
       },
@@ -120,7 +120,11 @@ const DesktopSideBar = () => {
   };
 
   return (
-    <div className={`${sidebarBase} ${sidebarWidth} ${isLogin && "hidden"}`}>
+    <div
+      className={`${sidebarBase} ${sidebarWidth} ${
+        isLogin && "hidden"
+      } transition-all duration-300`}
+    >
       <div className="bg-white rounded-r-lg p-4 h-full overflow-hidden transition-all duration-300 flex flex-col relative">
         {/* Toggle Button */}
         <div className="flex justify-end mb-4 group">

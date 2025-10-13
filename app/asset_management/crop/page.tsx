@@ -3,8 +3,8 @@ import RegisterCrop from "@/components/addCropForms/RegisterCrop";
 // import AddCrop from "@/components/AddCropDetailsModal";
 import { Button } from "@/components/ui/button";
 import GenericModal from "@/components/ui/GenericModal";
-import { Plus } from "lucide-react";
-import React, { useState } from "react";
+import { ClipboardCheck, FilePlus, Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 
 const CropsPage = () => {
@@ -16,6 +16,23 @@ const CropsPage = () => {
       plantation_date: string;
     }>
   >([]);
+
+  useEffect(() => {
+    const cropData = [
+      {
+        crop_name: "Rice",
+        variety: "Aman",
+        plantation_date: "9-Dec-2009",
+      },
+      {
+        crop_name: "Rice",
+        variety: "Aman",
+        plantation_date: "9-Dec-2009",
+      },
+    ];
+
+    setCrops(cropData);
+  });
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -57,13 +74,18 @@ const CropsPage = () => {
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Crop Name
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Variety
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Plantation Date
                 </th>
-                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">action</th> */}
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
+                  Stage 1
+                </th>
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
+                  Stage 2
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -76,54 +98,42 @@ const CropsPage = () => {
                       style={{ animationDelay: `${idx * 100}ms` }}
                     >
                       <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {crop.crop_name}
-                            </div>
-                          </div>
+                        <div className="font-medium text-gray-900">
+                          {crop.crop_name}
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="space-y-1">
-                          {/* <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Mail className="w-4 h-4" />
-                          {crop.email}
-                        </div> */}
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            {crop.variety}
-                          </div>
+                        <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
+                          {crop.variety}
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-gray-900">
-                            {crop.plantation_date}
-                          </div>
-                          {/* <div className="text-sm text-gray-500 ml-6">
-                          {crop.region}
-                        </div> */}
+                        <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                          {crop.plantation_date}
                         </div>
                       </td>
-                      {/* <td className="py-4 px-4">
-                      <Badge className={getStatusBadge(crop.status)}>
-                        {crop.status}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
-                        {crop.joinDate}
-                      </span>
-                    </td> */}
-                      {/* <td className="py-4 px-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedCrop(crop)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </td> */}
+                      <td className="flex justify-center items-center py-4 px-4">
+                        <Button
+                          variant={"ghost"}
+                          className="bg-white text-blue-900"
+                          title="Add crop details"
+                          onClick={() => console.log(crop)}
+                        >
+                          <FilePlus />
+                        </Button>
+                      </td>
+                      <td>
+                        <div className="flex items-center justify-center py-4 px-4">
+                          <Button
+                            variant={"ghost"}
+                            className="bg-white text-blue-900"
+                            title="Add revisit data"
+                            onClick={() => console.log(crop)}
+                          >
+                            <ClipboardCheck />
+                          </Button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
               </>
@@ -147,9 +157,7 @@ const CropsPage = () => {
         </div>
       </div>
       {isModal && (
-        <GenericModal 
-          closeModal={() => setIsModal(false)}
-        >
+        <GenericModal title="Register Crop"  closeModal={() => setIsModal(false)}>
           {/* <AddCrop /> */}
           <RegisterCrop
             setCropData={setCrops}

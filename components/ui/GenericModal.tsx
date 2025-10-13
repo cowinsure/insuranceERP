@@ -11,9 +11,15 @@ interface GenericModalProps {
   children?: React.ReactNode;
   content?: string;
   onConfirm?: () => void;
+  modalWidth?: string;
 }
 
-const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
+const GenericModal = ({
+  closeModal,
+  title,
+  children,
+  modalWidth,
+}: GenericModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const modalWrapperRef = useRef<HTMLDivElement>(null);
@@ -68,7 +74,9 @@ const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 w-full max-w-5xl animate__animated min-w-md ${
+        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 w-full ${
+          modalWidth ? modalWidth : "max-w-5xl min-w-md"
+        } animate__animated ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"
         }`}
       >

@@ -35,14 +35,14 @@ const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
   }, []);
 
   // Outside click
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (
-      modalWrapperRef.current &&
-      !modalWrapperRef.current.contains(e.target as Node)
-    ) {
-      triggerClose();
-    }
-  };
+  // const handleOverlayClick = (e: React.MouseEvent) => {
+  //   if (
+  //     modalWrapperRef.current &&
+  //     !modalWrapperRef.current.contains(e.target as Node)
+  //   ) {
+  //     triggerClose();
+  //   }
+  // };
 
   // Closing animation handler
   const triggerClose = () => {
@@ -61,7 +61,7 @@ const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate__animated ${
         isClosing ? "animate__fadeOut" : "animate__fadeIn"
       }`}
-      onClick={handleOverlayClick}
+      // onClick={handleOverlayClick}
       onAnimationEnd={handleAnimationEnd}
       role="dialog"
       aria-modal="true"

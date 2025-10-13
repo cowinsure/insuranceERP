@@ -43,7 +43,7 @@ const mainMenuItems = [
     activeIcon: BsClipboardCheckFill,
     children: [
       {
-        title: "Land & Crop",
+        title: "Crop",
         url: "/asset_management/crop",
         icon: <PiFlowerTulipFill size={20} />,
       },

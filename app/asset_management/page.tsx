@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { GiCow } from "react-icons/gi";
 import { PiFlowerTulipFill } from "react-icons/pi";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import AddCrop from "@/components/AddCrop";
+import AddCrop from "@/components/AddCropDetailsModal";
 
 const AssetManagement = () => {
   const [isCrop, setIsCrop] = useState(false);

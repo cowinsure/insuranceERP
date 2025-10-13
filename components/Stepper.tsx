@@ -13,56 +13,65 @@ export const Stepper: React.FC<StepperProps> = ({
   completedSteps,
 }) => {
   const progressPercent =
-    steps.length === 1
-      ? 100
-      : Math.max(18, (currentStep / (steps.length - 1)) * 100);
+    steps.length === 1 ? 100 : (currentStep / (steps.length - 1)) * 100;
+
   return (
-    <div className="relative w-full my-5 lg:w-[70%] mx-auto">
+    <div className="relative w-full my-5 lg:w-[70%] mx-auto h-20">
       {/* Line background behind the steps */}
-      <div className="absolute top-2 left-0 right-0 h-5 bg-gray-300 rounded-full z-0 " />
+      <div className="absolute top-2 left-0 right-0 h-5 bg-gray-300 rounded-full z-0 px-1" />
 
       {/* Progress line */}
       <div
-        className="absolute top-2 left-0 h-5 bg-gradient-to-r from-blue-500 to-blue-900 rounded-full z-10 transition-all duration-300"
+        className="absolute top-2 left-0 h-5 bg-gradient-to-r from-blue-500 to-blue-900 rounded-full z-10 transition-all duration-300 px-1"
         style={{ width: `${progressPercent}%` }}
       />
 
       {/* Step circles and labels */}
-      <div className="flex justify-between items-center relative z-20">
-        {steps.map((step, index) => {
-          const isCurrent = index === currentStep;
-          const isCompleted = completedSteps.has(index);
+      {steps.map((step, index) => {
+        const isCurrent = index === currentStep;
+        const isCompleted = completedSteps.has(index);
 
-          return (
+        // Calculate left position as a percentage of container width
+        const leftPercent = (index / (steps.length - 1)) * 100;
+
+        return (
+          <div
+            key={index}
+            className="absolute top-0 flex flex-col items-center text-center z-50"
+            style={{ left: `${leftPercent}%`, transform: "translateX(-50%)" }}
+          >
             <div
-              key={index}
-              className="flex flex-col items-center flex-1 text-center"
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors custom-hover ${
+                isCompleted ? "bg-blue-400 text-white" : ""
+              } ${
+                isCurrent
+                  ? "bg-blue-800 text-white scale-125 border-4 border-blue-400"
+                  : "bg-gray-300 text-gray-700"
+              }`}
             >
-              <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors custom-hover ${
-                  isCompleted && "bg-blue-400 text-white"
-                }
-                ${
-                  isCurrent
-                    ? "bg-blue-800 text-white scale-125 border-4 border-blue-400"
-                    : "bg-gray-300 text-gray-700"
-                }`}
-              >
-                {isCompleted ? <Check size={30} /> : index + 1}
-              </div>
-              <p
-                className={`text-xs sm:text-sm mt-2 ${
-                  isCurrent || isCompleted
-                    ? "font-semibold text-gray-800"
-                    : "text-gray-500"
-                }`}
-              >
-                {step}
-              </p>
+              {isCompleted ? (
+                <Check
+                  size={30}
+                  className={`${
+                    isCurrent ? "" : "bg-blue-900 rounded-full w-9 h-9 p-1"
+                  }`}
+                />
+              ) : (
+                index + 1
+              )}
             </div>
-          );
-        })}
-      </div>
+            <p
+              className={`text-xs sm:text-sm mt-2 ${
+                isCurrent || isCompleted
+                  ? "font-semibold text-gray-800"
+                  : "text-gray-500"
+              }`}
+            >
+              {step}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 };

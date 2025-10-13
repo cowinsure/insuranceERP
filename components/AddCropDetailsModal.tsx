@@ -4,27 +4,35 @@ import { useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { toast } from "sonner";
-import LandPreparationForm, { LandPreparationRef } from "./LandPreparation";
 import { Stepper } from "./Stepper";
 import CropDetailsForm, { CropDetailsRef } from "./AddCropDetails";
 import PreviewSubmit from "./PreviewForm";
 
-export default function AddCrop() {
-  const steps = ["Land Preparation", "Crop Details", "Preview & Submit"];
+export default function AddCropDetailsModal() {
+  const steps = ["Crop Details", "Preview"];
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [cropData, setCropData] = useState({
+    seedName: "",
+    variety: "",
+    seedCompany: "",
+    seedType: "",
+    irrigationFacility: "",
+    irrigationSource: "",
+    pesticideDose: "",
+    fertilizerDose: "",
+    cultivationSystem: "",
+    landSuitability: "",
+  });
 
-  const landPrepRef = useRef<LandPreparationRef>(null);
   const cropDetailsRef = useRef<CropDetailsRef>(null);
 
   const handleNext = () => {
     let valid = false;
 
     if (currentStep === 0)
-      valid = landPrepRef.current?.validateFields() ?? false;
-    else if (currentStep === 1)
       valid = cropDetailsRef.current?.validateFields() ?? false;
     else valid = true;
 
@@ -41,10 +49,9 @@ export default function AddCrop() {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    const landData = landPrepRef.current?.getValues();
     const cropData = cropDetailsRef.current?.getValues();
 
-    const formData = { ...landData, ...cropData };
+    const formData = { ...cropData };
 
     console.log("Final Submitted Data:", formData);
     toast.success("Form submitted successfully!");
@@ -55,18 +62,29 @@ export default function AddCrop() {
     }, 1500);
   };
 
+  const handleCropChange = (field: string, value: string) => {
+    setCropData((prev) => {
+      const updated = { ...prev, [field]: value };
+      localStorage.setItem("cropFormData", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <LandPreparationForm ref={landPrepRef} />;
+        return (
+          <CropDetailsForm
+            ref={cropDetailsRef}
+            data={cropData}
+            onChange={handleCropChange}
+          />
+        );
       case 1:
-        return <CropDetailsForm ref={cropDetailsRef} />;
-      case 2:
         return (
           <PreviewSubmit
             data={{
-              ...landPrepRef.current?.getValues(),
-              ...cropDetailsRef.current?.getValues(),
+              cropData,
             }}
           />
         );

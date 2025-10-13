@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, MapPin, ImageIcon, Trash2, Plus } from "lucide-react"
+import { Loader2, MapPin, ImageIcon, Trash2, Plus,LocateFixed  } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { GoogleMap, Marker, Polygon, useJsApiLoader } from "@react-google-maps/api"
 
@@ -59,6 +59,26 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   })
+
+  const getCurrentLocation = (index: number) => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        updateCoordinate(index, "lat", latitude.toFixed(6));
+        updateCoordinate(index, "lng", longitude.toFixed(6));
+      },
+      (error) => {
+        console.error(error);
+        alert("Unable to retrieve location. Please allow location access.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   useEffect(() => {
     if (open && navigator.geolocation) {
@@ -342,6 +362,15 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                           />
                         </div>
                       </div>
+                      <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => getCurrentLocation(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <LocateFixed className="h-4 w-4" />
+                        </Button>
                       {coordinates.length > 1 && (
                         <Button
                           type="button"

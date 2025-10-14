@@ -160,7 +160,7 @@ export function FarmersTable() {
                           </AvatarFallback>
                         </Avatar> */}
                             <div>
-                              <div className="font-medium text-gray-900">
+                              <div className="font-medium text-gray-900 text-sm">
                                 {farmer.farmer_name}
                               </div>
                               {/* <div className="text-sm text-black-500">

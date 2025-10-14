@@ -185,3 +185,48 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Custom checkbox styles */
+.custom-checkbox {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 20px; /* Increase size */
+  height: 20px; /* Increase size */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #dbdbdb; /* Light background */
+
+  position: relative;
+  transition: all 0.3s ease; /* Smooth transition */
+  cursor: pointer;
+}
+
+/* Checked state */
+.custom-checkbox:checked {
+  background-color: #1b6fee; /* Green color when checked */
+  /* border-color: #4caf50; */
+}
+
+/* Checkbox animation when checked */
+.custom-checkbox:checked::before {
+  content: "✓"; /* Check mark */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.custom-checkbox:hover {
+  transform: scale(1.1); /* Slightly enlarge on hover */
+  border-color: #999; /* Darker border on hover */
+}
+
+/* Focus effect (optional) */
+.custom-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(25, 154, 240, 0.6); /* Green glow when focused */
+}

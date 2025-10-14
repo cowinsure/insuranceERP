@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle, useState } from "react";
 import InputField from "./InputField";
+import DropdownField from "./DropDownField";
 
 export interface CropDetailsRef {
   validateFields: () => boolean;
@@ -52,115 +53,90 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
       getValues: () => data,
     }));
 
+    // Seed type options array
+    const seedTypeOptions = [
+      { value: "Good", label: "Good – used by most farmers" },
+      {
+        value: "Moderate",
+        label: "Moderate – used by a good number of farmers",
+      },
+      {
+        value: "Poor",
+        label: "Poor – locally developed, moderate to low yielding",
+      },
+    ];
+
+    // Variety options array
+    const varietyOptions = [
+      { value: "Local Variety", label: "Local Variety (স্থানীয় জাত)" },
+      {
+        value: "High Yield Variety",
+        label: "High Yield Variety (উচ্চফলনশীল জাত)",
+      },
+      { value: "Hybrid", label: "Hybrid (হাইব্রিড)" },
+    ];
+
     return (
-      <div className="max-w-4xl mx-auto bg-white">
-        <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
-          Farm Input Related Information
-        </h2>
-
-        <div className="space-y-6">
+      <div className="p-3">
+        <h2 className="text-xl font-semibold mb-5 text-center underline">Seed Details</h2>
+        <div className="space-y-5">
           {/* Seed Info */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <InputField
-              id="seedName"
-              label="Common Name of Seed (AMAN)"
-              type="text"
-              name="seedName"
-              value={data.seedName}
-              onChange={handleChange}
-              placeholder="Enter seed name (e.g., Local Variety)"
-              error={errors.seedName}
-            />
+          <InputField
+            id="seedName"
+            label="Common Name of Seed"
+            type="text"
+            name="seedName"
+            value={data.seedName}
+            onChange={handleChange}
+            placeholder="Enter seed name (e.g., Local Variety)"
+            error={errors.seedName}
+          />
 
-            <div>
-              <label
-                htmlFor="variety"
-                className="mb-1 text-sm font-bold text-gray-600"
-              >
-                Variety of Seed
-              </label>
-              <select
-                id="variety"
-                name="variety"
-                value={data.variety}
-                onChange={handleChange}
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
-                  errors.variety ? "border-red-600" : ""
-                }`}
-              >
-                <option value="">Select</option>
-                <option value="Local Variety">
-                  Local Variety (স্থানীয় জাত)
-                </option>
-                <option value="High Yield Variety">
-                  High Yield Variety (উচ্চফলনশীল জাত)
-                </option>
-                <option value="Hybrid">Hybrid (হাইব্রিড)</option>
-              </select>
-              {errors.variety && (
-                <p className="text-red-600 text-sm mt-1">{errors.variety}</p>
-              )}
-            </div>
-          </div>
+          <DropdownField
+            label="Variety of Seed"
+            id="variety"
+            name="variety"
+            value={data.variety}
+            onChange={handleChange}
+            options={varietyOptions}
+            error={errors.variety}
+          />
 
           {/* Seed Company & Type */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="font-medium">Name of the Seed Company</label>
-              <input
-                type="text"
-                name="seedCompany"
-                value={data.seedCompany}
-                onChange={handleChange}
-                placeholder="Enter seed company or source"
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
-                  errors.seedCompany ? "border-red-600" : ""
-                }`}
-              />
-              {errors.seedCompany && (
-                <p className="text-red-600 text-sm mt-1">
-                  {errors.seedCompany}
-                </p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Example: Local Open Market or Own Stock Conserved.
-              </p>
-            </div>
-
-            <div>
-              <label className="font-medium">Type of the Seed Used</label>
-              <select
-                name="seedType"
-                value={data.seedType}
-                onChange={handleChange}
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
-                  errors.seedType ? "border-red-600" : ""
-                }`}
-              >
-                <option value="">Select</option>
-                <option value="Good">Good – used by most farmers</option>
-                <option value="Moderate">
-                  Moderate – used by a good number of farmers
-                </option>
-                <option value="Poor">
-                  Poor – locally developed, moderate to low yielding
-                </option>
-              </select>
-              {errors.seedType && (
-                <p className="text-red-600 text-sm mt-1">{errors.seedType}</p>
-              )}
-            </div>
+          <div>
+            <InputField
+              id="seedCompany"
+              label="Name of the seed company"
+              type="text"
+              name="seedCompany"
+              value={data.seedCompany}
+              onChange={handleChange}
+              placeholder="Ex: Local Open Market or Own Stock Conserved"
+            />
+            {/* {errors.seedCompany && (
+              <p className="text-red-600 text-sm mt-1">{errors.seedCompany}</p>
+            )} */}
           </div>
 
+          <DropdownField
+            label="Type of the Seed Used"
+            id="seedType"
+            name="seedType"
+            value={data.seedType}
+            onChange={handleChange}
+            options={seedTypeOptions}
+            error={errors.seedType}
+          />
+
           {/* Irrigation */}
-          <div className="grid md:grid-cols-2 gap-4">
+          {/* <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium">Irrigation Facility</label>
               <select
                 name="irrigationFacility"
                 value={data.irrigationFacility}
                 onChange={handleChange}
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
+                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none ${
                   errors.irrigationFacility ? "border-red-600" : ""
                 }`}
               >
@@ -184,7 +160,7 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
                 name="irrigationSource"
                 value={data.irrigationSource}
                 onChange={handleChange}
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
+                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none ${
                   errors.irrigationSource ? "border-red-600" : ""
                 }`}
               >
@@ -199,10 +175,10 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
                 </p>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Pesticides / Fertilizers */}
-          <div className="grid md:grid-cols-2 gap-4">
+          {/* <div className="grid md:grid-cols-2 gap-4">
             <InputField
               id="pesticideDose"
               label="Name and Dose of Pesticides/Fungicides (Litre)"
@@ -223,23 +199,23 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
                 value={data.fertilizerDose}
                 onChange={handleChange}
                 placeholder="Enter name and dose"
-                className="w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none"
+                className="w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Example: Urea, TSP, Potash/OMOP, DSP, Zink, Bio-fertilizer
               </p>
             </div>
-          </div>
+          </div> */}
 
           {/* System & Suitability */}
-          <div className="grid md:grid-cols-2 gap-4">
+          {/* <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium">System of Cultivation</label>
               <select
                 name="cultivationSystem"
                 value={data.cultivationSystem}
                 onChange={handleChange}
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
+                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none ${
                   errors.cultivationSystem ? "border-red-600" : ""
                 }`}
               >
@@ -263,7 +239,7 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
                 name="landSuitability"
                 value={data.landSuitability}
                 onChange={handleChange}
-                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none ${
+                className={`w-full border rounded-md p-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none ${
                   errors.landSuitability ? "border-red-600" : ""
                 }`}
               >
@@ -281,7 +257,7 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
                 </p>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     );

@@ -1,7 +1,9 @@
 "use client";
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
+import StageOne from "@/components/addCropForms/StageOne";
 // import AddCrop from "@/components/AddCropDetailsModal";
 import { Button } from "@/components/ui/button";
+import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
 import { ClipboardCheck, FilePlus, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -9,6 +11,7 @@ import { IoIosArrowForward } from "react-icons/io";
 
 const CropsPage = () => {
   const [isModal, setIsModal] = React.useState(false);
+  const [isStageOneModal, setIsStageOneModal] = React.useState(false);
   const [crops, setCrops] = useState<
     Array<{
       crop_name: string;
@@ -32,7 +35,7 @@ const CropsPage = () => {
     ];
 
     setCrops(cropData);
-  });
+  }, [crops.length]);
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -67,6 +70,12 @@ const CropsPage = () => {
       </div>
       {/* Table */}
       <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
+        <div className="mb-5">
+          <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
+            Registered Crops
+          </CardTitle>
+          <p className="text-sm text-gray-600">{crops.length} crops found</p>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -117,7 +126,7 @@ const CropsPage = () => {
                           variant={"ghost"}
                           className="bg-white text-blue-900"
                           title="Add crop details"
-                          onClick={() => console.log(crop)}
+                          onClick={() => setIsStageOneModal(true)}
                         >
                           <FilePlus />
                         </Button>
@@ -153,16 +162,30 @@ const CropsPage = () => {
               />
             </div>
           )} */}
-          {/* Here was the commented code - #001 */}
         </div>
       </div>
       {isModal && (
-        <GenericModal title="Register Crop"  closeModal={() => setIsModal(false)}>
+        <GenericModal
+          title="Register Crop"
+          closeModal={() => setIsModal(false)}
+          widthValue={"w-full max-w-xl"}
+        >
           {/* <AddCrop /> */}
           <RegisterCrop
             setCropData={setCrops}
             closeModal={() => setIsModal(false)}
           />
+        </GenericModal>
+      )}
+
+      {/* Stage One Modal */}
+      {isStageOneModal && (
+        <GenericModal
+          title="Add Crop Details"
+          closeModal={() => setIsStageOneModal(false)}
+          widthValue={"w-full max-w-xl"}
+        >
+          <StageOne />
         </GenericModal>
       )}
     </div>

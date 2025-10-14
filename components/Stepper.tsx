@@ -16,7 +16,7 @@ export const Stepper: React.FC<StepperProps> = ({
     steps.length === 1 ? 100 : (currentStep / (steps.length - 1)) * 100;
 
   return (
-    <div className="relative w-full my-5 lg:w-[70%] mx-auto h-20">
+    <div className="relative w-full my-5 lg:w-[90%] mx-auto h-16">
       {/* Line background behind the steps */}
       <div className="absolute top-2 left-0 right-0 h-5 bg-gray-300 rounded-full z-0 px-1" />
 
@@ -61,7 +61,7 @@ export const Stepper: React.FC<StepperProps> = ({
               )}
             </div>
             <p
-              className={`text-xs sm:text-sm mt-2 ${
+              className={`text-xs mt-2 ${
                 isCurrent || isCompleted
                   ? "font-semibold text-gray-800"
                   : "text-gray-500"

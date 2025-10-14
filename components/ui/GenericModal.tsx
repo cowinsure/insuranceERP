@@ -11,14 +11,14 @@ interface GenericModalProps {
   children?: React.ReactNode;
   content?: string;
   onConfirm?: () => void;
-  modalWidth?: string;
+  widthValue?: string;
 }
 
 const GenericModal = ({
   closeModal,
   title,
   children,
-  modalWidth,
+  widthValue,
 }: GenericModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -74,13 +74,13 @@ const GenericModal = ({
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 w-full ${
-          modalWidth ? modalWidth : "max-w-5xl min-w-md"
-        } animate__animated ${
+        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 ${
+          widthValue ? widthValue : "w-full max-w-5xl"
+        } animate__animated min-w-md ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"
         }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
           <button
             onClick={triggerClose}

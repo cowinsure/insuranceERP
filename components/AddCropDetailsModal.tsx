@@ -1,15 +1,28 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { toast } from "sonner";
 import { Stepper } from "./Stepper";
-import CropDetailsForm, { CropDetailsRef } from "./AddCropDetails";
+import CropDetailsForm from "./AddCropDetails";
 import PreviewSubmit from "./PreviewForm";
+import Cultivation from "./addCropForms/stageOneSteps/Cultivation";
+import History from "./addCropForms/stageOneSteps/History";
+import Weather from "./addCropForms/stageOneSteps/Weather";
+import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
+import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
 
 export default function AddCropDetailsModal() {
-  const steps = ["Crop Details", "Preview"];
+  const steps = [
+    "Seed",
+    "Cultivation",
+    "History",
+    "Weather",
+    "Pest & Disease",
+    "Chemicals",
+    "Preview",
+  ];
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -27,38 +40,26 @@ export default function AddCropDetailsModal() {
     landSuitability: "",
   });
 
-  const cropDetailsRef = useRef<CropDetailsRef>(null);
-
+  /** ✅ Simplified handleNext (no validation) **/
   const handleNext = () => {
-    let valid = false;
-
-    if (currentStep === 0)
-      valid = cropDetailsRef.current?.validateFields() ?? false;
-    else valid = true;
-
-    if (!valid) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
     setCompletedSteps((prev) => new Set(prev).add(currentStep));
-    setCurrentStep((prev) => prev + 1);
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   };
 
-  const handlePrev = () => setCurrentStep((prev) => prev - 1);
+  const handlePrev = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    const cropData = cropDetailsRef.current?.getValues();
+    console.log("Final Submitted Data:", cropData);
 
-    const formData = { ...cropData };
-
-    console.log("Final Submitted Data:", formData);
     toast.success("Form submitted successfully!");
 
     setTimeout(() => {
       setIsLoading(false);
       setCurrentStep(0);
+      setCompletedSteps(new Set());
     }, 1500);
   };
 
@@ -70,31 +71,30 @@ export default function AddCropDetailsModal() {
     });
   };
 
+  /** ✅ Step Rendering **/
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return (
-          <CropDetailsForm
-            ref={cropDetailsRef}
-            data={cropData}
-            onChange={handleCropChange}
-          />
-        );
+        return <CropDetailsForm data={cropData} onChange={handleCropChange} />;
       case 1:
-        return (
-          <PreviewSubmit
-            data={{
-              cropData,
-            }}
-          />
-        );
+        return <Cultivation />;
+      case 2:
+        return <History />;
+      case 3:
+        return <Weather />;
+      case 4:
+        return <PestsDisease />;
+      case 5:
+        return <Chemicals />;
+      case 6:
+        return <PreviewSubmit data={{ cropData }} />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="">
+    <div>
       {/* Stepper */}
       <div className="bg-white rounded-xl mb-4">
         <Stepper
@@ -105,7 +105,7 @@ export default function AddCropDetailsModal() {
       </div>
 
       {/* Step Content */}
-      <div className="overflow-y-auto h-[550px] bg-white rounded-b-xl p-5">
+      <div className={`overflow-y-auto  bg-white rounded-b-xl`}>
         {renderStep()}
       </div>
 

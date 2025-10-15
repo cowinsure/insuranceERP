@@ -58,7 +58,7 @@ export default function CropPage() {
     
   
     const plotCoordinates =
-      apiPayload?.data?.plot_coordinates?.map((coord: { latitude: number, longitude: number }) => ({
+      apiPayload?.data?.plot_coordinate?.map((coord: { latitude: number, longitude: number }) => ({
         lat: coord.latitude.toString(),
         lng: coord.longitude.toString(),
       })) ?? [];

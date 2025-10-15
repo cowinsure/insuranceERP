@@ -211,7 +211,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       console.log(data);
 
       // Extract fields from the correct structure
-      const plotCoordinatesRaw = data.data?.plot_coordinates ?? [];
+      const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
       const landAreaRaw = data.data?.land_area ?? [];
       const imageUrl = data.data?.image ?? "";
       const area = typeof data.area === "number" ? `${data.area.toFixed(2)} acres` : "N/A";

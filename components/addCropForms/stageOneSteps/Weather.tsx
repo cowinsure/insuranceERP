@@ -1,19 +1,26 @@
+import { CropData } from "@/components/AddCropDetailsModal";
 import InputField from "@/components/InputField";
 import React, { useState } from "react";
 
-const Weather = () => {
-  const [data, setData] = useState({
-    adverseWeatherEffects: {
-      flood: false,
-      drought: false,
-      excessRainfall: false,
-      storms: false,
-      hailstorm: false,
-    },
-    periodFrom: "",
-    periodTo: "",
-  });
-
+const Weather = ({
+  data,
+  onChange,
+}: {
+  data: CropData;
+  onChange: (
+    field: string,
+    value:
+      | string
+      | boolean
+      | {
+          flood: boolean;
+          drought: boolean;
+          excessRainfall: boolean;
+          storms: boolean;
+          hailstorm: boolean;
+        }
+  ) => void;
+}) => {
   const [errors, setErrors] = useState({
     adverseWeatherEffects: "",
     periodFrom: "",
@@ -23,19 +30,16 @@ const Weather = () => {
   // Handle change for all form fields (Checkbox and Date)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value, checked } = e.target;
+
     if (type === "checkbox") {
-      setData((prevData) => ({
-        ...prevData,
-        adverseWeatherEffects: {
-          ...prevData.adverseWeatherEffects,
-          [name]: checked,
-        },
-      }));
+      // Update nested adverseWeatherEffects
+      onChange("adverseWeatherEffects", {
+        ...data.adverseWeatherEffects,
+        [name]: checked,
+      });
     } else {
-      setData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
+      // Update date fields
+      onChange(name, value);
     }
   };
 
@@ -47,13 +51,13 @@ const Weather = () => {
       periodTo: "",
     };
 
-    // Example validation checks (you can customize)
+    const effects = data.adverseWeatherEffects;
     if (
-      !data.adverseWeatherEffects.flood &&
-      !data.adverseWeatherEffects.drought &&
-      !data.adverseWeatherEffects.excessRainfall &&
-      !data.adverseWeatherEffects.storms &&
-      !data.adverseWeatherEffects.hailstorm
+      !effects.flood &&
+      !effects.drought &&
+      !effects.excessRainfall &&
+      !effects.storms &&
+      !effects.hailstorm
     ) {
       newErrors.adverseWeatherEffects =
         "Please select at least one adverse weather effect";
@@ -67,7 +71,9 @@ const Weather = () => {
 
   return (
     <form className="p-3">
-      <h2 className="text-xl font-semibold mb-5 underline text-center">Weather Details</h2>
+      <h2 className="text-xl font-semibold mb-5 underline text-center">
+        Weather Details
+      </h2>
       <div className="space-y-5">
         {/* Adverse Weather Effects (Checkboxes) */}
         <div className="space-y-5">
@@ -119,7 +125,7 @@ const Weather = () => {
                   className="text-gray-600 flex flex-col"
                 >
                   <strong className="text-[15px]">{effect.label}</strong>
-                  <span className="text-gray-400"> {effect.description}</span>
+                  <span className="text-gray-400">{effect.description}</span>
                 </label>
               </div>
             ))}
@@ -133,7 +139,9 @@ const Weather = () => {
 
         {/* Period of Adverse Weather (Date Inputs) */}
         <div>
-          <h1 className="text-lg font-semibold mb-1">Period of Adverse Weather</h1>
+          <h1 className="text-lg font-semibold mb-1">
+            Period of Adverse Weather
+          </h1>
           <div className="grid grid-cols-2 gap-6">
             <InputField
               label="From"

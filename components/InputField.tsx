@@ -4,7 +4,7 @@ import clsx from "clsx";
 import React from "react";
 
 interface InputFieldProps {
-  label: string;
+  label?: string;
   type?: string;
   id: string;
   name: string;
@@ -34,9 +34,11 @@ const InputField: React.FC<InputFieldProps> = ({
   return (
     <div className="relative">
       <div className="flex flex-col">
-        <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-500">
-          {label}
-        </label>
+        {label && (
+          <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-500">
+            {label}
+          </label>
+        )}
         <input
           type={type}
           id={id}

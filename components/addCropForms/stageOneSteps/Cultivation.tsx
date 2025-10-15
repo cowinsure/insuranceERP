@@ -1,14 +1,19 @@
 import DropdownField from "@/components/DropDownField";
 import React, { useState } from "react";
 
-const Cultivation = () => {
-  const [data, setData] = useState({
-    irrigationFacility: "",
-    irrigationSource: "",
-    cultivationSystem: "",
-    landSuitability: "",
-  });
+interface CultivationData {
+  irrigationFacility: string;
+  irrigationSource: string;
+  cultivationSystem: string;
+  landSuitability: string;
+}
 
+interface CultivationProps {
+  data: CultivationData;
+  onChange: (field: string, value: string) => void;
+}
+
+const Cultivation = ({ data, onChange }: CultivationProps) => {
   const [errors, setErrors] = useState({
     irrigationFacility: "",
     irrigationSource: "",
@@ -21,10 +26,7 @@ const Cultivation = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    onChange(name, value);
   };
 
   // Form validation not in use currently

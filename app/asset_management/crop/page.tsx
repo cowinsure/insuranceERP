@@ -183,7 +183,7 @@ const CropsPage = () => {
         <GenericModal
           title="Add Crop Details"
           closeModal={() => setIsStageOneModal(false)}
-          widthValue={"w-full max-w-xl"}
+          widthValue={"w-full min-w-sm md:max-w-xl"}
         >
           <StageOne />
         </GenericModal>

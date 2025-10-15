@@ -3,6 +3,7 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import InputField from "./InputField";
 import DropdownField from "./DropDownField";
+import { CropData } from "./AddCropDetailsModal";
 
 export interface CropDetailsRef {
   validateFields: () => boolean;
@@ -10,8 +11,8 @@ export interface CropDetailsRef {
 }
 
 interface CropDetailsFormProps {
-  data: Record<string, string>;
-  onChange: (field: string, value: string) => void;
+  data: CropData;
+  onChange: (field: string, value: string | boolean) => void;
 }
 
 const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
@@ -78,7 +79,9 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
 
     return (
       <div className="p-3">
-        <h2 className="text-xl font-semibold mb-5 text-center underline">Seed Details</h2>
+        <h2 className="text-xl font-semibold mb-5 text-center underline">
+          Seed Details
+        </h2>
         <div className="space-y-5">
           {/* Seed Info */}
           <InputField

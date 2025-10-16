@@ -12,6 +12,7 @@ import History from "./addCropForms/stageOneSteps/History";
 import Weather from "./addCropForms/stageOneSteps/Weather";
 import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
 import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
+import { SelectedCropData } from "./addCropForms/StageOne";
 
 export interface Item {
   name: string;
@@ -67,7 +68,60 @@ export interface CropData {
   pesticides: Item[];
 }
 
-export default function AddCropDetailsModal() {
+const defaultCropData: CropData = {
+  seedName: "",
+  variety: "",
+  seedCompany: "",
+  seedType: "",
+  irrigationFacility: "",
+  irrigationSource: "",
+  cultivationSystem: "",
+  landSuitability: "",
+  immediatePreviousCrop: "",
+  harvestDate: "",
+  lastYearsCrop: "",
+  lastYearProduction: "",
+  sowingDate: "",
+  seedUsedLastYear: "",
+  reasonForChangingSeed: "",
+  adverseWeatherEffects: {
+    flood: false,
+    drought: false,
+    excessRainfall: false,
+    storms: false,
+    hailstorm: false,
+  },
+  periodFrom: "",
+  periodTo: "",
+  pestAttack: {
+    stemBorer: false,
+    leafFolder: false,
+    brownPlanthopper: false,
+    greenLeafhopper: false,
+    stinkBug: false,
+    others: false,
+    none: false,
+  },
+  diseaseAttack: {
+    leafBlast: false,
+    bacterialLeafBlight: false,
+    sheathBlight: false,
+    bakanae: false,
+    brownSpot: false,
+    leafScald: false,
+    hispa: false,
+    tungro: false,
+    none: false,
+  },
+  fertilizers: [{ name: "", quantity: "" }],
+  pesticides: [{ name: "", quantity: "" }],
+};
+
+export default function AddCropDetailsModal({
+  selectedCrop,
+}: {
+  selectedCrop: SelectedCropData;
+}) {
   const steps = [
     "Seed",
     "Cultivation",
@@ -78,61 +132,13 @@ export default function AddCropDetailsModal() {
     "Preview",
   ];
 
+  const storageKey = `cropFormData_${selectedCrop.crop_name}`;
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
-  const [cropData, setCropData] = useState<CropData>({
-    // step 1
-    seedName: "",
-    variety: "",
-    seedCompany: "",
-    seedType: "",
-    // step 2
-    irrigationFacility: "",
-    irrigationSource: "",
-    cultivationSystem: "",
-    landSuitability: "",
-    // step 3
-    immediatePreviousCrop: "",
-    harvestDate: "",
-    lastYearsCrop: "",
-    lastYearProduction: "",
-    sowingDate: "",
-    seedUsedLastYear: "",
-    reasonForChangingSeed: "",
-    // step 4
-    adverseWeatherEffects: {
-      flood: false,
-      drought: false,
-      excessRainfall: false,
-      storms: false,
-      hailstorm: false,
-    },
-    periodFrom: "",
-    periodTo: "",
-    // step 5
-    pestAttack: {
-      stemBorer: false,
-      leafFolder: false,
-      brownPlanthopper: false,
-      greenLeafhopper: false,
-      stinkBug: false,
-      others: false,
-      none: false,
-    },
-    diseaseAttack: {
-      leafBlast: false,
-      bacterialLeafBlight: false,
-      sheathBlight: false,
-      bakanae: false,
-      brownSpot: false,
-      leafScald: false,
-      hispa: false,
-      tungro: false,
-      none: false,
-    },
-    fertilizers: [{ name: "", quantity: "" }],
-    pesticides: [{ name: "", quantity: "" }],
+  const [cropData, setCropData] = useState<CropData>(() => {
+    const saved = localStorage.getItem(`${storageKey}`);
+    return saved ? JSON.parse(saved) : defaultCropData;
   });
 
   /** ✅ Simplified handleNext (no validation) **/
@@ -148,13 +154,15 @@ export default function AddCropDetailsModal() {
   const handleSubmit = async () => {
     setIsLoading(true);
     console.log("Final Submitted Data:", cropData);
-
     toast.success("Form submitted successfully!");
+
+    // ✅ Mark Stage One as completed in localStorage
+    localStorage.setItem(`stageOneCompleted_${selectedCrop.crop_name}`, "true");
 
     setTimeout(() => {
       setIsLoading(false);
       setCurrentStep(0);
-      setCompletedSteps(new Set());
+      // setCompletedSteps(new Set());
     }, 1500);
   };
 
@@ -181,16 +189,22 @@ export default function AddCropDetailsModal() {
         updated[field as keyof CropData] = value as any;
       }
 
-      localStorage.setItem("cropFormData", JSON.stringify(updated));
+      localStorage.setItem(`${storageKey}`, JSON.stringify(updated));
       return updated;
     });
   };
 
-  /** ✅ Step Rendering **/
+  /* ✅ Step Rendering */
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <CropDetailsForm data={cropData} onChange={handleCropChange} />;
+        return (
+          <CropDetailsForm
+            data={cropData}
+            onChange={handleCropChange}
+            selectedCrop={{ ...selectedCrop }}
+          />
+        );
       case 1:
         return <Cultivation data={cropData} onChange={handleCropChange} />;
       case 2:

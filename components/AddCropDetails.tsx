@@ -4,6 +4,7 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import InputField from "./InputField";
 import DropdownField from "./DropDownField";
 import { CropData } from "./AddCropDetailsModal";
+import { SelectedCropData } from "./addCropForms/StageOne";
 
 export interface CropDetailsRef {
   validateFields: () => boolean;
@@ -13,10 +14,11 @@ export interface CropDetailsRef {
 interface CropDetailsFormProps {
   data: CropData;
   onChange: (field: string, value: string | boolean) => void;
+  selectedCrop: SelectedCropData;
 }
 
 const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
-  ({ data, onChange }, ref) => {
+  ({ data, onChange, selectedCrop }, ref) => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const handleChange = (
@@ -76,6 +78,8 @@ const CropDetailsForm = forwardRef<CropDetailsRef, CropDetailsFormProps>(
       },
       { value: "Hybrid", label: "Hybrid (হাইব্রিড)" },
     ];
+
+    console.log(selectedCrop);
 
     return (
       <div className="p-3">

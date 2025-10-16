@@ -8,10 +8,17 @@ import GenericModal from "@/components/ui/GenericModal";
 import { ClipboardCheck, FilePlus, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
+import { toast, Toaster } from "sonner";
 
 const CropsPage = () => {
   const [isModal, setIsModal] = React.useState(false);
   const [isStageOneModal, setIsStageOneModal] = React.useState(false);
+  const [isStageTwoModal, setIsStageTwoModal] = React.useState(false);
+  const [selectedCrop, setSelectedCrop] = useState({
+    crop_name: "",
+    variety: "",
+    plantation_date: "",
+  });
   const [crops, setCrops] = useState<
     Array<{
       crop_name: string;
@@ -23,12 +30,22 @@ const CropsPage = () => {
   useEffect(() => {
     const cropData = [
       {
-        crop_name: "Rice",
+        crop_name: "Rice-1",
         variety: "Aman",
         plantation_date: "9-Dec-2009",
       },
       {
-        crop_name: "Rice",
+        crop_name: "Rice-2",
+        variety: "Aman",
+        plantation_date: "9-Dec-2009",
+      },
+      {
+        crop_name: "Aman",
+        variety: "Aman",
+        plantation_date: "9-Dec-2009",
+      },
+      {
+        crop_name: "Rice-3",
         variety: "Aman",
         plantation_date: "9-Dec-2009",
       },
@@ -36,6 +53,28 @@ const CropsPage = () => {
 
     setCrops(cropData);
   }, [crops.length]);
+
+  const handleAddCropDetails = (cropName: string) => {
+    if (!cropName) return;
+    const selectedCrop = crops.find((crop) => crop.crop_name === cropName);
+    if (!selectedCrop) return;
+    setSelectedCrop(selectedCrop);
+    setIsStageOneModal(true);
+  };
+
+  const handleRevisitData = (cropName: string) => {
+    if (!cropName) return;
+    const selectedCrop = crops.find((crop) => crop.crop_name === cropName);
+    if (!selectedCrop) return;
+    setSelectedCrop(selectedCrop);
+    setIsStageTwoModal(true);
+  };
+
+  // Flag for stage one complete
+  const isStageOneCompleted = (cropName: string) => {
+    return localStorage.getItem(`stageOneCompleted_${cropName}`) === "true";
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -126,7 +165,7 @@ const CropsPage = () => {
                           variant={"ghost"}
                           className="bg-white text-blue-900"
                           title="Add crop details"
-                          onClick={() => setIsStageOneModal(true)}
+                          onClick={() => handleAddCropDetails(crop.crop_name)}
                         >
                           <FilePlus />
                         </Button>
@@ -135,9 +174,23 @@ const CropsPage = () => {
                         <div className="flex items-center justify-center py-4 px-4">
                           <Button
                             variant={"ghost"}
-                            className="bg-white text-blue-900"
-                            title="Add revisit data"
-                            onClick={() => console.log(crop)}
+                            className={`bg-white ${
+                              isStageOneCompleted(crop.crop_name)
+                                ? "text-blue-900"
+                                : "text-gray-400 cursor-not-allowed"
+                            }`}
+                            title={
+                              isStageOneCompleted(crop.crop_name)
+                                ? "Add revisit data"
+                                : ""
+                            }
+                            onClick={() => {
+                              if (!isStageOneCompleted(crop.crop_name)) {
+                                toast.error("Complete Stage one first");
+                              } else {
+                                handleRevisitData(crop.crop_name);
+                              }
+                            }}
                           >
                             <ClipboardCheck />
                           </Button>
@@ -181,13 +234,40 @@ const CropsPage = () => {
       {/* Stage One Modal */}
       {isStageOneModal && (
         <GenericModal
-          title="Add Crop Details"
+          title={
+            <h1 className="flex flex-col">
+              {`Add Details for ${selectedCrop.crop_name} `}
+              <small className="font-medium text-gray-500">
+                Variety: {selectedCrop.variety}
+              </small>
+            </h1>
+          }
           closeModal={() => setIsStageOneModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-          <StageOne />
+          <StageOne {...(selectedCrop as any)} />
         </GenericModal>
       )}
+
+      {/* Stage Two Modal */}
+      {isStageTwoModal && (
+        <GenericModal
+          title={
+            <h1 className="flex flex-col">
+              {`Revisit data for ${selectedCrop.crop_name} `}
+              <small className="font-medium text-gray-500">
+                Variety: {selectedCrop.variety}
+              </small>
+            </h1>
+          }
+          closeModal={() => setIsStageTwoModal(false)}
+          widthValue={"w-full min-w-sm md:max-w-xl"}
+        >
+          <h1>This is stage 2</h1>
+        </GenericModal>
+      )}
+
+      <Toaster richColors />
     </div>
   );
 };

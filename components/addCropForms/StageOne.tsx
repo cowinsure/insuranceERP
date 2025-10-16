@@ -1,10 +1,16 @@
 import React from "react";
 import AddCropDetailsModal from "../AddCropDetailsModal";
 
-const StageOne = () => {
+export interface SelectedCropData {
+  crop_name: string;
+  variety: string;
+  plantation_date: string;
+}
+
+const StageOne = (selectedCropData: SelectedCropData) => {
   return (
     <div>
-      <AddCropDetailsModal />
+      <AddCropDetailsModal selectedCrop={{ ...selectedCropData }} />
     </div>
   );
 };

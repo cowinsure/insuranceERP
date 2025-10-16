@@ -7,7 +7,7 @@ import { MdClose } from "react-icons/md";
 
 interface GenericModalProps {
   closeModal: () => void;
-  title?: string;
+  title?: React.ReactNode | string;
   children?: React.ReactNode;
   content?: string;
   onConfirm?: () => void;

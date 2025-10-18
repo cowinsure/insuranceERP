@@ -5,7 +5,8 @@ import StageOne from "@/components/addCropForms/StageOne";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
-import { ClipboardCheck, FilePlus, Plus } from "lucide-react";
+import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
+import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
@@ -14,6 +15,7 @@ const CropsPage = () => {
   const [isModal, setIsModal] = React.useState(false);
   const [isStageOneModal, setIsStageOneModal] = React.useState(false);
   const [isStageTwoModal, setIsStageTwoModal] = React.useState(false);
+  const [isCropView, setIsCropView] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState({
     crop_name: "",
     variety: "",
@@ -68,6 +70,18 @@ const CropsPage = () => {
     if (!selectedCrop) return;
     setSelectedCrop(selectedCrop);
     setIsStageTwoModal(true);
+  };
+
+  const handleView = (name: string) => {
+    if (!name) return;
+    const viewCrop = crops.find((crop) => crop.crop_name === name);
+    console.log(viewCrop);
+    setSelectedCrop({
+      crop_name: viewCrop?.crop_name as string,
+      plantation_date: viewCrop?.plantation_date as string,
+      variety: viewCrop?.variety as string,
+    });
+    setIsCropView(true);
   };
 
   // Flag for stage one complete
@@ -134,6 +148,9 @@ const CropsPage = () => {
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Stage 2
                 </th>
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
+                  View Crop
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -160,6 +177,7 @@ const CropsPage = () => {
                           {crop.plantation_date}
                         </div>
                       </td>
+                      {/* Stage one */}
                       <td className="flex justify-center items-center py-4 px-4">
                         <Button
                           variant={"ghost"}
@@ -170,6 +188,7 @@ const CropsPage = () => {
                           <FilePlus />
                         </Button>
                       </td>
+                      {/* Stage two */}
                       <td>
                         <div className="flex items-center justify-center py-4 px-4">
                           <Button
@@ -193,6 +212,17 @@ const CropsPage = () => {
                             }}
                           >
                             <ClipboardCheck />
+                          </Button>
+                        </div>
+                      </td>
+                      {/* Action btn */}
+                      <td>
+                        <div className="flex items-center justify-center py-4 px-4">
+                          <Button
+                            variant={"outline"}
+                            onClick={() => handleView(crop.crop_name)}
+                          >
+                            <Eye />
                           </Button>
                         </div>
                       </td>
@@ -264,6 +294,16 @@ const CropsPage = () => {
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
           <h1>This is stage 2</h1>
+        </GenericModal>
+      )}
+
+      {/* Crop View Modal */}
+      {isCropView && (
+        <GenericModal
+          closeModal={() => setIsCropView(false)}
+          title={`Viewing details of ${selectedCrop.crop_name}`}
+        >
+          <CropStageModalTabs stageOneData={selectedCrop} />
         </GenericModal>
       )}
 

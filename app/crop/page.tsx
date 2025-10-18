@@ -25,16 +25,33 @@ interface PlotData {
   plotName: string
   area: string
 }
+interface Coordinate {
+  lat: string;
+  lng: string;
+}
+
 interface Plot {
   id: string
   plotName: string
   description?: string
   area: string
-  coordinates: { lat: string; lng: string }[]
-  landArea: { lat: string; lng: string }[]
+  coordinates: Coordinate[]
+  landArea: Coordinate[]
   imageUrl: string
   createdAt: string
   status: "active" | "pending" | "archived"
+  // Advanced map fields for marker/polygon support
+  landCoordinates?: Coordinate[]
+  plotCoordinates?: Coordinate[]
+  innerCoordinates?: Coordinate[]
+  swMark?: Coordinate | null
+  nCorner?: Coordinate | null
+  eCorner?: Coordinate | null
+  nMark?: Coordinate | null
+  eMark?: Coordinate | null
+  nMarkDist?: number | null
+  eMarkDist?: number | null
+  intersection?: Coordinate | null
 }
 
 export default function CropPage() {
@@ -55,7 +72,20 @@ export default function CropPage() {
   const handlePlotCreated = ( apiPayload: any , plotName: string, plotDescription: string) => {
 
     console.log(apiPayload);
+  const plotCoordinatesRaw = apiPayload.data?.plot_coordinate ?? [];
+  const innerAreaRaw = apiPayload.data?.inner_area ?? [];
+  const landAreaRaw = apiPayload.data?.land_area ?? [];
     
+  const sw_mark_raw = apiPayload?.data?.sw_mark ?? null;
+  const n_corner_raw = apiPayload?.data?.n_corner ?? null;
+  const e_corner_raw = apiPayload?.data?.e_corner ?? null;
+  const n_mark_raw = apiPayload?.data?.n_mark ?? null;
+  const e_mark_raw = apiPayload?.data?.e_mark ?? null;
+  const intersection_raw = apiPayload?.data?.intersection ?? null;
+  const n_mark_dist_raw = apiPayload?.data?.n_mark_dist ?? null;
+  const e_mark_dist_raw = apiPayload?.data?.e_mark_dist ?? null;
+    
+
   
     const plotCoordinates =
       apiPayload?.data?.plot_coordinate?.map((coord: { latitude: number, longitude: number }) => ({
@@ -79,10 +109,37 @@ export default function CropPage() {
       description: plotDescription,
       area,
       coordinates: plotCoordinates,
-      landArea:landArea,
-      imageUrl,
+      plotCoordinates:  Array.isArray(plotCoordinatesRaw)
+          ? plotCoordinatesRaw.map((coord: { latitude: number, longitude: number }) => ({
+              lat: coord.latitude.toString(),
+              lng: coord.longitude.toString()
+            }))
+          : [],
+      innerCoordinates:  Array.isArray(innerAreaRaw)
+          ? innerAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
+              lat: coord.latitude.toString(),
+              lng: coord.longitude.toString()
+            }))
+          : [],
+          landArea:landArea,
+          landCoordinates: Array.isArray(landAreaRaw)
+          ? landAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
+              lat: coord.latitude.toString(),
+              lng: coord.longitude.toString()
+            }))
+          : [],
+          imageUrl,
       createdAt: new Date().toISOString(),
       status: "active",
+       swMark: sw_mark_raw ? { lat: sw_mark_raw.latitude.toString(), lng: sw_mark_raw.longitude.toString() } : null,
+        nCorner: n_corner_raw ? { lat: n_corner_raw.latitude.toString(), lng: n_corner_raw.longitude.toString() } : null,
+        eCorner: e_corner_raw ? { lat: e_corner_raw.latitude.toString(), lng: e_corner_raw.longitude.toString() } : null,
+        nMark: n_mark_raw ? { lat: n_mark_raw.latitude.toString(), lng: n_mark_raw.longitude.toString() } : null,
+  eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
+  nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
+  eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
+        intersection: intersection_raw ? { lat: intersection_raw.latitude.toString(), lng: intersection_raw.longitude.toString() } : null,
+       
     };
     setPlots((prev) => [...prev, newPlot]);
   }
@@ -117,6 +174,8 @@ export default function CropPage() {
 
   // Save plots to localStorage whenever plots change
   useEffect(() => {
+
+    
     localStorage.setItem("plots", JSON.stringify(plots));
   }, [plots]);
 

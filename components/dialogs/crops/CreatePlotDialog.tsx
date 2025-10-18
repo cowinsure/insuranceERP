@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, MapPin, ImageIcon, Trash2, Plus,LocateFixed  } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { GoogleMap, Marker, Polygon, useJsApiLoader } from "@react-google-maps/api"
+import { GoogleMap, Marker, Polygon, InfoWindow, useJsApiLoader } from "@react-google-maps/api"
 
 const mapContainerStyle = {
   width: "100%",
@@ -30,6 +30,15 @@ interface Coordinate {
 interface PlotData {
   landCoordinates: Coordinate[]
   plotCoordinates: Coordinate[]
+  innerCoordinates?: Coordinate[]
+  swMark?: Coordinate | null
+  nCorner?: Coordinate | null
+  eCorner?: Coordinate | null
+  nMark?: Coordinate | null
+  eMark?: Coordinate | null
+  nMarkDist?: number | null
+  eMarkDist?: number | null
+  intersection?: Coordinate | null
   imageUrl: string
   plotName: string
   area: string
@@ -54,6 +63,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [apiPayload, setApiPayload] = useState<any>(null);
   const { toast } = useToast()
   const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
+  const [openInfoFor, setOpenInfoFor] = useState<string | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -145,24 +155,46 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
     })
   }
 
-  const generatePlot = async () => {
-    if (!plotName.trim()) {
-      toast({
-        title: "Plot name required",
-        description: "Please enter a name for your plot.",
-        variant: "destructive",
-      })
-      return
-    }
+  // demo data 
+  var apiPayloadDemo = {
+    "land_area": [
+      {
+        "latitude": 23.77059158003182,
+        "longitude": 90.4059435510674
+      },
+      {
+        "latitude": 23.768004012086546,
+        "longitude": 90.40556006776123
+      },
+      {
+        "latitude": 23.768386947388315,
+        "longitude": 90.40291004522925
+      },
+      {
+        "latitude": 23.77093982059538,
+        "longitude": 90.40333919867572
+      }
+    ]
+  }
 
-    if (!validateCoordinates()) {
-      toast({
-        title: "Invalid coordinates",
-        description: "Please check that all coordinates are valid (lat: -90 to 90, lng: -180 to 180).",
-        variant: "destructive",
-      })
-      return
-    }
+  const generatePlot = async () => {
+    // if (!plotName.trim()) {
+    //   toast({
+    //     title: "Plot name required",
+    //     description: "Please enter a name for your plot.",
+    //     variant: "destructive",
+    //   })
+    //   return
+    // }
+
+    // if (!validateCoordinates()) {
+    //   toast({
+    //     title: "Invalid coordinates",
+    //     description: "Please check that all coordinates are valid (lat: -90 to 90, lng: -180 to 180).",
+    //     variant: "destructive",
+    //   })
+    //   return
+    // }
 
     setIsGenerating(true)
  setApiErrorMessage(null);
@@ -179,13 +211,13 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       
 
       // Make the API call
-      const response = await fetch("https://cropploting.dev.insurecow.com/landmap/generate/", {
+      const response = await fetch("http://127.0.0.1:8000/landmap/generate/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTb21lLXRlc3QtdXNlci0xMjM0NSIsInJvbGUiOiJBZG1pbl9UZXN0IiwiZXhwIjo4ODE1ODAyMjI4N30.EKD2bGCZ4KzaVrxjtf2wWE9XYIzbS_V-VKGPQIHsuyY"
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(apiPayloadDemo)
       });
 
       if (!response.ok) {
@@ -211,10 +243,20 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       console.log(data);
 
       // Extract fields from the correct structure
-      const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
-      const landAreaRaw = data.data?.land_area ?? [];
-      const imageUrl = data.data?.image ?? "";
-      const area = typeof data.area === "number" ? `${data.area.toFixed(2)} acres` : "N/A";
+  const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
+  const landAreaRaw = data.data?.land_area ?? [];
+  const innerAreaRaw = data.data?.inner_area ?? [];
+  const imageUrl = data.data?.image ?? "";
+  const area = typeof data.area === "number" ? `${data.area.toFixed(2)} acres` : "N/A";
+
+  const sw_mark_raw = data.data?.sw_mark ?? null;
+  const n_corner_raw = data.data?.n_corner ?? null;
+  const e_corner_raw = data.data?.e_corner ?? null;
+  const n_mark_raw = data.data?.n_mark ?? null;
+  const e_mark_raw = data.data?.e_mark ?? null;
+  const intersection_raw = data.data?.intersection ?? null;
+  const n_mark_dist_raw = data.data?.n_mark_dist ?? null;
+  const e_mark_dist_raw = data.data?.e_mark_dist ?? null;
 
       setApiPayload(data); // Save full API payload
 
@@ -232,6 +274,20 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
               lng: coord.longitude.toString()
             }))
           : [],
+        innerCoordinates: Array.isArray(innerAreaRaw)
+          ? innerAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
+              lat: coord.latitude.toString(),
+              lng: coord.longitude.toString()
+            }))
+          : [],
+        swMark: sw_mark_raw ? { lat: sw_mark_raw.latitude.toString(), lng: sw_mark_raw.longitude.toString() } : null,
+        nCorner: n_corner_raw ? { lat: n_corner_raw.latitude.toString(), lng: n_corner_raw.longitude.toString() } : null,
+        eCorner: e_corner_raw ? { lat: e_corner_raw.latitude.toString(), lng: e_corner_raw.longitude.toString() } : null,
+        nMark: n_mark_raw ? { lat: n_mark_raw.latitude.toString(), lng: n_mark_raw.longitude.toString() } : null,
+  eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
+  nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
+  eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
+        intersection: intersection_raw ? { lat: intersection_raw.latitude.toString(), lng: intersection_raw.longitude.toString() } : null,
         imageUrl,
         area,
         description: plotDescription,
@@ -295,6 +351,27 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       const angleB = Math.atan2(parseFloat(b.lat) - centroid.lat, parseFloat(b.lng) - centroid.lng);
       return angleA - angleB;
     });
+  }
+
+  function getMarkerIcon(kind: string) {
+    // Use Google Maps simple colored dots
+    const base = "http://maps.google.com/mapfiles/ms/icons/";
+    switch (kind) {
+      case "sw":
+        return base + "purple-dot.png";
+      case "n_corner":
+        return base + "yellow-dot.png";
+      case "e_corner":
+        return base + "orange-dot.png";
+      case "n_mark":
+        return base + "red-dot.png";
+      case "e_mark":
+        return base + "pink-dot.png";
+      case "intersection":
+        return base + "black-dot.png";
+      default:
+        return base + "blue-dot.png";
+    }
   }
 
   return (
@@ -607,6 +684,24 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                         }}
                       />
                     )}
+                    {/* Inner Area Polygon (if available) */}
+                    {plotData.innerCoordinates && plotData.innerCoordinates.length > 2 && (
+                      <Polygon
+                        path={sortPolygonCoords(plotData.innerCoordinates).map(coord => ({
+                          lat: parseFloat(coord.lat),
+                          lng: parseFloat(coord.lng),
+                        }))}
+                        options={{
+                          strokeColor: "#6f42c1", // purple
+                          strokeOpacity: 1,
+                          strokeWeight: 2,
+                          fillColor: "#6f42c1",
+                          fillOpacity: 0.05,
+                          clickable: false,
+                          zIndex: 3,
+                        }}
+                      />
+                    )}
                     {/* Land Coordinates Polygon */}
                     {plotData.landCoordinates && plotData.landCoordinates.length > 2 && (
                       <Polygon
@@ -633,6 +728,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                           lat: parseFloat(coord.lat),
                           lng: parseFloat(coord.lng),
                         }}
+                        onClick={() => setOpenInfoFor(`plot-${index}`)}
                       />
                     ))}
                     {/* Markers for land coordinates */}
@@ -646,11 +742,173 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                         icon={{
                           url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                         }}
+                        onClick={() => setOpenInfoFor(`land-${index}`)}
                       />
                     ))}
+                    {/* Special markers */}
+                    {plotData.swMark && (
+                      <Marker
+                        key={`sw_mark`}
+                        position={{ lat: parseFloat(plotData.swMark.lat), lng: parseFloat(plotData.swMark.lng) }}
+                        icon={{ url: getMarkerIcon('sw') }}
+                        onClick={() => setOpenInfoFor('sw_mark')}
+                      />
+                    )}
+                    {plotData.nCorner && (
+                      <Marker
+                        key={`n_corner`}
+                        position={{ lat: parseFloat(plotData.nCorner.lat), lng: parseFloat(plotData.nCorner.lng) }}
+                        icon={{ url: getMarkerIcon('n_corner') }}
+                        onClick={() => setOpenInfoFor('n_corner')}
+                      />
+                    )}
+                    {plotData.eCorner && (
+                      <Marker
+                        key={`e_corner`}
+                        position={{ lat: parseFloat(plotData.eCorner.lat), lng: parseFloat(plotData.eCorner.lng) }}
+                        icon={{ url: getMarkerIcon('e_corner') }}
+                        onClick={() => setOpenInfoFor('e_corner')}
+                      />
+                    )}
+                    {plotData.nMark && (
+                      <Marker
+                        key={`n_mark`}
+                        position={{ lat: parseFloat(plotData.nMark.lat), lng: parseFloat(plotData.nMark.lng) }}
+                        icon={{ url: getMarkerIcon('n_mark') }}
+                        onClick={() => setOpenInfoFor('n_mark')}
+                      />
+                    )}
+                    {plotData.eMark && (
+                      <Marker
+                        key={`e_mark`}
+                        position={{ lat: parseFloat(plotData.eMark.lat), lng: parseFloat(plotData.eMark.lng) }}
+                        icon={{ url: getMarkerIcon('e_mark') }}
+                        onClick={() => setOpenInfoFor('e_mark')}
+                      />
+                    )}
+                    {plotData.intersection && (
+                      <Marker
+                        key={`intersection`}
+                        position={{ lat: parseFloat(plotData.intersection.lat), lng: parseFloat(plotData.intersection.lng) }}
+                        icon={{ url: getMarkerIcon('intersection') }}
+                        onClick={() => setOpenInfoFor('intersection')}
+                      />
+                    )}
+                    {/* InfoWindows for generic markers */}
+                    {openInfoFor?.startsWith('plot-') && (() => {
+                      const idx = Number(openInfoFor.split('-')[1]);
+                      const coord = plotData.plotCoordinates?.[idx];
+                      if (!coord) return null;
+                      return (
+                        <InfoWindow
+                          position={{ lat: parseFloat(coord.lat), lng: parseFloat(coord.lng) }}
+                          onCloseClick={() => setOpenInfoFor(null)}
+                        >
+                          <div className="text-sm">
+                            <div className="font-semibold">Plot Point {idx + 1}</div>
+                            <div className="font-mono">{coord.lat}, {coord.lng}</div>
+                          </div>
+                        </InfoWindow>
+                      );
+                    })()}
+                    {openInfoFor?.startsWith('land-') && (() => {
+                      const idx = Number(openInfoFor.split('-')[1]);
+                      const coord = plotData.landCoordinates?.[idx];
+                      if (!coord) return null;
+                      return (
+                        <InfoWindow
+                          position={{ lat: parseFloat(coord.lat), lng: parseFloat(coord.lng) }}
+                          onCloseClick={() => setOpenInfoFor(null)}
+                        >
+                          <div className="text-sm">
+                            <div className="font-semibold">Land Point {idx + 1}</div>
+                            <div className="font-mono">{coord.lat}, {coord.lng}</div>
+                          </div>
+                        </InfoWindow>
+                      );
+                    })()}
+                    {openInfoFor === 'sw_mark' && plotData.swMark && (
+                      <InfoWindow
+                        position={{ lat: parseFloat(plotData.swMark.lat), lng: parseFloat(plotData.swMark.lng) }}
+                        onCloseClick={() => setOpenInfoFor(null)}
+                      >
+                        <div className="text-sm">
+                          <div className="font-semibold">SW Mark</div>
+                          <div className="font-mono">{plotData.swMark.lat}, {plotData.swMark.lng}</div>
+                        </div>
+                      </InfoWindow>
+                    )}
+                    {openInfoFor === 'n_corner' && plotData.nCorner && (
+                      <InfoWindow
+                        position={{ lat: parseFloat(plotData.nCorner.lat), lng: parseFloat(plotData.nCorner.lng) }}
+                        onCloseClick={() => setOpenInfoFor(null)}
+                      >
+                        <div className="text-sm">
+                          <div className="font-semibold">N Corner</div>
+                          <div className="font-mono">{plotData.nCorner.lat}, {plotData.nCorner.lng}</div>
+                        </div>
+                      </InfoWindow>
+                    )}
+                    {openInfoFor === 'e_corner' && plotData.eCorner && (
+                      <InfoWindow
+                        position={{ lat: parseFloat(plotData.eCorner.lat), lng: parseFloat(plotData.eCorner.lng) }}
+                        onCloseClick={() => setOpenInfoFor(null)}
+                      >
+                        <div className="text-sm">
+                          <div className="font-semibold">E Corner</div>
+                          <div className="font-mono">{plotData.eCorner.lat}, {plotData.eCorner.lng}</div>
+                        </div>
+                      </InfoWindow>
+                    )}
+                    {/* Info windows for distances */}
+                    {openInfoFor === 'n_mark' && plotData.nMark && (
+                      <InfoWindow
+                        position={{ lat: parseFloat(plotData.nMark.lat), lng: parseFloat(plotData.nMark.lng) }}
+                        onCloseClick={() => setOpenInfoFor(null)}
+                      >
+                        <div className="text-sm">
+                          <div className="font-semibold">N Mark</div>
+                          <div>{(plotData.nMarkDist ?? 0).toFixed(2)} meters</div>
+                        </div>
+                      </InfoWindow>
+                    )}
+                    {openInfoFor === 'e_mark' && plotData.eMark && (
+                      <InfoWindow
+                        position={{ lat: parseFloat(plotData.eMark.lat), lng: parseFloat(plotData.eMark.lng) }}
+                        onCloseClick={() => setOpenInfoFor(null)}
+                      >
+                        <div className="text-sm">
+                          <div className="font-semibold">E Mark</div>
+                          <div>{(plotData.eMarkDist ?? 0).toFixed(2)} meters</div>
+                        </div>
+                      </InfoWindow>
+                    )}
                   </GoogleMap>
                 </CardContent>
               </Card>
+            </div>
+          )}
+          {/* Legend for special markers */}
+          {showResults && plotData && (
+            <div className="mt-3 flex flex-wrap gap-3 items-center justify-center">
+              <div className="flex items-center gap-2 text-sm">
+                <img src={getMarkerIcon('sw')} alt="sw" className="w-4 h-4" /> <span>SW Mark</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <img src={getMarkerIcon('n_corner')} alt="n_corner" className="w-4 h-4" /> <span>N Corner</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <img src={getMarkerIcon('e_corner')} alt="e_corner" className="w-4 h-4" /> <span>E Corner</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <img src={getMarkerIcon('n_mark')} alt="n_mark" className="w-4 h-4" /> <span>N Mark</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <img src={getMarkerIcon('e_mark')} alt="e_mark" className="w-4 h-4" /> <span>E Mark</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <img src={getMarkerIcon('intersection')} alt="intersection" className="w-4 h-4" /> <span>Intersection</span>
+              </div>
             </div>
           )}
           {/* API error message */}

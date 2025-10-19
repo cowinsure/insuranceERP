@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, MapPin, ImageIcon, Trash2, Plus,LocateFixed  } from "lucide-react"
@@ -54,7 +56,15 @@ interface CreatePlotDialogProps {
 export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePlotDialogProps) {
   const [coordinates, setCoordinates] = useState<Coordinate[]>([{ lat: "", lng: "" }])
   const [plotName, setPlotName] = useState("")
+  const [landName, setLandName] = useState("")
   const [plotDescription, setPlotDescription] = useState("")
+  const [ownershipType, setOwnershipType] = useState("")
+  const [suitabilityReasons, setSuitabilityReasons] = useState<string[]>([])
+  const [nonSuitabilityReasons, setNonSuitabilityReasons] = useState<string[]>([])
+  const [measureSWSE, setMeasureSWSE] = useState("")
+  const [measureSWNW, setMeasureSWNW] = useState("")
+  const [measureNWNE, setMeasureNWNE] = useState("")
+  const [measureSENE, setMeasureSENE] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [plotData, setPlotData] = useState<PlotData | null>(null)
@@ -178,23 +188,23 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   }
 
   const generatePlot = async () => {
-    // if (!plotName.trim()) {
-    //   toast({
-    //     title: "Plot name required",
-    //     description: "Please enter a name for your plot.",
-    //     variant: "destructive",
-    //   })
-    //   return
-    // }
+    if (!plotName.trim()) {
+      toast({
+        title: "Plot name required",
+        description: "Please enter a name for your plot.",
+        variant: "destructive",
+      })
+      return
+    }
 
-    // if (!validateCoordinates()) {
-    //   toast({
-    //     title: "Invalid coordinates",
-    //     description: "Please check that all coordinates are valid (lat: -90 to 90, lng: -180 to 180).",
-    //     variant: "destructive",
-    //   })
-    //   return
-    // }
+    if (!validateCoordinates()) {
+      toast({
+        title: "Invalid coordinates",
+        description: "Please check that all coordinates are valid (lat: -90 to 90, lng: -180 to 180).",
+        variant: "destructive",
+      })
+      return
+    }
 
     setIsGenerating(true)
  setApiErrorMessage(null);
@@ -208,7 +218,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       };
 
       console.log(requestBody);
-      
+      // https://cropploting.dev.insurecow.com/landmap/generate/
 
       // Make the API call
       const response = await fetch("http://127.0.0.1:8000/landmap/generate/", {
@@ -217,7 +227,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
           "Content-Type": "application/json",
           "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTb21lLXRlc3QtdXNlci0xMjM0NSIsInJvbGUiOiJBZG1pbl9UZXN0IiwiZXhwIjo4ODE1ODAyMjI4N30.EKD2bGCZ4KzaVrxjtf2wWE9XYIzbS_V-VKGPQIHsuyY"
         },
-        body: JSON.stringify(apiPayloadDemo)
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
@@ -387,6 +397,17 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         <div className="space-y-6">
           {!showResults ? (
             <>
+              {/* Land Name */}
+              <div className="space-y-2">
+                <Label htmlFor="landName">Land Name</Label>
+                <Input
+                  id="landName"
+                  placeholder="Enter land name"
+                  value={landName}
+                  onChange={(e) => setLandName(e.target.value)}
+                />
+              </div>
+
               {/* Plot Name */}
               <div className="space-y-2">
                 <Label htmlFor="plotName">Plot Name *</Label>
@@ -407,6 +428,83 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                   value={plotDescription}
                   onChange={(e) => setPlotDescription(e.target.value)}
                 />
+              </div>
+
+              {/* Ownership Type */}
+              <div className="space-y-2">
+                <Label htmlFor="ownershipType">Ownership Type</Label>
+                <Select value={ownershipType} onValueChange={(value: string) => setOwnershipType(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select ownership type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="tenant">Tenant</SelectItem>
+                    <SelectItem value="communal">Communal</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Land Suitability */}
+              <div className="space-y-2">
+                <Label>Land Suitability</Label>
+                <div className="text-sm text-muted-foreground">Reasons for Suitability (select all that apply)</div>
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={suitabilityReasons.includes("good_soil")} onCheckedChange={(checked) => {
+                      if (checked) setSuitabilityReasons([...suitabilityReasons, "good_soil"]) ; else setSuitabilityReasons(suitabilityReasons.filter(x=>x!=="good_soil"))
+                    }} />
+                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Good soil quality</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={suitabilityReasons.includes("access_water")} onCheckedChange={(checked) => {
+                      if (checked) setSuitabilityReasons([...suitabilityReasons, "access_water"]) ; else setSuitabilityReasons(suitabilityReasons.filter(x=>x!=="access_water"))
+                    }} />
+                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Access to water</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={suitabilityReasons.includes("favorable_climate")} onCheckedChange={(checked) => {
+                      if (checked) setSuitabilityReasons([...suitabilityReasons, "favorable_climate"]) ; else setSuitabilityReasons(suitabilityReasons.filter(x=>x!=="favorable_climate"))
+                    }} />
+                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Favorable climate</div>
+                  </div>
+                </div>
+
+                <div className="mt-3 text-sm text-muted-foreground">Reasons for Non-Suitability (select all that apply)</div>
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={nonSuitabilityReasons.includes("poor_soil")} onCheckedChange={(checked) => {
+                      if (checked) setNonSuitabilityReasons([...nonSuitabilityReasons, "poor_soil"]) ; else setNonSuitabilityReasons(nonSuitabilityReasons.filter(x=>x!=="poor_soil"))
+                    }} />
+                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Poor soil quality</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={nonSuitabilityReasons.includes("water_scarcity")} onCheckedChange={(checked) => {
+                      if (checked) setNonSuitabilityReasons([...nonSuitabilityReasons, "water_scarcity"]) ; else setNonSuitabilityReasons(nonSuitabilityReasons.filter(x=>x!=="water_scarcity"))
+                    }} />
+                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Water scarcity</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox checked={nonSuitabilityReasons.includes("risk_flooding")} onCheckedChange={(checked) => {
+                      if (checked) setNonSuitabilityReasons([...nonSuitabilityReasons, "risk_flooding"]) ; else setNonSuitabilityReasons(nonSuitabilityReasons.filter(x=>x!=="risk_flooding"))
+                    }} />
+                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Risk of flooding</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Land Measurements */}
+              <div className="space-y-2">
+                <Label>Land Measurements</Label>
+                <div className="text-sm text-muted-foreground">SW → SE (meters)</div>
+                <Input placeholder="Enter measurement" value={measureSWSE} onChange={(e)=>setMeasureSWSE(e.target.value)} />
+                <div className="text-sm text-muted-foreground">SW → NW (meters)</div>
+                <Input placeholder="Enter measurement" value={measureSWNW} onChange={(e)=>setMeasureSWNW(e.target.value)} />
+                <div className="text-sm text-muted-foreground">NW → NE (meters)</div>
+                <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e)=>setMeasureNWNE(e.target.value)} />
+                <div className="text-sm text-muted-foreground">SE → NE (meters)</div>
+                <Input placeholder="Enter measurement" value={measureSENE} onChange={(e)=>setMeasureSENE(e.target.value)} />
               </div>
 
               {/* Coordinates Input */}

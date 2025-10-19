@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../InputField";
 import DropdownField from "../DropDownField";
+import { toast, Toaster } from "sonner";
+import useApi from "@/hooks/use_api";
 
 interface CropData {
   crop_name: string;
@@ -14,16 +16,44 @@ interface RegisterCropProps {
   closeModal?: () => void;
 }
 
+interface LandData {
+  land_name: string;
+}
+
 const RegisterCrop: React.FC<RegisterCropProps> = ({
   setCropData,
   closeModal,
 }) => {
+  const { get } = useApi();
   const [formData, setFormData] = useState<CropData>({
     crop_name: "",
     variety: "",
     plantation_date: "",
     land: "",
   });
+  const [isLandData, setIsLandData] = useState<LandData[]>([]);
+
+  useEffect(() => {
+    getLandData();
+  }, []);
+
+  /**************** Get requests  ****************/
+  const getLandData = async () => {
+    try {
+      const response = await get("/lams/land-info-service", {
+        params: { start_record: 1, page_size: 10 },
+      });
+      console.log(response);
+
+      if (response.status === "success") {
+        setIsLandData(response.data);
+      }
+    } catch (error) {
+      toast.error(`${error}`);
+    }
+  };
+
+  /**************** ########  ****************/
 
   // Handles text/date inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +89,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
 
     if (closeModal) closeModal();
   };
-
+  console.log(isLandData);
   return (
     <div>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,13 +131,10 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
           value={formData.land}
           onChange={handleDropdownChange}
           required
-          options={[
-            { value: "north_badda_land_a", label: "North Badda Land A" },
-            { value: "north_badda_land_b", label: "North Badda Land B" },
-            { value: "north_badda_land_c", label: "North Badda Land C" },
-            { value: "north_badda_land_d", label: "North Badda Land D" },
-            { value: "north_badda_land_e", label: "North Badda Land E" },
-          ]}
+          options={isLandData.map((land) => ({
+            value: land.land_name,
+            label: land.land_name,
+          }))}
         />
 
         <button
@@ -117,6 +144,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
           Submit
         </button>
       </form>
+      <Toaster richColors />
     </div>
   );
 };

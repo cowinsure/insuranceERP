@@ -76,7 +76,7 @@ const GenericModal = ({
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-4 md:p-6 ${
+        className={`bg-white rounded-xl shadow-2xl p-4 md:p-6 max-h-[95vh] overflow-auto ${
           widthValue ? widthValue : "w-full max-w-5xl"
         } animate__animated min-w-md ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"

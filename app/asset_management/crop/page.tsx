@@ -1,6 +1,7 @@
 "use client";
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
 import StageOne from "@/components/addCropForms/StageOne";
+import StageTwo from "@/components/addCropForms/StageTwo";
 // import AddCrop from "@/components/AddCropDetailsModal";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
@@ -20,12 +21,14 @@ const CropsPage = () => {
     crop_name: "",
     variety: "",
     plantation_date: "",
+    land: "",
   });
   const [crops, setCrops] = useState<
     Array<{
       crop_name: string;
       variety: string;
       plantation_date: string;
+      land: string;
     }>
   >([]);
 
@@ -35,21 +38,25 @@ const CropsPage = () => {
         crop_name: "Rice-1",
         variety: "Aman",
         plantation_date: "9-Dec-2009",
+        land: "New land",
       },
       {
         crop_name: "Rice-2",
         variety: "Aman",
         plantation_date: "9-Dec-2009",
+        land: "New land",
       },
       {
         crop_name: "Aman",
         variety: "Aman",
         plantation_date: "9-Dec-2009",
+        land: "New land",
       },
       {
         crop_name: "Rice-3",
         variety: "Aman",
         plantation_date: "9-Dec-2009",
+        land: "New land",
       },
     ];
 
@@ -80,6 +87,7 @@ const CropsPage = () => {
       crop_name: viewCrop?.crop_name as string,
       plantation_date: viewCrop?.plantation_date as string,
       variety: viewCrop?.variety as string,
+      land: viewCrop?.land as string,
     });
     setIsCropView(true);
   };
@@ -95,11 +103,11 @@ const CropsPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
               Asset Management
             </h1>
             <IoIosArrowForward size={30} />
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
               Crop Registration
             </h1>
           </div>
@@ -143,6 +151,9 @@ const CropsPage = () => {
                   Plantation Date
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
+                  Land
+                </th>
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Stage 1
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
@@ -175,6 +186,11 @@ const CropsPage = () => {
                       <td className="py-4 px-4">
                         <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
                           {crop.plantation_date}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                          {crop.land}
                         </div>
                       </td>
                       {/* Stage one */}
@@ -293,7 +309,7 @@ const CropsPage = () => {
           closeModal={() => setIsStageTwoModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-          <h1>This is stage 2</h1>
+          <StageTwo selectedCrop={selectedCrop} setStageTwoData={() => {}} />
         </GenericModal>
       )}
 
@@ -302,6 +318,7 @@ const CropsPage = () => {
         <GenericModal
           closeModal={() => setIsCropView(false)}
           title={`Viewing details of ${selectedCrop.crop_name}`}
+          height={true}
         >
           <CropStageModalTabs stageOneData={selectedCrop} />
         </GenericModal>

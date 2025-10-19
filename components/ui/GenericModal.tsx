@@ -12,6 +12,7 @@ interface GenericModalProps {
   content?: string;
   onConfirm?: () => void;
   widthValue?: string;
+  height?: boolean;
 }
 
 const GenericModal = ({
@@ -19,6 +20,7 @@ const GenericModal = ({
   title,
   children,
   widthValue,
+  height,
 }: GenericModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -74,7 +76,7 @@ const GenericModal = ({
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 ${
+        className={`bg-white rounded-xl shadow-2xl p-4 md:p-6 ${
           widthValue ? widthValue : "w-full max-w-5xl"
         } animate__animated min-w-md ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"
@@ -90,7 +92,11 @@ const GenericModal = ({
             <MdClose size={20} className="hover:text-red-600 cursor-pointer" />
           </button>
         </div>
-        <div className="text-sm text-gray-700">
+        <div
+          className={`text-sm text-gray-700 ${
+            height && "h-[80vh]"
+          } overflow-auto`}
+        >
           {children || "This is a dynamic modal."}
         </div>
       </div>

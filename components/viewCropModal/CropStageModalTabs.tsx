@@ -4,6 +4,7 @@ import { GiPlantRoots } from "react-icons/gi";
 import { PiCalendar, PiPlantDuotone } from "react-icons/pi";
 import StageOneData from "./StageOneData";
 import StageTwoData from "./StageTwoData";
+import { LandPlot } from "lucide-react";
 
 interface CropStageModalTabsProps {
   stageOneData: any;
@@ -19,7 +20,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   const tabs = ["stage1", "stage2"];
   const numTabs = tabs.length;
   const tabWidthPercent = 100 / numTabs;
-  const slidingWidthPercent = tabWidthPercent * 0.9;
+  const slidingWidthPercent = tabWidthPercent * 0.98;
   const activeIndex = tabs.findIndex((tab) => tab === activeTab);
   const slidingLeftPercent =
     tabWidthPercent * activeIndex + (tabWidthPercent - slidingWidthPercent) / 2;
@@ -44,7 +45,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           Crop Details
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {/* Crop Name */}
           <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
             <span className="p-2 bg-green-100 text-green-700 rounded-full">
@@ -83,6 +84,19 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               </p>
             </div>
           </div>
+
+          {/* Land Information */}
+          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+            <span className="p-2 bg-yellow-100 text-yellow-600 rounded-full">
+              <LandPlot className="text-" />
+            </span>
+            <div>
+              <p className="text-sm text-gray-500">Land</p>
+              <p className="font-medium text-gray-800">
+                {stageOneData.land || "N/A"}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -92,7 +106,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex flex-col md:flex-row items-center gap-2 flex-1 justify-center px-4 py-2 rounded-md text-sm z-10 transition-all duration-200 cursor-pointer
+            className={`flex flex-col md:flex-row items-center gap-2 flex-1 justify-center py-2 rounded-md text-sm z-10 transition-all duration-200 cursor-pointer
               ${
                 activeTab === tab
                   ? "text-green-800 font-bold md:text-[17px]"

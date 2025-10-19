@@ -17,7 +17,6 @@ interface HistoryProps {
 }
 
 const History = ({ data, onChange }: HistoryProps) => {
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onChange(name, value);
@@ -28,7 +27,7 @@ const History = ({ data, onChange }: HistoryProps) => {
       <h2 className="text-xl font-semibold mb-5 text-center underline">
         History
       </h2>
-      <div className="space-y-5">
+      <div className="space-y-5 max-h-[400px] overflow-auto">
         {/* Immediate Previous Crop */}
         <InputField
           placeholder="Ex - Boro Rice"

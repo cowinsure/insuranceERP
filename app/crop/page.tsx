@@ -17,6 +17,7 @@ import { ProductsTable } from "@/components/products-table";
 import { CreatePlotDialog } from "@/components/dialogs/crops/CreatePlotDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import PlotDetailsDialog from "@/components/dialogs/crops/PlotDetailsDialog";
+import PlotCoordinatesDialog from "@/components/dialogs/crops/PlotCoordinatesDialog";
 
 interface PlotData {
   landCoordinates: { lat: string; lng: string }[]
@@ -57,6 +58,8 @@ interface Plot {
 export default function CropPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isPlotCoordsDialogOpen, setIsPlotCoordsDialogOpen] = useState(false)
+  const [plotCoordsTargetId, setPlotCoordsTargetId] = useState<string | null>(null)
   const [plots, setPlots] = useState<Plot[]>([])
   const [searchTerm, setSearchTerm] = useState("")
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null)
@@ -155,6 +158,42 @@ export default function CropPage() {
     console.log("Edit plot:", plot)
   }
 
+  const handleSaveCoordinatesPlot = (coords: Coordinate[]) => {
+    if (plotCoordsTargetId) {
+      // Update existing plot with new coordinates
+      setPlots((prev) =>
+        prev.map((p) =>
+          p.id === plotCoordsTargetId
+            ? {
+                ...p,
+                coordinates: coords,
+                plotCoordinates: coords,
+                landArea: coords,
+              }
+            : p
+        )
+      )
+      setPlotCoordsTargetId(null)
+    } else {
+      // Build a minimal plot from provided coordinates
+      const newPlot: Plot = {
+        id: Date.now().toString(),
+        plotName: `Manual Plot ${plots.length + 1}`,
+        description: "Coordinates entered manually",
+        area: "N/A",
+        coordinates: coords,
+        plotCoordinates: coords,
+        innerCoordinates: [],
+        landArea: coords,
+        imageUrl: "",
+        createdAt: new Date().toISOString(),
+        status: "active",
+      }
+      setPlots((prev) => [...prev, newPlot])
+    }
+    setIsPlotCoordsDialogOpen(false)
+  }
+
   const handleDeletePlot = (plotId: string) => {
     setPlots((prev) => prev.filter((plot) => plot.id !== plotId))
     setIsDetailsDialogOpen(false)
@@ -183,20 +222,22 @@ export default function CropPage() {
    
 
     <div className="flex-1 space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
             Crop Management
           </h1>
           <p className="text-gray-600">Create and manage crop plots for insurance coverage</p>
         </div>
-        <Button
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-          onClick={() => setIsCreateDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4" />
-          Create Plot
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            Create Plot
+          </Button>
+        </div>
       </div>
 
       <div className="animate__animated animate__fadeIn flex flex-col gap-7">
@@ -244,57 +285,92 @@ export default function CropPage() {
                   )}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Plot Name</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Area</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Points</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPlots.map((plot) => (
-                        <tr key={plot.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-4 px-4">
+                <>
+                  {/* Mobile: card list */}
+                  <div className="space-y-4 md:hidden">
+                    {filteredPlots.map((plot) => (
+                      <div key={plot.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                        <div className="flex items-start justify-between">
+                          <div>
                             <div className="font-medium text-gray-900">{plot.plotName}</div>
-                          </td>
-                          <td className="py-4 px-4">
                             <div className="text-sm text-gray-600">{plot.area}</div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm text-gray-600">{new Date(plot.createdAt).toLocaleDateString()}</div>
-                          </td>
-                          <td className="py-4 px-4">
-                            {/* <Badge
-                              variant="secondary"
-                              className={
-                                plot.status === "active"
-                                  ? "bg-green-100 text-green-800"
-                                  : plot.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-gray-100 text-gray-800"
-                              }
-                            >
-                              {plot.status}
-                            </Badge> */}
-                          </td>
-                          <td className="py-4 px-4">
+                          </div>
+                          <div className="text-sm text-gray-500">{new Date(plot.createdAt).toLocaleDateString()}</div>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between">
+                          <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
+                          <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
-                              View Details
+                              View
                             </Button>
-                          </td>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setPlotCoordsTargetId(plot.id)
+                                setIsPlotCoordsDialogOpen(true)
+                              }}
+                            >
+                              <MapPin className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop: table */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Plot Name</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Area</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Points</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {filteredPlots.map((plot) => (
+                          <tr key={plot.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-4 px-4">
+                              <div className="font-medium text-gray-900">{plot.plotName}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="text-sm text-gray-600">{plot.area}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="text-sm text-gray-600">{new Date(plot.createdAt).toLocaleDateString()}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                            </td>
+                            <td className="py-4 px-4 flex gap-2">
+                              <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
+                                View Details
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setPlotCoordsTargetId(plot.id)
+                                  setIsPlotCoordsDialogOpen(true)
+                                }}
+                              >
+                                <MapPin className="w-4 h-4 mr-2" />
+                                Plot Coordinates
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -329,6 +405,12 @@ export default function CropPage() {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onPlotCreated={handlePlotCreated}
+      />
+
+      <PlotCoordinatesDialog
+        open={isPlotCoordsDialogOpen}
+        onOpenChange={setIsPlotCoordsDialogOpen}
+        onSave={handleSaveCoordinatesPlot}
       />
 
       <PlotDetailsDialog

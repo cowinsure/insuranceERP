@@ -190,8 +190,8 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const generatePlot = async () => {
     if (!plotName.trim()) {
       toast({
-        title: "Plot name required",
-        description: "Please enter a name for your plot.",
+        title: "Land name required",
+        description: "Please enter a name for your land plot.",
         variant: "destructive",
       })
       return
@@ -390,15 +390,16 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            Create New Crop Plot
+            Create New Land
           </DialogTitle>
+          <div className="text-sm text-muted-foreground mt-1">Create and manage land entries for insurance coverage.</div>
         </DialogHeader>
 
         <div className="space-y-6">
           {!showResults ? (
             <>
               {/* Land Name */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="landName">Land Name</Label>
                 <Input
                   id="landName"
@@ -406,11 +407,11 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                   value={landName}
                   onChange={(e) => setLandName(e.target.value)}
                 />
-              </div>
+              </div> */}
 
               {/* Plot Name */}
               <div className="space-y-2">
-                <Label htmlFor="plotName">Plot Name *</Label>
+                <Label htmlFor="plotName">Land Name *</Label>
                 <Input
                   id="plotName"
                   placeholder="Enter plot name (e.g., North Field A)"
@@ -419,12 +420,12 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 />
               </div>
 
-              {/* Plot Description */}
+              {/* Land Description */}
               <div className="space-y-2">
-                <Label htmlFor="plotDescription">Plot Description</Label>
+                <Label htmlFor="plotDescription">Land Description</Label>
                 <Textarea
                   id="plotDescription"
-                  placeholder="Enter plot description"
+                  placeholder="Enter land description"
                   value={plotDescription}
                   onChange={(e) => setPlotDescription(e.target.value)}
                 />
@@ -725,7 +726,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 <Button variant="outline" onClick={handleClose}>
                   Cancel
                 </Button>
-                <Button onClick={savePlot}>Save Plot</Button>
+                <Button onClick={savePlot}>Save Land</Button>
               </div>
             </>
           )}
@@ -735,7 +736,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
             <div className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
                     Plot Location
                   </CardTitle>

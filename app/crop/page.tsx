@@ -225,9 +225,9 @@ export default function CropPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Crop Management
+            Land Management
           </h1>
-          <p className="text-gray-600">Create and manage crop plots for insurance coverage</p>
+          <p className="text-gray-600">Create and manage lands and plots for insurance coverage</p>
         </div>
         <div className="flex items-center gap-3">
           <Button
@@ -235,7 +235,7 @@ export default function CropPage() {
             onClick={() => setIsCreateDialogOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            Create Plot
+            Create Land
           </Button>
         </div>
       </div>
@@ -275,12 +275,12 @@ export default function CropPage() {
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No plots found</h3>
                   <p className="text-gray-500 mb-4">
-                    {searchTerm ? "Try adjusting your search terms" : "Create your first crop plot to get started"}
+                    {searchTerm ? "Try adjusting your search terms" : "Create your first land entry to get started"}
                   </p>
                   {!searchTerm && (
                     <Button onClick={() => setIsCreateDialogOpen(true)}>
                       <Plus className="w-4 h-4 mr-2" />
-                      Create Plot
+                      Create Land
                     </Button>
                   )}
                 </div>

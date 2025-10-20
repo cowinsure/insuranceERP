@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PiFlowerTulipFill } from "react-icons/pi";
+import { PiFlowerTulipFill  } from "react-icons/pi";
 import {
   MdOutlineSpaceDashboard,
   MdSpaceDashboard,
@@ -19,6 +19,7 @@ import {
   MdManageAccounts,
   MdOutlineSettings,
   MdSettings,
+  MdOutlineLandscape
 } from "react-icons/md";
 import { AiOutlineProduct, AiFillProduct } from "react-icons/ai";
 import { FaLockOpen, FaLock } from "react-icons/fa";
@@ -61,10 +62,10 @@ const mainMenuItems = [
     activeIcon: MdGroups,
   },
   {
-    title: "Crops",
-    url: "/crop",
-    icon: PiFlowerTulipFill,
-    activeIcon: PiFlowerTulipFill,
+    title: "Lands",
+    url: "/land",
+    icon: MdOutlineLandscape ,
+    activeIcon: MdOutlineLandscape ,
   },
   {
     title: "Products",

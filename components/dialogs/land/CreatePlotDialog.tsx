@@ -221,7 +221,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       // https://cropploting.dev.insurecow.com/landmap/generate/
 
       // Make the API call
-      const response = await fetch("https://cropploting.dev.insurecow.com/landmap/generate/", {
+      const response = await fetch("http://127.0.0.1:8000/landmap/generate/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -378,7 +378,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       case "e_mark":
         return base + "pink-dot.png";
       case "intersection":
-        return base + "black-dot.png";
+        return base + "green-dot.png";
       default:
         return base + "blue-dot.png";
     }
@@ -500,12 +500,12 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 <Label>Land Measurements</Label>
                 <div className="text-sm text-muted-foreground">SW → SE (meters)</div>
                 <Input placeholder="Enter measurement" value={measureSWSE} onChange={(e)=>setMeasureSWSE(e.target.value)} />
-                <div className="text-sm text-muted-foreground">SW → NW (meters)</div>
-                <Input placeholder="Enter measurement" value={measureSWNW} onChange={(e)=>setMeasureSWNW(e.target.value)} />
-                <div className="text-sm text-muted-foreground">NW → NE (meters)</div>
-                <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e)=>setMeasureNWNE(e.target.value)} />
                 <div className="text-sm text-muted-foreground">SE → NE (meters)</div>
                 <Input placeholder="Enter measurement" value={measureSENE} onChange={(e)=>setMeasureSENE(e.target.value)} />
+                <div className="text-sm text-muted-foreground"> NE → NW (meters)</div>
+                <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e)=>setMeasureNWNE(e.target.value)} />
+                <div className="text-sm text-muted-foreground">NW → SW (meters)</div>
+                <Input placeholder="Enter measurement" value={measureSWNW} onChange={(e)=>setMeasureSWNW(e.target.value)} />
               </div>
 
               {/* Coordinates Input */}

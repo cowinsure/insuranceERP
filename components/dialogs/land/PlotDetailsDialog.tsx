@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { MapPin, Calendar, Edit, Trash2 } from "lucide-react"
 import { GoogleMap, InfoWindow, Marker, Polygon, useJsApiLoader } from "@react-google-maps/api"
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 
 
@@ -97,16 +99,16 @@ function sortPolygonCoords(coords: Coordinate[]): Coordinate[] {
   })
 }
 
-const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotDetailsDialogProps)=> {
-  
+const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotDetailsDialogProps) => {
+
   console.log(plot);
-  
+
   const [mapError, setMapError] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState("")
   const [showApiKeyInput, setShowApiKeyInput] = useState(false)
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null)
   const [watchId, setWatchId] = useState<number | null>(null)
-   const [openInfoFor, setOpenInfoFor] = useState<string | null>(null);
+  const [openInfoFor, setOpenInfoFor] = useState<string | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -180,7 +182,14 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
         <div className="flex-1 overflow-y-auto space-y-6">
           {/* Plot Image */}
           <div className="aspect-video relative overflow-hidden rounded-lg border">
-            <img src={plot.imageUrl || "/placeholder.svg"} alt={plot.plotName} className="w-full h-full object-cover" />
+            <Zoom>
+              <img
+                src={plot.imageUrl || "/placeholder.svg"}
+                alt={plot.plotName}
+                className="w-full h-full object-cover"
+              />
+            </Zoom>
+            {/* <img src={plot.imageUrl || "/placeholder.svg"} alt={plot.plotName} className="w-full h-full object-cover" /> */}
           </div>
 
           {/* Plot Information */}
@@ -246,9 +255,9 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                         ? userLocation
                         : plot.plotCoordinates && plot.plotCoordinates.length > 0
                           ? {
-                              lat: parseFloat(plot.plotCoordinates[0].lat),
-                              lng: parseFloat(plot.plotCoordinates[0].lng),
-                            }
+                            lat: parseFloat(plot.plotCoordinates[0].lat),
+                            lng: parseFloat(plot.plotCoordinates[0].lng),
+                          }
                           : defaultCenter
                     }
                     zoom={15}

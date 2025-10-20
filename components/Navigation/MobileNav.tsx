@@ -49,8 +49,8 @@ const allNavItems = [
     icon: Users,
   },
   {
-    title: "Crops",
-    url: "/crop",
+    title: "Lands",
+    url: "/land",
     icon: PiFlowerTulipFill,
   },
   {

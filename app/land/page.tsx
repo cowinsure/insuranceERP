@@ -14,10 +14,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GenericModal from "@/components/ui/GenericModal";
 import { useState, useEffect } from "react";
 import { ProductsTable } from "@/components/products-table";
-import { CreatePlotDialog } from "@/components/dialogs/crops/CreatePlotDialog";
+import { CreatePlotDialog } from "@/components/dialogs/land/CreatePlotDialog";
 import { Card, CardContent } from "@/components/ui/card";
-import PlotDetailsDialog from "@/components/dialogs/crops/PlotDetailsDialog";
-import PlotCoordinatesDialog from "@/components/dialogs/crops/PlotCoordinatesDialog";
+import PlotDetailsDialog from "@/components/dialogs/land/PlotDetailsDialog";
+import PlotCoordinatesDialog from "@/components/dialogs/land/PlotCoordinatesDialog";
 
 interface PlotData {
   landCoordinates: { lat: string; lng: string }[]

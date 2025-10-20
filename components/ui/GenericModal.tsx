@@ -7,13 +7,21 @@ import { MdClose } from "react-icons/md";
 
 interface GenericModalProps {
   closeModal: () => void;
-  title?: string;
+  title?: React.ReactNode | string;
   children?: React.ReactNode;
   content?: string;
   onConfirm?: () => void;
+  widthValue?: string;
+  height?: boolean;
 }
 
-const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
+const GenericModal = ({
+  closeModal,
+  title,
+  children,
+  widthValue,
+  height,
+}: GenericModalProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const modalWrapperRef = useRef<HTMLDivElement>(null);
@@ -35,14 +43,14 @@ const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
   }, []);
 
   // Outside click
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (
-      modalWrapperRef.current &&
-      !modalWrapperRef.current.contains(e.target as Node)
-    ) {
-      triggerClose();
-    }
-  };
+  // const handleOverlayClick = (e: React.MouseEvent) => {
+  //   if (
+  //     modalWrapperRef.current &&
+  //     !modalWrapperRef.current.contains(e.target as Node)
+  //   ) {
+  //     triggerClose();
+  //   }
+  // };
 
   // Closing animation handler
   const triggerClose = () => {
@@ -61,18 +69,20 @@ const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate__animated ${
         isClosing ? "animate__fadeOut" : "animate__fadeIn"
       }`}
-      onClick={handleOverlayClick}
+      // onClick={handleOverlayClick}
       onAnimationEnd={handleAnimationEnd}
       role="dialog"
       aria-modal="true"
     >
       <div
         ref={modalWrapperRef}
-        className={`bg-white rounded-xl shadow-2xl p-2 md:p-6 w-full max-w-5xl animate__animated min-w-md ${
+        className={`bg-white rounded-xl shadow-2xl p-4 md:p-6 max-h-[95vh] overflow-auto ${
+          widthValue ? widthValue : "w-full max-w-5xl"
+        } animate__animated min-w-md ${
           isClosing ? "animate__fadeOutUp" : "animate__fadeInDown"
         }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
           <button
             onClick={triggerClose}
@@ -82,7 +92,11 @@ const GenericModal = ({ closeModal, title, children }: GenericModalProps) => {
             <MdClose size={20} className="hover:text-red-600 cursor-pointer" />
           </button>
         </div>
-        <div className="text-sm text-gray-700">
+        <div
+          className={`text-sm text-gray-700 ${
+            height && "h-[80vh]"
+          } overflow-auto`}
+        >
           {children || "This is a dynamic modal."}
         </div>
       </div>

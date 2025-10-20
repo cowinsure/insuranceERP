@@ -60,23 +60,23 @@ export function FarmersTable() {
         const response = await get(`ims/farmer-service`, {
           params: { start_record: 1 },
         });
-        console.log("Response from API:", response.status);
+        // console.log("Response from API:", response.status);
 
         if (response.status === "success") {
           setFarmers(response.data);
           setFilteredFarmers(response.data);
         }
-        console.log(response.data.length + " farmers found");
+        // console.log(response.data.length + " farmers found");
 
         // for (let index = 0; index < response.date.length; index++) {
         //   const element = response.data[index];
 
         //   console.log("Fetching applications from API..." + element);
         // }
-        console.log(
-          "Fetching applications from API..." +
-            response?.data[12]?.mobile_number
-        );
+        // console.log(
+        //   "Fetching applications from API..." +
+        //     response?.data[12]?.mobile_number
+        // );
       } catch (error) {
         console.log("Error fetching applications from API...");
       } finally {
@@ -87,7 +87,7 @@ export function FarmersTable() {
     fetchData();
   }, []);
 
-  console.log("Farmers data:", farmers);
+  // console.log("Farmers data:", farmers);
 
   return (
     <>
@@ -160,7 +160,7 @@ export function FarmersTable() {
                           </AvatarFallback>
                         </Avatar> */}
                             <div>
-                              <div className="font-medium text-gray-900">
+                              <div className="font-medium text-gray-900 text-sm">
                                 {farmer.farmer_name}
                               </div>
                               {/* <div className="text-sm text-black-500">

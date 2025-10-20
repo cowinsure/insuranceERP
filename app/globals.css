@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,10 +122,6 @@
   }
 }
 
-
-
-
-
 /* Base scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -139,7 +135,13 @@
 
 /* Scroll thumb */
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, transparent, #84c8d5d7,#84c8d5d7, transparent);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #84c8d5d7,
+    #84c8d5d7,
+    transparent
+  );
   border-radius: 10px;
 }
 
@@ -149,10 +151,82 @@
 
 /* Smooth fade effect at top/bottom (vertical scrollbar) */
 ::-webkit-scrollbar-track:vertical {
-  background: linear-gradient(to bottom, transparent 0%, transparent 5%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.05) 85%, transparent 95%, transparent 100%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 5%,
+    rgba(0, 0, 0, 0.05) 15%,
+    rgba(0, 0, 0, 0.05) 85%,
+    transparent 95%,
+    transparent 100%
+  );
 }
 
 /* Smooth fade effect at left/right (horizontal scrollbar) */
 ::-webkit-scrollbar-track:horizontal {
-  background: linear-gradient(to right, transparent 0%, transparent 5%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.05) 85%, transparent 95%, transparent 100%);
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent 5%,
+    rgba(0, 0, 0, 0.05) 15%,
+    rgba(0, 0, 0, 0.05) 85%,
+    transparent 95%,
+    transparent 100%
+  );
+}
+
+/* globals.css */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Custom checkbox styles */
+.custom-checkbox {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 20px; /* Increase size */
+  height: 20px; /* Increase size */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #dbdbdb; /* Light background */
+
+  position: relative;
+  transition: all 0.3s ease; /* Smooth transition */
+  cursor: pointer;
+}
+
+/* Checked state */
+.custom-checkbox:checked {
+  background-color: #1b6fee; /* Green color when checked */
+  /* border-color: #4caf50; */
+}
+
+/* Checkbox animation when checked */
+.custom-checkbox:checked::before {
+  content: "✓"; /* Check mark */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.custom-checkbox:hover {
+  transform: scale(1.1); /* Slightly enlarge on hover */
+  border-color: #999; /* Darker border on hover */
+}
+
+/* Focus effect (optional) */
+.custom-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(25, 154, 240, 0.6); /* Green glow when focused */
 }

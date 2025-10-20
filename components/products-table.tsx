@@ -138,7 +138,7 @@ export function ProductsTable() {
                 </tr>
               </thead>
               <tbody>
-                {loading || paginatedProducts.length === 0 ? (
+                {loading ? (
                   <tr>
                     <td colSpan={6} className="py-6 text-center">
                       <Loading />

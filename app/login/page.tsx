@@ -275,7 +275,7 @@ const Login: React.FC<LoginProps> = ({
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-semibold text-blue-300 bg-blue-800 hover:bg-blue-700"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-semibold text-blue-300 bg-blue-800 hover:bg-blue-700 cursor-pointer"
               data-aos="fade-in"
               data-aos-delay="300"
             >

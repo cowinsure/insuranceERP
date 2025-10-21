@@ -2,101 +2,82 @@
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
 import StageOne from "@/components/addCropForms/StageOne";
 import StageTwo from "@/components/addCropForms/StageTwo";
+import { CropData } from "@/components/model/crop/CropCoreModel";
 // import AddCrop from "@/components/AddCropDetailsModal";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
+import useApi from "@/hooks/use_api";
 import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
 
 const CropsPage = () => {
+  const { get } = useApi();
+  const [isLoading, setIsLoading] = useState(false);
   const [isModal, setIsModal] = React.useState(false);
   const [isStageOneModal, setIsStageOneModal] = React.useState(false);
   const [isStageTwoModal, setIsStageTwoModal] = React.useState(false);
   const [isCropView, setIsCropView] = useState(false);
-  const [selectedCrop, setSelectedCrop] = useState({
-    crop_name: "",
-    variety: "",
-    plantation_date: "",
-    land: "",
-  });
-  const [crops, setCrops] = useState<
-    Array<{
-      crop_name: string;
-      variety: string;
-      plantation_date: string;
-      land: string;
-    }>
-  >([]);
+  const [selectedCrop, setSelectedCrop] = useState<Partial<CropData>>({});
+  const [crops, setCrops] = useState<CropData[]>([]);
 
   useEffect(() => {
-    const cropData = [
-      {
-        crop_name: "Rice-1",
-        variety: "Aman",
-        plantation_date: "9-Dec-2009",
-        land: "New land",
-      },
-      {
-        crop_name: "Rice-2",
-        variety: "Aman",
-        plantation_date: "9-Dec-2009",
-        land: "New land",
-      },
-      {
-        crop_name: "Aman",
-        variety: "Aman",
-        plantation_date: "9-Dec-2009",
-        land: "New land",
-      },
-      {
-        crop_name: "Rice-3",
-        variety: "Aman",
-        plantation_date: "9-Dec-2009",
-        land: "New land",
-      },
-    ];
+    fetchCropData();
+  }, []);
 
-    setCrops(cropData);
-  }, [crops.length]);
+  const fetchCropData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await get("/cms/crop-info-service", {
+        params: {
+          page_size: 10,
+          start_record: 1,
+          crop_id: -1,
+        },
+      });
 
-  const handleAddCropDetails = (cropName: string) => {
-    if (!cropName) return;
-    const selectedCrop = crops.find((crop) => crop.crop_name === cropName);
+      if (response.status === "success") {
+        setCrops(response.data);
+      }
+    } catch (error) {
+      toast.error(`${error}`);
+    }
+  };
+  // console.log(crops);
+
+  const handleAddCropDetails = (cropId: number) => {
+    if (!cropId) return;
+    const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
     if (!selectedCrop) return;
     setSelectedCrop(selectedCrop);
     setIsStageOneModal(true);
   };
 
-  const handleRevisitData = (cropName: string) => {
-    if (!cropName) return;
-    const selectedCrop = crops.find((crop) => crop.crop_name === cropName);
+  const handleRevisitData = (cropId: number) => {
+    if (!cropId) return;
+    const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
     if (!selectedCrop) return;
     setSelectedCrop(selectedCrop);
     setIsStageTwoModal(true);
   };
 
-  const handleView = (name: string) => {
-    if (!name) return;
-    const viewCrop = crops.find((crop) => crop.crop_name === name);
-    console.log(viewCrop);
-    setSelectedCrop({
-      crop_name: viewCrop?.crop_name as string,
-      plantation_date: viewCrop?.plantation_date as string,
-      variety: viewCrop?.variety as string,
-      land: viewCrop?.land as string,
-    });
+  const handleView = (cropId: number) => {
+    if (!cropId) return;
+    const viewCrop = crops.find((crop) => crop.crop_id === cropId);
+    if (!viewCrop) return;
+
+    setSelectedCrop(viewCrop);
     setIsCropView(true);
   };
 
   // Flag for stage one complete
-  const isStageOneCompleted = (cropName: string) => {
-    return localStorage.getItem(`stageOneCompleted_${cropName}`) === "true";
+  const isStageOneCompleted = (cropId: number) => {
+    return localStorage.getItem(`stageOneCompleted_${cropId}`) === "true";
   };
-
+console.log(selectedCrop)
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -148,10 +129,10 @@ const CropsPage = () => {
                   Variety
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Plantation Date
+                  Planting Date
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Land
+                  Land Name
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Stage 1
@@ -167,102 +148,92 @@ const CropsPage = () => {
             <tbody>
               <>
                 {crops &&
-                  crops.map((crop, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                    >
-                      <td className="py-4 px-4">
-                        <div className="font-medium text-gray-900">
-                          {crop.crop_name}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
-                          {crop.variety}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
-                          {crop.plantation_date}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
-                          {crop.land}
-                        </div>
-                      </td>
-                      {/* Stage one */}
-                      <td className="flex justify-center items-center py-4 px-4">
-                        <Button
-                          variant={"ghost"}
-                          className="bg-white text-blue-900"
-                          title="Add crop details"
-                          onClick={() => handleAddCropDetails(crop.crop_name)}
-                        >
-                          <FilePlus />
-                        </Button>
-                      </td>
-                      {/* Stage two */}
-                      <td>
-                        <div className="flex items-center justify-center py-4 px-4">
+                  crops.map((crop, idx) => {
+                    const seed = crop.crop_asset_seed_details?.[0];
+                    return (
+                      <tr
+                        key={idx}
+                        className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-gray-900">
+                            {seed?.crop_name || "N/A"}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
+                            {seed?.seed_variety || crop.variety || "N/A"}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                            {crop.planting_date || "N/A"}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                            {seed?.land_name || "N/A"}
+                          </div>
+                        </td>
+                        {/* Stage one */}
+                        <td className="flex justify-center items-center py-4 px-4">
                           <Button
                             variant={"ghost"}
-                            className={`bg-white ${
-                              isStageOneCompleted(crop.crop_name)
-                                ? "text-blue-900"
-                                : "text-gray-400 cursor-not-allowed"
-                            }`}
-                            title={
-                              isStageOneCompleted(crop.crop_name)
-                                ? "Add revisit data"
-                                : ""
-                            }
-                            onClick={() => {
-                              if (!isStageOneCompleted(crop.crop_name)) {
-                                toast.error("Complete Stage one first");
-                              } else {
-                                handleRevisitData(crop.crop_name);
+                            className="bg-white text-blue-900"
+                            title="Add crop details"
+                            onClick={() => handleAddCropDetails(crop.crop_id)}
+                          >
+                            <FilePlus />
+                          </Button>
+                        </td>
+                        {/* Stage two */}
+                        <td>
+                          <div className="flex items-center justify-center py-4 px-4">
+                            <Button
+                              variant={"ghost"}
+                              className={`bg-white ${
+                                isStageOneCompleted(crop.crop_id)
+                                  ? "text-blue-900"
+                                  : "text-gray-400 cursor-not-allowed"
+                              }`}
+                              title={
+                                isStageOneCompleted(crop.crop_id)
+                                  ? "Add revisit data"
+                                  : ""
                               }
-                            }}
-                          >
-                            <ClipboardCheck />
-                          </Button>
-                        </div>
-                      </td>
-                      {/* Action btn */}
-                      <td>
-                        <div className="flex items-center justify-center py-4 px-4">
-                          <Button
-                            variant={"outline"}
-                            onClick={() => handleView(crop.crop_name)}
-                          >
-                            <Eye />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                              onClick={() => {
+                                if (!isStageOneCompleted(crop.crop_id)) {
+                                  toast.error("Complete Stage one first");
+                                } else {
+                                  handleRevisitData(crop.crop_id);
+                                }
+                              }}
+                            >
+                              <ClipboardCheck />
+                            </Button>
+                          </div>
+                        </td>
+                        {/* Action btn */}
+                        <td>
+                          <div className="flex items-center justify-center py-4 px-4">
+                            <Button
+                              variant={"outline"}
+                              onClick={() => handleView(crop.crop_id)}
+                            >
+                              <Eye />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </>
             </tbody>
           </table>
-          {/* {totalPages > 1 && (
-            <div className="">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={pageSize}
-                onPageSizeChange={(size) => {
-                  setPageSize(size);
-                  setCurrentPage(1); // reset page to 1
-                }}
-              />
-            </div>
-          )} */}
         </div>
       </div>
+
       {isModal && (
         <GenericModal
           title="Register Crop"
@@ -282,9 +253,13 @@ const CropsPage = () => {
         <GenericModal
           title={
             <h1 className="flex flex-col">
-              {`Add Details for ${selectedCrop.crop_name} `}
+              {`Add Details for ${
+                selectedCrop.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+              } `}
               <small className="font-medium text-gray-500">
-                Variety: {selectedCrop.variety}
+                Variety:{" "}
+                {selectedCrop.crop_asset_seed_details?.[0]?.seed_variety ||
+                  selectedCrop.variety}
               </small>
             </h1>
           }
@@ -300,16 +275,20 @@ const CropsPage = () => {
         <GenericModal
           title={
             <h1 className="flex flex-col">
-              {`Revisit data for ${selectedCrop.crop_name} `}
+              {`Revisit data for ${
+                selectedCrop.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+              } `}
               <small className="font-medium text-gray-500">
-                Variety: {selectedCrop.variety}
+                Variety:{" "}
+                {selectedCrop.crop_asset_seed_details?.[0]?.seed_variety ||
+                  selectedCrop.variety}
               </small>
             </h1>
           }
           closeModal={() => setIsStageTwoModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-          <StageTwo selectedCrop={selectedCrop} setStageTwoData={() => {}} />
+          {/* <StageTwo selectedCrop={selectedCrop} setStageTwoData={() => {}} /> */}
         </GenericModal>
       )}
 
@@ -317,7 +296,9 @@ const CropsPage = () => {
       {isCropView && (
         <GenericModal
           closeModal={() => setIsCropView(false)}
-          title={`Viewing details of ${selectedCrop.crop_name}`}
+          title={`Viewing details of ${
+            selectedCrop.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+          }`}
           height={true}
         >
           <CropStageModalTabs stageOneData={selectedCrop} />

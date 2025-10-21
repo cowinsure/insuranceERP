@@ -45,8 +45,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
           )}
         >
           <option value="">Select</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
+          {options.map((option, idx) => (
+            <option key={idx} value={option.value}>
               {option.label}
             </option>
           ))}

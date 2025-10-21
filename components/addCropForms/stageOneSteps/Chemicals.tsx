@@ -1,55 +1,95 @@
+"use client";
+
 import { useState } from "react";
 import { X } from "lucide-react";
-import { Item } from "@/components/AddCropDetailsModal";
 import InputField from "@/components/InputField";
+import { ChemicalUsage, CropData } from "@/components/model/crop/CropCoreModel";
 import "animate.css";
 
 interface ChemicalsProps {
-  data: {
-    fertilizers: Item[];
-    pesticides: Item[];
-  };
-  onChange: (field: "fertilizers" | "pesticides", value: Item[]) => void;
+  data: CropData;
+  onChange: (updatedChemicals: ChemicalUsage[]) => void;
 }
 
 const Chemicals = ({ data, onChange }: ChemicalsProps) => {
-  const [removing, setRemoving] = useState<{ [key: string]: number | null }>({
-    fertilizers: null,
-    pesticides: null,
-  });
+  const [removing, setRemoving] = useState<number | null>(null);
+
+  const fertilizers = data.crop_asset_chemical_usage_details.filter(
+    (c) => c.chemical_type_id === 1
+  );
+  const pesticides = data.crop_asset_chemical_usage_details.filter(
+    (c) => c.chemical_type_id === 2
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
-    type: "fertilizers" | "pesticides"
+    type: "fertilizer" | "pesticide"
   ) => {
     const { name, value } = e.target;
-    const updated = [...data[type]];
-    updated[index] = { ...updated[index], [name]: value };
-    onChange(type, updated);
+    const updated = [...data.crop_asset_chemical_usage_details];
+    const typeId = type === "fertilizer" ? 1 : 2;
+
+    let count = -1;
+    const targetIndex = updated.findIndex((c) => {
+      if (c.chemical_type_id === typeId) count++;
+      return count === index && c.chemical_type_id === typeId;
+    });
+
+    if (targetIndex !== -1) {
+      updated[targetIndex] = {
+        ...updated[targetIndex],
+        [name === "quantity" ? "qty" : "chemical_name"]:
+          name === "quantity" ? Number(value) : value,
+      };
+      onChange(updated);
+    }
   };
 
-  const addField = (type: "fertilizers" | "pesticides") => {
-    onChange(type, [...data[type], { name: "", quantity: "" }]);
+  const addField = (type: "fertilizer" | "pesticide") => {
+    const typeId = type === "fertilizer" ? 1 : 2;
+    const newChemical: ChemicalUsage = {
+      chemical_usage_id: Date.now(),
+      chemical_name: "",
+      chemical_type_id: typeId,
+      qty: 0,
+      qty_unit: type === "fertilizer" ? "kg" : "litre",
+      remarks: "",
+      crop_name: data.crop_asset_seed_details[0]?.crop_name || "",
+      land_name: data.crop_asset_seed_details[0]?.land_name || "",
+      farmer_name: data.crop_asset_seed_details[0]?.farmer_name || "",
+      mobile_number: data.crop_asset_seed_details[0]?.mobile_number || "",
+      created_at: new Date().toISOString(),
+      modified_at: null,
+      stage_name: null,
+    };
+
+    // Add new chemical and trigger parent update
+    onChange([...data.crop_asset_chemical_usage_details, newChemical]);
   };
 
-  const removeField = (index: number, type: "fertilizers" | "pesticides") => {
-    setRemoving((prev) => ({ ...prev, [type]: index }));
+  const removeField = (index: number, type: "fertilizer" | "pesticide") => {
+    setRemoving(index);
+    const typeId = type === "fertilizer" ? 1 : 2;
+
     setTimeout(() => {
-      onChange(
-        type,
-        data[type].filter((_, i) => i !== index)
-      );
-      setRemoving((prev) => ({ ...prev, [type]: null }));
-    }, 500); // match with animation duration
+      let count = -1;
+      const updated = data.crop_asset_chemical_usage_details.filter((c) => {
+        if (c.chemical_type_id === typeId) count++;
+        return !(count === index && c.chemical_type_id === typeId);
+      });
+      onChange(updated);
+      setRemoving(null);
+    }, 300);
   };
 
-  const renderFields = (type: "fertilizers" | "pesticides") => {
-    return data[type].map((item, index) => {
-      const isRemoving = removing[type] === index;
+  const renderFields = (type: "fertilizer" | "pesticide") => {
+    const list = type === "fertilizer" ? fertilizers : pesticides;
+    return list.map((item, index) => {
+      const isRemoving = removing === index;
       return (
         <div
-          key={index}
+          key={item.chemical_usage_id}
           className={`flex items-center gap-2 animate__animated ${
             isRemoving ? "animate__fadeOut" : "animate__fadeIn"
           }`}
@@ -60,8 +100,8 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
           <div className="flex items-center justify-between w-full">
             <InputField
               id={`${type}-name-${index}`}
-              name="name"
-              value={item.name ?? ""}
+              name="chemical_name"
+              value={item.chemical_name ?? ""}
               onChange={(e) => handleChange(e, index, type)}
               placeholder={`Enter ${type} name`}
             />
@@ -69,11 +109,11 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
               id={`${type}-qty-${index}`}
               name="quantity"
               type="number"
-              value={item.quantity ?? ""}
+              value={item.qty ?? ""}
               onChange={(e) => handleChange(e, index, type)}
-              placeholder={`Quantity (${
-                type === "fertilizers" ? "kg" : "litre"
-              })`}
+              placeholder={`Quantity ${
+                type === "fertilizer" ? "(kg)" : "(litre)"
+              }`}
             />
             <button
               type="button"
@@ -93,10 +133,10 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
       {/* Fertilizers */}
       <div className="space-y-5 mb-3 bg-gray-50 p-3 border rounded-lg">
         <h2 className="text-lg font-medium mb-5">Fertilizers</h2>
-        {renderFields("fertilizers")}
+        {renderFields("fertilizer")}
         <button
           type="button"
-          onClick={() => addField("fertilizers")}
+          onClick={() => addField("fertilizer")}
           className="px-4 py-2 mt-2 bg-gray-200 cursor-pointer rounded-md hover:bg-gray-300"
         >
           + Add Fertilizer
@@ -108,10 +148,10 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
       {/* Pesticides */}
       <div className="space-y-5 mt-3 bg-gray-50 p-3 border rounded-lg">
         <h2 className="text-lg font-medium mb-5">Pesticides & Fungicides</h2>
-        {renderFields("pesticides")}
+        {renderFields("pesticide")}
         <button
           type="button"
-          onClick={() => addField("pesticides")}
+          onClick={() => addField("pesticide")}
           className="px-4 py-2 mt-2 bg-gray-200 cursor-pointer rounded-md hover:bg-gray-300"
         >
           + Add Pesticide

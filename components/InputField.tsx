@@ -8,7 +8,7 @@ interface InputFieldProps {
   type?: string;
   id: string;
   name: string;
-  value: string;
+  value: string | number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;

@@ -14,107 +14,38 @@ import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
 import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
 import { SelectedCropData } from "./addCropForms/StageOne";
 
-export interface Item {
-  name: string;
-  quantity: string;
-}
+// ✅ Import your new interface
+import {
+  CropData,
+  SeedDetails,
+  IrrigationCultivation,
+  PreviousSeasonHistory,
+  PestAttack,
+  DiseaseAttack,
+  ChemicalUsage,
+  StageHistory,
+  WeatherDetails,
+} from "./model/crop/CropCoreModel";
 
-export interface CropData {
-  seedName: string;
-  variety: string;
-  seedCompany: string;
-  seedType: string;
-  irrigationFacility: string;
-  irrigationSource: string;
-  cultivationSystem: string;
-  landSuitability: string;
-  immediatePreviousCrop: string;
-  harvestDate: string;
-  lastYearsCrop: string;
-  lastYearProduction: string;
-  sowingDate: string;
-  seedUsedLastYear: string;
-  reasonForChangingSeed: string;
-  adverseWeatherEffects: {
-    flood: boolean;
-    drought: boolean;
-    excessRainfall: boolean;
-    storms: boolean;
-    hailstorm: boolean;
-  };
-  periodFrom: string;
-  periodTo: string;
-  pestAttack: {
-    stemBorer: boolean;
-    leafFolder: boolean;
-    brownPlanthopper: boolean;
-    greenLeafhopper: boolean;
-    stinkBug: boolean;
-    others: boolean;
-    none: boolean;
-  };
-  diseaseAttack: {
-    leafBlast: boolean;
-    bacterialLeafBlight: boolean;
-    sheathBlight: boolean;
-    bakanae: boolean;
-    brownSpot: boolean;
-    leafScald: boolean;
-    hispa: boolean;
-    tungro: boolean;
-    none: boolean;
-  };
-  fertilizers: Item[];
-  pesticides: Item[];
-}
-
+// ✅ Default crop data following new interface
 const defaultCropData: CropData = {
-  seedName: "",
+  season: "",
+  crop_id: 0,
+  land_id: 0,
   variety: "",
-  seedCompany: "",
-  seedType: "",
-  irrigationFacility: "",
-  irrigationSource: "",
-  cultivationSystem: "",
-  landSuitability: "",
-  immediatePreviousCrop: "",
-  harvestDate: "",
-  lastYearsCrop: "",
-  lastYearProduction: "",
-  sowingDate: "",
-  seedUsedLastYear: "",
-  reasonForChangingSeed: "",
-  adverseWeatherEffects: {
-    flood: false,
-    drought: false,
-    excessRainfall: false,
-    storms: false,
-    hailstorm: false,
-  },
-  periodFrom: "",
-  periodTo: "",
-  pestAttack: {
-    stemBorer: false,
-    leafFolder: false,
-    brownPlanthopper: false,
-    greenLeafhopper: false,
-    stinkBug: false,
-    others: false,
-    none: false,
-  },
-  diseaseAttack: {
-    leafBlast: false,
-    bacterialLeafBlight: false,
-    sheathBlight: false,
-    bakanae: false,
-    brownSpot: false,
-    leafScald: false,
-    hispa: false,
-    tungro: false,
-    none: false,
-  },
-  fertilizers: [{ name: "", quantity: "" }],
-  pesticides: [{ name: "", quantity: "" }],
+  crop_type_id: 0,
+  planting_date: "",
+  harvest_date: "",
+  estimated_yield: 0,
+
+  crop_asset_seed_details: [],
+  crop_asset_irrigation_cultivation_details: [],
+  crop_asset_previous_season_history_details: [],
+  crop_asset_pest_attack_details: [],
+  crop_asset_disease_attack_details: [],
+  crop_asset_chemical_usage_details: [],
+  crop_asset_stage_history_details: [],
+  crop_asset_weather_details: [],
 };
 
 export default function AddCropDetailsModal({
@@ -132,7 +63,7 @@ export default function AddCropDetailsModal({
     "Preview",
   ];
 
-  const storageKey = `cropFormData_${selectedCrop.crop_name}`;
+  const storageKey = `cropFormData_${selectedCrop.crop_id}`;
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
@@ -140,7 +71,6 @@ export default function AddCropDetailsModal({
     const saved = localStorage.getItem(`${storageKey}`);
     return saved ? JSON.parse(saved) : defaultCropData;
   });
-
   /** ✅ Simplified handleNext (no validation) **/
   const handleNext = () => {
     setCompletedSteps((prev) => new Set(prev).add(currentStep));
@@ -157,7 +87,7 @@ export default function AddCropDetailsModal({
     toast.success("Form submitted successfully!");
 
     // ✅ Mark Stage One as completed in localStorage
-    localStorage.setItem(`stageOneCompleted_${selectedCrop.crop_name}`, "true");
+    localStorage.setItem(`stageOneCompleted_${selectedCrop.crop_id}`, "true");
 
     setTimeout(() => {
       setIsLoading(false);
@@ -166,31 +96,40 @@ export default function AddCropDetailsModal({
     }, 1500);
   };
 
-  const handleCropChange = (
-    field: string,
-    value:
-      | string
-      | boolean
-      | Partial<CropData["adverseWeatherEffects"]>
-      | Partial<CropData["pestAttack"]>
-      | Partial<CropData["diseaseAttack"]>
-      | Item[] // <-- add this
+  /** ✅ Generic handler to merge step updates into full CropData **/
+  const handleStepUpdate = (
+    stepField: keyof CropData,
+    updatedData: Partial<SeedDetails | WeatherDetails | ChemicalUsage[]>
   ) => {
     setCropData((prev) => {
-      const updated = { ...prev };
+      let updatedFieldValue;
 
-      // Merge nested objects for Weather or Pests/Disease
-      if (typeof value === "object" && !Array.isArray(value) && field in prev) {
-        updated[field as keyof CropData] = {
-          ...(prev[field as keyof CropData] as object),
-          ...value,
-        } as any;
+      if (Array.isArray(prev[stepField])) {
+        const existingArray = prev[stepField] as any[];
+
+        // If no first item, initialize it with updatedData
+        if (!existingArray[0]) {
+          updatedFieldValue = [updatedData];
+        } else {
+          // Merge the first object with updatedData
+          const updatedFirstItem = {
+            ...existingArray[0],
+            ...updatedData,
+          };
+          updatedFieldValue = [updatedFirstItem, ...existingArray.slice(1)];
+        }
       } else {
-        updated[field as keyof CropData] = value as any;
+        updatedFieldValue = updatedData;
       }
 
-      localStorage.setItem(`${storageKey}`, JSON.stringify(updated));
-      return updated;
+      const newCropData = {
+        ...prev,
+        [stepField]: updatedFieldValue,
+      };
+
+      localStorage.setItem(storageKey, JSON.stringify(newCropData));
+
+      return newCropData;
     });
   };
 
@@ -200,36 +139,87 @@ export default function AddCropDetailsModal({
       case 0:
         return (
           <CropDetailsForm
-            data={cropData}
-            onChange={handleCropChange}
+            data={cropData.crop_asset_seed_details?.[0] || {}}
+            onChange={(updatedSeed: Partial<SeedDetails>) =>
+              handleStepUpdate("crop_asset_seed_details", updatedSeed)
+            }
             selectedCrop={{ ...selectedCrop }}
           />
         );
       case 1:
-        return <Cultivation data={cropData} onChange={handleCropChange} />;
+        return (
+          <Cultivation
+            data={cropData.crop_asset_irrigation_cultivation_details?.[0] || {}}
+            onChange={(updatedCultivation: Partial<IrrigationCultivation>) =>
+              handleStepUpdate(
+                "crop_asset_irrigation_cultivation_details",
+                updatedCultivation
+              )
+            }
+          />
+        );
       case 2:
-        return <History data={cropData} onChange={handleCropChange} />;
+        return (
+          <History
+            data={
+              cropData.crop_asset_previous_season_history_details?.[0] || {}
+            }
+            onChange={(updatedHistory: Partial<PreviousSeasonHistory>) =>
+              handleStepUpdate(
+                "crop_asset_previous_season_history_details",
+                updatedHistory
+              )
+            }
+          />
+        );
       case 3:
-        return <Weather data={cropData} onChange={handleCropChange} />;
+        return (
+          <Weather
+            data={cropData.crop_asset_weather_details?.[0] || {}}
+            onChange={(updatedWeather: Partial<WeatherDetails>) =>
+              handleStepUpdate("crop_asset_weather_details", updatedWeather)
+            }
+          />
+        );
       case 4:
-        return <PestsDisease data={cropData} onChange={handleCropChange} />;
+        return (
+          <PestsDisease
+            data={{
+              pest: cropData.crop_asset_pest_attack_details?.[0] || {},
+              disease: cropData.crop_asset_disease_attack_details?.[0] || {},
+            }}
+            onChange={(
+              updatedPest: Partial<PestAttack>,
+              updatedDisease: Partial<DiseaseAttack>
+            ) => {
+              handleStepUpdate("crop_asset_pest_attack_details", updatedPest);
+              handleStepUpdate(
+                "crop_asset_disease_attack_details",
+                updatedDisease
+              );
+            }}
+          />
+        );
       case 5:
         return (
           <Chemicals
-            data={{
-              fertilizers: cropData.fertilizers,
-              pesticides: cropData.pesticides,
-            }}
-            onChange={handleCropChange}
+            data={cropData} // Pass the full CropData object
+            onChange={(updatedChemicals: ChemicalUsage[]) =>
+              handleStepUpdate(
+                "crop_asset_chemical_usage_details",
+                updatedChemicals
+              )
+            }
           />
         );
       case 6:
-        return <PreviewSubmit data={{ cropData }} />;
+        return <PreviewSubmit data={cropData} />;
       default:
         return null;
     }
   };
 
+  // console.log(cropData);
   return (
     <div>
       {/* Stepper */}
@@ -242,7 +232,7 @@ export default function AddCropDetailsModal({
       </div>
 
       {/* Step Content */}
-      <div className={`overflow-y-auto  bg-white rounded-b-xl`}>
+      <div className={`overflow-y-auto bg-white rounded-b-xl`}>
         {renderStep()}
       </div>
 

@@ -2,7 +2,7 @@ import React from "react";
 import AddCropDetailsModal from "../AddCropDetailsModal";
 
 export interface SelectedCropData {
-  crop_name: string;
+  crop_id: number;
   variety: string;
   plantation_date: string;
 }

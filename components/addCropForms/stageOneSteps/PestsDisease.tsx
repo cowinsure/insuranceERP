@@ -1,128 +1,155 @@
 "use client";
 
 import React from "react";
-
-export interface PestsDiseaseData {
-  pestAttack: {
-    stemBorer: boolean;
-    leafFolder: boolean;
-    brownPlanthopper: boolean;
-    greenLeafhopper: boolean;
-    stinkBug: boolean;
-    others: boolean;
-    none: boolean;
-  };
-  diseaseAttack: {
-    leafBlast: boolean;
-    bacterialLeafBlight: boolean;
-    sheathBlight: boolean;
-    bakanae: boolean;
-    brownSpot: boolean;
-    leafScald: boolean;
-    hispa: boolean;
-    tungro: boolean;
-    none: boolean;
-  };
-}
+import {
+  PestAttack,
+  DiseaseAttack,
+} from "@/components/model/crop/CropCoreModel";
 
 interface PestsDiseaseProps {
-  data: PestsDiseaseData;
+  data: {
+    pest: Partial<PestAttack>;
+    disease: Partial<DiseaseAttack>;
+  };
   onChange: (
-    group: "pestAttack" | "diseaseAttack",
-    value:
-      | Partial<PestsDiseaseData["pestAttack"]>
-      | Partial<PestsDiseaseData["diseaseAttack"]>
+    updatedPest: Partial<PestAttack>,
+    updatedDisease: Partial<DiseaseAttack>
   ) => void;
   errors?: {
     pestAttack?: string;
     diseaseAttack?: string;
   };
 }
+
 const PestsDisease = ({ data, onChange, errors }: PestsDiseaseProps) => {
+  // Merge default values with passed data
+  const pestAttack: Partial<PestAttack> = {
+    crop_pest_attack_id: 0,
+    pest_attack_type_id: 0,
+    pest_attack_observations_type_name: [],
+    remarks: "",
+    attack_date: "",
+    ...data.pest,
+  };
+
+  const diseaseAttack: Partial<DiseaseAttack> = {
+    crop_disease_attack_id: 0,
+    disease_attack_type_id: 0,
+    disease_attack_observations_type_name: [],
+    remarks: "",
+    attack_date: "",
+    ...data.disease,
+  };
+
+  // Handle checkbox change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked, dataset } = e.target;
+    const group = dataset.group as "pestAttack" | "diseaseAttack";
+
+    if (group === "pestAttack") {
+      const selected = new Set(pestAttack.pest_attack_observations_type_name);
+      if (checked) selected.add(name);
+      else selected.delete(name);
+
+      onChange(
+        {
+          ...pestAttack,
+          pest_attack_observations_type_name: Array.from(selected),
+        },
+        diseaseAttack
+      );
+    } else {
+      const selected = new Set(
+        diseaseAttack.disease_attack_observations_type_name
+      );
+      if (checked) selected.add(name);
+      else selected.delete(name);
+
+      onChange(pestAttack, {
+        ...diseaseAttack,
+        disease_attack_observations_type_name: Array.from(selected),
+      });
+    }
+  };
+
+  // ✅ Options (unchanged)
   const pestOptions = [
     {
       label: "Stem Borer infestation (খোদরো পোকার আক্রমণ)",
-      name: "stemBorer",
+      name: "Stem Borer",
       desc: "In stem borer infestation, panicles turn white and remain empty.",
     },
     {
       label: "Leaf Folder attack (পাতা মড়ি পোকার আক্রমণ)",
-      name: "leafFolder",
+      name: "Leaf Folder",
       desc: "Leaves fold with feeding marks, resulting in smaller panicles.",
     },
     {
       label: "Brown Planthopper (BPH) infestation (বাদামী গাছফড়িং আক্রমণ)",
-      name: "brownPlanthopper",
+      name: "Brown Planthopper",
       desc: "BPH infestation causes plants to dry up.",
     },
     {
       label: "Green Leafhopper (GLH) infestation (সবুজ গাছফড়িং আক্রমণ)",
-      name: "greenLeafhopper",
+      name: "Green Leafhopper",
       desc: "GLH attacks cause hopper burn, drying leaves and panicles.",
     },
     {
       label: "Stink Bug (গন্ধি পোকা)",
-      name: "stinkBug",
+      name: "Stink Bug",
       desc: "Sucks the grains, drying them and creating bad odor.",
     },
     {
       label: "Others - Please Specify (অন্যান্য - অনুগ্রহ করে উল্লেখ করুন)",
-      name: "others",
+      name: "Others",
       desc: "",
     },
-    { label: "None of the above (উপরের কোনোটিই নয়)", name: "none", desc: "" },
+    { label: "None of the above (উপরের কোনোটিই নয়)", name: "None", desc: "" },
   ];
 
   const diseaseOptions = [
     {
       label: "Leaf blast disease (পাতার পোড়ার রোগ)",
-      name: "leafBlast",
+      name: "Leaf Blast",
       desc: "Burnt spots appear on leaves; panicles dry up and empty grains increase.",
     },
     {
       label: "Bacterial leaf blight (BLB) (পাতার কলাপচলা রোগ)",
-      name: "bacterialLeafBlight",
+      name: "Bacterial Leaf Blight",
       desc: "Leaf tips burn downwards due to bacterial infection.",
     },
     {
       label: "Sheath blight disease (পাতার গোড়ার পচা রোগ)",
-      name: "sheathBlight",
+      name: "Sheath Blight",
       desc: "Brown spots appear on the stem base; panicles remain empty.",
     },
     {
       label: "Bakanae disease (বাকানাই রোগ)",
-      name: "bakanae",
+      name: "Bakanae",
       desc: "Plants grow abnormally tall and weak with hollow panicles.",
     },
     {
       label: "Brown spot disease (বাদামী দাগা রোগ)",
-      name: "brownSpot",
+      name: "Brown Spot",
       desc: "Brown spots appear on leaves; plants dry up prematurely.",
     },
     {
       label: "Leaf Scald (পাতার স্ক্যাল্ড রোগ)",
-      name: "leafScald",
+      name: "Leaf Scald",
       desc: "Leaves appear burnt or dried.",
     },
     {
       label: "Hispa (হিস্পা পোকার)",
-      name: "hispa",
+      name: "Hispa",
       desc: "Leaves curl due to infestation.",
     },
     {
       label: "Tungro Virus Disease (ধানের টুংগ্রো ভাইরাস রোগ)",
-      name: "tungro",
+      name: "Tungro",
       desc: "Plants become short, leaves turn orange/yellow, and yield decreases.",
     },
-    { label: "None of the above (উপরের কোনোটিই নয়)", name: "none", desc: "" },
+    { label: "None of the above (উপরের কোনোটিই নয়)", name: "None", desc: "" },
   ];
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked, dataset } = e.target;
-    const group = dataset.group as "pestAttack" | "diseaseAttack";
-
-    onChange(group, { [name]: checked }); // ✅ pass object
-  };
 
   return (
     <form className="p-3">
@@ -144,9 +171,9 @@ const PestsDisease = ({ data, onChange, errors }: PestsDiseaseProps) => {
                 id={item.name}
                 name={item.name}
                 data-group="pestAttack"
-                checked={
-                  data.pestAttack[item.name as keyof typeof data.pestAttack]
-                }
+                checked={pestAttack.pest_attack_observations_type_name?.includes(
+                  item.name
+                )}
                 onChange={handleChange}
                 className="mt-1 custom-checkbox"
               />
@@ -165,6 +192,7 @@ const PestsDisease = ({ data, onChange, errors }: PestsDiseaseProps) => {
             <p className="text-red-600 text-sm mt-1">{errors.pestAttack}</p>
           )}
         </div>
+
         {/* Disease Attack Section */}
         <div className="space-y-4 bg-gray-50 p-4 border rounded-lg">
           <h3 className="text-base font-semibold mb-2">
@@ -178,11 +206,9 @@ const PestsDisease = ({ data, onChange, errors }: PestsDiseaseProps) => {
                 id={item.name}
                 name={item.name}
                 data-group="diseaseAttack"
-                checked={
-                  data.diseaseAttack[
-                    item.name as keyof typeof data.diseaseAttack
-                  ]
-                }
+                checked={diseaseAttack.disease_attack_observations_type_name?.includes(
+                  item.name
+                )}
                 onChange={handleChange}
                 className="mt-1 custom-checkbox"
               />

@@ -1,56 +1,18 @@
 import DropdownField from "@/components/DropDownField";
-import React, { useState } from "react";
-
-interface CultivationData {
-  irrigationFacility: string;
-  irrigationSource: string;
-  cultivationSystem: string;
-  landSuitability: string;
-}
+import React from "react";
+import { IrrigationCultivation } from "@/components/model/crop/CropCoreModel";
 
 interface CultivationProps {
-  data: CultivationData;
-  onChange: (field: string, value: string) => void;
+  data: IrrigationCultivation;
+  onChange: (updated: Partial<IrrigationCultivation>) => void;
 }
 
 const Cultivation = ({ data, onChange }: CultivationProps) => {
-  const [errors, setErrors] = useState({
-    irrigationFacility: "",
-    irrigationSource: "",
-    cultivationSystem: "",
-    landSuitability: "",
-  });
-
-  // Handle change for all form fields (Input and Select)
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    onChange(name, value);
+    onChange({ [name]: value });
   };
 
-  // Form validation not in use currently
-  // const validateForm = () => {
-  //   const newErrors = {
-  //     irrigationFacility: "",
-  //     irrigationSource: "",
-  //     cultivationSystem: "",
-  //     landSuitability: "",
-  //   };
-  //   // Example validation checks (you can customize)
-  //   if (!data.irrigationFacility)
-  //     newErrors.irrigationFacility = "This field is required";
-  //   if (!data.irrigationSource)
-  //     newErrors.irrigationSource = "This field is required";
-  //   if (!data.cultivationSystem)
-  //     newErrors.cultivationSystem = "This field is required";
-  //   if (!data.landSuitability)
-  //     newErrors.landSuitability = "This field is required";
-
-  //   setErrors(newErrors);
-  // };
-
-  // Dropdown options for each select field
   const irrigationFacilityOptions = [
     { value: "Good", label: "Good – Utilized by most farm" },
     { value: "Moderate", label: "Moderate – Used by a good number of farmers" },
@@ -88,48 +50,37 @@ const Cultivation = ({ data, onChange }: CultivationProps) => {
         Cultivation Details
       </h2>
       <div className="space-y-5">
-        {/* Irrigation Facility */}
         <DropdownField
           label="Irrigation Facility"
           id="irrigationFacility"
           name="irrigationFacility"
-          value={data.irrigationFacility}
+          value={data.irrigation_facility}
           onChange={handleChange}
           options={irrigationFacilityOptions}
-          error={errors.irrigationFacility}
         />
-
-        {/* Irrigation Source */}
         <DropdownField
           label="Irrigation Source"
           id="irrigationSource"
           name="irrigationSource"
-          value={data.irrigationSource}
+          value={data.irrigation_source}
           onChange={handleChange}
           options={irrigationSourceOptions}
-          error={errors.irrigationSource}
         />
-
-        {/* Cultivation System */}
         <DropdownField
           label="Cultivation System"
           id="cultivationSystem"
           name="cultivationSystem"
-          value={data.cultivationSystem}
+          value={data.crop_cultivation_system_name}
           onChange={handleChange}
           options={cultivationSystemOptions}
-          error={errors.cultivationSystem}
         />
-
-        {/* Land Suitability for Commercial */}
         <DropdownField
           label="Land Suitability for Commercial"
           id="landSuitability"
           name="landSuitability"
-          value={data.landSuitability}
+          value={data.crop_land_suitability_name}
           onChange={handleChange}
           options={landSuitabilityOptions}
-          error={errors.landSuitability}
         />
       </div>
     </form>

@@ -10,8 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, MapPin, ImageIcon, Trash2, Plus,LocateFixed  } from "lucide-react"
+import { Loader2, MapPin, ImageIcon, Trash2, Plus, LocateFixed } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import useApi from "@/hooks/use_api"
 import { GoogleMap, Marker, Polygon, InfoWindow, useJsApiLoader } from "@react-google-maps/api"
 
 const mapContainerStyle = {
@@ -50,7 +51,12 @@ interface PlotData {
 interface CreatePlotDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onPlotCreated: (plot: PlotData , plotname:string,description:string) => void
+  onPlotCreated: (plot: PlotData, plotname: string, description: string) => void
+}
+
+interface FarmerProfile {
+  user_id: string | number
+  farmer_name: string
 }
 
 export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePlotDialogProps) {
@@ -61,11 +67,31 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [ownershipType, setOwnershipType] = useState("")
   const [suitabilityReasons, setSuitabilityReasons] = useState<string[]>([])
   const [nonSuitabilityReasons, setNonSuitabilityReasons] = useState<string[]>([])
+  // overall suitability selection: '', 'suitable', 'not_suitable'
+  const [overallSuitability, setOverallSuitability] = useState<string>("")
+  // Dummy datasets for land suitability (English + Bengali) - sourced from user-provided dataset
+  const SUITABILITY_OPTIONS = [
+    { id: "mostly_flat", text: "Mostly flat land with minimal uneven areas - অধিকাংশ সমতল জমি এবং অল্প অসমান এলাকা" },
+    { id: "adequate_drainage", text: "Adequate water drainage system - এখানে পর্যাপ্ত পানি নিষ্কাশনের ব্যবস্থা রয়েছে" },
+    { id: "few_holes", text: "Few holes in the land - জমি মোটামুটি সমতল, খুব কম গর্ত রয়েছে" },
+    { id: "clear_boundary", text: "Clear and proper boundary of the land - জমির স্পষ্ট ও সঠিক সীমানা রয়েছে" },
+  ]
+
+  const NON_SUITABILITY_OPTIONS = [
+    { id: "mostly_uneven", text: "Mostly uneven land not suitable for cropping - অধিকাংশ অসমান জমি, চাষাবাদের জন্য উপযুক্ত নয়" },
+    { id: "inadequate_drainage", text: "Inadequate water drainage system - যথাযথ পানি নিষ্কাশন ব্যবস্থা নেই" },
+    { id: "abundance_holes", text: "Abundance of holes in the land - জমিতে গর্তের আধিক্য রয়েছে" },
+    { id: "bad_boundary", text: "Boundary of the land is not well maintained - জমির সীমানা ঠিকমতো রক্ষণাবেক্ষণ করা হয়নি" },
+  ]
   const [measureSWSE, setMeasureSWSE] = useState("")
   const [measureSWNW, setMeasureSWNW] = useState("")
   const [measureNWNE, setMeasureNWNE] = useState("")
   const [measureSENE, setMeasureSENE] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
+  // farmers list and selection
+  const [farmers, setFarmers] = useState<FarmerProfile[]>([])
+  const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null)
+  const [farmersLoading, setFarmersLoading] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [plotData, setPlotData] = useState<PlotData | null>(null)
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
@@ -79,6 +105,31 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   })
+
+  const { get } = useApi()
+
+  useEffect(() => {
+    // fetch farmers when dialog opens
+    if (!open) return
+    let cancelled = false
+    const fetchFarmers = async () => {
+      setFarmersLoading(true)
+      try {
+        const resp = await get(`ims/farmer-service`, { params: { start_record: 1 } })
+        console.log(resp);
+        
+        if (!cancelled && resp?.status === 'success' && Array.isArray(resp.data)) {
+          setFarmers(resp.data)
+        }
+      } catch (err) {
+        // ignore silently; toast could be added
+      } finally {
+        if (!cancelled) setFarmersLoading(false)
+      }
+    }
+    fetchFarmers()
+    return () => { cancelled = true }
+  }, [open, get])
 
   const getCurrentLocation = (index: number) => {
     if (!navigator.geolocation) {
@@ -207,7 +258,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
     }
 
     setIsGenerating(true)
- setApiErrorMessage(null);
+    setApiErrorMessage(null);
     try {
       // Prepare the request body with land area coordinates
       const requestBody = {
@@ -231,14 +282,14 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       });
 
       if (!response.ok) {
-         let errorMsg = "Failed to generate plot. Please try again.";
+        let errorMsg = "Failed to generate plot. Please try again.";
         let errorJson: any = null;
         try {
           errorJson = await response.json();
           if (errorJson?.message) {
             errorMsg = errorJson.message;
           }
-        } catch {}
+        } catch { }
         setApiErrorMessage(errorMsg);
         toast({
           title: "Generation failed",
@@ -253,20 +304,20 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       console.log(data);
 
       // Extract fields from the correct structure
-  const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
-  const landAreaRaw = data.data?.land_area ?? [];
-  const innerAreaRaw = data.data?.inner_area ?? [];
-  const imageUrl = data.data?.image ?? "";
-  const area = typeof data.area === "number" ? `${data.area.toFixed(2)} acres` : "N/A";
+      const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
+      const landAreaRaw = data.data?.land_area ?? [];
+      const innerAreaRaw = data.data?.inner_area ?? [];
+      const imageUrl = data.data?.image ?? "";
+      const area = typeof data.area === "number" ? `${data.area.toFixed(2)} acres` : "N/A";
 
-  const sw_mark_raw = data.data?.sw_mark ?? null;
-  const n_corner_raw = data.data?.n_corner ?? null;
-  const e_corner_raw = data.data?.e_corner ?? null;
-  const n_mark_raw = data.data?.n_mark ?? null;
-  const e_mark_raw = data.data?.e_mark ?? null;
-  const intersection_raw = data.data?.intersection ?? null;
-  const n_mark_dist_raw = data.data?.n_mark_dist ?? null;
-  const e_mark_dist_raw = data.data?.e_mark_dist ?? null;
+      const sw_mark_raw = data.data?.sw_mark ?? null;
+      const n_corner_raw = data.data?.n_corner ?? null;
+      const e_corner_raw = data.data?.e_corner ?? null;
+      const n_mark_raw = data.data?.n_mark ?? null;
+      const e_mark_raw = data.data?.e_mark ?? null;
+      const intersection_raw = data.data?.intersection ?? null;
+      const n_mark_dist_raw = data.data?.n_mark_dist ?? null;
+      const e_mark_dist_raw = data.data?.e_mark_dist ?? null;
 
       setApiPayload(data); // Save full API payload
 
@@ -274,29 +325,29 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         plotName,
         landCoordinates: Array.isArray(landAreaRaw)
           ? landAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
-              lat: coord.latitude.toString(),
-              lng: coord.longitude.toString()
-            }))
+            lat: coord.latitude.toString(),
+            lng: coord.longitude.toString()
+          }))
           : [],
         plotCoordinates: Array.isArray(plotCoordinatesRaw)
           ? plotCoordinatesRaw.map((coord: { latitude: number, longitude: number }) => ({
-              lat: coord.latitude.toString(),
-              lng: coord.longitude.toString()
-            }))
+            lat: coord.latitude.toString(),
+            lng: coord.longitude.toString()
+          }))
           : [],
         innerCoordinates: Array.isArray(innerAreaRaw)
           ? innerAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
-              lat: coord.latitude.toString(),
-              lng: coord.longitude.toString()
-            }))
+            lat: coord.latitude.toString(),
+            lng: coord.longitude.toString()
+          }))
           : [],
         swMark: sw_mark_raw ? { lat: sw_mark_raw.latitude.toString(), lng: sw_mark_raw.longitude.toString() } : null,
         nCorner: n_corner_raw ? { lat: n_corner_raw.latitude.toString(), lng: n_corner_raw.longitude.toString() } : null,
         eCorner: e_corner_raw ? { lat: e_corner_raw.latitude.toString(), lng: e_corner_raw.longitude.toString() } : null,
         nMark: n_mark_raw ? { lat: n_mark_raw.latitude.toString(), lng: n_mark_raw.longitude.toString() } : null,
-  eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
-  nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
-  eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
+        eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
+        nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
+        eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
         intersection: intersection_raw ? { lat: intersection_raw.latitude.toString(), lng: intersection_raw.longitude.toString() } : null,
         imageUrl,
         area,
@@ -324,7 +375,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
 
   const savePlot = () => {
     if (apiPayload) {
-      onPlotCreated(apiPayload,plotName,plotDescription);
+      onPlotCreated(apiPayload, plotName, plotDescription);
       toast({
         title: "Plot saved!",
         description: `${plotData?.plotName ?? ""} has been added to your plots.`,
@@ -420,6 +471,24 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 />
               </div>
 
+              {/* Farmer selector (optional) */}
+              <div className="space-y-2">
+                <Label htmlFor="plotFarmer">Farmer</Label>
+                <Select value={selectedFarmerId ?? "none"} onValueChange={(val: string) => setSelectedFarmerId(val === "none" ? null : val)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={farmersLoading ? "Loading farmers..." : "Select a farmer (optional)"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {farmers.map((f) => (
+                      <SelectItem key={String(f.user_id)} value={String(f.user_id)}>
+                        {f.farmer_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Land Description */}
               <div className="space-y-2">
                 <Label htmlFor="plotDescription">Land Description</Label>
@@ -440,9 +509,8 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="tenant">Tenant</SelectItem>
-                    <SelectItem value="communal">Communal</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="tenant">Lease</SelectItem>
+
                   </SelectContent>
                 </Select>
               </div>
@@ -450,62 +518,93 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
               {/* Land Suitability */}
               <div className="space-y-2">
                 <Label>Land Suitability</Label>
-                <div className="text-sm text-muted-foreground">Reasons for Suitability (select all that apply)</div>
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={suitabilityReasons.includes("good_soil")} onCheckedChange={(checked) => {
-                      if (checked) setSuitabilityReasons([...suitabilityReasons, "good_soil"]) ; else setSuitabilityReasons(suitabilityReasons.filter(x=>x!=="good_soil"))
-                    }} />
-                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Good soil quality</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={suitabilityReasons.includes("access_water")} onCheckedChange={(checked) => {
-                      if (checked) setSuitabilityReasons([...suitabilityReasons, "access_water"]) ; else setSuitabilityReasons(suitabilityReasons.filter(x=>x!=="access_water"))
-                    }} />
-                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Access to water</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={suitabilityReasons.includes("favorable_climate")} onCheckedChange={(checked) => {
-                      if (checked) setSuitabilityReasons([...suitabilityReasons, "favorable_climate"]) ; else setSuitabilityReasons(suitabilityReasons.filter(x=>x!=="favorable_climate"))
-                    }} />
-                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Favorable climate</div>
-                  </div>
+                <div className="text-sm text-muted-foreground">Is this land suitable?</div>
+                <div className="pt-2">
+                  <Select value={overallSuitability} onValueChange={(val: string) => {
+                    // when switching modes, clear the opposite selections
+                    if (val === 'suitable') {
+                      setNonSuitabilityReasons([])
+                    } else if (val === 'not_suitable') {
+                      setSuitabilityReasons([])
+                    } else if (val === 'undecided') {
+                      setSuitabilityReasons([])
+                      setNonSuitabilityReasons([])
+                    }
+                    setOverallSuitability(val)
+                  }}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select suitability" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="suitable">Suitable</SelectItem>
+                      <SelectItem value="not_suitable">Not suitable</SelectItem>
+
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="mt-3 text-sm text-muted-foreground">Reasons for Non-Suitability (select all that apply)</div>
+                {/* Conditional option lists based on overallSuitability */}
+                {overallSuitability === 'suitable' && (
+                  <div className="space-y-2 pt-2">
+                    {SUITABILITY_OPTIONS.map((opt) => (
+                      <div key={opt.id} className="flex items-center gap-2">
+                        <Checkbox
+                          checked={suitabilityReasons.includes(opt.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) setSuitabilityReasons((s) => Array.from(new Set([...s, opt.id])));
+                            else setSuitabilityReasons((s) => s.filter((x) => x !== opt.id));
+                          }}
+                        />
+                        <div className="flex-1 rounded-md bg-muted p-3 text-sm">{opt.text}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {overallSuitability === 'not_suitable' && (
+                  <div className="space-y-2 pt-2">
+                    {NON_SUITABILITY_OPTIONS.map((opt) => (
+                      <div key={opt.id} className="flex items-center gap-2">
+                        <Checkbox
+                          checked={nonSuitabilityReasons.includes(opt.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) setNonSuitabilityReasons((s) => Array.from(new Set([...s, opt.id])));
+                            else setNonSuitabilityReasons((s) => s.filter((x) => x !== opt.id));
+                          }}
+                        />
+                        <div className="flex-1 rounded-md bg-muted p-3 text-sm">{opt.text}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* <div className="mt-3 text-sm text-muted-foreground">Reasons for Non-Suitability (select all that apply)</div>
                 <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={nonSuitabilityReasons.includes("poor_soil")} onCheckedChange={(checked) => {
-                      if (checked) setNonSuitabilityReasons([...nonSuitabilityReasons, "poor_soil"]) ; else setNonSuitabilityReasons(nonSuitabilityReasons.filter(x=>x!=="poor_soil"))
-                    }} />
-                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Poor soil quality</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={nonSuitabilityReasons.includes("water_scarcity")} onCheckedChange={(checked) => {
-                      if (checked) setNonSuitabilityReasons([...nonSuitabilityReasons, "water_scarcity"]) ; else setNonSuitabilityReasons(nonSuitabilityReasons.filter(x=>x!=="water_scarcity"))
-                    }} />
-                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Water scarcity</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox checked={nonSuitabilityReasons.includes("risk_flooding")} onCheckedChange={(checked) => {
-                      if (checked) setNonSuitabilityReasons([...nonSuitabilityReasons, "risk_flooding"]) ; else setNonSuitabilityReasons(nonSuitabilityReasons.filter(x=>x!=="risk_flooding"))
-                    }} />
-                    <div className="flex-1 rounded-md bg-muted p-3 text-sm">Risk of flooding</div>
-                  </div>
-                </div>
+                  {NON_SUITABILITY_OPTIONS.map((opt) => (
+                    <div key={opt.id} className="flex items-center gap-2">
+                      <Checkbox
+                        checked={nonSuitabilityReasons.includes(opt.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) setNonSuitabilityReasons((s) => Array.from(new Set([...s, opt.id])));
+                          else setNonSuitabilityReasons((s) => s.filter((x) => x !== opt.id));
+                        }}
+                      />
+                      <div className="flex-1 rounded-md bg-muted p-3 text-sm">{opt.text}</div>
+                    </div>
+                  ))}
+                </div> */}
               </div>
 
               {/* Land Measurements */}
               <div className="space-y-2">
                 <Label>Land Measurements</Label>
                 <div className="text-sm text-muted-foreground">SW → SE (meters)</div>
-                <Input placeholder="Enter measurement" value={measureSWSE} onChange={(e)=>setMeasureSWSE(e.target.value)} />
+                <Input placeholder="Enter measurement" value={measureSWSE} onChange={(e) => setMeasureSWSE(e.target.value)} />
                 <div className="text-sm text-muted-foreground">SE → NE (meters)</div>
-                <Input placeholder="Enter measurement" value={measureSENE} onChange={(e)=>setMeasureSENE(e.target.value)} />
+                <Input placeholder="Enter measurement" value={measureSENE} onChange={(e) => setMeasureSENE(e.target.value)} />
                 <div className="text-sm text-muted-foreground"> NE → NW (meters)</div>
-                <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e)=>setMeasureNWNE(e.target.value)} />
+                <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e) => setMeasureNWNE(e.target.value)} />
                 <div className="text-sm text-muted-foreground">NW → SW (meters)</div>
-                <Input placeholder="Enter measurement" value={measureSWNW} onChange={(e)=>setMeasureSWNW(e.target.value)} />
+                <Input placeholder="Enter measurement" value={measureSWNW} onChange={(e) => setMeasureSWNW(e.target.value)} />
               </div>
 
               {/* Coordinates Input */}
@@ -539,14 +638,14 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                         </div>
                       </div>
                       <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => getCurrentLocation(index)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <LocateFixed className="h-4 w-4" />
-                        </Button>
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => getCurrentLocation(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <LocateFixed className="h-4 w-4" />
+                      </Button>
                       {coordinates.length > 1 && (
                         <Button
                           type="button"
@@ -579,9 +678,9 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                         center={
                           coordinates.length > 0 && coordinates[0].lat && coordinates[0].lng
                             ? {
-                                lat: parseFloat(coordinates[0].lat),
-                                lng: parseFloat(coordinates[0].lng),
-                              }
+                              lat: parseFloat(coordinates[0].lat),
+                              lng: parseFloat(coordinates[0].lng),
+                            }
                             : userLocation
                               ? userLocation
                               : defaultCenter
@@ -730,13 +829,13 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
               </div>
             </>
           )}
-          
+
           {/* Google Map */}
           {isLoaded && showResults && plotData && (
             <div className="mt-6">
               <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
                     Plot Location
                   </CardTitle>
@@ -749,9 +848,9 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                         ? userLocation
                         : plotData.plotCoordinates && plotData.plotCoordinates.length > 0
                           ? {
-                              lat: parseFloat(plotData.plotCoordinates[0].lat),
-                              lng: parseFloat(plotData.plotCoordinates[0].lng),
-                            }
+                            lat: parseFloat(plotData.plotCoordinates[0].lat),
+                            lng: parseFloat(plotData.plotCoordinates[0].lng),
+                          }
                           : defaultCenter
                     }
                     zoom={15}

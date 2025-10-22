@@ -449,18 +449,10 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         <div className="space-y-6">
           {!showResults ? (
             <>
-              {/* Land Name */}
-              {/* <div className="space-y-2">
-                <Label htmlFor="landName">Land Name</Label>
-                <Input
-                  id="landName"
-                  placeholder="Enter land name"
-                  value={landName}
-                  onChange={(e) => setLandName(e.target.value)}
-                />
-              </div> */}
+             
+          
 
-              {/* Plot Name */}
+          {/* Land Name */}
               <div className="space-y-2">
                 <Label htmlFor="plotName">Land Name *</Label>
                 <Input

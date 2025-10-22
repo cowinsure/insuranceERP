@@ -62,7 +62,7 @@ export default function CropPage() {
   const [plotCoordsTargetId, setPlotCoordsTargetId] = useState<string | null>(null)
   const [plots, setPlots] = useState<Plot[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null)
+  const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null)
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
   const filteredPlots = plots.filter(
     (plot) =>
@@ -72,31 +72,31 @@ export default function CropPage() {
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
 
-  const handlePlotCreated = ( apiPayload: any , plotName: string, plotDescription: string) => {
+  const handlePlotCreated = (apiPayload: any, plotName: string, plotDescription: string) => {
 
     console.log(apiPayload);
-  const plotCoordinatesRaw = apiPayload.data?.plot_coordinate ?? [];
-  const innerAreaRaw = apiPayload.data?.inner_area ?? [];
-  const landAreaRaw = apiPayload.data?.land_area ?? [];
-    
-  const sw_mark_raw = apiPayload?.data?.sw_mark ?? null;
-  const n_corner_raw = apiPayload?.data?.n_corner ?? null;
-  const e_corner_raw = apiPayload?.data?.e_corner ?? null;
-  const n_mark_raw = apiPayload?.data?.n_mark ?? null;
-  const e_mark_raw = apiPayload?.data?.e_mark ?? null;
-  const intersection_raw = apiPayload?.data?.intersection ?? null;
-  const n_mark_dist_raw = apiPayload?.data?.n_mark_dist ?? null;
-  const e_mark_dist_raw = apiPayload?.data?.e_mark_dist ?? null;
-    
+    const plotCoordinatesRaw = apiPayload.data?.plot_coordinate ?? [];
+    const innerAreaRaw = apiPayload.data?.inner_area ?? [];
+    const landAreaRaw = apiPayload.data?.land_area ?? [];
 
-  
+    const sw_mark_raw = apiPayload?.data?.sw_mark ?? null;
+    const n_corner_raw = apiPayload?.data?.n_corner ?? null;
+    const e_corner_raw = apiPayload?.data?.e_corner ?? null;
+    const n_mark_raw = apiPayload?.data?.n_mark ?? null;
+    const e_mark_raw = apiPayload?.data?.e_mark ?? null;
+    const intersection_raw = apiPayload?.data?.intersection ?? null;
+    const n_mark_dist_raw = apiPayload?.data?.n_mark_dist ?? null;
+    const e_mark_dist_raw = apiPayload?.data?.e_mark_dist ?? null;
+
+
+
     const plotCoordinates =
       apiPayload?.data?.plot_coordinate?.map((coord: { latitude: number, longitude: number }) => ({
         lat: coord.latitude.toString(),
         lng: coord.longitude.toString(),
       })) ?? [];
 
-       const landArea =
+    const landArea =
       apiPayload?.data?.land_area?.map((coord: { latitude: number, longitude: number }) => ({
         lat: coord.latitude.toString(),
         lng: coord.longitude.toString(),
@@ -112,42 +112,42 @@ export default function CropPage() {
       description: plotDescription,
       area,
       coordinates: plotCoordinates,
-      plotCoordinates:  Array.isArray(plotCoordinatesRaw)
-          ? plotCoordinatesRaw.map((coord: { latitude: number, longitude: number }) => ({
-              lat: coord.latitude.toString(),
-              lng: coord.longitude.toString()
-            }))
-          : [],
-      innerCoordinates:  Array.isArray(innerAreaRaw)
-          ? innerAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
-              lat: coord.latitude.toString(),
-              lng: coord.longitude.toString()
-            }))
-          : [],
-          landArea:landArea,
-          landCoordinates: Array.isArray(landAreaRaw)
-          ? landAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
-              lat: coord.latitude.toString(),
-              lng: coord.longitude.toString()
-            }))
-          : [],
-          imageUrl,
+      plotCoordinates: Array.isArray(plotCoordinatesRaw)
+        ? plotCoordinatesRaw.map((coord: { latitude: number, longitude: number }) => ({
+          lat: coord.latitude.toString(),
+          lng: coord.longitude.toString()
+        }))
+        : [],
+      innerCoordinates: Array.isArray(innerAreaRaw)
+        ? innerAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
+          lat: coord.latitude.toString(),
+          lng: coord.longitude.toString()
+        }))
+        : [],
+      landArea: landArea,
+      landCoordinates: Array.isArray(landAreaRaw)
+        ? landAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
+          lat: coord.latitude.toString(),
+          lng: coord.longitude.toString()
+        }))
+        : [],
+      imageUrl,
       createdAt: new Date().toISOString(),
       status: "active",
-       swMark: sw_mark_raw ? { lat: sw_mark_raw.latitude.toString(), lng: sw_mark_raw.longitude.toString() } : null,
-        nCorner: n_corner_raw ? { lat: n_corner_raw.latitude.toString(), lng: n_corner_raw.longitude.toString() } : null,
-        eCorner: e_corner_raw ? { lat: e_corner_raw.latitude.toString(), lng: e_corner_raw.longitude.toString() } : null,
-        nMark: n_mark_raw ? { lat: n_mark_raw.latitude.toString(), lng: n_mark_raw.longitude.toString() } : null,
-  eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
-  nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
-  eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
-        intersection: intersection_raw ? { lat: intersection_raw.latitude.toString(), lng: intersection_raw.longitude.toString() } : null,
-       
+      swMark: sw_mark_raw ? { lat: sw_mark_raw.latitude.toString(), lng: sw_mark_raw.longitude.toString() } : null,
+      nCorner: n_corner_raw ? { lat: n_corner_raw.latitude.toString(), lng: n_corner_raw.longitude.toString() } : null,
+      eCorner: e_corner_raw ? { lat: e_corner_raw.latitude.toString(), lng: e_corner_raw.longitude.toString() } : null,
+      nMark: n_mark_raw ? { lat: n_mark_raw.latitude.toString(), lng: n_mark_raw.longitude.toString() } : null,
+      eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
+      nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
+      eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
+      intersection: intersection_raw ? { lat: intersection_raw.latitude.toString(), lng: intersection_raw.longitude.toString() } : null,
+
     };
     setPlots((prev) => [...prev, newPlot]);
   }
 
-  
+
   const handleViewDetails = (plot: Plot) => {
     setSelectedPlot(plot)
     setIsDetailsDialogOpen(true)
@@ -165,11 +165,11 @@ export default function CropPage() {
         prev.map((p) =>
           p.id === plotCoordsTargetId
             ? {
-                ...p,
-                coordinates: coords,
-                plotCoordinates: coords,
-                landArea: coords,
-              }
+              ...p,
+              coordinates: coords,
+              plotCoordinates: coords,
+              landArea: coords,
+            }
             : p
         )
       )
@@ -214,12 +214,12 @@ export default function CropPage() {
   // Save plots to localStorage whenever plots change
   useEffect(() => {
 
-    
+
     localStorage.setItem("plots", JSON.stringify(plots));
   }, [plots]);
 
   return (
-   
+
 
     <div className="flex-1 space-y-6 p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -244,64 +244,114 @@ export default function CropPage() {
         {/* <ProductStats /> */}
         {/* <ProductFilters />
         <ProductsTable /> */}
-          {/* Search */}
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Search</h2>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search by plot name or coordinates..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Search */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Search</h2>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search by plot name or coordinates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Plots List */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-gray-900">Created Plots</h2>
-                <span className="text-sm text-gray-500">{filteredPlots.length} plots found</span>
-              </div>
+        {/* Plots List */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">Created Plots</h2>
+              <span className="text-sm text-gray-500">{filteredPlots.length} plots found</span>
+            </div>
 
-              {filteredPlots.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MapPin className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No plots found</h3>
-                  <p className="text-gray-500 mb-4">
-                    {searchTerm ? "Try adjusting your search terms" : "Create your first land entry to get started"}
-                  </p>
-                  {!searchTerm && (
-                    <Button onClick={() => setIsCreateDialogOpen(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Land
-                    </Button>
-                  )}
+            {filteredPlots.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-8 h-8 text-gray-400" />
                 </div>
-              ) : (
-                <>
-                  {/* Mobile: card list */}
-                  <div className="space-y-4 md:hidden">
-                    {filteredPlots.map((plot) => (
-                      <div key={plot.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="font-medium text-gray-900">{plot.plotName}</div>
-                            <div className="text-sm text-gray-600">{plot.area}</div>
-                          </div>
-                          <div className="text-sm text-gray-500">{new Date(plot.createdAt).toLocaleDateString()}</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No plots found</h3>
+                <p className="text-gray-500 mb-4">
+                  {searchTerm ? "Try adjusting your search terms" : "Create your first land entry to get started"}
+                </p>
+                {!searchTerm && (
+                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Land
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Mobile: card list */}
+                <div className="space-y-4 md:hidden">
+                  {filteredPlots.map((plot) => (
+                    <div key={plot.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">{plot.plotName}</div>
+                          <div className="text-sm text-gray-600">{plot.area}</div>
                         </div>
-                        <div className="mt-3 flex items-center justify-between">
-                          <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
-                          <div className="flex items-center gap-2">
+                        <div className="text-sm text-gray-500">{new Date(plot.createdAt).toLocaleDateString()}</div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
+                            View
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setPlotCoordsTargetId(plot.id)
+                              setIsPlotCoordsDialogOpen(true)
+                            }}
+                          >
+                            <MapPin className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop: table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Plot Name</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Area</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Points</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPlots.map((plot) => (
+                        <tr key={plot.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-4 px-4">
+                            <div className="font-medium text-gray-900">{plot.plotName}</div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">{plot.area}</div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">{new Date(plot.createdAt).toLocaleDateString()}</div>
+                          </td>
+                          <td className="py-4 px-4">
+                          </td>
+                          <td className="py-4 px-4 flex gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
-                              View
+                              View Details
                             </Button>
                             <Button
                               variant="ghost"
@@ -311,69 +361,19 @@ export default function CropPage() {
                                 setIsPlotCoordsDialogOpen(true)
                               }}
                             >
-                              <MapPin className="w-4 h-4" />
+                              <MapPin className="w-4 h-4 mr-2" />
+                              Plot Coordinates
                             </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Desktop: table */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-medium text-gray-700">Plot Name</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-700">Area</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-700">Points</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {filteredPlots.map((plot) => (
-                          <tr key={plot.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-4 px-4">
-                              <div className="font-medium text-gray-900">{plot.plotName}</div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="text-sm text-gray-600">{plot.area}</div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="text-sm text-gray-600">{plot.coordinates.length} points</div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="text-sm text-gray-600">{new Date(plot.createdAt).toLocaleDateString()}</div>
-                            </td>
-                            <td className="py-4 px-4">
-                            </td>
-                            <td className="py-4 px-4 flex gap-2">
-                              <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
-                                View Details
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setPlotCoordsTargetId(plot.id)
-                                  setIsPlotCoordsDialogOpen(true)
-                                }}
-                              >
-                                <MapPin className="w-4 h-4 mr-2" />
-                                Plot Coordinates
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
       {isOpen && (
         <GenericModal closeModal={onClose}>
@@ -417,7 +417,7 @@ export default function CropPage() {
         open={isDetailsDialogOpen}
         onOpenChange={setIsDetailsDialogOpen}
         plot={selectedPlot}
-       
+
         onDelete={handleDeletePlot}
       />
     </div>

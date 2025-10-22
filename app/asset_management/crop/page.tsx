@@ -7,6 +7,7 @@ import { CropData } from "@/components/model/crop/CropCoreModel";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
+import Loading from "@/components/utils/Loading";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
 import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
@@ -42,16 +43,24 @@ const CropsPage = () => {
       if (response.status === "success") {
         setCrops(response.data);
       }
-    } catch (error) {
-      toast.error(`${error}`);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to fetch crop data.";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
     }
   };
   // console.log(crops);
 
   const handleAddCropDetails = (cropId: number) => {
+    console.log(cropId)
     if (!cropId) return;
     const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
     if (!selectedCrop) return;
+    console.log(selectedCrop)
     setSelectedCrop(selectedCrop);
     setIsStageOneModal(true);
   };
@@ -77,7 +86,7 @@ const CropsPage = () => {
   const isStageOneCompleted = (cropId: number) => {
     return localStorage.getItem(`stageOneCompleted_${cropId}`) === "true";
   };
-console.log(selectedCrop)
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -146,9 +155,15 @@ console.log(selectedCrop)
               </tr>
             </thead>
             <tbody>
-              <>
-                {crops &&
-                  crops.map((crop, idx) => {
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-6 text-center">
+                    <Loading />
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  {crops.map((crop, idx) => {
                     const seed = crop.crop_asset_seed_details?.[0];
                     return (
                       <tr
@@ -228,7 +243,8 @@ console.log(selectedCrop)
                       </tr>
                     );
                   })}
-              </>
+                </>
+              )}
             </tbody>
           </table>
         </div>
@@ -242,7 +258,7 @@ console.log(selectedCrop)
         >
           {/* <AddCrop /> */}
           <RegisterCrop
-            setCropData={setCrops}
+            onSuccess={() => fetchCropData()}
             closeModal={() => setIsModal(false)}
           />
         </GenericModal>

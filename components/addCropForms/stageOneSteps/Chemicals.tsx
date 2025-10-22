@@ -3,23 +3,25 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import InputField from "@/components/InputField";
-import { ChemicalUsage, CropData } from "@/components/model/crop/CropCoreModel";
+import { ChemicalUsage } from "@/components/model/crop/CropCoreModel";
 import "animate.css";
 
 interface ChemicalsProps {
-  data: CropData;
+  chemicals: ChemicalUsage[];
+  cropMeta: {
+    crop_name: string;
+    land_name: string;
+    farmer_name?: string;
+    mobile_number?: string;
+  };
   onChange: (updatedChemicals: ChemicalUsage[]) => void;
 }
 
-const Chemicals = ({ data, onChange }: ChemicalsProps) => {
+const Chemicals = ({ chemicals, cropMeta, onChange }: ChemicalsProps) => {
   const [removing, setRemoving] = useState<number | null>(null);
 
-  const fertilizers = data.crop_asset_chemical_usage_details.filter(
-    (c) => c.chemical_type_id === 1
-  );
-  const pesticides = data.crop_asset_chemical_usage_details.filter(
-    (c) => c.chemical_type_id === 2
-  );
+  const fertilizers = chemicals.filter((c) => c.chemical_type_id === 1);
+  const pesticides = chemicals.filter((c) => c.chemical_type_id === 2);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -27,45 +29,49 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
     type: "fertilizer" | "pesticide"
   ) => {
     const { name, value } = e.target;
-    const updated = [...data.crop_asset_chemical_usage_details];
+    const updated = [...chemicals];
     const typeId = type === "fertilizer" ? 1 : 2;
+    const filteredList = updated.filter((c) => c.chemical_type_id === typeId);
 
-    let count = -1;
-    const targetIndex = updated.findIndex((c) => {
-      if (c.chemical_type_id === typeId) count++;
-      return count === index && c.chemical_type_id === typeId;
-    });
-
-    if (targetIndex !== -1) {
-      updated[targetIndex] = {
-        ...updated[targetIndex],
-        [name === "quantity" ? "qty" : "chemical_name"]:
-          name === "quantity" ? Number(value) : value,
-      };
-      onChange(updated);
+    if (index < filteredList.length) {
+      const globalIndex = updated.indexOf(filteredList[index]);
+      if (globalIndex !== -1) {
+        updated[globalIndex] = {
+          ...updated[globalIndex],
+          chemical_name:
+            name === "chemical_name"
+              ? value
+              : updated[globalIndex].chemical_name,
+          qty: name === "quantity" ? Number(value) : updated[globalIndex].qty,
+          qty_unit:
+            updated[globalIndex].qty_unit ||
+            (type === "fertilizer" ? "kg" : "litre"),
+        };
+        onChange(updated);
+      }
     }
   };
 
   const addField = (type: "fertilizer" | "pesticide") => {
     const typeId = type === "fertilizer" ? 1 : 2;
     const newChemical: ChemicalUsage = {
+      crop_id: 0,
       chemical_usage_id: Date.now(),
       chemical_name: "",
       chemical_type_id: typeId,
       qty: 0,
       qty_unit: type === "fertilizer" ? "kg" : "litre",
       remarks: "",
-      crop_name: data.crop_asset_seed_details[0]?.crop_name || "",
-      land_name: data.crop_asset_seed_details[0]?.land_name || "",
-      farmer_name: data.crop_asset_seed_details[0]?.farmer_name || "",
-      mobile_number: data.crop_asset_seed_details[0]?.mobile_number || "",
+      crop_name: cropMeta.crop_name,
+      land_name: cropMeta.land_name,
+      farmer_name: cropMeta.farmer_name || "",
+      mobile_number: cropMeta.mobile_number || "",
       created_at: new Date().toISOString(),
       modified_at: null,
       stage_name: null,
     };
 
-    // Add new chemical and trigger parent update
-    onChange([...data.crop_asset_chemical_usage_details, newChemical]);
+    onChange([...chemicals, newChemical]);
   };
 
   const removeField = (index: number, type: "fertilizer" | "pesticide") => {
@@ -74,7 +80,7 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
 
     setTimeout(() => {
       let count = -1;
-      const updated = data.crop_asset_chemical_usage_details.filter((c) => {
+      const updated = chemicals.filter((c) => {
         if (c.chemical_type_id === typeId) count++;
         return !(count === index && c.chemical_type_id === typeId);
       });

@@ -1,305 +1,129 @@
-// import React, { useEffect, useState } from "react";
-// import InputField from "../InputField";
-// import DropdownField from "../DropDownField";
-// import { toast, Toaster } from "sonner";
-// import useApi from "@/hooks/use_api";
-
-// interface CropData {
-//   crop_name: string;
-//   variety: string;
-//   plantation_date: string;
-//   land: string;
-// }
-
-// interface RegisterCropProps {
-//   setCropData: React.Dispatch<React.SetStateAction<any[]>>;
-//   closeModal?: () => void;
-// }
-
-// interface LandData {
-//   land_name: string;
-// }
-
-// const RegisterCrop: React.FC<RegisterCropProps> = ({
-//   setCropData,
-//   closeModal,
-// }) => {
-//   const { get } = useApi();
-//   const [formData, setFormData] = useState<CropData>({
-//     crop_name: "",
-//     variety: "",
-//     plantation_date: "",
-//     land: "",
-//   });
-//   const [isLandData, setIsLandData] = useState<LandData[]>([]);
-
-//   useEffect(() => {
-//     getLandData();
-//   }, []);
-
-//   /**************** Get requests  ****************/
-//   const getLandData = async () => {
-//     try {
-//       const response = await get("/lams/land-info-service", {
-//         params: { start_record: 1, page_size: 10 },
-//       });
-//       // console.log(response);
-
-//       if (response.status === "success") {
-//         setIsLandData(response.data);
-//       }
-//     } catch (error) {
-//       toast.error(`${error}`);
-//     }
-//   };
-
-//   /**************** ########  ****************/
-
-//   // Handles text/date inputs
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: value,
-//     }));
-//   };
-
-//   // ✅ Handles dropdown input
-//   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: value,
-//     }));
-//   };
-
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault();
-
-//     // Add new crop to existing list
-//     setCropData((prevCrops) => [...prevCrops, formData]);
-
-//     // Reset form after submission
-//     setFormData({
-//       crop_name: "",
-//       variety: "",
-//       plantation_date: "",
-//       land: "",
-//     });
-
-//     if (closeModal) closeModal();
-//   };
-
-//   return (
-//     <div>
-//       <form onSubmit={handleSubmit} className="space-y-4">
-//         <InputField
-//           label="Crop Name"
-//           id="crop_name"
-//           name="crop_name"
-//           placeholder="Crop Name"
-//           value={formData.crop_name}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <InputField
-//           label="Variety"
-//           id="variety"
-//           name="variety"
-//           placeholder="Variety"
-//           value={formData.variety}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <InputField
-//           label="Plantation Date"
-//           id="plantation_date"
-//           name="plantation_date"
-//           type="date"
-//           value={formData.plantation_date}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         {/* ✅ Controlled dropdown */}
-//         <DropdownField
-//           id="land"
-//           label="Select Land"
-//           name="land"
-//           value={formData.land}
-//           onChange={handleDropdownChange}
-//           required
-//           options={isLandData.map((land) => ({
-//             value: land.land_name,
-//             label: land.land_name,
-//           }))}
-//         />
-
-//         <button
-//           type="submit"
-//           className="bg-blue-700 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-600 border w-full"
-//         >
-//           Submit
-//         </button>
-//       </form>
-//       <Toaster richColors />
-//     </div>
-//   );
-// };
-
-// export default RegisterCrop;
-
 "use client";
 import React, { useEffect, useState } from "react";
 import InputField from "../InputField";
 import DropdownField from "../DropDownField";
 import { toast, Toaster } from "sonner";
 import useApi from "@/hooks/use_api";
-import { CropData } from "../model/crop/CropCoreModel";
+import { CropRegisterData } from "../model/crop/CropRegisterModel";
 
-// Default CropData object
-const defaultCropData: CropData = {
-  season: "",
-  crop_id: 0,
+const defaultDate = new Date().toISOString();
+
+// ✅ Default object following CropRegisterData
+export const defaultCropData: CropRegisterData = {
   land_id: 0,
-  variety: "",
-  created_at: "",
-  updated_at: "",
   crop_type_id: 0,
-  harvest_date: "",
-  planting_date: "",
+  variety: "",
+  season: "",
+  planting_date: defaultDate,
+  harvest_date: defaultDate,
   estimated_yield: 0,
+  created_at: defaultDate,
 
   crop_asset_seed_details: [
     {
-      created_at: "",
-      crop_id: 0,
-      crop_name: "",
-      farmer_name: "",
-      land_name: "",
-      mobile_number: "",
-      modified_at: "",
+      seed_id: 0,
       seed_common_name: "",
+      seed_variety_id: 0,
       seed_company_name: "",
       seed_company_type_id: 0,
-      seed_company_type_name: "",
-      seed_id: 0,
       seed_type_id: 0,
-      seed_type_name: "",
-      seed_variety: "",
-      seed_variety_id: 0,
-      stage_name: "",
+      created_at: defaultDate,
+      created_by: 0,
     },
   ],
-
-  crop_asset_pest_attack_details: [
-    {
-      crop_id: 0,
-      crop_name: "",
-      land_name: "",
-      created_at: "",
-      remarks: "",
-    },
-  ],
-
-  crop_asset_stage_history_details: [
-    {
-      crop_id: 0,
-      crop_name: "",
-      stage_name: "",
-      remarks: "",
-      created_at: "",
-    },
-  ],
-
   crop_asset_chemical_usage_details: [
     {
+      chemical_type_id: 0,
+      chemical_name: "",
       qty: 0,
-      qty_unit: "",
-      crop_id: 0,
-      crop_name: "",
+      qty_unit: "kg",
       remarks: "",
-      created_at: "",
+      created_at: defaultDate,
+      created_by: 0,
     },
   ],
-
   crop_asset_disease_attack_details: [
     {
-      crop_id: 0,
-      crop_name: "",
-      land_name: "",
-      created_at: "",
+      disease_attack_type_id: 0,
+      attack_date: defaultDate,
       remarks: "",
+      created_at: defaultDate,
+      created_by: 0,
     },
   ],
-
   crop_asset_irrigation_cultivation_details: [
     {
-      crop_id: 0,
-      crop_name: "",
-      irrigation_source: "",
-      irrigation_facility: "",
-      land_suitability_id: 0,
+      irrigation_facility_id: 0,
       irrigation_source_id: 0,
       cultivation_system_id: 0,
-      irrigation_facility_id: 0,
-      crop_cultivation_system_name: "",
-      crop_land_suitability_name: "",
-      farmer_name: "",
-      mobile_number: "",
-      created_at: "",
-      modified_at: "",
-      stage_name: "",
+      land_suitability_id: 0,
+      created_at: defaultDate,
+      created_by: 0,
     },
   ],
-
+  crop_asset_pest_attack_details: [
+    {
+      pest_attack_type_id: 0,
+      attack_date: defaultDate,
+      remarks: "",
+      created_at: defaultDate,
+      created_by: 0,
+    },
+  ],
   crop_asset_previous_season_history_details: [
     {
-      crop_id: 0,
-      crop_name: "",
-      sowing_date: "",
-      harvest_date: "",
-      seed_used_last_year: "",
-      last_year_production: 0,
       immediate_previous_crop: "",
-      reason_for_changing_seed: "",
+      harvest_date: defaultDate,
       last_year_crop_type_id: 0,
-      last_year_crop_type_name: "",
-      farmer_name: "",
-      mobile_number: "",
-      created_at: "",
-      modified_at: "",
-      stage_name: "",
+      last_year_production: 0,
+      sowing_date: defaultDate,
+      seed_used_last_year: "",
+      reason_for_changing_seed: "",
+      created_at: defaultDate,
+      created_by: 0,
+    },
+  ],
+  crop_asset_weather_effect_history: [
+    {
+      weather_effect_type_id: 0,
+      remarks: "",
     },
   ],
 };
 
 interface RegisterCropProps {
-  setCropData: React.Dispatch<React.SetStateAction<CropData[]>>;
+  onSuccess: () => void;
   closeModal?: () => void;
 }
 
 interface LandData {
   land_name: string;
-  land_id: number;
+  land_id: 0;
+}
+
+interface CropType {
+  crop_name: string;
+  crop_type_id: number;
 }
 
 const RegisterCrop: React.FC<RegisterCropProps> = ({
-  setCropData,
   closeModal,
+  onSuccess,
 }) => {
-  const { get } = useApi();
-  const [formData, setFormData] = useState<CropData>({ ...defaultCropData });
+  const { get, post } = useApi();
+  const [formData, setFormData] = useState<CropRegisterData>({
+    ...defaultCropData,
+  });
   const [landData, setLandData] = useState<LandData[]>([]);
+  const [cropType, setCropType] = useState<CropType[]>([]);
+  const [cropName, setCropName] = useState("New Crop");
 
   useEffect(() => {
     getLandData();
-    // Reset form data each time modal opens
-    setFormData({ ...defaultCropData });
+    getCropType();
   }, []);
 
+  // GET requests for dropdowns
   const getLandData = async () => {
     try {
       const response = await get("/lams/land-info-service", {
@@ -310,90 +134,140 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
       toast.error(`${error}`);
     }
   };
+  const getCropType = async () => {
+    try {
+      const response = await get("/cms/crop-type-service", {
+        params: { start_record: 1, page_size: 10, crop_id: -1 },
+      });
+      console.log(response);
+      if (response.status === "success") setCropType(response.data);
+    } catch (error) {
+      toast.error(`${error}`);
+    }
+  };
+  /////////////////////////////
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // ✅ Handle change for simple fields
+  const handleChange =
+    (key: keyof CropRegisterData) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setFormData((prev) => ({ ...prev, [key]: e.target.value }));
+    };
+
+  const handleCropNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setCropName(name);
+    // Keep crop name synced with seed details for backend
+    setFormData((prev) => ({
+      ...prev,
+      crop_asset_seed_details: prev.crop_asset_seed_details.map((d) => ({
+        ...d,
+        seed_common_name: name,
+      })),
+    }));
   };
 
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    // Find selected land
-    const selectedLand = landData.find((l) => l.land_name === value);
-    if (selectedLand) {
-      setFormData((prev) => ({
-        ...prev,
-        land_id: selectedLand.land_id,
-        crop_asset_irrigation_cultivation_details: [
-          {
-            ...prev.crop_asset_irrigation_cultivation_details![0],
-            land_name: selectedLand.land_name,
-          },
-        ],
-      }));
+    const { name, value } = e.target;
+    const parsedValue = parseInt(value, 10); // since you're working with IDs
+
+    setFormData((prev) => ({
+      ...prev,
+      [name === "land_name"
+        ? "land_id"
+        : name === "crop_name"
+        ? "crop_type_id"
+        : name]: parsedValue,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await post("cms/crop-info-service/", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+      if (response.status === "success") {
+        toast.success("Crop registered successfully!");
+        setFormData({ ...defaultCropData });
+        onSuccess();
+        setCropName("");
+        closeModal?.();
+      } else {
+        toast.error(response.message || "Failed to register crop");
+      }
+    } catch (error) {
+      toast.error("Error submitting crop data");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Send formData to backend via API here if needed
-    setCropData((prev) => [...prev, formData]);
-    setFormData({ ...defaultCropData });
-    if (closeModal) closeModal();
-  };
+  console.log(formData);
 
   return (
     <div>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <InputField
-          label="Crop Name"
-          name="season"
-          placeholder="Season"
-          value={formData.season}
-          onChange={handleChange}
+        {/* ✅ Crop Name */}
+        <DropdownField
+          id="crop_type_id"
+          label="Select Crop"
+          name="crop_type_id"
+          value={formData.crop_type_id || ""}
+          onChange={handleDropdownChange}
           required
+          options={cropType.map((crop) => ({
+            value: crop.crop_type_id,
+            label: crop.crop_name,
+          }))}
         />
 
+        {/* ✅ Variety */}
         <InputField
+          id="variety"
           label="Variety"
           name="variety"
-          placeholder="Variety"
+          placeholder="Enter variety"
           value={formData.variety}
-          onChange={handleChange}
+          onChange={handleChange("variety")}
           required
         />
 
+        {/* ✅ Planting Date */}
         <InputField
+          id="planting_date"
           label="Planting Date"
           name="planting_date"
           type="date"
           value={formData.planting_date}
-          onChange={handleChange}
+          onChange={handleChange("planting_date")}
           required
         />
 
+        {/* ✅ Select Land */}
         <DropdownField
+          id="land_name"
           label="Select Land"
-          name="land"
-          value={
-            formData.crop_asset_irrigation_cultivation_details![0].land_name
-          }
+          name="land_name"
+          value={formData.land_id || ""}
           onChange={handleDropdownChange}
           required
           options={landData.map((land) => ({
-            value: land.land_name,
+            value: land.land_id,
             label: land.land_name,
           }))}
         />
 
         <button
           type="submit"
-          className="bg-blue-700 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-600 border w-full"
+          className="bg-[#003846] cursor-pointer text-white px-4 py-2 rounded hover:opacity-90 w-full"
         >
           Submit
         </button>
       </form>
-      <Toaster richColors />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import { Loader2, MapPin, ImageIcon, Trash2, Plus, LocateFixed } from "lucide-re
 import { useToast } from "@/hooks/use-toast"
 import useApi from "@/hooks/use_api"
 import { GoogleMap, Marker, Polygon, InfoWindow, useJsApiLoader } from "@react-google-maps/api"
+import { LandCoordinatePoint, LandSubmissionModel, normalizeLandSubmission } from "@/components/model/Land/LandSubmissionModel"
 
 const mapContainerStyle = {
   width: "100%",
@@ -29,11 +30,18 @@ interface Coordinate {
   lat: string
   lng: string
 }
+interface LandManualMeasurements {
+  sw_se: number,
+  se_ne: number,
+  ne_nw: number,
+  nw_sw: number
+}
 
 interface PlotData {
   landCoordinates: Coordinate[]
   plotCoordinates: Coordinate[]
-  innerCoordinates?: Coordinate[]
+  innerCoordinates: Coordinate[]
+  plotManualEntry: Coordinate[] | null
   swMark?: Coordinate | null
   nCorner?: Coordinate | null
   eCorner?: Coordinate | null
@@ -41,11 +49,16 @@ interface PlotData {
   eMark?: Coordinate | null
   nMarkDist?: number | null
   eMarkDist?: number | null
+  ncornerDist?: number | null
+  ecornerDist?: number | null
   intersection?: Coordinate | null
   imageUrl: string
   plotName: string
   area: string
-  description: string
+  description: string,
+  LandManualMeasurements?: LandManualMeasurements
+
+
 }
 
 interface CreatePlotDialogProps {
@@ -69,20 +82,39 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [nonSuitabilityReasons, setNonSuitabilityReasons] = useState<string[]>([])
   // overall suitability selection: '', 'suitable', 'not_suitable'
   const [overallSuitability, setOverallSuitability] = useState<string>("")
-  // Dummy datasets for land suitability (English + Bengali) - sourced from user-provided dataset
-  const SUITABILITY_OPTIONS = [
-    { id: "mostly_flat", text: "Mostly flat land with minimal uneven areas - অধিকাংশ সমতল জমি এবং অল্প অসমান এলাকা" },
-    { id: "adequate_drainage", text: "Adequate water drainage system - এখানে পর্যাপ্ত পানি নিষ্কাশনের ব্যবস্থা রয়েছে" },
-    { id: "few_holes", text: "Few holes in the land - জমি মোটামুটি সমতল, খুব কম গর্ত রয়েছে" },
-    { id: "clear_boundary", text: "Clear and proper boundary of the land - জমির স্পষ্ট ও সঠিক সীমানা রয়েছে" },
-  ]
+  // land suitability options will be fetched from API
 
-  const NON_SUITABILITY_OPTIONS = [
-    { id: "mostly_uneven", text: "Mostly uneven land not suitable for cropping - অধিকাংশ অসমান জমি, চাষাবাদের জন্য উপযুক্ত নয়" },
-    { id: "inadequate_drainage", text: "Inadequate water drainage system - যথাযথ পানি নিষ্কাশন ব্যবস্থা নেই" },
-    { id: "abundance_holes", text: "Abundance of holes in the land - জমিতে গর্তের আধিক্য রয়েছে" },
-    { id: "bad_boundary", text: "Boundary of the land is not well maintained - জমির সীমানা ঠিকমতো রক্ষণাবেক্ষণ করা হয়নি" },
-  ]
+  console.log(suitabilityReasons);
+  
+  interface LandSuitability {
+    type: string
+    is_active: boolean
+    created_at?: string | null
+    created_by?: number | null
+    modified_at?: string | null
+    modified_by?: number | null
+    land_suitability_id: number
+    land_suitability_name: string
+  }
+
+  const [landSuitabilities, setLandSuitabilities] = useState<LandSuitability[]>([])
+  const [lsLoading, setLsLoading] = useState(false)
+
+  // derive suitable / not suitable lists for the UI
+  const SUITABILITY_OPTIONS = useMemo(() =>
+    landSuitabilities
+      .filter((s) => String(s.type).toLowerCase().includes("suit"))
+      .filter((s) => s.type === "Suitable")
+      .map((s) => ({ id: String(s.land_suitability_id), text: s.land_suitability_name })),
+    [landSuitabilities]
+  )
+
+  const NON_SUITABILITY_OPTIONS = useMemo(() =>
+    landSuitabilities
+      .filter((s) => s.type === "Not Suitable")
+      .map((s) => ({ id: String(s.land_suitability_id), text: s.land_suitability_name })),
+    [landSuitabilities]
+  )
   const [measureSWSE, setMeasureSWSE] = useState("")
   const [measureSWNW, setMeasureSWNW] = useState("")
   const [measureNWNE, setMeasureNWNE] = useState("")
@@ -107,6 +139,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   })
 
   const { get } = useApi()
+  const { post: landSubmissionAPi } = useApi()
 
   useEffect(() => {
     // fetch farmers when dialog opens
@@ -117,7 +150,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       try {
         const resp = await get(`ims/farmer-service`, { params: { start_record: 1 } })
         console.log(resp);
-        
+
         if (!cancelled && resp?.status === 'success' && Array.isArray(resp.data)) {
           setFarmers(resp.data)
         }
@@ -128,6 +161,26 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       }
     }
     fetchFarmers()
+    return () => { cancelled = true }
+  }, [open, get])
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    const fetchSuitability = async () => {
+      setLsLoading(true)
+      try {
+        const resp = await get(`lams/land-suitability-service/`, { params: { page_size: 10, start_record: 1 } })
+        if (!cancelled && resp?.status === 'success' && Array.isArray(resp.data)) {
+          setLandSuitabilities(resp.data)
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setLsLoading(false)
+      }
+    }
+    fetchSuitability()
     return () => { cancelled = true }
   }, [open, get])
 
@@ -318,11 +371,13 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       const intersection_raw = data.data?.intersection ?? null;
       const n_mark_dist_raw = data.data?.n_mark_dist ?? null;
       const e_mark_dist_raw = data.data?.e_mark_dist ?? null;
+      const n_corner_dist = data.data?.n_corner_dist ?? null;
+      const e_corner_dist = data.data?.e_corner_dist ?? null;
 
       setApiPayload(data); // Save full API payload
 
       const apiPlotData: PlotData = {
-        plotName,
+        plotName: plotName,
         landCoordinates: Array.isArray(landAreaRaw)
           ? landAreaRaw.map((coord: { latitude: number, longitude: number }) => ({
             lat: coord.latitude.toString(),
@@ -348,10 +403,19 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         eMark: e_mark_raw ? { lat: e_mark_raw.latitude.toString(), lng: e_mark_raw.longitude.toString() } : null,
         nMarkDist: typeof n_mark_dist_raw === 'number' ? n_mark_dist_raw : null,
         eMarkDist: typeof e_mark_dist_raw === 'number' ? e_mark_dist_raw : null,
+        ncornerDist: typeof n_corner_dist === 'number' ? n_corner_dist : null,
+        ecornerDist: typeof e_corner_dist === 'number' ? e_corner_dist : null,
         intersection: intersection_raw ? { lat: intersection_raw.latitude.toString(), lng: intersection_raw.longitude.toString() } : null,
         imageUrl,
         area,
         description: plotDescription,
+        LandManualMeasurements: {
+          sw_se: parseInt(measureSWSE) ,
+          se_ne: parseInt(measureSENE),
+          ne_nw: parseInt(measureNWNE),
+          nw_sw: parseInt(measureSWNW),
+        },
+        plotManualEntry: null
       };
 
       setPlotData(apiPlotData);
@@ -373,14 +437,127 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
     }
   }
 
-  const savePlot = () => {
+  const savePlot = async () => {
+    console.log(suitabilityReasons);
+    
     if (apiPayload) {
       onPlotCreated(apiPayload, plotName, plotDescription);
       toast({
         title: "Plot saved!",
         description: `${plotData?.plotName ?? ""} has been added to your plots.`,
       });
-      handleClose();
+
+      //plot coordinate mapping
+      const coordinates: LandCoordinatePoint[] = plotData?.plotCoordinates.map(coord => ({
+        coordinate_type: 'plot',
+        latitude: coord.lat,
+        longitude: coord.lng
+      })) || []
+
+
+      //inner land  coordinate mapping
+      const innerCoordinates: LandCoordinatePoint[] = plotData?.innerCoordinates.map(coord => ({
+        coordinate_type: 'inner_area',
+        latitude: coord.lat,
+        longitude: coord.lng
+      })) || []
+
+      //inner land  coordinate mapping
+      const landCoordinates: LandCoordinatePoint[] = plotData?.landCoordinates.map(coord => ({
+        coordinate_type: 'inner_area',
+        latitude: coord.lat,
+        longitude: coord.lng
+      })) || []
+
+      // reference point mapping
+      const sw_mark = plotData?.swMark ? { latitude: plotData.swMark.lat, longitude: plotData.swMark.lng } : null;
+      const n_corner = plotData?.nCorner ? { latitude: plotData.nCorner.lat, longitude: plotData.nCorner.lng } : null;  
+      const e_corner = plotData?.eCorner ? { latitude: plotData.eCorner.lat, longitude: plotData.eCorner.lng } : null;  
+      const n_mark = plotData?.nMark ? { latitude: plotData.nMark.lat, longitude: plotData.nMark.lng } : null;  
+      const e_mark = plotData?.eMark ? { latitude: plotData.eMark.lat, longitude: plotData.eMark.lng } : null;  
+      const intersection = plotData?.intersection ? { latitude: plotData.intersection.lat, longitude: plotData.intersection.lng } : null;  
+
+      // suitability mapping
+
+
+      //arrange payload here 
+      const landSubmissionModel: LandSubmissionModel =
+      {
+        farmer_id: selectedFarmerId ? Number(selectedFarmerId) : 0,
+        land_name: plotName,
+        ownership_type: ownershipType || "",
+       // land_suitability_details: suitabilityReasons.length > 0 ? JSON.stringify(suitabilityReasons) : "",
+
+        area_in_acre: plotData?.area ? parseFloat(plotData.area) : 0,
+        image: plotData?.imageUrl || null,
+        land_measurement_info: {
+          sw_se: plotData?.LandManualMeasurements?.sw_se || 0,
+          se_ne: plotData?.LandManualMeasurements?.se_ne || 0,
+          ne_nw: plotData?.LandManualMeasurements?.ne_nw || 0,
+          nw_sw: plotData?.LandManualMeasurements?.nw_sw || 0,
+          n_mark_dist: plotData?.nMarkDist || null,
+          e_mark_dist: plotData?.eMarkDist || null,
+          n_corner_dist: plotData?.ncornerDist || null,
+          e_corner_dist: plotData?.ecornerDist || null,
+
+        },
+
+
+        land_coordinate_point: [
+          ...coordinates,
+           ...innerCoordinates,
+           ...landCoordinates
+          ],
+       land_reference_point: [
+        {point_type: 'sw_mark',
+          latitude: sw_mark ? sw_mark.latitude : "",
+          longitude: sw_mark ? sw_mark.longitude : ""
+        },
+
+        {point_type: 'n_corner',
+          latitude: n_corner ? n_corner.latitude : "",
+          longitude: n_corner ? n_corner.longitude : ""
+        },
+        {point_type: 'e_corner',
+          latitude: e_corner ? e_corner.latitude : "",
+          longitude: e_corner ? e_corner.longitude : "" 
+        },
+        {point_type: 'n_mark',
+          latitude: n_mark ? n_mark.latitude : "",
+          longitude: n_mark ? n_mark.longitude : ""
+        },
+        {point_type: 'e_mark',
+          latitude: e_mark ? e_mark.latitude : "",
+          longitude: e_mark ? e_mark.longitude : ""
+        },
+        {point_type: 'intersection',
+          latitude: intersection ? intersection.latitude : "",
+          longitude: intersection ? intersection.longitude : ""
+        }
+      ],
+
+        
+  }
+
+  console.log(landSubmissionModel);
+  
+
+
+      
+
+      const payload = normalizeLandSubmission(apiPayload);
+
+      // make api call here to save plot data to server
+      try {
+        const resp = await landSubmissionAPi(`lams/land-info-service/`)
+
+      } catch (error) {
+
+      }
+
+
+
+      // handleClose();
     }
   }
 
@@ -449,10 +626,10 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         <div className="space-y-6">
           {!showResults ? (
             <>
-             
-          
 
-          {/* Land Name */}
+
+
+              {/* Land Name */}
               <div className="space-y-2">
                 <Label htmlFor="plotName">Land Name *</Label>
                 <Input

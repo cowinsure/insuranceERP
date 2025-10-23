@@ -7,6 +7,7 @@ import DesktopSideBar from "@/components/Navigation/DesktopSideBar";
 import MobileNav from "@/components/Navigation/MobileNav";
 import "animate.css";
 import { AuthProvider } from "@/core/context/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Insurance ERP",
@@ -44,6 +45,7 @@ export default function RootLayout({
             <MobileNav />
           </div>
         </div>
+        <Toaster />
 
       </AuthProvider>
       </body>

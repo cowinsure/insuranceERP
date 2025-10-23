@@ -25,7 +25,7 @@ export interface LandMeasurementInfo {
 }
 
 export interface LandSuitabilityRemark {
-  land_suitability_id: number;
+  land_suitability_id: number | string;
   remarks: string;
 }
 
@@ -82,13 +82,13 @@ export function normalizeLandSubmission(
 ): LandSubmissionModel {
     const now = new Date().toISOString();
 
-    // normalize suitability to array
-    let suitability: number[] = [];
-    if (Array.isArray(input.land_suitability_id)) {
-        suitability = input.land_suitability_id.filter((n): n is number => typeof n === 'number');
-    } else if (typeof input.land_suitability_id === 'number') {
-        suitability = [input.land_suitability_id];
-    }
+    // normalize land_suitability_details to always be an array of objects
+    const land_suitability_details: LandSuitabilityRemark[] = Array.isArray(input.land_suitability_details)
+        ? input.land_suitability_details.map(detail => ({
+             land_suitability_id: detail.land_suitability_id,
+             remarks: detail.remarks,
+         }))        
+         : [];
 
     // defensive defaults for nested objects
     const measurement: LandMeasurementInfo = {
@@ -122,7 +122,7 @@ export function normalizeLandSubmission(
         ownership_type: input.ownership_type ?? 'Owned',
        
     
-        land_suitability_id: suitability,
+        land_suitability_details: land_suitability_details,
         land_name: input.land_name ?? 'Unnamed Land',
         image: input.image ?? null,
        
@@ -150,9 +150,9 @@ export function validateLandSubmission(model: Partial<LandSubmissionModel>): str
     if (!model.land_name || typeof model.land_name !== 'string') {
         errors.push('land_name is required.');
     }
-    const suitability = model.land_suitability_id;
+    const suitability = model.land_suitability_details;
     if (!suitability || (Array.isArray(suitability) && suitability.length === 0)) {
-        errors.push('land_suitability_id is required (at least one id).');
+        errors.push('land_suitability_details is required (at least one detail).');
     }
     if (!Array.isArray(model.land_coordinate_point) || model.land_coordinate_point.length === 0) {
         errors.push('land_coordinate_point must contain at least one coordinate.');

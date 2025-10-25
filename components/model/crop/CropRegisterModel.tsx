@@ -1,3 +1,15 @@
+// model/crop/CropCoreModel.ts
+export interface SelectedCropMeta {
+  crop_id: number;
+  crop_name?: string;
+  land_name?: string;
+  farmer_name?: string;
+  mobile_number?: string;
+  land_id: number;
+  crop_type_id: number;
+  variety?: string;
+}
+
 export interface CropRegisterData {
   land_id: number;
   crop_type_id: number;

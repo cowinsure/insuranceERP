@@ -1,6 +1,6 @@
 "use client";
+import AddCropDetailsModal from "@/components/AddCropDetailsModal";
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
-import StageOne from "@/components/addCropForms/StageOne";
 import StageTwo from "@/components/addCropForms/StageTwo";
 import { CropData } from "@/components/model/crop/CropCoreModel";
 // import AddCrop from "@/components/AddCropDetailsModal";
@@ -22,7 +22,7 @@ const CropsPage = () => {
   const [isStageOneModal, setIsStageOneModal] = React.useState(false);
   const [isStageTwoModal, setIsStageTwoModal] = React.useState(false);
   const [isCropView, setIsCropView] = useState(false);
-  const [selectedCrop, setSelectedCrop] = useState<Partial<CropData>>({});
+  const [selectedCrop, setSelectedCrop] = useState<CropData>();
   const [crops, setCrops] = useState<CropData[]>([]);
 
   useEffect(() => {
@@ -53,14 +53,11 @@ const CropsPage = () => {
       setIsLoading(false);
     }
   };
-  // console.log(crops);
 
   const handleAddCropDetails = (cropId: number) => {
-    console.log(cropId)
     if (!cropId) return;
     const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
     if (!selectedCrop) return;
-    console.log(selectedCrop)
     setSelectedCrop(selectedCrop);
     setIsStageOneModal(true);
   };
@@ -86,6 +83,8 @@ const CropsPage = () => {
   const isStageOneCompleted = (cropId: number) => {
     return localStorage.getItem(`stageOneCompleted_${cropId}`) === "true";
   };
+
+  // console.log("Selected crop :", selectedCrop);
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -270,19 +269,19 @@ const CropsPage = () => {
           title={
             <h1 className="flex flex-col">
               {`Add Details for ${
-                selectedCrop.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+                selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
               } `}
               <small className="font-medium text-gray-500">
                 Variety:{" "}
-                {selectedCrop.crop_asset_seed_details?.[0]?.seed_variety ||
-                  selectedCrop.variety}
+                {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
+                  selectedCrop?.variety}
               </small>
             </h1>
           }
           closeModal={() => setIsStageOneModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-          <StageOne {...(selectedCrop as any)} />
+         <AddCropDetailsModal selectedCrop={selectedCrop!} />
         </GenericModal>
       )}
 
@@ -292,12 +291,12 @@ const CropsPage = () => {
           title={
             <h1 className="flex flex-col">
               {`Revisit data for ${
-                selectedCrop.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+                selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
               } `}
               <small className="font-medium text-gray-500">
                 Variety:{" "}
-                {selectedCrop.crop_asset_seed_details?.[0]?.seed_variety ||
-                  selectedCrop.variety}
+                {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
+                  selectedCrop?.variety}
               </small>
             </h1>
           }
@@ -313,7 +312,7 @@ const CropsPage = () => {
         <GenericModal
           closeModal={() => setIsCropView(false)}
           title={`Viewing details of ${
-            selectedCrop.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+            selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
           }`}
           height={true}
         >

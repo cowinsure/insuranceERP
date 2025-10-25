@@ -19,6 +19,7 @@ export interface CropData {
   crop_asset_disease_attack_details?: DiseaseAttack[];
   crop_asset_irrigation_cultivation_details?: IrrigationCultivation[];
   crop_asset_previous_season_history_details?: PreviousSeasonHistory[];
+  crop_asset_weather_effect_history?: CropAssetWeatherEffectHistory[];
 }
 
 // ✅ 1. Seed Details
@@ -89,7 +90,7 @@ export interface ChemicalUsage {
   chemical_name: string;
   mobile_number: string | null;
   chemical_type_id: number;
-  chemical_usage_id: number;
+  chemical_usage_id?: number;
 }
 
 // ✅ 5. Disease Attack Details
@@ -150,3 +151,20 @@ export interface PreviousSeasonHistory {
   reason_for_changing_seed: string;
   previous_season_history_id: number;
 }
+
+export interface CropAssetWeatherEffectHistory {
+  period_to: string;
+  period_from: string;
+  crop_id: number;  
+  remarks: string;
+  crop_name: string;
+  land_name: string | null;
+  created_at: string;
+  stage_name: string | null;
+  farmer_name: string | null;
+  modified_at: string | null;
+  mobile_number: string | null;
+  weather_effect_type_id: number;
+  weather_effect_type_name: string | null;
+  land_weather_effect_history_id: number;
+  }

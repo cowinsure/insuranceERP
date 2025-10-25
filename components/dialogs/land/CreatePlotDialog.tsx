@@ -505,7 +505,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
 
         //inner land  coordinate mapping
         const landCoordinates: LandCoordinatePoint[] = plotData?.landCoordinates.map(coord => ({
-          coordinate_type: 'inner_area',
+          coordinate_type: 'land_area',
           latitude: coord.lat,
           longitude: coord.lng
         })) || []

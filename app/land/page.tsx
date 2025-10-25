@@ -19,8 +19,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import PlotDetailsDialog from "@/components/dialogs/land/PlotDetailsDialog";
 import PlotCoordinatesDialog from "@/components/dialogs/land/PlotCoordinatesDialog";
 import useApi from "@/hooks/use_api";
+import { group } from "console";
 
 interface LandData {
+  image: string | null;
   land_id: number;
   location: string | null;
   farmer_id: number;
@@ -92,6 +94,7 @@ export default function CropPage() {
   const [plotCoordsTargetId, setPlotCoordsTargetId] = useState<string | null>(
     null
   );
+  
   const [landData, setLandData] = useState<LandData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlot, setSelectedPlot] = useState<any | null>(null);
@@ -118,7 +121,7 @@ export default function CropPage() {
     (plot) =>
       plot.land_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plot.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plot.mobile_number?.toLowerCase().includes(searchTerm.toLowerCase())
+      plot.mobile_number.trim().includes(searchTerm.toLowerCase())
   );
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
@@ -131,28 +134,104 @@ export default function CropPage() {
     // This function needs to be adapted to the new data structure
   };
 
+interface LandCoordinate {
+  land_id: number;
+  latitude: number;
+  longitude: number;
+  land_name: string;
+  created_at: string;
+  created_by: number;
+  farmer_name: string;
+  modified_at: string | null;
+  modified_by: number | null;
+  sequence_no: number | null;
+  mobile_number: string;
+  coordinate_type: "plot" | "inner_area" | string; // allow extra types if needed
+  land_coordinate_point_id: number;
+}
+
+interface GroupedCoordinates {
+  [key: string]: LandCoordinate[];
+}
+
+
+function groupByCoordinateType(data: LandCoordinate[]): GroupedCoordinates {
+  return data.reduce((result, item) => {
+    const type = item.coordinate_type;
+    if (!result[type]) {
+      result[type] = [];
+    }
+    result[type].push(item);
+    return result;
+  }, {} as GroupedCoordinates);
+}
+type LandPoint = {
+  land_id: number;
+  latitude: number;
+  land_name: string;
+  longitude: number;
+  created_at: string;
+  created_by: number;
+  point_type: string;
+  farmer_name: string;
+  modified_at: string | null;
+  modified_by: number | null;
+  mobile_number: string;
+  distance_from_base: number | null;
+  land_reference_point_id: number;
+};
+
+function groupByPointType(points: LandPoint[]) {
+  return points.reduce((acc, point) => {
+    if (!acc[point.point_type]) {
+      acc[point.point_type] = [];
+    }
+    acc[point.point_type].push(point);
+    return acc;
+  }, {} as Record<string, LandPoint[]>);
+}
+
   const handleViewDetails = (plot: any) => {
     // Map API land payload to the Plot shape used by the details dialog
+    console.log(plot);
+   const groupedData= groupByCoordinateType(plot.land_coordinate_point);
+   console.log(groupedData);
+
+
+   const grouped_ref = groupByPointType(plot.land_reference_point);
+console.log(grouped_ref);
+   
     const mapped = {
       id: plot.land_id?.toString() ?? Date.now().toString(),
       plotName: plot.land_name,
       description: `Owner: ${plot.farmer_name}`,
       area: `${plot.area_in_acre}`,
-      coordinates: plot.land_coordinate_point?.map((c: any) => ({ lat: c.latitude.toString(), lng: c.longitude.toString() })) || [],
-      landArea: plot.land_coordinate_point?.map((c: any) => ({ lat: c.latitude.toString(), lng: c.longitude.toString() })) || [],
-      imageUrl: plot.google_map_link || "",
+      coordinates: groupedData?.plot || [],
+      landArea: groupedData?.land_area || [],
+      imageUrl: plot.image,
       createdAt: plot.land_coordinate_point?.[0]?.created_at || new Date().toISOString(),
       status: "active",
-      landCoordinates: plot.land_coordinate_point?.map((c: any) => ({ lat: c.latitude.toString(), lng: c.longitude.toString() })) || [],
-      plotCoordinates: plot.land_coordinate_point?.map((c: any) => ({ lat: c.latitude.toString(), lng: c.longitude.toString() })) || [],
-      innerCoordinates: [],
-      nMarkDist: plot.land_measurement_info?.[0]?.n_mark_dist ?? null,
-      eMarkDist: plot.land_measurement_info?.[0]?.e_mark_dist ?? null,
-      mobileNumber: plot.mobile_number,
+      landCoordinates: groupedData?.land_area || [],
+      plotCoordinates: groupedData?.plot|| [],
+      innerCoordinates:groupedData?.inner_area || [],
+      swMark: grouped_ref?.sw_mark?.[0] ?? null,
+      nCorner: grouped_ref?.n_corner?.[0] ?? null,
+      eCorner:grouped_ref?.e_corner?.[0] ?? null,
+      nMark : grouped_ref?.n_mark?.[0] ?? null,
+      eMark : grouped_ref?.e_mark?.[0] ?? null,
+      nMarkDist: plot?.land_measurement_info?.[0]?.n_mark_dist ?? null,
+      eMarkDist: plot?.land_measurement_info?.[0]?.e_mark_dist ?? null,
+      ecornerDist: plot?.land_measurement_info?.[0]?.e_corner_dist ?? null,
+      ncornerDist: plot?.land_measurement_info?.[0]?.n_corner_dist ?? null,
+      intersection: grouped_ref?.intersection?.[0] ?? null,
+      mobileNumber: plot?.mobile_number,
       farmerId: plot.farmer_id,
       farmerName: plot.farmer_name,
       suitability: plot.land_suitability_details?.map((d: any) => d.land_suitability_name) || []
     }
+
+
+
 
     setSelectedPlot(mapped);
     setIsDetailsDialogOpen(true);
@@ -255,7 +334,7 @@ export default function CropPage() {
                     >
                       <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
                         <img
-                          src={plot.google_map_link || '/placeholder.svg'}
+                          src={'https://dev-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
                           alt={plot.land_name}
                           className="w-full h-full object-cover"
                         />
@@ -271,9 +350,20 @@ export default function CropPage() {
 
                         <div className="mt-2 flex items-center justify-between">
                           <div className="text-sm text-gray-600">{plot.mobile_number}</div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col items-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
                               View
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // setPlotCoordsTargetId(plot.id)
+                                // setIsPlotCoordsDialogOpen(true)
+                              }}
+                            >
+                              <MapPin  />
+                              Plot
                             </Button>
                           </div>
                         </div>
@@ -299,6 +389,9 @@ export default function CropPage() {
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Farmer Name
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        Contact Number
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
                         Area (acres)
@@ -329,6 +422,11 @@ export default function CropPage() {
                         </td>
                         <td className="py-4 px-4">
                           <div className="text-sm text-gray-600">
+                            {plot.mobile_number}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-sm text-gray-600">
                             {plot.area_in_acre}
                           </div>
                         </td>
@@ -337,6 +435,7 @@ export default function CropPage() {
                             {plot.ownership_type}
                           </div>
                         </td>
+                       
                         <td className="py-4 px-4 flex gap-2">
                           <Button
                             variant="outline"
@@ -345,7 +444,20 @@ export default function CropPage() {
                           >
                             View Details
                           </Button>
+
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // setPlotCoordsTargetId(plot.id)
+                                setIsPlotCoordsDialogOpen(true)
+                              }}
+                            >
+                              <MapPin className="w-4 h-4 mr-2" />
+                              Plot Entry
+                            </Button>
                         </td>
+                       
                       </tr>
                     ))}
                   </tbody>
@@ -384,6 +496,7 @@ export default function CropPage() {
       />
 
       <PlotCoordinatesDialog
+      landData={landData}
         open={isPlotCoordsDialogOpen}
         onOpenChange={setIsPlotCoordsDialogOpen}
         onSave={handleSaveCoordinatesPlot}

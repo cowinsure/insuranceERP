@@ -9,19 +9,93 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, LocateFixed, MapPin } from "lucide-react"
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "@/hooks/use-toast"
 
 interface Coordinate {
   lat: string
   lng: string
 }
 
+export interface LandCoordinatePoint {
+    coordinate_type: 'plot_manual';
+    latitude: string;
+    longitude: string;
+}
+
+interface LandData {
+  image: string | null;
+  land_id: number;
+  location: string | null;
+  farmer_id: number;
+  land_code: string | null;
+  land_name: string;
+  soil_type: string | null;
+  farmer_name: string;
+  area_in_acre: number;
+  mobile_number: string;
+  ownership_type: string;
+  google_map_link: string | null;
+  land_suitability_id: number;
+  land_reference_point: any[];
+  land_coordinate_point: {
+    land_id: number;
+    latitude: number;
+    land_name: string;
+    longitude: number;
+    created_at: string;
+    created_by: number;
+    farmer_name: string;
+    modified_at: string | null;
+    modified_by: string | null;
+    sequence_no: string | null;
+    mobile_number: string;
+    coordinate_type: string | null;
+    land_coordinate_point_id: number;
+  }[];
+  land_measurement_info: {
+    ne_nw: string | null;
+    nw_sw: string | null;
+    se_ne: string | null;
+    sw_se: string | null;
+    land_id: number;
+    land_name: string;
+    created_at: string;
+    created_by: number;
+    e_mark_dist: number;
+    farmer_name: string;
+    modified_at: string | null;
+    modified_by: string | null;
+    n_mark_dist: number;
+    e_corner_dist: number;
+    mobile_number: string;
+    n_corner_dist: number;
+  }[];
+  land_suitability_name: string;
+  land_suitability_details: {
+    land_id: number;
+    remarks: string;
+    is_active: boolean;
+    land_name: string;
+    created_at: string;
+    created_by: number;
+    farmer_name: string;
+    modified_at: string | null;
+    modified_by: string | null;
+    mobile_number: string;
+    land_suitability_id: number;
+    land_suitability_name: string;
+    land_suitable_details_id: number;
+  }[];
+}
+
 interface PlotCoordinatesDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (coords: Coordinate[]) => void
+  landData: LandData[];
 }
 
-export default function PlotCoordinatesDialog({ open, onOpenChange, onSave }: PlotCoordinatesDialogProps) {
+export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landData }: PlotCoordinatesDialogProps) {
   const [coordinates, setCoordinates] = useState<Coordinate[]>([
     { lat: "", lng: "" },
     { lat: "", lng: "" },
@@ -62,9 +136,13 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave }: Pl
     }
   }, [open])
 
-  // We enforce exactly 4 coordinate slots; no add/remove
-  const addCoordinate = () => {}
-  const removeCoordinate = (_index: number) => {}
+  // Allow adding/removing coordinate slots
+  const addCoordinate = () => {
+    setCoordinates((prev) => [...prev, { lat: "", lng: "" }])
+  }
+  const removeCoordinate = (index: number) => {
+    setCoordinates((prev) => prev.filter((_, i) => i !== index))
+  }
 
   const updateCoordinate = (index: number, field: "lat" | "lng", value: string) => {
     const updated = [...coordinates]
@@ -88,10 +166,13 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave }: Pl
   }
 
   const handleSave = () => {
-    // Validate the four coordinate slots
-    const coordsToSave = coordinates.slice(0, 4)
-    for (let i = 0; i < coordsToSave.length; i++) {
-      const c = coordsToSave[i]
+    // Validate all coordinate slots
+    if (coordinates.length === 0) {
+      alert("Please add at least one coordinate.")
+      return
+    }
+    for (let i = 0; i < coordinates.length; i++) {
+      const c = coordinates[i]
       if (!c.lat || !c.lng) {
         alert(`Please fill latitude and longitude for point ${i + 1}`)
         return
@@ -103,7 +184,27 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave }: Pl
         return
       }
     }
-    onSave(coordsToSave)
+
+    
+//             //inner land  coordinate mapping
+//    const innerCoordinates: LandCoordinatePoint[] = coordinates.map(coord => ({
+//               coordinate_type: 'inner_area',
+//               latitude: coord.lat,
+//               longitude: coord.lng
+//             })) || []
+
+        
+// const updatedLandData = {
+//   ...landData,
+//   land_coordinate_point: [
+//     ...landData.land_coordinate_point, // keep existing points
+//     ...innerCoordinates,                 // add new ones
+//   ],
+// };
+
+ toast({ title: 'Plot saved', description: `Plot saved successfully ` })
+
+    // onSave(coordinates)
     onOpenChange(false)
   }
 
@@ -139,17 +240,35 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave }: Pl
                     />
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => getCurrentLocation(index)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <LocateFixed className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => getCurrentLocation(index)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <LocateFixed className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeCoordinate(index)}
+                    className="text-destructive hover:text-destructive"
+                    title="Remove coordinate"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
+
+            <div className="pt-2">
+              <Button type="button" variant="ghost" size="sm" onClick={addCoordinate} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" /> Add Coordinate
+              </Button>
+            </div>
           </div>
 
           {/* Map preview */}
@@ -178,14 +297,14 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave }: Pl
                       const newLat = e.latLng?.lat().toString() || ""
                       const newLng = e.latLng?.lng().toString() || ""
                       if (newLat && newLng) {
-                        // place into first empty slot if any; otherwise replace the last (4th) slot
+                        // place into first empty slot if any; otherwise append a new coordinate
                         const emptyIndex = coordinates.findIndex((c) => !c.lat || !c.lng)
                         if (emptyIndex !== -1) {
                           updateCoordinate(emptyIndex, "lat", newLat)
                           updateCoordinate(emptyIndex, "lng", newLng)
                         } else {
-                          updateCoordinate(3, "lat", newLat)
-                          updateCoordinate(3, "lng", newLng)
+                          // append a new coordinate with clicked location
+                          setCoordinates((prev) => [...prev, { lat: newLat, lng: newLng }])
                         }
                       }
                     }}

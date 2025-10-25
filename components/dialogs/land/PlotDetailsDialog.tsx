@@ -35,8 +35,8 @@ function getMarkerIcon(type: string): string {
 }
 
 interface Coordinate {
-  lat: string
-  lng: string
+  latitude: string
+  longitude: string
 }
 
 interface Plot {
@@ -81,23 +81,25 @@ const defaultCenter = {
   lng: 90.4125,
 }
 
-function sortPolygonCoords(coords: Coordinate[]): Coordinate[] {
-  if (coords.length < 3) return coords
-  const centroid = coords.reduce(
-    (acc, curr) => ({
-      lat: acc.lat + parseFloat(curr.lat),
-      lng: acc.lng + parseFloat(curr.lng),
-    }),
-    { lat: 0, lng: 0 }
-  )
-  centroid.lat /= coords.length
-  centroid.lng /= coords.length
-  return [...coords].sort((a, b) => {
-    const angleA = Math.atan2(parseFloat(a.lat) - centroid.lat, parseFloat(a.lng) - centroid.lng)
-    const angleB = Math.atan2(parseFloat(b.lat) - centroid.lat, parseFloat(b.lng) - centroid.lng)
-    return angleA - angleB
-  })
-}
+ function sortPolygonCoords(coords: Coordinate[]): Coordinate[] {
+      if (coords.length < 3) return coords;
+      // Calculate centroid
+      const centroid = coords.reduce(
+        (acc, curr) => ({
+          lat: acc.lat + parseFloat(curr.latitude),
+          lng: acc.lng + parseFloat(curr.longitude),
+        }),
+        { lat: 0, lng: 0 }
+      );
+      centroid.lat /= coords.length;
+      centroid.lng /= coords.length;
+      // Sort by angle from centroid
+      return [...coords].sort((a, b) => {
+        const angleA = Math.atan2(parseFloat(a.latitude) - centroid.lat, parseFloat(a.longitude) - centroid.lng);
+        const angleB = Math.atan2(parseFloat(b.latitude) - centroid.lat, parseFloat(b.longitude) - centroid.lng);
+        return angleA - angleB;
+      });
+    }
 
 const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotDetailsDialogProps) => {
 
@@ -184,7 +186,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
           <div className="aspect-video relative overflow-hidden rounded-lg border">
             <Zoom>
               <img
-                src={plot.imageUrl || "/placeholder.svg"}
+                src={'https://dev-backend.insurecow.com/'+plot.imageUrl || "/placeholder.svg"}
                 alt={plot.plotName}
                 className="w-full h-full object-cover"
               />
@@ -227,11 +229,12 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
               </CardHeader>
               <CardContent>
                 <div className="max-h-48 overflow-y-auto space-y-2">
-                  {plot.coordinates.map((coord, index) => (
+                  {plot.plotCoordinates?.map((coord, index) => (
+                    
                     <div key={index} className="text-sm p-2 bg-muted rounded-md">
                       <div className="font-medium">Point {index + 1}</div>
                       <div className="text-muted-foreground">
-                        Lat: {coord.lat}, Lng: {coord.lng}
+                        Lat: {coord.latitude}, Lng: {coord?.longitude}
                       </div>
                     </div>
                   ))}
@@ -255,8 +258,8 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                         ? userLocation
                         : plot.plotCoordinates && plot.plotCoordinates.length > 0
                           ? {
-                            lat: parseFloat(plot.plotCoordinates[0].lat),
-                            lng: parseFloat(plot.plotCoordinates[0].lng),
+                            lat: parseFloat(plot.plotCoordinates[0].latitude),
+                            lng: parseFloat(plot.plotCoordinates[0].longitude),
                           }
                           : defaultCenter
                     }
@@ -275,8 +278,8 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.plotCoordinates && plot.plotCoordinates.length > 2 && (
                       <Polygon
                         path={sortPolygonCoords(plot.plotCoordinates).map(coord => ({
-                          lat: parseFloat(coord.lat),
-                          lng: parseFloat(coord.lng),
+                          lat: parseFloat(coord.latitude),
+                          lng: parseFloat(coord.longitude),
                         }))}
                         options={{
                           strokeColor: "#007bff",
@@ -293,8 +296,8 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.innerCoordinates && plot.innerCoordinates.length > 2 && (
                       <Polygon
                         path={sortPolygonCoords(plot.innerCoordinates).map(coord => ({
-                          lat: parseFloat(coord.lat),
-                          lng: parseFloat(coord.lng),
+                          lat: parseFloat(coord.latitude),
+                          lng: parseFloat(coord.longitude),
                         }))}
                         options={{
                           strokeColor: "#6f42c1", // purple
@@ -311,8 +314,8 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.landCoordinates && plot.landCoordinates.length > 2 && (
                       <Polygon
                         path={sortPolygonCoords(plot.landCoordinates).map(coord => ({
-                          lat: parseFloat(coord.lat),
-                          lng: parseFloat(coord.lng),
+                          lat: parseFloat(coord.latitude),
+                          lng: parseFloat(coord.longitude),
                         }))}
                         options={{
                           strokeColor: "#28a745",
@@ -330,9 +333,10 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                       <Marker
                         key={`plot-${index}`}
                         position={{
-                          lat: parseFloat(coord.lat),
-                          lng: parseFloat(coord.lng),
+                          lat: parseFloat(coord.latitude),
+                          lng: parseFloat(coord.longitude),
                         }}
+                        
                         onClick={() => setOpenInfoFor(`plot-${index}`)}
                       />
                     ))}
@@ -341,8 +345,8 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                       <Marker
                         key={`land-${index}`}
                         position={{
-                          lat: parseFloat(coord.lat),
-                          lng: parseFloat(coord.lng),
+                          lat: parseFloat(coord.latitude),
+                          lng: parseFloat(coord.longitude),
                         }}
                         icon={{
                           url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
@@ -354,7 +358,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.swMark && (
                       <Marker
                         key={`sw_mark`}
-                        position={{ lat: parseFloat(plot.swMark.lat), lng: parseFloat(plot.swMark.lng) }}
+                        position={{ lat: parseFloat(plot.swMark.latitude), lng: parseFloat(plot.swMark.longitude) }}
                         icon={{ url: getMarkerIcon('sw') }}
                         onClick={() => setOpenInfoFor('sw_mark')}
                       />
@@ -362,7 +366,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.nCorner && (
                       <Marker
                         key={`n_corner`}
-                        position={{ lat: parseFloat(plot.nCorner.lat), lng: parseFloat(plot.nCorner.lng) }}
+                        position={{ lat: parseFloat(plot.nCorner.latitude), lng: parseFloat(plot.nCorner.longitude) }}
                         icon={{ url: getMarkerIcon('n_corner') }}
                         onClick={() => setOpenInfoFor('n_corner')}
                       />
@@ -370,7 +374,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.eCorner && (
                       <Marker
                         key={`e_corner`}
-                        position={{ lat: parseFloat(plot.eCorner.lat), lng: parseFloat(plot.eCorner.lng) }}
+                        position={{ lat: parseFloat(plot.eCorner.latitude), lng: parseFloat(plot.eCorner.longitude) }}
                         icon={{ url: getMarkerIcon('e_corner') }}
                         onClick={() => setOpenInfoFor('e_corner')}
                       />
@@ -378,7 +382,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.nMark && (
                       <Marker
                         key={`n_mark`}
-                        position={{ lat: parseFloat(plot.nMark.lat), lng: parseFloat(plot.nMark.lng) }}
+                        position={{ lat: parseFloat(plot.nMark.latitude), lng: parseFloat(plot.nMark.longitude) }}
                         icon={{ url: getMarkerIcon('n_mark') }}
                         onClick={() => setOpenInfoFor('n_mark')}
                       />
@@ -386,7 +390,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.eMark && (
                       <Marker
                         key={`e_mark`}
-                        position={{ lat: parseFloat(plot.eMark.lat), lng: parseFloat(plot.eMark.lng) }}
+                        position={{ lat: parseFloat(plot.eMark.latitude), lng: parseFloat(plot.eMark.longitude) }}
                         icon={{ url: getMarkerIcon('e_mark') }}
                         onClick={() => setOpenInfoFor('e_mark')}
                       />
@@ -394,7 +398,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     {plot.intersection && (
                       <Marker
                         key={`intersection`}
-                        position={{ lat: parseFloat(plot.intersection.lat), lng: parseFloat(plot.intersection.lng) }}
+                        position={{ lat: parseFloat(plot.intersection.latitude), lng: parseFloat(plot.intersection.longitude) }}
                         icon={{ url: getMarkerIcon('intersection') }}
                         onClick={() => setOpenInfoFor('intersection')}
                       />
@@ -406,12 +410,12 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                       if (!coord) return null;
                       return (
                         <InfoWindow
-                          position={{ lat: parseFloat(coord.lat), lng: parseFloat(coord.lng) }}
+                          position={{ lat: parseFloat(coord.latitude), lng: parseFloat(coord.longitude) }}
                           onCloseClick={() => setOpenInfoFor(null)}
                         >
                           <div className="text-sm">
                             <div className="font-semibold">Plot Point {idx + 1}</div>
-                            <div className="font-mono">{coord.lat}, {coord.lng}</div>
+                            <div className="font-mono">{coord.latitude}, {coord.longitude}</div>
                           </div>
                         </InfoWindow>
                       );
@@ -422,53 +426,53 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                       if (!coord) return null;
                       return (
                         <InfoWindow
-                          position={{ lat: parseFloat(coord.lat), lng: parseFloat(coord.lng) }}
+                          position={{ lat: parseFloat(coord.latitude), lng: parseFloat(coord.longitude) }}
                           onCloseClick={() => setOpenInfoFor(null)}
                         >
                           <div className="text-sm">
                             <div className="font-semibold">Land Point {idx + 1}</div>
-                            <div className="font-mono">{coord.lat}, {coord.lng}</div>
+                            <div className="font-mono">{coord.latitude}, {coord.longitude}</div>
                           </div>
                         </InfoWindow>
                       );
                     })()}
                     {openInfoFor === 'sw_mark' && plot.swMark && (
                       <InfoWindow
-                        position={{ lat: parseFloat(plot.swMark.lat), lng: parseFloat(plot.swMark.lng) }}
+                        position={{ lat: parseFloat(plot.swMark.latitude), lng: parseFloat(plot.swMark.longitude) }}
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
                           <div className="font-semibold">SW Mark</div>
-                          <div className="font-mono">{plot.swMark.lat}, {plot.swMark.lng}</div>
+                          <div className="font-mono">{plot.swMark.latitude}, {plot.swMark.longitude}</div>
                         </div>
                       </InfoWindow>
                     )}
                     {openInfoFor === 'n_corner' && plot.nCorner && (
                       <InfoWindow
-                        position={{ lat: parseFloat(plot.nCorner.lat), lng: parseFloat(plot.nCorner.lng) }}
+                        position={{ lat: parseFloat(plot.nCorner.latitude), lng: parseFloat(plot.nCorner.longitude) }}
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
                           <div className="font-semibold">N Corner</div>
-                          <div className="font-mono">{plot.nCorner.lat}, {plot.nCorner.lng}</div>
+                          <div className="font-mono">{plot.nCorner.latitude}, {plot.nCorner.longitude}</div>
                         </div>
                       </InfoWindow>
                     )}
                     {openInfoFor === 'e_corner' && plot.eCorner && (
                       <InfoWindow
-                        position={{ lat: parseFloat(plot.eCorner.lat), lng: parseFloat(plot.eCorner.lng) }}
+                        position={{ lat: parseFloat(plot.eCorner.latitude), lng: parseFloat(plot.eCorner.longitude) }}
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
                           <div className="font-semibold">E Corner</div>
-                          <div className="font-mono">{plot.eCorner.lat}, {plot.eCorner.lng}</div>
+                          <div className="font-mono">{plot.eCorner.latitude}, {plot.eCorner.longitude}</div>
                         </div>
                       </InfoWindow>
                     )}
                     {/* Info windows for distances */}
                     {openInfoFor === 'n_mark' && plot.nMark && (
                       <InfoWindow
-                        position={{ lat: parseFloat(plot.nMark.lat), lng: parseFloat(plot.nMark.lng) }}
+                        position={{ lat: parseFloat(plot.nMark.latitude), lng: parseFloat(plot.nMark.longitude) }}
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
@@ -479,7 +483,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     )}
                     {openInfoFor === 'e_mark' && plot.eMark && (
                       <InfoWindow
-                        position={{ lat: parseFloat(plot.eMark.lat), lng: parseFloat(plot.eMark.lng) }}
+                        position={{ lat: parseFloat(plot.eMark.latitude), lng: parseFloat(plot.eMark.longitude) }}
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
@@ -502,7 +506,34 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
           </Card>
         </div>
 
+
+
         <Separator />
+
+        <div className="mt-3 flex flex-wrap gap-3 items-center justify-center">
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('sw')} alt="sw" className="w-4 h-4" /> <span>SW Mark</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('n_corner')} alt="n_corner" className="w-4 h-4" /> <span>N Corner</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('e_corner')} alt="e_corner" className="w-4 h-4" /> <span>E Corner</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('n_mark')} alt="n_mark" className="w-4 h-4" /> <span>N Mark</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('e_mark')} alt="e_mark" className="w-4 h-4" /> <span>E Mark</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('intersection')} alt="intersection" className="w-4 h-4" /> <span>Intersection</span>
+                </div>
+
+                 <div className="flex items-center gap-2 text-sm">
+                  <img src={getMarkerIcon('intersection')} alt="intersection" className="w-4 h-4" /> <span>Land Outer area</span>
+                </div>
+              </div>
 
         {/* Action Buttons */}
         <div className="flex justify-between pt-2">
@@ -513,7 +544,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                 Edit Plot
               </Button>
             )}
-            {onDelete && (
+            {/* {onDelete && (
               <Button
                 variant="outline"
                 onClick={() => onDelete(plot.id)}
@@ -522,7 +553,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Plot
               </Button>
-            )}
+            )} */}
           </div>
           <Button onClick={() => onOpenChange(false)}>Close</Button>
         </div>

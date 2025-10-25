@@ -336,7 +336,7 @@ console.log(grouped_ref);
                         <img
                           src={'https://dev-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
                           alt={plot.land_name}
-                          className="w-full h-full object-cover"
+                          className="w-auto object-fit"
                         />
                       </div>
                       <div className="flex-1">

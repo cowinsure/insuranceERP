@@ -316,7 +316,10 @@ const CropsPage = () => {
           closeModal={() => setIsStageTwoModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-          <StageTwo selectedCrop={selectedCrop!} onSuccess={runFunctionOnSuccessStageTwo} />
+          <StageTwo
+            selectedCrop={selectedCrop!}
+            onSuccess={runFunctionOnSuccessStageTwo}
+          />
         </GenericModal>
       )}
 
@@ -329,7 +332,10 @@ const CropsPage = () => {
           }`}
           height={true}
         >
-          <CropStageModalTabs stageOneData={selectedCrop} stageTwoData={selectedCrop?.crop_id}  />
+          <CropStageModalTabs
+            stageOneData={selectedCrop}
+            stageTwoData={selectedCrop?.crop_id}
+          />
         </GenericModal>
       )}
 

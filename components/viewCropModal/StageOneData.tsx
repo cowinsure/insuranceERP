@@ -137,10 +137,10 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             items={
               data.crop_asset_pest_attack_details?.map(
                 (p: {
+                  // pest_attack_observations_type_name: any;
                   pest_attack_observations_type_name: any;
-                  remarks: any;
                 }) => ({
-                  name: p.remarks,
+                  name: p.pest_attack_observations_type_name,
                 })
               ) || []
             }
@@ -151,9 +151,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               data.crop_asset_disease_attack_details?.map(
                 (d: {
                   disease_attack_observations_type_name: any;
-                  remarks: any;
+                  // remarks: any;
                 }) => ({
-                  name: d.remarks,
+                  name: d.disease_attack_observations_type_name,
                 })
               ) || []
             }

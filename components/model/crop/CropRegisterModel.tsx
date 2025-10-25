@@ -19,6 +19,8 @@ export interface CropRegisterData {
   harvest_date: string;
   estimated_yield: number;
   created_at: string;
+  farmer_name?: string,
+  mobile_number?: string,
 
   crop_asset_seed_details: CropAssetSeedDetail[];
   crop_asset_chemical_usage_details: CropAssetChemicalUsageDetail[];

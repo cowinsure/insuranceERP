@@ -77,9 +77,17 @@ const CropsPage = () => {
 
     setSelectedCrop(viewCrop);
     setIsCropView(true);
-    console.log("View Crop",viewCrop)
+    console.log("View Crop", viewCrop);
   };
 
+  const runFunctionOnSuccess = () => {
+    fetchCropData();
+    setIsStageOneModal(false);
+  };
+
+  const runFunctionOnSuccessStageTwo = () => {
+    setIsStageTwoModal(false);
+  };
 
   // Flag for stage one complete
   const isStageOneCompleted = (cropId: number) => {
@@ -285,7 +293,7 @@ const CropsPage = () => {
         >
           <AddCropDetailsModal
             selectedCrop={selectedCrop!}
-            onSuccess={fetchCropData}
+            onSuccess={runFunctionOnSuccess}
           />
         </GenericModal>
       )}
@@ -308,7 +316,7 @@ const CropsPage = () => {
           closeModal={() => setIsStageTwoModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-          {/* <StageTwo selectedCrop={selectedCrop} setStageTwoData={() => {}} /> */}
+          <StageTwo selectedCrop={selectedCrop!} onSuccess={runFunctionOnSuccessStageTwo} />
         </GenericModal>
       )}
 
@@ -321,7 +329,7 @@ const CropsPage = () => {
           }`}
           height={true}
         >
-          <CropStageModalTabs stageOneData={selectedCrop} />
+          <CropStageModalTabs stageOneData={selectedCrop} stageTwoData={selectedCrop?.crop_id}  />
         </GenericModal>
       )}
 

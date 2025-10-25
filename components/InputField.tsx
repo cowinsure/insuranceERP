@@ -1,6 +1,7 @@
 // components/ui/InputField.tsx
 
 import clsx from "clsx";
+import { read } from "fs";
 import React from "react";
 
 interface InputFieldProps {
@@ -9,13 +10,14 @@ interface InputFieldProps {
   id: string;
   name: string;
   value: string | number | undefined;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
   maxLength?: number;
   error?: string;
   max?: string;
+  readOnly?: boolean;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -29,6 +31,7 @@ const InputField: React.FC<InputFieldProps> = ({
   disabled = false,
   placeholder = "",
   maxLength,
+  readOnly = false,
   error,
 }) => {
   return (
@@ -49,6 +52,7 @@ const InputField: React.FC<InputFieldProps> = ({
           disabled={disabled}
           placeholder={placeholder}
           maxLength={maxLength}
+          readOnly={readOnly}
           className={clsx(
             "p-2 border border-gray-300 bg-gray-50 rounded-md font-semibold",
             "focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-blue-50",

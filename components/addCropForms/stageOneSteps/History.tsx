@@ -60,7 +60,7 @@ const History = ({ selectedCrop, value, onChange }: HistoryProps) => {
     setFormData(updated);
     onChange([updated]); // always send as array
   };
-
+console.log(formData.last_year_crop_type_name);
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">

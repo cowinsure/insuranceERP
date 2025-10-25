@@ -266,7 +266,7 @@ const PestsDisease = ({ value, onChange }: PestsDiseaseProps) => {
   const [selectedDiseases, setSelectedDiseases] = useState<ObservationItem[]>(
     []
   );
-
+console.log(value);
   /** 🔄 Sync external values (useful when editing existing crop) */
   useEffect(() => {
     setSelectedPests(value?.pests || []);
@@ -351,7 +351,7 @@ const PestsDisease = ({ value, onChange }: PestsDiseaseProps) => {
               <input
                 type="checkbox"
                 id={`pest-${item.id}`}
-                checked={selectedPests.some((p) => p.id === item.id)}
+                checked={selectedPests.some((p) => p.label === item.label)}
                 onChange={() => toggleSelection(item, "pest")}
                 className="mt-1 cursor-pointer accent-blue-600 custom-checkbox"
               />

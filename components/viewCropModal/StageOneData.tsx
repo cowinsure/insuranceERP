@@ -19,7 +19,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             label="Seed Name"
             value={data.crop_asset_seed_details?.[0]?.seed_common_name || ""}
           />
-          <InputField label="Variety" value={data.variety || ""} />
+          <InputField label="Variety" value={data.crop_asset_seed_details?.[0].seed_variety || ""} />
           <InputField
             label="Seed Company"
             value={data.crop_asset_seed_details?.[0]?.seed_company_name || ""}

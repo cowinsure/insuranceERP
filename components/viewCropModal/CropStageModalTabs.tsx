@@ -35,11 +35,12 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
       case "stage1":
         return <StageOneData data={stageOneData} />;
       case "stage2":
-        return <StageTwoData data={stageTwoData} />;
+        return <StageTwoData cropId={stageTwoData} />;
       default:
         return null;
     }
   };
+  console.log(stageTwoData);
 
   // Finding land according to the selected crop
   if (stageOneData.land_id) {
@@ -98,7 +99,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Variety</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.variety || "N/A"}
+                {stageOneData.crop_asset_seed_details[0].seed_variety || "N/A"}
               </p>
             </div>
           </div>

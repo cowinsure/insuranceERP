@@ -98,7 +98,9 @@ interface RegisterCropProps {
 
 interface LandData {
   land_name: string;
-  land_id: 0;
+  land_id: number;
+  farmer_name?: string;
+  mobile_number?: string;
 }
 
 interface CropType {
@@ -117,6 +119,10 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   const [landData, setLandData] = useState<LandData[]>([]);
   const [cropType, setCropType] = useState<CropType[]>([]);
   const [cropName, setCropName] = useState("New Crop");
+
+  // ✅ new states for farmer info
+  const [farmerName, setFarmerName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
 
   useEffect(() => {
     getLandData();
@@ -140,13 +146,11 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
       const response = await get("/cms/crop-type-service", {
         params: { start_record: 1, page_size: 10, crop_id: -1 },
       });
-      console.log(response);
       if (response.status === "success") setCropType(response.data);
     } catch (error) {
       toast.error(`${error}`);
     }
   };
-  /////////////////////////////
 
   // ✅ Handle change for simple fields
   const handleChange =
@@ -158,7 +162,6 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   const handleCropNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     setCropName(name);
-    // Keep crop name synced with seed details for backend
     setFormData((prev) => ({
       ...prev,
       crop_asset_seed_details: prev.crop_asset_seed_details.map((d) => ({
@@ -170,7 +173,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
 
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const parsedValue = parseInt(value, 10); // since you're working with IDs
+    const parsedValue = parseInt(value, 10);
 
     setFormData((prev) => ({
       ...prev,
@@ -180,6 +183,18 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         ? "crop_type_id"
         : name]: parsedValue,
     }));
+
+    // ✅ Update farmer info when land changes
+    if (name === "land_name") {
+      const selectedLand = landData.find((land) => land.land_id === parsedValue);
+      if (selectedLand) {
+        setFarmerName(selectedLand.farmer_name || "Farmer name not found");
+        setMobileNumber(selectedLand.mobile_number || "N/A");
+      } else {
+        setFarmerName("");
+        setMobileNumber("");
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,12 +207,13 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response);
       if (response.status === "success") {
         toast.success("Crop registered successfully!");
         setFormData({ ...defaultCropData });
-        onSuccess();
+        setFarmerName("");
+        setMobileNumber("");
         setCropName("");
+        onSuccess();
         closeModal?.();
       } else {
         toast.error(response.message || "Failed to register crop");
@@ -206,9 +222,6 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
       toast.error("Error submitting crop data");
     }
   };
-
-  console.log(formData);
-  console.log(landData);
 
   return (
     <div>
@@ -250,6 +263,30 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
             value: land.land_id,
             label: land.land_name,
           }))}
+        />
+
+        {/* ✅ Farmer Name (auto-filled, read-only) */}
+        <InputField
+          id="farmer_name"
+          label="Farmer Name"
+          name="farmer_name"
+          type="text"
+          value={farmerName}
+          onChange={() => {}}
+          readOnly={true}
+          placeholder="Name will be auto-filled"
+        />
+
+        {/* ✅ Mobile Number (auto-filled, read-only) */}
+        <InputField
+          id="mobile_number"
+          label="Mobile Number"
+          name="mobile_number"
+          type="text"
+          value={mobileNumber}
+          onChange={() => {}}
+          readOnly={true}
+          placeholder="Number will be auto-filled"
         />
 
         <button

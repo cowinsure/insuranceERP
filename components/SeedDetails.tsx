@@ -139,21 +139,11 @@
 import React from "react";
 import InputField from "./InputField";
 import DropdownField from "./DropDownField";
-import { CropData } from "./model/crop/CropCoreModel";
-
-// Define the step data type (replace this with your actual interface if different)
-export interface CropAssetSeedDetail {
-  seed_common_name?: string;
-  seed_variety_id?: number;
-  seed_company_name?: string;
-  seed_company_type_id?: number;
-  seed_type_id?: number;
-}
+import { SeedDetails as SeedDetailsType } from "./model/crop/CropCoreModel";
 
 interface SeedDetailsProps {
-  selectedCrop?: CropData;
-  value: Partial<CropAssetSeedDetail>; // current step data from parent
-  onChange: (data: Partial<CropAssetSeedDetail>) => void;
+  value: Partial<SeedDetailsType>;
+  onChange: (data: Partial<SeedDetailsType>) => void;
 }
 
 const SeedDetails = ({ value, onChange }: SeedDetailsProps) => {
@@ -162,20 +152,21 @@ const SeedDetails = ({ value, onChange }: SeedDetailsProps) => {
   ) => {
     const { name, value: val } = e.target;
 
-    // Convert dropdown values to numbers if applicable
     const numberFields = [
       "seed_variety_id",
       "seed_company_type_id",
       "seed_type_id",
     ];
-    const parsedValue = numberFields.includes(name)
-      ? Number(val) || undefined
-      : val;
+    const parsedValue =
+      numberFields.includes(name) && val !== ""
+        ? Number(val)
+        : val === ""
+        ? ""
+        : val;
 
     onChange({ ...value, [name]: parsedValue });
   };
 
-  /** 🔹 Dropdown options */
   const seedVarietyOptions = [
     { value: 1, label: "Local Variety (স্থানীয় জাত)" },
     { value: 2, label: "High Yield Variety (উচ্চফলনশীল জাত)" },
@@ -201,7 +192,6 @@ const SeedDetails = ({ value, onChange }: SeedDetailsProps) => {
       </h2>
 
       <div className="space-y-5">
-        {/* ✅ Common Name of Seed */}
         <InputField
           id="seed_common_name"
           label="Common Name of Seed"
@@ -212,17 +202,15 @@ const SeedDetails = ({ value, onChange }: SeedDetailsProps) => {
           placeholder="Enter Seed Common Name"
         />
 
-        {/* ✅ Variety of Seed */}
         <DropdownField
           label="Variety of Seed"
           id="seed_variety_id"
           name="seed_variety_id"
-          value={value.seed_variety_id || ""}
+          value={value.seed_variety_id ?? ""}
           onChange={handleChange}
           options={seedVarietyOptions}
         />
 
-        {/* ✅ Seed Company Name */}
         <InputField
           id="seed_company_name"
           label="Name of the Seed Company"
@@ -233,22 +221,20 @@ const SeedDetails = ({ value, onChange }: SeedDetailsProps) => {
           placeholder="Ex: Local Open Market or Own Stock Conserved"
         />
 
-        {/* ✅ Seed Company Type */}
         <DropdownField
           label="Seed Company Type"
           id="seed_company_type_id"
           name="seed_company_type_id"
-          value={value.seed_company_type_id || ""}
+          value={value.seed_company_type_id ?? ""}
           onChange={handleChange}
           options={seedCompanyTypeOptions}
         />
 
-        {/* ✅ Type of the Seed Used */}
         <DropdownField
           label="Type of the Seed Used"
           id="seed_type_id"
           name="seed_type_id"
-          value={value.seed_type_id || ""}
+          value={value.seed_type_id ?? ""}
           onChange={handleChange}
           options={seedTypeOptions}
         />

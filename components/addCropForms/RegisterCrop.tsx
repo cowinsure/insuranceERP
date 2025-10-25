@@ -134,6 +134,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
       toast.error(`${error}`);
     }
   };
+
   const getCropType = async () => {
     try {
       const response = await get("/cms/crop-type-service", {
@@ -207,6 +208,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   };
 
   console.log(formData);
+  console.log(landData);
 
   return (
     <div>
@@ -223,17 +225,6 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
             value: crop.crop_type_id,
             label: crop.crop_name,
           }))}
-        />
-
-        {/* ✅ Variety */}
-        <InputField
-          id="variety"
-          label="Variety"
-          name="variety"
-          placeholder="Enter variety"
-          value={formData.variety}
-          onChange={handleChange("variety")}
-          required
         />
 
         {/* ✅ Planting Date */}

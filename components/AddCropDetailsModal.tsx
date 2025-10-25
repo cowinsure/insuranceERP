@@ -496,19 +496,40 @@ import {
   IrrigationCultivation,
   PreviousSeasonHistory,
   CropAssetWeatherEffectHistory,
-  PestAttack,
-  DiseaseAttack,
   ChemicalUsage,
 } from "./model/crop/CropCoreModel";
-import { Select } from "react-day-picker";
+import useApi from "@/hooks/use_api";
 
 interface AddCropDetailsModalProps {
   selectedCrop: CropData;
+  onSuccess?: () => void;
+}
+
+interface EditableCropData {
+  seed?: Partial<SeedDetailsType>;
+  cultivation?: Partial<IrrigationCultivation>[];
+  history?: Partial<PreviousSeasonHistory>[];
+  weather?: Partial<CropAssetWeatherEffectHistory>;
+  pests?: { id: number; label: string }[];
+  diseases?: { id: number; label: string }[];
+  fertilizers?: (Partial<ChemicalUsage> & { qty?: number | string })[];
+  pesticides?: (Partial<ChemicalUsage> & { qty?: number | string })[];
+  season?: string;
+  crop_id?: number;
+  land_id?: number;
+  variety?: string;
+  planting_date?: string;
+  harvest_date?: string;
+  estimated_yield?: number | string;
+  crop_type_id?: number;
 }
 
 export default function AddCropDetailsModal({
+  onSuccess,
   selectedCrop,
 }: AddCropDetailsModalProps) {
+  const { put } = useApi();
+
   const steps = [
     "Seed",
     "Cultivation",
@@ -523,37 +544,35 @@ export default function AddCropDetailsModal({
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Use Partial<> for editable form state
-  const [cropData, setCropData] = useState<{
-    crop_asset_seed_details?: Partial<SeedDetailsType>[];
-    crop_asset_irrigation_cultivation_details?: Partial<IrrigationCultivation>[];
-    crop_asset_previous_season_history_details?: Partial<PreviousSeasonHistory>[];
-    crop_asset_weather_effect_history?: Partial<CropAssetWeatherEffectHistory>[];
-    crop_asset_pest_attack_details?: Partial<PestAttack>[];
-    crop_asset_disease_attack_details?: Partial<DiseaseAttack>[];
-    crop_asset_chemical_usage_details?: Partial<ChemicalUsage>[];
-    season?: string;
-    crop_id?: number;
-    land_id?: number;
-    variety?: string;
-    planting_date?: string;
-    harvest_date?: string;
-    estimated_yield?: number;
-    crop_type_id?: number;
-  }>({
-    crop_asset_seed_details: selectedCrop.crop_asset_seed_details || [],
-    crop_asset_irrigation_cultivation_details:
-      selectedCrop.crop_asset_irrigation_cultivation_details || [],
-    crop_asset_previous_season_history_details:
-      selectedCrop.crop_asset_previous_season_history_details || [],
-    crop_asset_weather_effect_history:
-      selectedCrop.crop_asset_weather_effect_history || [],
-    crop_asset_pest_attack_details:
-      selectedCrop.crop_asset_pest_attack_details || [],
-    crop_asset_disease_attack_details:
-      selectedCrop.crop_asset_disease_attack_details || [],
-    crop_asset_chemical_usage_details:
-      selectedCrop.crop_asset_chemical_usage_details || [],
+  const [cropData, setCropData] = useState<EditableCropData>({
+    seed: selectedCrop.crop_asset_seed_details?.[0] || {},
+    cultivation: selectedCrop.crop_asset_irrigation_cultivation_details || [],
+    history: selectedCrop.crop_asset_previous_season_history_details || [],
+    weather: selectedCrop.crop_asset_weather_effect_history?.[0] || {},
+    pests:
+      selectedCrop.crop_asset_pest_attack_details
+        ?.map((p) => ({
+          id: p.pest_attack_type_id ?? 0,
+          label: p.pest_attack_observations_type_name ?? "",
+        }))
+        .filter((p) => p.id && p.label) || [],
+
+    diseases:
+      selectedCrop.crop_asset_disease_attack_details
+        ?.map((d) => ({
+          id: d.disease_attack_type_id ?? 0,
+          label: d.disease_attack_observations_type_name ?? "",
+        }))
+        .filter((d) => d.id && d.label) || [],
+
+    fertilizers:
+      selectedCrop.crop_asset_chemical_usage_details
+        ?.filter((c) => c.chemical_type_id === 1)
+        .map((c) => ({ ...c })) || [],
+    pesticides:
+      selectedCrop.crop_asset_chemical_usage_details
+        ?.filter((c) => c.chemical_type_id === 2)
+        .map((c) => ({ ...c })) || [],
     season: selectedCrop.season,
     crop_id: selectedCrop.crop_id,
     land_id: selectedCrop.land_id,
@@ -562,6 +581,54 @@ export default function AddCropDetailsModal({
     harvest_date: selectedCrop.harvest_date,
     estimated_yield: selectedCrop.estimated_yield,
     crop_type_id: selectedCrop.crop_type_id,
+  });
+
+  // ✅ Preview state containing only display fields
+  const [previewData, setPreviewData] = useState<Record<string, any>>({
+    seed: [
+      {
+        seed_common_name: cropData.seed?.seed_common_name || "",
+        seed_variety: cropData.seed?.seed_variety || "",
+        seed_company_name: cropData.seed?.seed_company_name || "",
+        seed_company_type_name: cropData.seed?.seed_company_type_name || "",
+        seed_type_name: cropData.seed?.seed_type_name || "",
+      },
+    ],
+    cultivation: cropData.cultivation?.map((c) => ({
+      irrigation_facility: c.irrigation_facility || "",
+      irrigation_source: c.irrigation_source || "",
+      crop_cultivation_system_name: c.crop_cultivation_system_name || "",
+      crop_land_suitability_name: c.crop_land_suitability_name || "",
+    })),
+    history: cropData.history?.map((h) => ({
+      immediate_previous_crop: h.immediate_previous_crop || "",
+      last_year_crop_type_name: h.last_year_crop_type_name || "",
+      last_year_production: h.last_year_production || "",
+      sowing_date: h.sowing_date || "",
+      harvest_date: h.harvest_date || "",
+      seed_used_last_year: h.seed_used_last_year || "",
+      reason_for_changing_seed: h.reason_for_changing_seed || "",
+    })),
+    weather: {
+      period_to: cropData.weather?.period_to || "",
+      period_from: cropData.weather?.period_from || "",
+      remarks: cropData.weather?.remarks || "",
+      weather_effect_type_name:
+        cropData.weather?.weather_effect_type_name || "",
+    },
+    pests: cropData.pests?.map((p) => p.label) || [],
+    diseases: cropData.diseases?.map((d) => d.label) || [],
+    fertilizers: cropData.fertilizers?.map((f) => ({
+      chemical_name: f.chemical_name || "",
+      qty: f.qty || "",
+      qty_unit: f.qty_unit || "",
+      remarks: f.remarks || "",
+    })),
+    pesticides: cropData.pesticides?.map((p) => ({
+      chemical_name: p.chemical_name || "",
+      qty_unit: p.qty_unit || "",
+      remarks: p.remarks || "",
+    })),
   });
 
   const storageKey = `stageOneCompleted_${selectedCrop.crop_id}`;
@@ -573,13 +640,103 @@ export default function AddCropDetailsModal({
 
   const handlePrev = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      // Normally, API call goes here
+      // Start with full backend object, keep master data from selectedCrop
+      const payload = {
+        crop_id: selectedCrop.crop_id,
+        land_id: selectedCrop.land_id,
+        crop_type_id: selectedCrop.crop_type_id,
+        variety: selectedCrop.variety,
+        season: selectedCrop.season,
+        planting_date: selectedCrop.planting_date,
+        harvest_date: selectedCrop.harvest_date,
+        estimated_yield: selectedCrop.estimated_yield,
+
+        // Seed
+        crop_asset_seed_details: [
+          {
+            ...selectedCrop.crop_asset_seed_details?.[0],
+            seed_common_name: cropData.seed?.seed_common_name || "",
+            seed_variety_id: cropData.seed?.seed_variety_id || null,
+            seed_company_name: cropData.seed?.seed_company_name || "",
+            seed_company_type_id: cropData.seed?.seed_company_type_id || null,
+            seed_type_id: cropData.seed?.seed_type_id || null,
+          },
+        ],
+
+        // Cultivation
+        crop_asset_irrigation_cultivation_details: cropData.cultivation?.length
+          ? cropData.cultivation.map((c) => ({
+              ...selectedCrop.crop_asset_irrigation_cultivation_details?.[0],
+              ...c,
+            }))
+          : selectedCrop.crop_asset_irrigation_cultivation_details,
+
+        // Previous Season History
+        crop_asset_previous_season_history_details: cropData.history?.length
+          ? cropData.history.map((h) => ({
+              ...selectedCrop.crop_asset_previous_season_history_details?.[0],
+              ...h,
+            }))
+          : selectedCrop.crop_asset_previous_season_history_details,
+
+        // Weather
+        crop_asset_weather_effect_history: [
+          {
+            ...selectedCrop.crop_asset_weather_effect_history?.[0],
+            ...cropData.weather,
+          },
+        ],
+
+        // ✅ Pests & Diseases (updated)
+        crop_asset_pest_attack_details: cropData.pests?.length
+          ? cropData.pests.map((p) => ({
+              ...selectedCrop.crop_asset_pest_attack_details?.[0],
+              pest_attack_observations_type_name: p.label,
+              pest_attack_type_id: p.id,
+              remarks: null,
+            }))
+          : selectedCrop.crop_asset_pest_attack_details,
+
+        crop_asset_disease_attack_details: cropData.diseases?.length
+          ? cropData.diseases.map((d) => ({
+              ...selectedCrop.crop_asset_disease_attack_details?.[0],
+              disease_attack_observations_type_name: d.label,
+              disease_attack_type_id: d.id,
+              remarks: null,
+            }))
+          : selectedCrop.crop_asset_disease_attack_details,
+
+        // Chemicals: fertilizers + pesticides
+        crop_asset_chemical_usage_details: [
+          ...(cropData.fertilizers?.map((f) => ({
+            ...f,
+            chemical_type_id: 1,
+            qty_unit: "kg",
+            qty: f.qty,
+          })) || []),
+          ...(cropData.pesticides?.map((p) => ({
+            ...p,
+            chemical_type_id: 2,
+            qty_unit: "kg",
+            qty: p.qty,
+          })) || []),
+        ],
+      };
+
+      const res = await put("/cms/crop-info-service", payload, {
+        params: { asset_id: `${selectedCrop.crop_id}` },
+      });
+      if (res.status === "success" && onSuccess) {
+        onSuccess();
+      }
+      console.log(res);
       toast.success("Crop data submitted successfully!");
       localStorage.setItem(storageKey, "true");
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Submission failed");
     } finally {
       setIsLoading(false);
@@ -587,22 +744,23 @@ export default function AddCropDetailsModal({
     }
   };
 
-  console.log("CropData", cropData);
-  console.log("SelectedCrop", selectedCrop);
-
   const renderStep = () => {
     switch (currentStep) {
       case 0:
         return (
           <SeedDetails
-            selectedCrop={selectedCrop}
-            value={cropData.crop_asset_seed_details?.[0] || {}}
-            onChange={(newData: Partial<SeedDetailsType>) =>
+            value={cropData.seed || {}}
+            onChange={(newData) => {
               setCropData((prev) => ({
                 ...prev,
-                crop_asset_seed_details: [newData],
-              }))
-            }
+                seed: { ...prev.seed, ...newData },
+              }));
+
+              setPreviewData((prev) => ({
+                ...prev,
+                seed: { ...newData },
+              }));
+            }}
           />
         );
 
@@ -610,13 +768,11 @@ export default function AddCropDetailsModal({
         return (
           <Cultivation
             selectedCrop={selectedCrop}
-            value={cropData.crop_asset_irrigation_cultivation_details || []}
-            onChange={(newData) =>
-              setCropData((prev) => ({
-                ...prev,
-                crop_asset_irrigation_cultivation_details: newData,
-              }))
-            }
+            value={cropData.cultivation || []}
+            onChange={(newData) => {
+              setCropData((prev) => ({ ...prev, cultivation: newData }));
+              setPreviewData((prev) => ({ cultivation: newData }));
+            }}
           />
         );
 
@@ -624,53 +780,51 @@ export default function AddCropDetailsModal({
         return (
           <History
             selectedCrop={selectedCrop}
-            value={cropData.crop_asset_previous_season_history_details || []}
-            onChange={(newData) =>
-              setCropData((prev) => ({
-                ...prev,
-                crop_asset_previous_season_history_details: newData,
-              }))
-            }
+            value={cropData.history || []}
+            onChange={(newData) => {
+              setCropData((prev) => ({ ...prev, history: newData }));
+              setPreviewData((prev) => ({ history: newData }));
+            }}
           />
         );
 
       case 3:
         return (
           <Weather
-            value={cropData.crop_asset_weather_effect_history?.[0] || {}}
-            onChange={(newData) =>
+            value={cropData.weather || {}}
+            onChange={(newData) => {
               setCropData((prev) => ({
                 ...prev,
-                crop_asset_weather_effect_history: [newData],
-              }))
-            }
+                weather: { ...prev.weather, ...newData },
+              }));
+              setPreviewData((prev) => ({
+                weather: { ...newData },
+              }));
+            }}
           />
         );
 
+      //  Pests & Diseases Step
       case 4:
         return (
           <PestsDisease
             value={{
-              pests:
-                (cropData.crop_asset_pest_attack_details
-                  ?.map((p) => p.pest_attack_observations_type_name)
-                  .filter(Boolean) as string[]) || [],
-              diseases:
-                (cropData.crop_asset_disease_attack_details
-                  ?.map((d) => d.disease_attack_observations_type_name)
-                  .filter(Boolean) as string[]) || [],
+              pests: cropData.pests || [],
+              diseases: cropData.diseases || [],
             }}
-            onChange={({ pests, diseases }) =>
+            onChange={({ pests, diseases }) => {
               setCropData((prev) => ({
                 ...prev,
-                crop_asset_pest_attack_details: pests.map((name) => ({
-                  pest_attack_observations_type_name: name,
-                })),
-                crop_asset_disease_attack_details: diseases.map((name) => ({
-                  disease_attack_observations_type_name: name,
-                })),
-              }))
-            }
+                pests,
+                diseases,
+              }));
+
+              setPreviewData((prev) => ({
+                ...prev,
+                pests: pests.map((p) => p.label),
+                diseases: diseases.map((d) => d.label),
+              }));
+            }}
           />
         );
 
@@ -678,151 +832,47 @@ export default function AddCropDetailsModal({
         return (
           <Chemicals
             value={{
-              fertilizers:
-                cropData.crop_asset_chemical_usage_details
-                  ?.filter((c) => c.chemical_type_id === 1)
-                  .map((c) => ({
-                    ...c,
-                    qty: typeof c.qty === "number" ? c.qty : undefined,
-                    chemical_name: c.chemical_name || "",
-                    qty_unit: c.qty_unit || "",
-                    remarks: c.remarks || "",
-                  })) || [],
-              pesticides:
-                cropData.crop_asset_chemical_usage_details
-                  ?.filter((c) => c.chemical_type_id === 2)
-                  .map((c) => ({
-                    ...c,
-                    qty: typeof c.qty === "number" ? c.qty : undefined,
-                    chemical_name: c.chemical_name || "",
-                    qty_unit: c.qty_unit || "",
-                    remarks: c.remarks || "",
-                  })) || [],
+              fertilizers: cropData.fertilizers || [],
+              pesticides: cropData.pesticides || [],
             }}
-            onChange={({ fertilizers, pesticides }) =>
+            onChange={({ fertilizers, pesticides }) => {
+              const updatedFert = fertilizers as (
+                | Partial<ChemicalUsage>
+                | { qty?: number | string }
+              )[];
+              const updatedPest = pesticides as (
+                | Partial<ChemicalUsage>
+                | { qty?: number | string }
+              )[];
+
               setCropData((prev) => ({
                 ...prev,
-                crop_asset_chemical_usage_details: [
-                  ...fertilizers.map((f) => ({
-                    ...f,
-                    chemical_type_id: 1,
-                    qty:
-                      typeof f.qty === "number"
-                        ? f.qty
-                        : f.qty === "" || f.qty === undefined
-                        ? undefined
-                        : Number(f.qty),
-                  })),
-                  ...pesticides.map((p) => ({
-                    ...p,
-                    chemical_type_id: 2,
-                    qty:
-                      typeof p.qty === "number"
-                        ? p.qty
-                        : p.qty === "" || p.qty === undefined
-                        ? undefined
-                        : Number(p.qty),
-                  })),
-                ] as Partial<ChemicalUsage>[],
-              }))
-            }
+                fertilizers: updatedFert.map((f) => ({
+                  ...f,
+                })) as (Partial<ChemicalUsage> & { qty?: string | number })[],
+                pesticides: updatedPest.map((p) => ({
+                  ...p,
+                })) as (Partial<ChemicalUsage> & { qty?: string | number })[],
+              }));
+
+              setPreviewData((prev) => ({
+                fertilizers: updatedFert,
+                pesticides: updatedPest,
+              }));
+            }}
           />
         );
 
       case 6:
-        return (
-          <PreviewSubmit
-            data={{
-              seed: {
-                seed_common_name:
-                  cropData.crop_asset_seed_details?.[0]?.seed_common_name || "",
-                seed_variety:
-                  cropData.crop_asset_seed_details?.[0]?.seed_variety || "",
-                seed_company_name:
-                  cropData.crop_asset_seed_details?.[0]?.seed_company_name ||
-                  "",
-                seed_company_typ_ide:
-                  cropData.crop_asset_seed_details?.[0]?.seed_company_type_id ||
-                  "",
-                seed_type_id:
-                  cropData.crop_asset_seed_details?.[0]?.seed_type_id || "",
-              },
-              cultivation:
-                cropData.crop_asset_irrigation_cultivation_details?.map(
-                  (c) => ({
-                    irrigation_facility: c.irrigation_facility || "",
-                    irrigation_source: c.irrigation_source || "",
-                    crop_cultivation_system_name:
-                      c.crop_cultivation_system_name || "",
-                    crop_land_suitability_name:
-                      c.crop_land_suitability_name || "",
-                  })
-                ) || [],
-              history:
-                cropData.crop_asset_previous_season_history_details?.map(
-                  (h) => ({
-                    immediate_previous_crop: h.immediate_previous_crop || "",
-                    last_year_crop_type_name: h.last_year_crop_type_name || "",
-                    last_year_production: h.last_year_production || "",
-                    sowing_date: h.sowing_date || "",
-                    harvest_date: h.harvest_date || "",
-                    seed_used_last_year: h.seed_used_last_year || "",
-                    reason_for_changing_seed: h.reason_for_changing_seed || "",
-                  })
-                ) || [],
-              weather: {
-                rainfall:
-                  (cropData.crop_asset_weather_effect_history?.[0] as any)
-                    ?.rainfall || "",
-                temperature:
-                  (cropData.crop_asset_weather_effect_history?.[0] as any)
-                    ?.temperature || "",
-                humidity:
-                  (cropData.crop_asset_weather_effect_history?.[0] as any)
-                    ?.humidity || "",
-                notes:
-                  (cropData.crop_asset_weather_effect_history?.[0] as any)
-                    ?.notes || "",
-              },
-
-              pests_disease: {
-                pests:
-                  (cropData.crop_asset_pest_attack_details
-                    ?.map((p) => p.pest_attack_observations_type_name)
-                    .filter(Boolean) as string[]) || [],
-                diseases:
-                  (cropData.crop_asset_disease_attack_details
-                    ?.map((d) => d.disease_attack_observations_type_name)
-                    .filter(Boolean) as string[]) || [],
-              },
-              chemicals: {
-                fertilizers:
-                  cropData.crop_asset_chemical_usage_details
-                    ?.filter((c) => c.chemical_type_id === 1)
-                    .map((f) => ({
-                      chemical_name: f.chemical_name || "",
-                      qty: typeof f.qty === "number" ? f.qty : "",
-                      qty_unit: f.qty_unit || "",
-                      remarks: f.remarks || "",
-                    })) || [],
-                pesticides:
-                  cropData.crop_asset_chemical_usage_details
-                    ?.filter((c) => c.chemical_type_id === 2)
-                    .map((p) => ({
-                      chemical_name: p.chemical_name || "",
-                      qty: typeof p.qty === "number" ? p.qty : "",
-                      qty_unit: p.qty_unit || "",
-                      remarks: p.remarks || "",
-                    })) || [],
-              },
-            }}
-          />
-        );
+        return <PreviewSubmit data={previewData} />;
 
       default:
         return null;
     }
   };
+
+  console.log("Preview Data", previewData);
+  console.log("SelectedCrop", selectedCrop);
 
   return (
     <div>

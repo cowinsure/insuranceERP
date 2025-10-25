@@ -20,7 +20,10 @@ const History = ({ selectedCrop, value, onChange }: HistoryProps) => {
   const [formData, setFormData] = useState<Partial<PreviousSeasonHistory>>({
     immediate_previous_crop: initialData.immediate_previous_crop || "",
     last_year_crop_type_name: initialData.last_year_crop_type_name || "",
-    last_year_production: initialData.last_year_production || Number(""),
+    last_year_production:
+      initialData.last_year_production !== undefined
+        ? initialData.last_year_production
+        : undefined,
     sowing_date: initialData.sowing_date || "",
     harvest_date: initialData.harvest_date || "",
     seed_used_last_year: initialData.seed_used_last_year || "",
@@ -33,7 +36,10 @@ const History = ({ selectedCrop, value, onChange }: HistoryProps) => {
     setFormData({
       immediate_previous_crop: newData.immediate_previous_crop || "",
       last_year_crop_type_name: newData.last_year_crop_type_name || "",
-      last_year_production: newData.last_year_production || Number(""),
+      last_year_production:
+        newData.last_year_production !== undefined
+          ? newData.last_year_production
+          : undefined,
       sowing_date: newData.sowing_date || "",
       harvest_date: newData.harvest_date || "",
       seed_used_last_year: newData.seed_used_last_year || "",
@@ -44,7 +50,13 @@ const History = ({ selectedCrop, value, onChange }: HistoryProps) => {
   // Handle input changes and notify parent
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value: val } = e.target;
-    const updated = { ...formData, [name]: val };
+    const parsed =
+      name === "last_year_production"
+        ? val === ""
+          ? undefined
+          : Number(val)
+        : val;
+    const updated = { ...formData, [name]: parsed };
     setFormData(updated);
     onChange([updated]); // always send as array
   };
@@ -80,7 +92,7 @@ const History = ({ selectedCrop, value, onChange }: HistoryProps) => {
           label="Last Year Production (mound/33 decimal)"
           id="lastYearProduction"
           name="last_year_production"
-          value={formData.last_year_production || ""}
+          value={formData.last_year_production ?? ""}
           onChange={handleChange}
         />
 

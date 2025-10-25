@@ -171,18 +171,18 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import InputField from "@/components/InputField";
 
-interface ChemicalUsage {
+export interface ChemicalUsage {
   chemical_usage_id?: number;
   chemical_name: string;
-  qty: number | "" | undefined; // ✅ allow undefined from parent
-  qty_unit: string;
+  qty: number | "" | undefined; // local state allows ""
   remarks: string;
+  chemical_type_id?: number;
 }
 
 interface ChemicalsProps {
   value: {
-    fertilizers: ChemicalUsage[];
-    pesticides: ChemicalUsage[];
+    fertilizers: Partial<ChemicalUsage>[];
+    pesticides: Partial<ChemicalUsage>[];
   };
   onChange: (data: {
     fertilizers: ChemicalUsage[];
@@ -192,34 +192,59 @@ interface ChemicalsProps {
 
 const Chemicals = ({ value, onChange }: ChemicalsProps) => {
   const [fertilizers, setFertilizers] = useState<ChemicalUsage[]>(
-    value.fertilizers || []
+    value?.fertilizers.map((f) => ({
+      ...f,
+      qty: f.qty ?? "",
+      chemical_name: f.chemical_name || "",
+      remarks: f.remarks || "",
+    })) || []
   );
+
   const [pesticides, setPesticides] = useState<ChemicalUsage[]>(
-    value.pesticides || []
+    value?.pesticides.map((p) => ({
+      ...p,
+      qty: p.qty ?? "",
+      chemical_name: p.chemical_name || "",
+      remarks: p.remarks || "",
+    })) || []
   );
+
   const [removing, setRemoving] = useState<number | null>(null);
 
   // Sync with parent value
   useEffect(() => {
-    setFertilizers(value.fertilizers || []);
-    setPesticides(value.pesticides || []);
+    setFertilizers(
+      value?.fertilizers.map((f) => ({
+        ...f,
+        qty: f.qty ?? "",
+        chemical_name: f.chemical_name || "",
+        remarks: f.remarks || "",
+      })) || []
+    );
+    setPesticides(
+      value?.pesticides.map((p) => ({
+        ...p,
+        qty: p.qty ?? "",
+        chemical_name: p.chemical_name || "",
+        remarks: p.remarks || "",
+      })) || []
+    );
   }, [value]);
 
   const addField = (type: "fertilizer" | "pesticide") => {
     const newField: ChemicalUsage = {
       chemical_name: "",
       qty: "",
-      qty_unit: "",
       remarks: "",
     };
     if (type === "fertilizer") {
       const updated = [...fertilizers, newField];
       setFertilizers(updated);
-      onChange({ fertilizers: updated, pesticides });
+      notifyParent(updated, pesticides);
     } else {
       const updated = [...pesticides, newField];
       setPesticides(updated);
-      onChange({ fertilizers, pesticides: updated });
+      notifyParent(fertilizers, updated);
     }
   };
 
@@ -229,11 +254,11 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
       if (type === "fertilizer") {
         const updated = fertilizers.filter((_, i) => i !== index);
         setFertilizers(updated);
-        onChange({ fertilizers: updated, pesticides });
+        notifyParent(updated, pesticides);
       } else {
         const updated = pesticides.filter((_, i) => i !== index);
         setPesticides(updated);
-        onChange({ fertilizers, pesticides: updated });
+        notifyParent(fertilizers, updated);
       }
       setRemoving(null);
     }, 300);
@@ -246,14 +271,46 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
     valueInput: string | number
   ) => {
     const list = type === "fertilizer" ? [...fertilizers] : [...pesticides];
-    list[index] = { ...list[index], [field]: valueInput };
-    if (type === "fertilizer") {
-      setFertilizers(list);
-      onChange({ fertilizers: list, pesticides });
-    } else {
-      setPesticides(list);
-      onChange({ fertilizers, pesticides: list });
-    }
+
+    const parsedValue =
+      field === "qty"
+        ? valueInput === "" || valueInput === undefined
+          ? "" // keep local empty
+          : typeof valueInput === "number"
+          ? valueInput
+          : Number(valueInput)
+        : valueInput;
+
+    list[index] = { ...list[index], [field]: parsedValue };
+
+    if (type === "fertilizer") setFertilizers(list);
+    else setPesticides(list);
+
+    notifyParent(
+      type === "fertilizer" ? list : fertilizers,
+      type === "pesticide" ? list : pesticides
+    );
+  };
+
+  // ✅ Always add qty_unit: "kg" when sending to parent
+  const notifyParent = (
+    fertList: ChemicalUsage[],
+    pestList: ChemicalUsage[]
+  ) => {
+    const sanitizedFertilizers = fertList.map((f) => ({
+      ...f,
+      qty: f.qty === "" ? undefined : f.qty,
+      qty_unit: "kg",
+    }));
+    const sanitizedPesticides = pestList.map((p) => ({
+      ...p,
+      qty: p.qty === "" ? undefined : p.qty,
+      qty_unit: "kg",
+    }));
+    onChange({
+      fertilizers: sanitizedFertilizers,
+      pesticides: sanitizedPesticides,
+    });
   };
 
   const renderFields = (type: "fertilizer" | "pesticide") => {
@@ -281,13 +338,12 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
               placeholder={`Enter ${type} name`}
             />
             <InputField
-              id={`${type}-unit-${index}`}
-              name="qty_unit"
-              value={item.qty_unit}
-              onChange={(e) =>
-                handleChange(index, type, "qty_unit", e.target.value)
-              }
-              placeholder="Unit (kg)"
+              id={`${type}-qty-${index}`}
+              name="qty"
+              type="number"
+              value={item.qty}
+              onChange={(e) => handleChange(index, type, "qty", e.target.value)}
+              placeholder="Quantity"
             />
             <button
               type="button"

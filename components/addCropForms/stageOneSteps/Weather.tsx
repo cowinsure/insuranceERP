@@ -213,7 +213,7 @@ const Weather = ({ value, onChange }: WeatherProps) => {
     }
     setSelectedWeatherEffects(updated);
 
-    // Update parent with first selected effect only
+    // Update parent with first selected effect only (keeps original UI/format)
     if (updated.length > 0) {
       const firstId = updated[0];
       const label = weatherOptions.find((w) => w.id === firstId)?.label || "";

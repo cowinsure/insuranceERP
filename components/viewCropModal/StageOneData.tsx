@@ -138,10 +138,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               data.crop_asset_pest_attack_details?.map(
                 (p: {
                   pest_attack_observations_type_name: any;
-                  attack_date: any;
+                  remarks: any;
                 }) => ({
-                  name: p.pest_attack_observations_type_name,
-                  quantity: p.attack_date || "",
+                  name: p.remarks,
                 })
               ) || []
             }
@@ -152,10 +151,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               data.crop_asset_disease_attack_details?.map(
                 (d: {
                   disease_attack_observations_type_name: any;
-                  attack_date: any;
+                  remarks: any;
                 }) => ({
-                  name: d.disease_attack_observations_type_name,
-                  quantity: d.attack_date || "",
+                  name: d.remarks,
                 })
               ) || []
             }
@@ -207,27 +205,30 @@ const ArrayDisplay = ({
 }: {
   title: string;
   items: { name: string; quantity: string }[];
-}) => (
-  <div>
-    <h3 className="font-medium mb-2 text-gray-600">{title}</h3>
-    {items && items.length > 0 ? (
-      <ul className="space-y-1">
-        {items.map((item, i) => (
-          <li
-            key={i}
-            className="text-sm bg-gray-50 border border-gray-200 p-2 rounded"
-          >
-            {item.name}{" "}
-            {item.quantity && (
-              <span className="text-gray-500">— {item.quantity}</span>
-            )}
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p className="text-gray-400 text-sm italic">No data</p>
-    )}
-  </div>
-);
+}) => {
+  console.log(title, items);
+  return (
+    <div>
+      <h3 className="font-medium mb-2 text-gray-600">{title}</h3>
+      {items && items.length > 0 ? (
+        <ul className="space-y-1">
+          {items.map((item, i) => (
+            <li
+              key={i}
+              className="text-sm bg-gray-50 border border-gray-200 p-2 rounded"
+            >
+              {item.name}{" "}
+              {item.quantity && (
+                <span className="text-gray-500">— {item.quantity}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-400 text-sm italic">No data</p>
+      )}
+    </div>
+  );
+};
 
 export default StageOneData;

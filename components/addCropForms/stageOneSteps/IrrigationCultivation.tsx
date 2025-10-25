@@ -88,7 +88,10 @@
 
 import { useState, useEffect } from "react";
 import DropdownField from "@/components/DropDownField";
-import { CropData, IrrigationCultivation as IrrigationCultivationType } from "@/components/model/crop/CropCoreModel";
+import {
+  CropData,
+  IrrigationCultivation as IrrigationCultivationType,
+} from "@/components/model/crop/CropCoreModel";
 
 interface IrrigationCultivationProps {
   selectedCrop: CropData;
@@ -105,20 +108,20 @@ const IrrigationCultivation = ({
   const initialData = value?.[0] || {};
 
   const [formData, setFormData] = useState<Partial<IrrigationCultivationType>>({
-    irrigation_facility_id: initialData.irrigation_facility_id || Number(""),
-    irrigation_source_id: initialData.irrigation_source_id || Number(""),
-    cultivation_system_id: initialData.cultivation_system_id || Number(""),
-    land_suitability_id: initialData.land_suitability_id || Number(""),
+    irrigation_facility_id: initialData.irrigation_facility_id,
+    irrigation_source_id: initialData.irrigation_source_id,
+    cultivation_system_id: initialData.cultivation_system_id,
+    land_suitability_id: initialData.land_suitability_id,
   });
 
   // Update form if parent value changes
   useEffect(() => {
     const newData = value?.[0] || {};
     setFormData({
-      irrigation_facility_id: newData.irrigation_facility_id || Number(""),
-      irrigation_source_id: newData.irrigation_source_id || Number(""),
-      cultivation_system_id: newData.cultivation_system_id || Number(""),
-      land_suitability_id: newData.land_suitability_id || Number(""),
+      irrigation_facility_id: newData.irrigation_facility_id,
+      irrigation_source_id: newData.irrigation_source_id,
+      cultivation_system_id: newData.cultivation_system_id,
+      land_suitability_id: newData.land_suitability_id,
     });
   }, [value]);
 
@@ -149,7 +152,11 @@ const IrrigationCultivation = ({
   /** 🔹 Update handler */
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value: val } = e.target;
-    const updated = { ...formData, [name]: val };
+    const parsed = val === "" ? undefined : Number(val);
+    const updated: Partial<IrrigationCultivationType> = {
+      ...formData,
+      [name]: parsed,
+    };
     setFormData(updated);
     onChange([updated]); // Send array with single object to parent
   };

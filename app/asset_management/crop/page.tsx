@@ -77,7 +77,9 @@ const CropsPage = () => {
 
     setSelectedCrop(viewCrop);
     setIsCropView(true);
+    console.log("View Crop",viewCrop)
   };
+
 
   // Flag for stage one complete
   const isStageOneCompleted = (cropId: number) => {
@@ -281,7 +283,10 @@ const CropsPage = () => {
           closeModal={() => setIsStageOneModal(false)}
           widthValue={"w-full min-w-sm md:max-w-xl"}
         >
-         <AddCropDetailsModal selectedCrop={selectedCrop!} />
+          <AddCropDetailsModal
+            selectedCrop={selectedCrop!}
+            onSuccess={fetchCropData}
+          />
         </GenericModal>
       )}
 

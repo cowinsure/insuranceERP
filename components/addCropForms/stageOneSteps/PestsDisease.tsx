@@ -239,101 +239,90 @@
 // Fresh start
 "use client";
 
+import useApi from "@/hooks/use_api";
 import { useEffect, useState } from "react";
 
-interface PestsDiseaseProps {
-  value: { pests: string[]; diseases: string[] };
-  onChange: (data: { pests: string[]; diseases: string[] }) => void;
+interface ObservationItem {
+  id: number;
+  label: string;
 }
 
-const pestOptions = [
-  {
-    label: "Stem Borer infestation (খোদরো পোকার আক্রমণ)",
-    name: "Stem Borer infestation (খোদরো পোকার আক্রমণ)",
-  },
-  {
-    label: "Leaf Folder attack (পাতা মড়ি পোকার আক্রমণ)",
-    name: "Leaf Folder attack (পাতা মড়ি পোকার আক্রমণ)",
-  },
-  {
-    label: "Brown Planthopper (BPH) infestation (বাদামী গাছফড়িং আক্রমণ)",
-    name: "Brown Planthopper (BPH) infestation (বাদামী গাছফড়িং আক্রমণ)",
-  },
-  {
-    label: "Green Leafhopper (GLH) infestation (সবুজ গাছফড়িং আক্রমণ)",
-    name: "Green Leafhopper (GLH) infestation (সবুজ গাছফড়িং আক্রমণ)",
-  },
-  { label: "Stink Bug (গন্ধি পোকা)", name: "Stink Bug (গন্ধি পোকা)" },
-  {
-    label: "Others - Please Specify (অন্যান্য)",
-    name: "Others - Please Specify (অন্যান্য)",
-  },
-  {
-    label: "None of the above (উপরের কোনোটিই নয়)",
-    name: "None of the above (উপরের কোনোটিই নয়)",
-  },
-];
-
-const diseaseOptions = [
-  {
-    label: "Leaf blast disease (পাতার পোড়া রোগ (ব্লাস্ট))",
-    name: "Leaf blast disease (পাতার পোড়া রোগ (ব্লাস্ট))",
-  },
-  {
-    label: "Bacterial leaf blight (পাতার কলাপচলা রোগ)",
-    name: "Bacterial leaf blight (পাতার কলাপচলা রোগ)",
-  },
-  {
-    label: "Sheath blight disease (পাতার গোড়ার পচা রোগ)",
-    name: "Sheath blight disease (পাতার গোড়ার পচা রোগ)",
-  },
-  {
-    label: "Bakanae disease (বাকানাই রোগ)",
-    name: "Bakanae disease (বাকানাই রোগ)",
-  },
-  {
-    label: "Brown spot disease (বাদামী দাগা রোগ)",
-    name: "Brown spot disease (বাদামী দাগা রোগ)",
-  },
-  {
-    label: "Leaf Scald (পাতার স্ক্যাল্ড রোগ)",
-    name: "Leaf Scald (পাতার স্ক্যাল্ড রোগ)",
-  },
-  { label: "Hispa (হিস্পা পোকার)", name: "Hispa (হিস্পা পোকার)" },
-  {
-    label: "Tungro Virus Disease (ধানের টুংগ্রো ভাইরাস রোগ)",
-    name: "Tungro Virus Disease (ধানের টুংগ্রো ভাইরাস রোগ)",
-  },
-  {
-    label: "None of the above (উপরের কোনোটিই নয়)",
-    name: "None of the above (উপরের কোনোটিই নয়)",
-  },
-];
+interface PestsDiseaseProps {
+  value: {
+    pests: ObservationItem[];
+    diseases: ObservationItem[];
+  };
+  onChange: (data: {
+    pests: ObservationItem[];
+    diseases: ObservationItem[];
+  }) => void;
+}
 
 const PestsDisease = ({ value, onChange }: PestsDiseaseProps) => {
-  const [selectedPests, setSelectedPests] = useState<string[]>(
-    value.pests.filter(Boolean)
-  );
-  const [selectedDiseases, setSelectedDiseases] = useState<string[]>(
-    value.diseases.filter(Boolean)
+  const { get } = useApi();
+  const [pestOptions, setPestOptions] = useState<ObservationItem[]>([]);
+  const [diseaseOptions, setDiseaseOptions] = useState<ObservationItem[]>([]);
+  const [selectedPests, setSelectedPests] = useState<ObservationItem[]>([]);
+  const [selectedDiseases, setSelectedDiseases] = useState<ObservationItem[]>(
+    []
   );
 
+  /** 🔄 Sync external values (useful when editing existing crop) */
   useEffect(() => {
-    setSelectedPests(value.pests.filter(Boolean));
-    setSelectedDiseases(value.diseases.filter(Boolean));
+    setSelectedPests(value?.pests || []);
+    setSelectedDiseases(value?.diseases || []);
   }, [value]);
 
-  const toggleSelection = (name: string, type: "pest" | "disease") => {
+  /** 🌐 Fetch pest and disease options from API */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [pestDataRes, diseaseDataRes] = await Promise.all([
+          get(
+            "/cms/crop-pest-attack-observations-type-service/?page_size=100&start_record=1"
+          ),
+          get(
+            "/cms/crop-disease-attack-observations-type-service/?page_size=100&start_record=1"
+          ),
+        ]);
+
+        // Correctly map API fields
+        const pestData =
+          pestDataRes?.data?.map((p: any) => ({
+            id: p.id, // fixed from undefined
+            label: p.pest_attack_observations_type_name,
+          })) || [];
+
+        const diseaseData =
+          diseaseDataRes?.data?.map((d: any) => ({
+            id: d.id, // fixed from undefined
+            label: d.disease_attack_observations_type_name,
+          })) || [];
+
+        setPestOptions(pestData);
+        setDiseaseOptions(diseaseData);
+      } catch (error) {
+        console.error("❌ Error fetching pest/disease options:", error);
+      }
+    };
+
+    fetchData();
+  }, [get]);
+
+  /** ✅ Toggle selection for pest or disease */
+  const toggleSelection = (item: ObservationItem, type: "pest" | "disease") => {
     if (type === "pest") {
-      const updated = selectedPests.includes(name)
-        ? selectedPests.filter((n) => n !== name)
-        : [...selectedPests, name];
+      const exists = selectedPests.some((p) => p.id === item.id);
+      const updated = exists
+        ? selectedPests.filter((p) => p.id !== item.id)
+        : [...selectedPests, item];
       setSelectedPests(updated);
       onChange({ pests: updated, diseases: selectedDiseases });
     } else {
-      const updated = selectedDiseases.includes(name)
-        ? selectedDiseases.filter((n) => n !== name)
-        : [...selectedDiseases, name];
+      const exists = selectedDiseases.some((d) => d.id === item.id);
+      const updated = exists
+        ? selectedDiseases.filter((d) => d.id !== item.id)
+        : [...selectedDiseases, item];
       setSelectedDiseases(updated);
       onChange({ pests: selectedPests, diseases: updated });
     }
@@ -342,55 +331,65 @@ const PestsDisease = ({ value, onChange }: PestsDiseaseProps) => {
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 underline text-center">
-        Pest & Disease Observations
+        <span className="font-bold">Pest & Disease Observations</span>
       </h2>
 
       <div className="max-h-[500px] overflow-auto space-y-6">
-        {/* Pest Section */}
+        {/* 🐛 Pest Section */}
         <div className="space-y-4 bg-gray-50 p-4 border rounded-lg">
           <h3 className="text-base font-semibold">
-            Pest Attack Observations{" "}
+            <span className="font-bold">Pest Attack Observations</span>{" "}
             <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
+
+          {pestOptions.length === 0 && (
+            <p className="text-sm text-gray-400">Loading pest options...</p>
+          )}
+
           {pestOptions.map((item) => (
-            <div key={item.name} className="flex items-start gap-2">
+            <div key={item.id} className="flex items-start gap-2">
               <input
                 type="checkbox"
-                id={item.name}
-                checked={selectedPests.includes(item.name)}
-                onChange={() => toggleSelection(item.name, "pest")}
-                className="mt-1 custom-checkbox cursor-pointer"
+                id={`pest-${item.id}`}
+                checked={selectedPests.some((p) => p.id === item.id)}
+                onChange={() => toggleSelection(item, "pest")}
+                className="mt-1 cursor-pointer accent-blue-600 custom-checkbox"
               />
               <label
-                htmlFor={item.name}
-                className="flex flex-col text-gray-700 cursor-pointer"
+                htmlFor={`pest-${item.id}`}
+                className="text-gray-700 cursor-pointer"
               >
-                <span className="font-semibold text-[15px]">{item.label}</span>
+                {item.label}
               </label>
             </div>
           ))}
         </div>
 
-        {/* Disease Section */}
+        {/* 🦠 Disease Section */}
         <div className="space-y-4 bg-gray-50 p-4 border rounded-lg">
           <h3 className="text-base font-semibold">
-            Disease Attack Observations{" "}
+            <span className="font-bold">Disease Attack Observations</span>{" "}
             <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
+
+          {diseaseOptions.length === 0 && (
+            <p className="text-sm text-gray-400">Loading disease options...</p>
+          )}
+
           {diseaseOptions.map((item) => (
-            <div key={item.name} className="flex items-start gap-2">
+            <div key={item.id} className="flex items-start gap-2">
               <input
                 type="checkbox"
-                id={item.name}
-                checked={selectedDiseases.includes(item.name)}
-                onChange={() => toggleSelection(item.name, "disease")}
-                className="mt-1 custom-checkbox cursor-pointer"
+                id={`disease-${item.id}`}
+                checked={selectedDiseases.some((d) => d.id === item.id)}
+                onChange={() => toggleSelection(item, "disease")}
+                className="mt-1 cursor-pointer accent-green-600 custom-checkbox"
               />
               <label
-                htmlFor={item.name}
-                className="flex flex-col text-gray-700 cursor-pointer"
+                htmlFor={`disease-${item.id}`}
+                className="text-gray-700 cursor-pointer"
               >
-                <span className="font-semibold text-[15px]">{item.label}</span>
+                {item.label}
               </label>
             </div>
           ))}

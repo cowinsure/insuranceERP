@@ -471,7 +471,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       toast({
         title: "Generation failed",
         description: "Failed to generate plot. Please try again.",
-        variant: "destructive",
+        variant: "default",
       });
     } finally {
       setIsGenerating(false);

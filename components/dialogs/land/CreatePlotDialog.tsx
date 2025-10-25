@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -69,7 +69,8 @@ interface CreatePlotDialogProps {
 
 interface FarmerProfile {
   user_id: string | number
-  farmer_name: string
+  farmer_name: string,
+  mobile_number: string
 }
 
 export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePlotDialogProps) {
@@ -124,7 +125,47 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [farmers, setFarmers] = useState<FarmerProfile[]>([])
   const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null)
   const [farmersLoading, setFarmersLoading] = useState(false)
+  const [farmerQuery, setFarmerQuery] = useState("")
+  const [comboboxOpen, setComboboxOpen] = useState(false)
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1)
   const [showResults, setShowResults] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  const filteredFarmers = useMemo(() => {
+    const q = farmerQuery.trim().toLowerCase()
+    if (!q) return farmers
+    return farmers.filter((f) =>
+      String(f.user_id).toLowerCase().includes(q) ||
+      f.farmer_name.toLowerCase().includes(q) ||
+      f.mobile_number.toLowerCase().includes(q)
+    )
+  }, [farmers, farmerQuery])
+
+  useEffect(() => {
+    // reset focused index when query changes
+    setFocusedIndex(filteredFarmers.length > 0 ? 0 : -1)
+  }, [farmerQuery, filteredFarmers.length])
+
+  useEffect(() => {
+    if (!comboboxOpen) setFocusedIndex(-1)
+  }, [comboboxOpen])
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setComboboxOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", onDocClick)
+    return () => document.removeEventListener("mousedown", onDocClick)
+  }, [])
+
+  function selectFarmer(f: FarmerProfile) {
+    setSelectedFarmerId(String(f.user_id))
+    setFarmerQuery(`${f.farmer_name} - ${f.mobile_number}`)
+    setComboboxOpen(false)
+  }
   const [plotData, setPlotData] = useState<PlotData | null>(null)
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [watchId, setWatchId] = useState<number | null>(null);
@@ -296,7 +337,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       toast({
         title: "Land name required",
         description: "Please enter a name for your land plot.",
-        variant: "destructive",
+        variant: "default",
       })
       return
     }
@@ -305,7 +346,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       toast({
         title: "Invalid coordinates",
         description: "Please check that all coordinates are valid (lat: -90 to 90, lng: -180 to 180).",
-        variant: "destructive",
+        variant: "default",
       })
       return
     }
@@ -347,7 +388,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         toast({
           title: "Generation failed",
           description: errorMsg,
-          variant: "destructive",
+          variant: "default",
         });
         setIsGenerating(false);
         return;
@@ -565,12 +606,12 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
           } else {
             // API returned a failure status - resp.message may contain reason
             const errMsg = resp?.message || 'Failed to save land'
-            toast({ title: 'Save failed', description: errMsg, variant: 'destructive' })
+            toast({ title: 'Save failed', description: errMsg, variant: 'default' })
           }
         } catch (err: any) {
           console.error('Error saving land submission:', err)
           const msg = err?.message || 'Network or server error while saving land'
-          toast({ title: 'Save failed', description: msg, variant: 'destructive' })
+          toast({ title: 'Save failed', description: msg, variant: 'default' })
         }
       }
     }
@@ -658,19 +699,66 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 {/* Farmer selector (optional) */}
                 <div className="space-y-2">
                   <Label htmlFor="plotFarmer">Farmer</Label>
-                  <Select value={selectedFarmerId ?? "none"} onValueChange={(val: string) => setSelectedFarmerId(val === "none" ? null : val)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={farmersLoading ? "Loading farmers..." : "Select a farmer (optional)"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {farmers.map((f) => (
-                        <SelectItem key={String(f.user_id)} value={String(f.user_id)}>
-                          {f.farmer_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative" ref={containerRef}>
+                    {/* Combobox input (acts like trigger) */}
+                    <Input
+                      id="plotFarmer"
+                      placeholder={farmersLoading ? "Loading farmers..." : "Search or select a farmer "}
+                      value={farmerQuery}
+                      onChange={(e) => {
+                        setFarmerQuery(e.target.value)
+                        setComboboxOpen(true)
+                      }}
+                      onFocus={() => setComboboxOpen(true)}
+                      onKeyDown={(e) => {
+                        const filtered = filteredFarmers
+                        if (e.key === "ArrowDown") {
+                          e.preventDefault()
+                          setFocusedIndex((i) => Math.min(i + 1, filtered.length - 1))
+                        } else if (e.key === "ArrowUp") {
+                          e.preventDefault()
+                          setFocusedIndex((i) => Math.max(i - 1, 0))
+                        } else if (e.key === "Enter") {
+                          e.preventDefault()
+                          if (filtered.length > 0 && focusedIndex >= 0) {
+                            const f = filtered[focusedIndex]
+                            if (f) selectFarmer(f)
+                          } else if (filtered.length === 1) {
+                            selectFarmer(filtered[0])
+                          }
+                        } else if (e.key === "Escape") {
+                          setComboboxOpen(false)
+                        }
+                      }}
+                    />
+
+                    {/* Dropdown list */}
+                    <div
+                      className={`absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-auto ${comboboxOpen ? "block" : "hidden"}`}
+                    >
+                      <div className="p-2 text-sm text-muted-foreground">Search results</div>
+                      <div className="divide-y">
+                        {filteredFarmers.length === 0 ? (
+                          <div className="p-2 text-sm">No results</div>
+                        ) : (
+                          filteredFarmers.map((f, idx) => (
+                            <div
+                              key={String(f.user_id)}
+                              role="option"
+                              aria-selected={selectedFarmerId === String(f.user_id)}
+                              className={`px-3 py-2 cursor-pointer hover:bg-accent/20 ${idx === focusedIndex ? "bg-accent/25" : ""}`}
+                              onMouseEnter={() => setFocusedIndex(idx)}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => selectFarmer(f)}
+                            >
+                              <div className="font-medium">{f.farmer_name}</div>
+                              <div className="text-xs text-muted-foreground">{f.mobile_number}</div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Land Description */}

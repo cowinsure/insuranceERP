@@ -5,11 +5,11 @@ interface DropdownFieldProps {
   label: string;
   id: string;
   name: string;
-  value: string;
+  value: string | number;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   required?: boolean;
   disabled?: boolean;
-  options: { value: string; label: string }[]; // Array of options, each with a value and label
+  options: { value: string | number; label: string }[]; // Array of options, each with a value and label
   error?: string;
 }
 
@@ -45,8 +45,8 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
           )}
         >
           <option value="">Select</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
+          {options.map((option, idx) => (
+            <option key={idx} value={option.value}>
               {option.label}
             </option>
           ))}

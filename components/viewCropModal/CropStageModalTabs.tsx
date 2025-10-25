@@ -1,10 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GiPlantRoots } from "react-icons/gi";
 import { PiCalendar, PiPlantDuotone } from "react-icons/pi";
 import StageOneData from "./StageOneData";
 import StageTwoData from "./StageTwoData";
 import { LandPlot } from "lucide-react";
+import useApi from "@/hooks/use_api";
+import { toast } from "sonner";
+import { SeedDetails } from "../model/crop/CropCoreModel";
 
 interface CropStageModalTabsProps {
   stageOneData: any;
@@ -15,7 +18,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   stageOneData,
   stageTwoData,
 }) => {
+  const { get } = useApi();
   const [activeTab, setActiveTab] = useState("stage1");
+  const [landName, setLandName] = useState<SeedDetails>();
 
   const tabs = ["stage1", "stage2"];
   const numTabs = tabs.length;
@@ -30,11 +35,38 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
       case "stage1":
         return <StageOneData data={stageOneData} />;
       case "stage2":
-        return <StageTwoData data={stageTwoData} />;
+        return <StageTwoData cropId={stageTwoData} />;
       default:
         return null;
     }
   };
+  console.log(stageTwoData);
+
+  // Finding land according to the selected crop
+  if (stageOneData.land_id) {
+    useEffect(() => {
+      const getLandData = async () => {
+        try {
+          const response = await get("/lams/land-info-service", {
+            params: { start_record: 1, page_size: 10 },
+          });
+          // console.log(response);
+
+          if (response.status === "success") {
+            const data = response.data;
+            const findName = data.find(
+              (land: { land_id: any }) => land.land_id === stageOneData.land_id
+            );
+            setLandName(findName);
+          }
+        } catch (error) {
+          toast.error(`${error}`);
+        }
+      };
+      getLandData();
+    }, []);
+  }
+
   console.log(stageOneData);
   return (
     <div className="p-3 md:p-4 text-gray-800">
@@ -54,7 +86,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Crop</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.crop_name || "N/A"}
+                {stageOneData.crop_asset_seed_details[0].crop_name || "N/A"}
               </p>
             </div>
           </div>
@@ -67,7 +99,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Variety</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.variety || "N/A"}
+                {stageOneData.crop_asset_seed_details[0].seed_variety || "N/A"}
               </p>
             </div>
           </div>
@@ -80,7 +112,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Plantation Date</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.plantation_date || "N/A"}
+                {stageOneData.planting_date || "N/A"}
               </p>
             </div>
           </div>
@@ -93,7 +125,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Land</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.land || "N/A"}
+                {landName?.land_name || "N/A"}
               </p>
             </div>
           </div>

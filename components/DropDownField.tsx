@@ -6,7 +6,7 @@ interface DropdownFieldProps {
   id: string;
   name: string;
   value: string | number;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   required?: boolean;
   disabled?: boolean;
   options: { value: string | number; label: string }[]; // Array of options, each with a value and label

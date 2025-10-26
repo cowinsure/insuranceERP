@@ -252,7 +252,7 @@ import PreviewSubmit from "../PreviewForm";
 import Harvest from "./stageTwoSteps/Harvest";
 import Observation from "./stageTwoSteps/Observation";
 import Weather from "./stageTwoSteps/Weather";
-import { CropData } from "../model/crop/CropCoreModel";
+import { CropData } from "../model/crop/CropGetModel";
 import PestsDisease from "./stageTwoSteps/PestsDisease";
 import { toast, Toaster } from "sonner";
 

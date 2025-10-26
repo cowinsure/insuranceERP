@@ -131,81 +131,52 @@
 // Fresh Start
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
-import { CropAssetWeatherEffectHistory as CropAssetWeatherEffectHistory } from "@/components/model/crop/CropCoreModel";
+import useApi from "@/hooks/use_api";
 
 interface WeatherProps {
-  value: Partial<CropAssetWeatherEffectHistory>; // single object from parent
-  onChange: (data: Partial<CropAssetWeatherEffectHistory>) => void;
+  data: any;
+  onChange: (updatedData: any) => void;
 }
 
-const Weather = ({ value, onChange }: WeatherProps) => {
-  // 🔹 Initial data
-  const initialData = value || {};
+interface WeatherOption {
+  id: number;
+  weather_effect_type_name: string;
+  desc?: string;
+}
 
-  const weatherOptions = [
-    { id: 1, label: "Flood", desc: "Floods cause full or partial damage." },
-    {
-      id: 2,
-      label: "Drought",
-      desc: "Some plants dry up prematurely or lodge down.",
-    },
-    {
-      id: 3,
-      label: "Excess Rainfall",
-      desc: "Some plants dry up prematurely or lodge down.",
-    },
-    {
-      id: 4,
-      label: "Storms",
-      desc: "Storms cause crop lodging or destruction.",
-    },
-    {
-      id: 5,
-      label: "Hailstorm",
-      desc: "Hailstorms cause physical damage to grains or panicles.",
-    },
-  ];
+const Weather = ({ data, onChange }: WeatherProps) => {
+  const { get } = useApi();
+  const [weatherOptions, setWeatherOptions] = useState<WeatherOption[]>([]);
 
-  // 🔹 Local form state
-  const [formData, setFormData] = useState<
-    Partial<CropAssetWeatherEffectHistory>
-  >({
-    weather_effect_type_id: initialData.weather_effect_type_id,
-    weather_effect_type_name: initialData.weather_effect_type_name || "",
-    period_from: initialData.period_from || "",
-    period_to: initialData.period_to || "",
-    remarks: initialData.remarks || "",
-  });
-
-  // 🔹 Selected weather effects (ids)
+  // selected checkboxes ids
   const [selectedWeatherEffects, setSelectedWeatherEffects] = useState<
     number[]
-  >(
-    initialData.weather_effect_type_id
-      ? [initialData.weather_effect_type_id]
-      : []
-  );
+  >(data.weather_effects?.map((w: any) => w.weather_effect_type_id) || []);
 
-  // 🔹 Sync with parent value when it changes
+  // Fetch weather options from API
   useEffect(() => {
-    const data = value || {};
-    setFormData({
-      weather_effect_type_id: data.weather_effect_type_id,
-      weather_effect_type_name: data.weather_effect_type_name || "",
-      period_from: data.period_from || "",
-      period_to: data.period_to || "",
-      remarks: data.remarks || "",
-    });
-    setSelectedWeatherEffects(
-      data.weather_effect_type_id ? [data.weather_effect_type_id] : []
-    );
-  }, [value]);
-
-  // 🔹 Handle checkbox toggle
+    const fetchWeatherOptions = async () => {
+      try {
+        const response = await get(
+          "/cms/crop-adverse-weather-effect-type-service/",
+          {
+            params: { page_size: 10, start_record: 1 },
+          }
+        );
+        if (response.status === "success") {
+          setWeatherOptions(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch weather options", err);
+      }
+    };
+    fetchWeatherOptions();
+  }, []);
+console.log(weatherOptions)
   const handleCheckboxChange = (id: number) => {
-    let updated: number[];
+    let updated: number[] = [];
     if (selectedWeatherEffects.includes(id)) {
       updated = selectedWeatherEffects.filter((w) => w !== id);
     } else {
@@ -213,34 +184,21 @@ const Weather = ({ value, onChange }: WeatherProps) => {
     }
     setSelectedWeatherEffects(updated);
 
-    // Update parent with first selected effect only (keeps original UI/format)
-    if (updated.length > 0) {
-      const firstId = updated[0];
-      const label = weatherOptions.find((w) => w.id === firstId)?.label || "";
-      const newData = {
-        ...formData,
-        weather_effect_type_id: firstId,
-        weather_effect_type_name: label,
-      };
-      setFormData(newData);
-      onChange(newData);
-    } else {
-      const newData = {
-        ...formData,
-        weather_effect_type_id: undefined,
-        weather_effect_type_name: "",
-      };
-      setFormData(newData);
-      onChange(newData);
-    }
+    // Update parent data as an array of objects for API
+    const updatedData = {
+      ...data,
+      weather_effects: updated.map((weather_effect_type_id) => ({
+        weather_effect_type_id,
+        remarks: "",
+        is_active: true,
+      })),
+    };
+    onChange(updatedData);
   };
 
-  // 🔹 Handle input change (period & remarks)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const newData = { ...formData, [name]: value };
-    setFormData(newData);
-    onChange(newData);
+    onChange({ ...data, [name]: value });
   };
 
   return (
@@ -257,7 +215,6 @@ const Weather = ({ value, onChange }: WeatherProps) => {
             <input
               type="checkbox"
               id={`weather_${w.id}`}
-              name="weather_effect"
               checked={selectedWeatherEffects.includes(w.id)}
               onChange={() => handleCheckboxChange(w.id)}
               className="mt-1 accent-green-600 custom-checkbox"
@@ -266,8 +223,10 @@ const Weather = ({ value, onChange }: WeatherProps) => {
               htmlFor={`weather_${w.id}`}
               className="flex flex-col cursor-pointer"
             >
-              <strong className="text-[15px] text-gray-700">{w.label}</strong>
-              <span className="text-gray-400 text-sm">{w.desc}</span>
+              <strong className="text-[15px] text-gray-700">{w.weather_effect_type_name}</strong>
+              {w.desc && (
+                <span className="text-gray-400 text-sm">{w.desc}</span>
+              )}
             </label>
           </div>
         ))}
@@ -282,7 +241,7 @@ const Weather = ({ value, onChange }: WeatherProps) => {
             id="period_from"
             name="period_from"
             type="date"
-            value={formData.period_from || ""}
+            value={data.period_from || ""}
             onChange={handleChange}
           />
           <InputField
@@ -290,7 +249,7 @@ const Weather = ({ value, onChange }: WeatherProps) => {
             id="period_to"
             name="period_to"
             type="date"
-            value={formData.period_to || ""}
+            value={data.period_to || ""}
             onChange={handleChange}
           />
         </div>
@@ -303,7 +262,7 @@ const Weather = ({ value, onChange }: WeatherProps) => {
         name="remarks"
         type="text"
         placeholder="Add remarks if any"
-        value={formData.remarks || ""}
+        value={data.remarks || ""}
         onChange={handleChange}
       />
     </form>

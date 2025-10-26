@@ -9,7 +9,7 @@ interface InputFieldProps {
   type?: string;
   id: string;
   name: string;
-  value: string | number | undefined;
+  value?: string | number | undefined;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;

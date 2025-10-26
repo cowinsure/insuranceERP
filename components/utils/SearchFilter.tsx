@@ -30,17 +30,26 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     setQuery(input);
-
+  
     const filtered = data.filter((item) =>
-      searchKeys.some((key) =>
-        item[key]?.toString().toLowerCase().includes(input.toLowerCase())
-      )
+      searchKeys.some((key) => {
+        const keys = key.split("."); // handle nested keys
+        let value: any = item;
+        for (const k of keys) {
+          if (Array.isArray(value)) {
+            value = value[0]; // take first element if array
+          }
+          value = value?.[k];
+        }
+        return value?.toString().toLowerCase().includes(input.toLowerCase());
+      })
     );
-
+  
     setFilteredData(filtered);
     setResultCount(filtered.length);
     setNoResults(input.trim().length > 0 && filtered.length === 0);
   };
+  
 
   const clearSearch = () => {
     setQuery("");

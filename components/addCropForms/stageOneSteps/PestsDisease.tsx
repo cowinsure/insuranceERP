@@ -245,7 +245,12 @@ import useApi from "@/hooks/use_api";
 
 interface PestsDiseaseProps {
   data: { pestIds?: number[]; diseaseIds?: number[] };
-  onChange: (pestIds: number[], diseaseIds: number[]) => void;
+  onChange: (
+    pestIds: number[],
+    diseaseIds: number[],
+    pestDetails?: { id: number; name: string }[],
+    diseaseDetails?: { id: number; name: string }[]
+  ) => void;
 }
 
 const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
@@ -306,23 +311,37 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     fetchOptions();
   }, [get]);
 
+  // Selecte pest
   const togglePest = (id: number) => {
     const updated = selectedPests.includes(id)
       ? selectedPests.filter((i) => i !== id)
       : [...selectedPests, id];
-    setSelectedPests(updated);
-    onChange(updated, selectedDiseases);
-  };
-  console.log(selectedPests)
 
+    setSelectedPests(updated);
+
+    const pestDetails = pestOptions.filter((p) => updated.includes(p.id));
+    const diseaseDetails = diseaseOptions.filter((d) =>
+      selectedDiseases.includes(d.id)
+    );
+
+    onChange(updated, selectedDiseases, pestDetails, diseaseDetails);
+  };
+
+  // Select disease
   const toggleDisease = (id: number) => {
     const updated = selectedDiseases.includes(id)
       ? selectedDiseases.filter((i) => i !== id)
       : [...selectedDiseases, id];
+
     setSelectedDiseases(updated);
-    onChange(selectedPests, updated);
+
+    const pestDetails = pestOptions.filter((p) => selectedPests.includes(p.id));
+    const diseaseDetails = diseaseOptions.filter((d) => updated.includes(d.id));
+
+    onChange(selectedPests, updated, pestDetails, diseaseDetails);
   };
 
+  console.log(selectedDiseases);
   return (
     <div className="p-3">
       <h2 className="text-xl font-semibold mb-5 underline text-center">

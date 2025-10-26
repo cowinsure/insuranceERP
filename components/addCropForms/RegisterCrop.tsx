@@ -96,7 +96,7 @@ interface RegisterCropProps {
   closeModal?: () => void;
 }
 
-interface LandData {
+export interface LandData {
   land_name: string;
   land_id: number;
   farmer_name?: string;

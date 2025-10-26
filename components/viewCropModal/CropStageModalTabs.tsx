@@ -4,10 +4,11 @@ import { GiPlantRoots } from "react-icons/gi";
 import { PiCalendar, PiPlantDuotone } from "react-icons/pi";
 import StageOneData from "./StageOneData";
 import StageTwoData from "./StageTwoData";
-import { LandPlot } from "lucide-react";
+import { LandPlot, User } from "lucide-react";
 import useApi from "@/hooks/use_api";
 import { toast } from "sonner";
 import { CropAssetSeedDetails } from "../model/crop/CropGetModel";
+import { IoMdKeypad } from "react-icons/io";
 
 interface CropStageModalTabsProps {
   stageOneData: any;
@@ -83,17 +84,17 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   return (
     <div className="p-3 text-gray-800">
       {/* Master Details */}
-      <div className="bg-white max-h-[80vh] overflow-y-auto mb-7">
+      <div className="bg-white min-h-[30vh] overflow-y-auto mb-7">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
           Crop Details
         </h2>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {/* Crop Name */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-green-100 text-green-700 rounded-full">
-              <GiPlantRoots className="text-xl" />
+              <GiPlantRoots className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Crop</p>
@@ -104,9 +105,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           </div>
 
           {/* Variety */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-blue-100 text-blue-700 rounded-full">
-              <PiPlantDuotone className="text-xl" />
+              <PiPlantDuotone className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Variety</p>
@@ -119,9 +120,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           </div>
 
           {/* Plantation Date */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-amber-100 text-amber-700 rounded-full">
-              <PiCalendar className="text-xl" />
+              <PiCalendar className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Plantation Date</p>
@@ -132,14 +133,40 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           </div>
 
           {/* Land Information */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-yellow-100 text-yellow-600 rounded-full">
-              <LandPlot />
+              <LandPlot className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Land</p>
               <p className="font-medium text-gray-800">
                 {landInfo?.land_name || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Farmer name */}
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
+            <span className="p-2 bg-pink-100 text-pink-600 rounded-full">
+              <User className="text-3xl"/>
+            </span>
+            <div>
+              <p className="text-sm text-gray-500">Farmer Name</p>
+              <p className="font-medium text-gray-800">
+                {landInfo?.farmer_name || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Farmer mobile*/}
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
+            <span className="p-2 bg-purple-100 text-purple-600 rounded-full">
+              <IoMdKeypad className="text-2xl"/>
+            </span>
+            <div>
+              <p className="text-sm text-gray-500">Farmer Mobile</p>
+              <p className="font-medium text-gray-800">
+                {landInfo?.mobile_number || "N/A"}
               </p>
             </div>
           </div>

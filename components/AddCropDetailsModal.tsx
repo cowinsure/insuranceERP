@@ -275,7 +275,7 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
-
+  console.log("Data", cropData);
   return (
     <div>
       <div className="bg-white rounded-xl mb-4">

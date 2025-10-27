@@ -19,12 +19,18 @@ const truncate = (text: string, limit = 60) => {
 };
 
 const renderRow = (label: string, value: any) => (
+  <div className="flex justify-between items-center border-b border-gray-100 p-2 text-sm">
+    <span className="font-medium text-gray-600">{label}</span>
+    <span className="text-gray-800 font-semibold" title={String(value || "—")}>
+      {value || <span className="text-gray-400">—</span>}
+    </span>
+  </div>
+);
+
+const renderRowPestDisease = (label: string, value: any) => (
   <div className="flex justify-start items-center border-b border-gray-100 p-2 text-sm">
-    <span className="font-semibold text-gray-600">{label}</span>
-    <span
-      className="text-gray-800 "
-      title={String(value || "—")}
-    >
+    <span className="font-medium text-gray-600">{label}</span>
+    <span className="text-gray-800 font-semibold" title={String(value || "—")}>
       {value || <span className="text-gray-400">—</span>}
     </span>
   </div>
@@ -36,16 +42,22 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
 
   // Lookup tables
   const [seedVarieties, setSeedVarieties] = useState<LookupMap>({});
-  const [irrigationFacilities, setIrrigationFacilities] = useState<LookupMap>({});
+  const [irrigationFacilities, setIrrigationFacilities] = useState<LookupMap>(
+    {}
+  );
   const [cultivationSystems, setCultivationSystems] = useState<LookupMap>({});
   const [landSuitability, setLandSuitability] = useState<LookupMap>({});
   const [weatherEffects, setWeatherEffects] = useState<LookupMap>({});
 
-  const toMap = (arr: any[], key = "id", valueKey = "name") =>
-    arr.reduce((acc: any, cur: any) => {
-      acc[cur[key]] = cur[valueKey];
-      return acc;
-    }, {});
+  const toMap = (arr: any[], key: string, label: string) =>
+    Array.isArray(arr)
+      ? arr.reduce((acc, cur) => {
+          if (cur && cur[key] !== undefined && cur[label] !== undefined) {
+            acc[cur[key]] = cur[label];
+          }
+          return acc;
+        }, {} as Record<string, string>)
+      : {};
 
   useEffect(() => {
     const fetchLookups = async () => {
@@ -56,16 +68,32 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
             get("/cms/crop-irrigation-facility-service"),
             get("/api/cms/get-asset-crop-cultivation-system"),
             get("/api/cms/get-asset-crop-land-suitability"),
-            get("/api/cms/crop-adverse-weather-effect-type-service/?page_size=100"),
+            get(
+              "/api/cms/crop-adverse-weather-effect-type-service/?page_size=100"
+            ),
           ]);
 
-        setSeedVarieties(toMap(varietyRes.data, "id", "variety_name"));
-        setIrrigationFacilities(toMap(irrigationRes.data, "id", "irrigation_facility_name"));
-        setCultivationSystems(toMap(cultivationRes.data, "id", "cultivation_system_name"));
-        setLandSuitability(toMap(landRes.data, "id", "land_suitability_name"));
-        setWeatherEffects(toMap(weatherRes.data, "id", "weather_effect_type_name"));
+        // ✅ FIX: most CMS endpoints return paginated objects with .results
+        const extract = (res: any) =>
+          Array.isArray(res?.data?.results) ? res.data.results : res.data;
+
+        const varietyData = extract(varietyRes);
+        const irrigationData = extract(irrigationRes);
+        const cultivationData = extract(cultivationRes);
+        const landData = extract(landRes);
+        const weatherData = extract(weatherRes);
+
+        setSeedVarieties(toMap(varietyData, "id", "seed_variety"));
+        setIrrigationFacilities(
+          toMap(irrigationData, "id", "irrigation_facility_name")
+        );
+        setCultivationSystems(
+          toMap(cultivationData, "id", "cultivation_system_name")
+        );
+        setLandSuitability(toMap(landData, "id", "land_suitability_name"));
+        setWeatherEffects(toMap(weatherData, "id", "weather_effect_type_name"));
       } catch (err) {
-        console.error("Failed to load lookup data", err);
+        console.error("❌ Failed to load lookup data", err);
       } finally {
         setLoading(false);
       }
@@ -75,6 +103,8 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
   }, []);
 
   if (loading) return <Loading />;
+
+  console.log("🌾 data passed to preview from parent:", data);
 
   return (
     <div className="max-w-4xl mx-auto text-gray-700 max-h-[75vh] overflow-y-auto p-6 bg-white rounded-2xl shadow-md border border-gray-100 space-y-6">
@@ -88,12 +118,27 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
           Seed Details
         </h3>
         {data.seed && data.seed.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             {data.seed.map((s: any, i: number) => (
               <div key={i} className="border rounded-xl bg-white shadow-sm p-3">
                 {renderRow("Seed Name", s.seed_common_name)}
-                {renderRow("Variety", seedVarieties[s.seed_variety_id])}
                 {renderRow("Company", s.seed_company_name)}
+                {renderRow(
+                  "Variety",
+                  s.seed_variety_name || seedVarieties[s.seed_variety_id]
+                )}
+                {renderRow("Seed Company Type", s.seed_company_type_name)}
+                <div className="flex justify-between border-b border-gray-100 p-2 text-sm">
+                  <span className="font-medium text-gray-600">
+                    Type of Seed Used
+                  </span>
+                  <span
+                    className="text-gray-800 font-semibold truncate max-w-xs"
+                    title={s.seed_type_name}
+                  >
+                    {s.seed_type_name || "—"}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -109,10 +154,18 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         </h3>
         {data.cultivation ? (
           <div className="rounded-lg bg-white shadow-sm p-3">
-            {renderRow("Irrigation Facility", irrigationFacilities[data.cultivation.irrigation_facility_id])}
-            {renderRow("Irrigation Source", data.cultivation.irrigation_source_id)}
-            {renderRow("Cultivation System", cultivationSystems[data.cultivation.cultivation_system_id])}
-            {renderRow("Land Suitability", landSuitability[data.cultivation.land_suitability_id])}
+            {renderRow(
+              "Last Year Crop Type",
+              data.history.last_year_crop_type_name
+            )}
+            {renderRow("Sowing Date", data.history.sowing_date)}
+            {renderRow("Harvest Date", data.history.harvest_date)}
+            {renderRow("Production", data.history.last_year_production)}
+            {renderRow("Seed Used Last Year", data.history.seed_used_last_year)}
+            {renderRow(
+              "Reason for Changing Seed",
+              data.history.reason_for_changing_seed
+            )}
           </div>
         ) : (
           <p className="text-gray-400 italic">No cultivation data</p>
@@ -126,7 +179,10 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         </h3>
         {data.history ? (
           <div className="rounded-lg bg-white shadow-sm p-3">
-            {renderRow("Immediate Previous Crop", data.history.immediate_previous_crop)}
+            {renderRow(
+              "Immediate Previous Crop",
+              data.history.immediate_previous_crop
+            )}
             {renderRow("Sowing Date", data.history.sowing_date)}
             {renderRow("Harvest Date", data.history.harvest_date)}
             {renderRow("Production", data.history.last_year_production)}
@@ -136,24 +192,39 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         )}
       </section>
 
-      {/* ☁️ Weather Effects */}
-      <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
-        <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
-          Weather Effects
-        </h3>
-        {data.weather?.weather_effects?.length ? (
-          <div className="grid gap-2">
-            {data.weather.weather_effects.map((w: any, i: number) => (
-              <div key={i} className="border rounded-lg bg-white p-3 shadow-sm">
-                {renderRow("Effect Type", weatherEffects[w.weather_effect_type_id] || "Unknown Effect")}
-                {renderRow("Remarks", truncate(w.remarks))}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-400 italic">No weather effect data</p>
-        )}
-      </section>
+ {/* ☁️ Weather Effects */}
+<section className="bg-gray-50 rounded-xl shadow-sm border p-5">
+  <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
+    Weather Effects
+  </h3>
+
+  {data.weather ? (
+    <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
+      {renderRow("Period From", data.weather.period_from)}
+      {renderRow("Period To", data.weather.period_to)}
+      {renderRow("Remarks", data.weather.remarks)}
+
+      {data.weather.weather_effects?.length ? (
+        <div className="mt-2 space-y-2">
+          {data.weather.weather_effects.map((w: any, i: number) => (
+            <div
+              key={i}
+              className="border rounded-lg bg-gray-50 p-2 shadow-sm"
+            >
+              {renderRow("Effect Type", w.weather_effect_type_name)}
+              {renderRow("Remarks", w.remarks || "—")}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-400 italic mt-2">No weather effects recorded</p>
+      )}
+    </div>
+  ) : (
+    <p className="text-gray-400 italic">No weather data</p>
+  )}
+</section>
+
 
       {/* 🐛 Pests & Diseases */}
       <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
@@ -166,9 +237,11 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
             <h4 className="font-semibold mb-2 text-gray-800">Pests</h4>
             {data.pestDetails?.length ? (
               data.pestDetails.map((p: any, i: number) => (
-                <div key={i} className="border rounded-lg bg-blue-50 p-1 mb-2 shadow-sm">
-                  {renderRow("", p.name)}
-                  {/* {renderRow("", truncate(p.remarks))} */}
+                <div
+                  key={i}
+                  className="border rounded-lg bg-blue-50 p-1 mb-2 shadow-sm"
+                >
+                  {renderRowPestDisease("", p.name)}
                 </div>
               ))
             ) : (
@@ -178,12 +251,16 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
 
           {/* Diseases */}
           <div>
-            <h4 className="font-semibold mb-2 text-gray-800">Diseases</h4>
+            <h4 className="font-semibold mb-2 text-gray-800 text-left">
+              Diseases
+            </h4>
             {data.diseaseDetails?.length ? (
               data.diseaseDetails.map((d: any, i: number) => (
-                <div key={i} className="border rounded-lg bg-blue-50 p-1 mb-2 shadow-sm">
-                  {renderRow("", d.name)}
-                  {/* {renderRow("", truncate(d.remarks))} */}
+                <div
+                  key={i}
+                  className="border rounded-lg bg-blue-50 p-1 mb-2 shadow-sm"
+                >
+                  {renderRowPestDisease("", d.name)}
                 </div>
               ))
             ) : (
@@ -200,13 +277,21 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         </h3>
         {data.chemicals ? (
           <>
-            <h4 className="font-semibold mt-2 mb-2 text-gray-800">Fertilizers</h4>
+            <h4 className="font-semibold mt-2 mb-2 text-gray-800">
+              Fertilizers
+            </h4>
             {data.chemicals.fertilizers?.length ? (
               <div className="grid gap-3">
                 {data.chemicals.fertilizers.map((f: any, i: number) => (
-                  <div key={i} className="border rounded-lg bg-white p-3 shadow-sm">
+                  <div
+                    key={i}
+                    className="border rounded-lg bg-white p-3 shadow-sm"
+                  >
                     {renderRow("Name", f.chemical_name)}
-                    {renderRow("Quantity", `${f.qty || 0} ${f.qty_unit || ""}`)}
+                    {renderRow(
+                      "Quantity",
+                      `${f.qty || 0} ${f.qty_unit || ""}kg`
+                    )}
                     {renderRow("Remarks", truncate(f.remarks))}
                   </div>
                 ))}
@@ -215,13 +300,21 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
               <p className="text-gray-400 italic mb-2">No fertilizers added</p>
             )}
 
-            <h4 className="font-semibold mt-4 mb-2 text-gray-800">Pesticides</h4>
+            <h4 className="font-semibold mt-4 mb-2 text-gray-800">
+              Pesticides
+            </h4>
             {data.chemicals.pesticides?.length ? (
               <div className="grid gap-3">
                 {data.chemicals.pesticides.map((p: any, i: number) => (
-                  <div key={i} className="border rounded-lg bg-white p-3 shadow-sm">
+                  <div
+                    key={i}
+                    className="border rounded-lg bg-white p-3 shadow-sm"
+                  >
                     {renderRow("Name", p.chemical_name)}
-                    {renderRow("Quantity", `${p.qty || 0} ${p.qty_unit || ""}`)}
+                    {renderRow(
+                      "Quantity",
+                      `${p.qty || 0} ${p.qty_unit || ""}kg`
+                    )}
                     {renderRow("Remarks", truncate(p.remarks))}
                   </div>
                 ))}

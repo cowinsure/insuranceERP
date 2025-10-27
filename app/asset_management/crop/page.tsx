@@ -311,7 +311,7 @@ const CropsPage = () => {
             </h1>
           }
           closeModal={() => setIsStageOneModal(false)}
-          widthValue={"w-full min-w-sm md:max-w-xl"}
+          widthValue={"w-full min-w-sm md:max-w-3xl"}
         >
           <AddCropDetailsModal crop={selectedCrop!} onClose={runOnClose} />
         </GenericModal>

@@ -7,7 +7,7 @@ import useApi from "@/hooks/use_api";
 
 interface SeedDetailsProps {
   selectedCropId: number;
-  data: any[]; // array of seed detail objects
+  data: any[];
   onChange: (updatedData: any[]) => void;
 }
 
@@ -34,9 +34,12 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         {
           seed_common_name: "",
           seed_variety_id: 0,
+          seed_variety_name: "",
           seed_company_name: "",
           seed_company_type_id: 0,
+          seed_company_type_name: "",
           seed_type_id: 0,
+          seed_type_name: "",
         },
       ]);
     }
@@ -84,10 +87,28 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     fetchSeedTypes();
   }, [get]);
 
-  // Update a single field in the seed data
+  // ✅ Update and include human-readable names for preview
   const handleChange = (index: number, field: string, value: any) => {
     const updated = [...data];
-    updated[index] = { ...updated[index], [field]: value };
+    const current = { ...updated[index], [field]: value };
+
+    // ✅ Add corresponding readable names for preview
+    if (field === "seed_variety_id") {
+      const selected = seedVarietyOptions.find((v) => v.value === value);
+      current.seed_variety_name = selected?.label || "";
+    }
+    console.log(seedCompanyTypeOptions);
+    if (field === "seed_company_type_id") {
+      const selected = seedCompanyTypeOptions.find((v) => v.value === value);
+      current.seed_company_type_name = selected?.label || "";
+    }
+
+    if (field === "seed_type_id") {
+      const selected = seedTypeOptions.find((v) => v.value === value);
+      current.seed_type_name = selected?.label || "";
+    }
+
+    updated[index] = current;
     onChange(updated);
   };
 
@@ -162,116 +183,3 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
 
 SeedDetails.displayName = "SeedDetails";
 export default SeedDetails;
-
-// Fresh Start
-// "use client";
-
-// import React from "react";
-// import InputField from "./InputField";
-// import DropdownField from "./DropDownField";
-// import { SeedDetails as SeedDetailsType } from "./model/crop/CropCoreModel";
-
-// interface SeedDetailsProps {
-//   value: Partial<SeedDetailsType>;
-//   onChange: (data: Partial<SeedDetailsType>) => void;
-// }
-
-// const SeedDetails = ({ value, onChange }: SeedDetailsProps) => {
-//   const handleChange = (
-//     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-//   ) => {
-//     const { name, value: val } = e.target;
-
-//     const numberFields = [
-//       "seed_variety_id",
-//       "seed_company_type_id",
-//       "seed_type_id",
-//     ];
-//     const parsedValue =
-//       numberFields.includes(name) && val !== ""
-//         ? Number(val)
-//         : val === ""
-//         ? ""
-//         : val;
-
-//     onChange({ ...value, [name]: parsedValue });
-//   };
-
-//   const seedVarietyOptions = [
-//     { value: 1, label: "Local Variety (স্থানীয় জাত)" },
-//     { value: 2, label: "High Yield Variety (উচ্চফলনশীল জাত)" },
-//     { value: 3, label: "Hybrid (হাইব্রিড)" },
-//   ];
-
-//   const seedCompanyTypeOptions = [
-//     { value: 1, label: "Government" },
-//     { value: 2, label: "Private" },
-//     { value: 3, label: "Local Market / Own Stock" },
-//   ];
-
-//   const seedTypeOptions = [
-//     { value: 1, label: "Good – used by most farmers" },
-//     { value: 2, label: "Moderate – used by many farmers" },
-//     { value: 3, label: "Poor – locally developed, low yielding" },
-//   ];
-
-//   return (
-//     <div className="p-3">
-//       <h2 className="text-xl font-semibold mb-5 text-center underline">
-//         Seed Details
-//       </h2>
-
-//       <div className="space-y-5">
-//         <InputField
-//           id="seed_common_name"
-//           label="Common Name of Seed"
-//           type="text"
-//           name="seed_common_name"
-//           value={value.seed_common_name || ""}
-//           onChange={handleChange}
-//           placeholder="Enter Seed Common Name"
-//         />
-
-//         <DropdownField
-//           label="Variety of Seed"
-//           id="seed_variety_id"
-//           name="seed_variety_id"
-//           value={value.seed_variety_id ?? ""}
-//           onChange={handleChange}
-//           options={seedVarietyOptions}
-//         />
-
-//         <InputField
-//           id="seed_company_name"
-//           label="Name of the Seed Company"
-//           type="text"
-//           name="seed_company_name"
-//           value={value.seed_company_name || ""}
-//           onChange={handleChange}
-//           placeholder="Ex: Local Open Market or Own Stock Conserved"
-//         />
-
-//         <DropdownField
-//           label="Seed Company Type"
-//           id="seed_company_type_id"
-//           name="seed_company_type_id"
-//           value={value.seed_company_type_id ?? ""}
-//           onChange={handleChange}
-//           options={seedCompanyTypeOptions}
-//         />
-
-//         <DropdownField
-//           label="Type of the Seed Used"
-//           id="seed_type_id"
-//           name="seed_type_id"
-//           value={value.seed_type_id ?? ""}
-//           onChange={handleChange}
-//           options={seedTypeOptions}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// SeedDetails.displayName = "SeedDetails";
-// export default SeedDetails;

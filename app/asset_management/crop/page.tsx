@@ -300,10 +300,17 @@ const CropsPage = () => {
         <GenericModal
           title={
             <h1 className="flex flex-col">
-              {`Add Details for ${
-                selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
-              } `}
-              <small className="font-medium text-gray-500">
+              {
+                <div className="flex gap-1">
+                  <span>Add details for</span>
+                  <span className="font-extrabold">
+                    {" "}
+                    {selectedCrop?.crop_asset_seed_details?.[0]?.crop_name ||
+                      "Crop"}
+                  </span>
+                </div>
+              }
+              <small className="font-medium text-gray-500 tracking-wide">
                 Variety:{" "}
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}

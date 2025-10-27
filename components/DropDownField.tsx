@@ -13,6 +13,21 @@ interface DropdownFieldProps {
   error?: string;
 }
 
+function renderStyledText(text: string) {
+  const match = text.match(/[\u0980-\u09FF]/);
+  if (!match) return text;
+
+  const index = match.index;
+  const englishPart = text.slice(0, index).trim();
+  const bengaliPart = text.slice(index).trim();
+console.log(englishPart);
+  return (
+    <>
+      {englishPart} <span className="">{bengaliPart}</span>
+    </>
+  );
+}
+
 const DropdownField: React.FC<DropdownFieldProps> = ({
   label,
   id,
@@ -27,7 +42,10 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   return (
     <div className="relative">
       <div className="flex flex-col">
-        <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-600">
+        <label
+          htmlFor={id}
+          className="mb-1 text-sm font-bold text-gray-400 tracking-wide"
+        >
           {label}
         </label>
         <select
@@ -46,8 +64,12 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
         >
           <option value="">Select</option>
           {options.map((option, idx) => (
-            <option key={idx} value={option.value}>
-              {option.label}
+            <option
+              key={idx}
+              value={option.value}
+              className="font-semibold tracking-wide space-y-2"
+            >
+              {renderStyledText(option.label)}
             </option>
           ))}
         </select>

@@ -38,7 +38,7 @@ const InputField: React.FC<InputFieldProps> = ({
     <div className="relative">
       <div className="flex flex-col">
         {label && (
-          <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-500">
+          <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-400">
             {label}
           </label>
         )}

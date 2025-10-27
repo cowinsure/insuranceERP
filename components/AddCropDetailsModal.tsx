@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { toast } from "sonner";
@@ -72,7 +72,66 @@ export default function AddCropDetailsModal({
   },
   onClose,
 }: AddCropDetailsModalProps) {
-  const { put } = useApi();
+  const { get, put } = useApi();
+
+  // This function fetchs and puts data on the forms for selected crop
+  useEffect(() => {
+    const fetchExistingCropData = async () => {
+      if (!cropId) return;
+      console.log("Got crop data for crop ID:", cropId);
+      try {
+        const res = await get(`/cms/crop-info-service/?crop_id=${cropId}`);
+        if (res.status === "success" && res.data) {
+          const d = res.data[0];
+          console.log(d);
+
+          // 🧩 Normalize data into same shape used by your state
+          setCropData({
+            seed: d.crop_asset_seed_details || [],
+            cultivation: d.crop_asset_irrigation_cultivation_details?.[0] || {},
+            history: d.crop_asset_previous_season_history_details?.[0] || {},
+            weather: {
+              remarks: d.crop_asset_weather_effect_history?.[0]?.remarks || "",
+              weather_effects:
+                d.crop_asset_weather_effect_history?.map((w: any) => ({
+                  weather_effect_type_id: w.weather_effect_type_id,
+                  remarks: w.remarks || "",
+                  is_active: true,
+                })) || [],
+              period_from:
+                d.crop_asset_weather_effect_history?.[0]?.period_from || "",
+              period_to:
+                d.crop_asset_weather_effect_history?.[0]?.period_to || "",
+            },
+            pests:
+              d.crop_asset_pest_attack_details?.map(
+                (p: any) => p.pest_attack_type_id
+              ) || [],
+            diseases:
+              d.crop_asset_disease_attack_details?.map(
+                (p: any) => p.disease_attack_type_id
+              ) || [],
+            chemicals: {
+              fertilizers:
+                d.crop_asset_chemical_usage_details?.filter(
+                  (c: any) => c.chemical_type_id === 1
+                ) || [],
+              pesticides:
+                d.crop_asset_chemical_usage_details?.filter(
+                  (c: any) => c.chemical_type_id === 2
+                ) || [],
+            },
+          });
+        } else {
+          console.warn("⚠️ No existing data found for crop:", cropId);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch crop data:", err);
+      }
+    };
+
+    fetchExistingCropData();
+  }, [cropId]);
 
   const steps = [
     "Seed",
@@ -275,7 +334,6 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
-  console.log("Data", cropData);
   return (
     <div>
       <div className="bg-white rounded-xl mb-4">

@@ -192,82 +192,72 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         )}
       </section>
 
- {/* ☁️ Weather Effects */}
-<section className="bg-gray-50 rounded-xl shadow-sm border p-5">
-  <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
-    Weather Effects
-  </h3>
+      {/* ☁️ Weather Effects */}
+      <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
+        <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
+          Weather Effects
+        </h3>
 
-  {data.weather ? (
-    <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
-      {renderRow("Period From", data.weather.period_from)}
-      {renderRow("Period To", data.weather.period_to)}
-      {renderRow("Remarks", data.weather.remarks)}
+        {data.weather ? (
+          <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
+            {renderRow("Period From", data.weather.period_from)}
+            {renderRow("Period To", data.weather.period_to)}
+            {renderRow("Remarks", data.weather.remarks)}
 
-      {data.weather.weather_effects?.length ? (
-        <div className="mt-2 space-y-2">
-          {data.weather.weather_effects.map((w: any, i: number) => (
-            <div
-              key={i}
-              className="border rounded-lg bg-gray-50 p-2 shadow-sm"
-            >
-              {renderRow("Effect Type", w.weather_effect_type_name)}
-              {renderRow("Remarks", w.remarks || "—")}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-400 italic mt-2">No weather effects recorded</p>
-      )}
-    </div>
-  ) : (
-    <p className="text-gray-400 italic">No weather data</p>
-  )}
-</section>
-
+            {data.weather.weather_effects?.length ? (
+              <div className="mt-2 space-y-2">
+                {data.weather.weather_effects.map((w: any, i: number) => (
+                  <div
+                    key={i}
+                    className="border rounded-lg bg-gray-50 p-2 shadow-sm"
+                  >
+                    {renderRow("Effect Type", w.weather_effect_type_name)}
+                    {renderRow("Remarks", w.remarks || "—")}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 italic mt-2">
+                No weather effects recorded
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="text-gray-400 italic">No weather data</p>
+        )}
+      </section>
 
       {/* 🐛 Pests & Diseases */}
       <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
         <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
-          Pests & Diseases
+          Pest & Disease Observations
         </h3>
-        <div className="grid md:grid-cols-1 gap-4">
-          {/* Pests */}
-          <div>
-            <h4 className="font-semibold mb-2 text-gray-800">Pests</h4>
-            {data.pestDetails?.length ? (
-              data.pestDetails.map((p: any, i: number) => (
-                <div
-                  key={i}
-                  className="border rounded-lg bg-blue-50 p-1 mb-2 shadow-sm"
-                >
-                  {renderRowPestDisease("", p.name)}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400 italic">No pests recorded</p>
-            )}
-          </div>
 
-          {/* Diseases */}
-          <div>
-            <h4 className="font-semibold mb-2 text-gray-800 text-left">
-              Diseases
-            </h4>
-            {data.diseaseDetails?.length ? (
-              data.diseaseDetails.map((d: any, i: number) => (
-                <div
-                  key={i}
-                  className="border rounded-lg bg-blue-50 p-1 mb-2 shadow-sm"
-                >
-                  {renderRowPestDisease("", d.name)}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400 italic">No diseases recorded</p>
-            )}
+        {data.pestDetails?.length ? (
+          <div className="mb-3">
+            <h4 className="font-semibold text-gray-700">Pests:</h4>
+            <ul className="list-disc list-inside text-gray-600">
+              {data.pestDetails.map((p: any) => (
+                <li key={p.id}>{p.name}</li>
+              ))}
+            </ul>
           </div>
-        </div>
+        ) : (
+          <p className="text-gray-500 italic">No pest data provided</p>
+        )}
+
+        {data.diseaseDetails?.length ? (
+          <div>
+            <h4 className="font-semibold text-gray-700">Diseases:</h4>
+            <ul className="list-disc list-inside text-gray-600">
+              {data.diseaseDetails.map((d: any) => (
+                <li key={d.id}>{d.name}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-gray-500 italic">No disease data provided</p>
+        )}
       </section>
 
       {/* 🧪 Chemicals */}

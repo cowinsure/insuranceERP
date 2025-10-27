@@ -27,7 +27,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     { value: 3, label: "Local Market / Own Stock" },
   ];
 
-  // Initialize first seed row if empty
+  // ✅ Initialize first seed row if empty (run once only)
   useEffect(() => {
     if (!data || data.length === 0) {
       onChange([
@@ -43,7 +43,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         },
       ]);
     }
-  }, [data, onChange]);
+  }, []); // <-- only once, prevents overwriting existing data
 
   // Fetch Seed Variety options
   useEffect(() => {
@@ -87,6 +87,31 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     fetchSeedTypes();
   }, [get]);
 
+  // ✅ Prefill readable names if data already exists
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const updated = data.map((item) => {
+        const variety = seedVarietyOptions.find(
+          (v) => v.value === item.seed_variety_id
+        );
+        const type = seedTypeOptions.find((t) => t.value === item.seed_type_id);
+        const companyType = seedCompanyTypeOptions.find(
+          (c) => c.value === item.seed_company_type_id
+        );
+
+        return {
+          ...item,
+          seed_variety_name: variety?.label || item.seed_variety_name || "",
+          seed_type_name: type?.label || item.seed_type_name || "",
+          seed_company_type_name:
+            companyType?.label || item.seed_company_type_name || "",
+        };
+      });
+
+      onChange(updated);
+    }
+  }, [seedVarietyOptions, seedTypeOptions]); // run after options load
+
   // ✅ Update and include human-readable names for preview
   const handleChange = (index: number, field: string, value: any) => {
     const updated = [...data];
@@ -111,6 +136,8 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     updated[index] = current;
     onChange(updated);
   };
+
+  console.log("Seed Details Data:", data);
 
   return (
     <div className="p-3">

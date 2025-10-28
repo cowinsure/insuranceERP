@@ -227,7 +227,11 @@ console.log(grouped_ref);
       mobileNumber: plot?.mobile_number,
       farmerId: plot.farmer_id,
       farmerName: plot.farmer_name,
-      suitability: plot.land_suitability_details?.map((d: any) => d.land_suitability_name) || []
+      suitability: plot.land_suitability_details?.map((d: any) => d.land_suitability_name) || [],
+      length: plot?.land_measurement_info?.[0]?.se_ne ?? null,
+      width: plot?.land_measurement_info?.[0]?.ne_nw ?? null,
+      farmer_name: plot.farmer_name,
+      mobile_number: plot.mobile_number,
     }
 
 
@@ -354,7 +358,7 @@ console.log(grouped_ref);
                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
                               View
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
@@ -364,7 +368,7 @@ console.log(grouped_ref);
                             >
                               <MapPin  />
                               Plot
-                            </Button>
+                            </Button> */}
                           </div>
                         </div>
 
@@ -445,7 +449,7 @@ console.log(grouped_ref);
                             View Details
                           </Button>
 
-                          <Button
+                          {/* <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
@@ -455,7 +459,7 @@ console.log(grouped_ref);
                             >
                               <MapPin className="w-4 h-4 mr-2" />
                               Plot Entry
-                            </Button>
+                            </Button> */}
                         </td>
                        
                       </tr>

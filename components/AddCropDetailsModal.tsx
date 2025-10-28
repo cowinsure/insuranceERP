@@ -104,17 +104,28 @@ export default function AddCropDetailsModal({
               date_to: d.crop_asset_weather_effect_history?.[0]?.date_to || "",
             },
             pests:
-              d.crop_asset_pest_attack_details?.map((p: any) => ({
-                id: p.pest_attack_type_id,
-                name: p.pest_attack_observations_type_name,
-              })) || [],
-            diseases:
-              d.crop_asset_disease_attack_details?.map(
-                (p: any) => ({
-                  id: p.disease_attack_type_id,
-                  name: p.disease_attack_observations_type_name,
-                })
+              d.crop_asset_pest_attack_details?.map((p: any) =>
+                Number(p.pest_attack_type_id)
               ) || [],
+
+            // ✅ store details for preview
+            pestDetails:
+              d.crop_asset_pest_attack_details?.map((p: any) => ({
+                id: Number(p.pest_attack_type_id),
+                name: p.pest_attack_observations_type_name || "",
+              })) || [],
+
+            diseases:
+              d.crop_asset_disease_attack_details?.map((d: any) =>
+                Number(d.disease_attack_type_id)
+              ) || [],
+
+            diseaseDetails:
+              d.crop_asset_disease_attack_details?.map((d: any) => ({
+                id: Number(d.disease_attack_type_id),
+                name: d.disease_attack_observations_type_name || "",
+              })) || [],
+
             chemicals: {
               fertilizers:
                 d.crop_asset_chemical_usage_details?.filter(
@@ -165,6 +176,8 @@ export default function AddCropDetailsModal({
     pests: [],
     diseases: [],
     chemicals: { fertilizers: [], pesticides: [] },
+    pestDetails: [],
+    diseaseDetails: [],
   });
 
   const handleNext = () => {

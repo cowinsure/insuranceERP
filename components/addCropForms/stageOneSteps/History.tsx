@@ -72,6 +72,7 @@ const History = ({ data, onChange }: HistoryProps) => {
     }
   }, [data.last_year_crop_type_id, cropType]);
 
+  console.log("History data:", data);
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
@@ -113,14 +114,14 @@ const History = ({ data, onChange }: HistoryProps) => {
         />
 
         <div className="grid md:grid-cols-2 gap-5">
-          <InputField
+          {/* <InputField
             label="Sowing Date (Aman)"
             id="sowingDate"
             name="sowing_date"
             type="date"
             value={data.sowing_date || ""}
             onChange={handleChange}
-          />
+          /> */}
           <InputField
             label="Harvest Date"
             id="harvestDate"

@@ -172,9 +172,10 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
               data.cultivation.cultivation_system_id_name ||
                 data.cultivation.crop_cultivation_system_name
             )}
-            {renderRow( 
+            {renderRow(
               "Land Suitability",
-              data.cultivation.land_suitability_id_name ||  data.cultivation.crop_land_suitability_name
+              data.cultivation.land_suitability_id_name ||
+                data.cultivation.crop_land_suitability_name
             )}
           </div>
         ) : (
@@ -197,7 +198,7 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
               "Last years Crop",
               data.history.last_year_crop_type_name
             )}
-            {renderRow("Sowing Date", data.history.sowing_date)}
+            {/* {renderRow("Sowing Date", data.history.sowing_date)} */}
             {renderRow("Harvest Date", data.history.harvest_date)}
             {renderRow("Production", data.history.last_year_production)}
           </div>
@@ -257,11 +258,11 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
           Pest & Disease Observations
         </h3>
 
-        {data.pests?.length ? (
+        {data.pestDetails?.length ? (
           <div className="mb-3">
             <h4 className="font-semibold text-gray-700">Pests:</h4>
             <ul className="list-disc list-inside text-gray-600">
-              {data.pests.map((p: any) => (
+              {data.pestDetails.map((p: any) => (
                 <li key={p.id}>{p.name}</li>
               ))}
             </ul>
@@ -270,11 +271,11 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
           <p className="text-gray-500 italic">No pest data provided</p>
         )}
 
-        {data.diseases?.length ? (
+        {data.diseaseDetails?.length ? (
           <div>
             <h4 className="font-semibold text-gray-700">Diseases:</h4>
             <ul className="list-disc list-inside text-gray-600">
-              {data.diseases.map((d: any) => (
+              {data.diseaseDetails.map((d: any) => (
                 <li key={d.id}>{d.name}</li>
               ))}
             </ul>

@@ -98,13 +98,13 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               data.crop_asset_previous_season_history_details
             )[0]?.last_year_production?.toString()}
           />
-          <InputField
+          {/* <InputField
             label="Sowing Date"
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.sowing_date
             }
-          />
+          /> */}
           <InputField
             label="Seed Used Last Year"
             value={

@@ -73,7 +73,7 @@ export const defaultCropData: CropRegisterData = {
   crop_asset_previous_season_history_details: [
     {
       immediate_previous_crop: "",
-      harvest_date: defaultDate,
+      // harvest_date: defaultDate,
       last_year_crop_type_id: 0,
       last_year_production: 0,
       sowing_date: defaultDate,
@@ -186,7 +186,9 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
 
     // ✅ Update farmer info when land changes
     if (name === "land_name") {
-      const selectedLand = landData.find((land) => land.land_id === parsedValue);
+      const selectedLand = landData.find(
+        (land) => land.land_id === parsedValue
+      );
       if (selectedLand) {
         setFarmerName(selectedLand.farmer_name || "Farmer name not found");
         setMobileNumber(selectedLand.mobile_number || "N/A");
@@ -200,13 +202,19 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ✅ Ensure no empty date fields
+    const payload = {
+      ...formData,
+      planting_date: formData.planting_date || new Date().toISOString(),
+      harvest_date: formData.harvest_date || new Date().toISOString(),
+    };
+
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await post("cms/crop-info-service/", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await post("cms/crop-info-service/", payload, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       if (response.status === "success") {
         toast.success("Crop registered successfully!");
         setFormData({ ...defaultCropData });

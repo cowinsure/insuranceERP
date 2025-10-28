@@ -95,6 +95,7 @@ export default function AddCropDetailsModal({
               weather_effects:
                 d.crop_asset_weather_effect_history?.map((w: any) => ({
                   weather_effect_type_id: w.weather_effect_type_id,
+                  weather_effect_type_name: w.weather_effect_type_name,
                   remarks: w.remarks || "",
                   is_active: true,
                 })) || [],
@@ -103,12 +104,16 @@ export default function AddCropDetailsModal({
               date_to: d.crop_asset_weather_effect_history?.[0]?.date_to || "",
             },
             pests:
-              d.crop_asset_pest_attack_details?.map(
-                (p: any) => p.pest_attack_type_id
-              ) || [],
+              d.crop_asset_pest_attack_details?.map((p: any) => ({
+                id: p.pest_attack_type_id,
+                name: p.pest_attack_observations_type_name,
+              })) || [],
             diseases:
               d.crop_asset_disease_attack_details?.map(
-                (p: any) => p.disease_attack_type_id
+                (p: any) => ({
+                  id: p.disease_attack_type_id,
+                  name: p.disease_attack_observations_type_name,
+                })
               ) || [],
             chemicals: {
               fertilizers:
@@ -173,6 +178,7 @@ export default function AddCropDetailsModal({
     setIsLoading(true);
     try {
       // Build payload
+      // old payload with no filtering
       // const payload = {
       //   crop_id: cropId,
       //   land_id: landId, // replace with actual land_id if available
@@ -262,6 +268,7 @@ export default function AddCropDetailsModal({
       //   ],
       // };
 
+      // new payload with filtering for ids 0 and "Not Provided"
       const payload = {
         crop_id: cropId,
         land_id: landId, // replace with actual land_id if available

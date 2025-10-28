@@ -1,66 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import DropdownField from "@/components/DropDownField";
 import InputField from "@/components/InputField";
-import {
-  CropData,
-  PreviousSeasonHistory,
-} from "@/components/model/crop/CropCoreModel";
+import React, { useEffect, useState } from "react";
+import { CropType } from "../RegisterCrop";
+import useApi from "@/hooks/use_api";
+import { toast } from "sonner";
 
 interface HistoryProps {
-  selectedCrop: CropData;
-  value: Partial<PreviousSeasonHistory>[]; // current step data
-  onChange: (data: Partial<PreviousSeasonHistory>[]) => void;
+  data: any;
+  onChange: (updatedData: any) => void;
 }
 
-const History = ({ selectedCrop, value, onChange }: HistoryProps) => {
-  // Initialize from value prop or empty
-  const initialData = value?.[0] || {};
+const History = ({ data, onChange }: HistoryProps) => {
+  const { get } = useApi();
+  const [cropType, setCropType] = useState<CropType[]>([]);
 
-  const [formData, setFormData] = useState<Partial<PreviousSeasonHistory>>({
-    immediate_previous_crop: initialData.immediate_previous_crop || "",
-    last_year_crop_type_name: initialData.last_year_crop_type_name || "",
-    last_year_production:
-      initialData.last_year_production !== undefined
-        ? initialData.last_year_production
-        : undefined,
-    sowing_date: initialData.sowing_date || "",
-    harvest_date: initialData.harvest_date || "",
-    seed_used_last_year: initialData.seed_used_last_year || "",
-    reason_for_changing_seed: initialData.reason_for_changing_seed || "",
-  });
-
-  // Update local form state if parent value changes
   useEffect(() => {
-    const newData = value?.[0] || {};
-    setFormData({
-      immediate_previous_crop: newData.immediate_previous_crop || "",
-      last_year_crop_type_name: newData.last_year_crop_type_name || "",
-      last_year_production:
-        newData.last_year_production !== undefined
-          ? newData.last_year_production
-          : undefined,
-      sowing_date: newData.sowing_date || "",
-      harvest_date: newData.harvest_date || "",
-      seed_used_last_year: newData.seed_used_last_year || "",
-      reason_for_changing_seed: newData.reason_for_changing_seed || "",
-    });
-  }, [value]);
+    getCropType();
+  }, []);
+
+  const getCropType = async () => {
+    try {
+      const response = await get("/cms/crop-type-service", {
+        params: { start_record: 1, page_size: 10, crop_id: -1 },
+      });
+      if (response.status === "success") setCropType(response.data);
+    } catch (error) {
+      toast.error(`${error}`);
+    }
+  };
 
   // Handle input changes and notify parent
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value: val } = e.target;
-    const parsed =
-      name === "last_year_production"
-        ? val === ""
-          ? undefined
-          : Number(val)
-        : val;
-    const updated = { ...formData, [name]: parsed };
-    setFormData(updated);
-    onChange([updated]); // always send as array
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const val = type === "number" ? Number(value) : value;
+    console.log("From history form:", name, val);
+
+    // When dropdown changes, also sync crop name
+    if (name === "last_year_crop_type_id") {
+      const selectedCrop = cropType.find(
+        (crop) => crop.crop_type_id === Number(val)
+      );
+      onChange({
+        ...data,
+        last_year_crop_type_id: Number(val),
+        last_year_crop_type_name: selectedCrop ? selectedCrop.crop_name : "",
+      });
+    } else {
+      onChange({ ...data, [name]: val });
+    }
   };
-console.log(formData.last_year_crop_type_name);
+
+  // Auto-sync crop name if ID exists and list has loaded
+  useEffect(() => {
+    if (data.last_year_crop_type_id && cropType.length > 0) {
+      const selected = cropType.find(
+        (c) => c.crop_type_id === data.last_year_crop_type_id
+      );
+      if (
+        selected &&
+        selected.crop_name !== data.last_year_crop_type_name
+      ) {
+        onChange({
+          ...data,
+          last_year_crop_type_name: selected.crop_name,
+        });
+      }
+    }
+  }, [data.last_year_crop_type_id, cropType]);
+
+  console.log("History data:", data);
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
@@ -73,17 +85,22 @@ console.log(formData.last_year_crop_type_name);
           label="Immediate Previous Crop"
           id="immediatePreviousCrop"
           name="immediate_previous_crop"
-          value={formData.immediate_previous_crop || ""}
+          value={data.immediate_previous_crop || ""}
           onChange={handleChange}
         />
 
-        <InputField
-          placeholder="Ex - Aman"
+        {/* ✅ FIXED: value should use ID, not name */}
+        <DropdownField
           label="Last Year's Crop"
           id="lastYearsCrop"
-          name="last_year_crop_type_name"
-          value={formData.last_year_crop_type_name || ""}
+          name="last_year_crop_type_id"
+          value={data.last_year_crop_type_id || ""}
           onChange={handleChange}
+          required
+          options={cropType.map((crop) => ({
+            value: crop.crop_type_id,
+            label: crop.crop_name,
+          }))}
         />
 
         <InputField
@@ -92,25 +109,25 @@ console.log(formData.last_year_crop_type_name);
           label="Last Year Production (mound/33 decimal)"
           id="lastYearProduction"
           name="last_year_production"
-          value={formData.last_year_production ?? ""}
+          value={data.last_year_production ?? ""}
           onChange={handleChange}
         />
 
         <div className="grid md:grid-cols-2 gap-5">
-          <InputField
+          {/* <InputField
             label="Sowing Date (Aman)"
             id="sowingDate"
             name="sowing_date"
             type="date"
-            value={formData.sowing_date || ""}
+            value={data.sowing_date || ""}
             onChange={handleChange}
-          />
+          /> */}
           <InputField
             label="Harvest Date"
             id="harvestDate"
             name="harvest_date"
             type="date"
-            value={formData.harvest_date || ""}
+            value={data.harvest_date || ""}
             onChange={handleChange}
           />
         </div>
@@ -121,7 +138,7 @@ console.log(formData.last_year_crop_type_name);
             id="seedUsedLastYear"
             name="seed_used_last_year"
             placeholder="e.g., BRRI dhan49"
-            value={formData.seed_used_last_year || ""}
+            value={data.seed_used_last_year || ""}
             onChange={handleChange}
           />
           <InputField
@@ -129,7 +146,7 @@ console.log(formData.last_year_crop_type_name);
             id="reasonForChangingSeed"
             name="reason_for_changing_seed"
             placeholder="e.g., Low yield, disease issues"
-            value={formData.reason_for_changing_seed || ""}
+            value={data.reason_for_changing_seed || ""}
             onChange={handleChange}
           />
         </div>

@@ -167,84 +167,68 @@
 // Fresh start
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
 import InputField from "@/components/InputField";
 
-export interface ChemicalUsage {
+interface ChemicalItem {
   chemical_usage_id?: number;
-  chemical_name: string;
-  qty: number | "" | undefined; // local state allows ""
-  remarks: string;
   chemical_type_id?: number;
+  chemical_name: string;
+  qty: number;
+  qty_unit?: string;
+  remarks?: string;
 }
 
 interface ChemicalsProps {
-  value: {
-    fertilizers: Partial<ChemicalUsage>[];
-    pesticides: Partial<ChemicalUsage>[];
+  data: {
+    fertilizers: ChemicalItem[];
+    pesticides: ChemicalItem[];
   };
-  onChange: (data: {
-    fertilizers: ChemicalUsage[];
-    pesticides: ChemicalUsage[];
+  onChange: (updatedData: {
+    fertilizers: ChemicalItem[];
+    pesticides: ChemicalItem[];
   }) => void;
 }
 
-const Chemicals = ({ value, onChange }: ChemicalsProps) => {
-  const [fertilizers, setFertilizers] = useState<ChemicalUsage[]>(
-    value?.fertilizers.map((f) => ({
-      ...f,
-      qty: f.qty ?? "",
-      chemical_name: f.chemical_name || "",
-      remarks: f.remarks || "",
-    })) || []
+const Chemicals = ({ data, onChange }: ChemicalsProps) => {
+  // Initialize state once
+  const [fertilizers, setFertilizers] = useState<ChemicalItem[]>(
+    () => data.fertilizers || []
   );
-
-  const [pesticides, setPesticides] = useState<ChemicalUsage[]>(
-    value?.pesticides.map((p) => ({
-      ...p,
-      qty: p.qty ?? "",
-      chemical_name: p.chemical_name || "",
-      remarks: p.remarks || "",
-    })) || []
+  const [pesticides, setPesticides] = useState<ChemicalItem[]>(
+    () => data.pesticides || []
   );
-
   const [removing, setRemoving] = useState<number | null>(null);
 
-  // Sync with parent value
-  useEffect(() => {
-    setFertilizers(
-      value?.fertilizers.map((f) => ({
-        ...f,
-        qty: f.qty ?? "",
-        chemical_name: f.chemical_name || "",
-        remarks: f.remarks || "",
-      })) || []
-    );
-    setPesticides(
-      value?.pesticides.map((p) => ({
-        ...p,
-        qty: p.qty ?? "",
-        chemical_name: p.chemical_name || "",
-        remarks: p.remarks || "",
-      })) || []
-    );
-  }, [value]);
+  const handleChange = (
+    index: number,
+    type: "fertilizer" | "pesticide",
+    field: keyof ChemicalItem,
+    value: any
+  ) => {
+    const list = type === "fertilizer" ? [...fertilizers] : [...pesticides];
+    list[index] = { ...list[index], [field]: value };
+
+    if (type === "fertilizer") {
+      setFertilizers(list);
+      onChange({ fertilizers: list, pesticides });
+    } else {
+      setPesticides(list);
+      onChange({ fertilizers, pesticides: list });
+    }
+  };
 
   const addField = (type: "fertilizer" | "pesticide") => {
-    const newField: ChemicalUsage = {
-      chemical_name: "",
-      qty: "",
-      remarks: "",
-    };
+    const newItem = { chemical_name: "", qty: 0 };
     if (type === "fertilizer") {
-      const updated = [...fertilizers, newField];
+      const updated = [...fertilizers, newItem];
       setFertilizers(updated);
-      notifyParent(updated, pesticides);
+      onChange({ fertilizers: updated, pesticides });
     } else {
-      const updated = [...pesticides, newField];
+      const updated = [...pesticides, newItem];
       setPesticides(updated);
-      notifyParent(fertilizers, updated);
+      onChange({ fertilizers, pesticides: updated });
     }
   };
 
@@ -252,65 +236,18 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
     setRemoving(index);
     setTimeout(() => {
       if (type === "fertilizer") {
-        const updated = fertilizers.filter((_, i) => i !== index);
+        const updated = [...fertilizers];
+        updated.splice(index, 1);
         setFertilizers(updated);
-        notifyParent(updated, pesticides);
+        onChange({ fertilizers: updated, pesticides });
       } else {
-        const updated = pesticides.filter((_, i) => i !== index);
+        const updated = [...pesticides];
+        updated.splice(index, 1);
         setPesticides(updated);
-        notifyParent(fertilizers, updated);
+        onChange({ fertilizers, pesticides: updated });
       }
       setRemoving(null);
     }, 300);
-  };
-
-  const handleChange = (
-    index: number,
-    type: "fertilizer" | "pesticide",
-    field: keyof ChemicalUsage,
-    valueInput: string | number
-  ) => {
-    const list = type === "fertilizer" ? [...fertilizers] : [...pesticides];
-
-    const parsedValue =
-      field === "qty"
-        ? valueInput === "" || valueInput === undefined
-          ? "" // keep local empty
-          : typeof valueInput === "number"
-          ? valueInput
-          : Number(valueInput)
-        : valueInput;
-
-    list[index] = { ...list[index], [field]: parsedValue };
-
-    if (type === "fertilizer") setFertilizers(list);
-    else setPesticides(list);
-
-    notifyParent(
-      type === "fertilizer" ? list : fertilizers,
-      type === "pesticide" ? list : pesticides
-    );
-  };
-
-  // ✅ Always add qty_unit: "kg" when sending to parent
-  const notifyParent = (
-    fertList: ChemicalUsage[],
-    pestList: ChemicalUsage[]
-  ) => {
-    const sanitizedFertilizers = fertList.map((f) => ({
-      ...f,
-      qty: f.qty === "" ? undefined : f.qty,
-      qty_unit: "kg",
-    }));
-    const sanitizedPesticides = pestList.map((p) => ({
-      ...p,
-      qty: p.qty === "" ? undefined : p.qty,
-      qty_unit: "kg",
-    }));
-    onChange({
-      fertilizers: sanitizedFertilizers,
-      pesticides: sanitizedPesticides,
-    });
   };
 
   const renderFields = (type: "fertilizer" | "pesticide") => {
@@ -342,7 +279,9 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
               name="qty"
               type="number"
               value={item.qty}
-              onChange={(e) => handleChange(index, type, "qty", e.target.value)}
+              onChange={(e) =>
+                handleChange(index, type, "qty", Number(e.target.value))
+              }
               placeholder="Quantity"
             />
             <button
@@ -360,7 +299,6 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
 
   return (
     <div className="p-3 max-h-[60vh] overflow-auto space-y-5">
-      {/* Fertilizers */}
       <div className="space-y-5 mb-3 bg-gray-50 p-3 border rounded-lg">
         <h2 className="text-lg font-medium mb-5">Fertilizers</h2>
         {renderFields("fertilizer")}
@@ -373,7 +311,6 @@ const Chemicals = ({ value, onChange }: ChemicalsProps) => {
         </button>
       </div>
 
-      {/* Pesticides */}
       <div className="space-y-5 bg-gray-50 p-3 border rounded-lg">
         <h2 className="text-lg font-medium mb-5">Pesticides & Fungicides</h2>
         {renderFields("pesticide")}

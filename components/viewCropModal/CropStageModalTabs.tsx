@@ -4,14 +4,22 @@ import { GiPlantRoots } from "react-icons/gi";
 import { PiCalendar, PiPlantDuotone } from "react-icons/pi";
 import StageOneData from "./StageOneData";
 import StageTwoData from "./StageTwoData";
-import { LandPlot } from "lucide-react";
+import { LandPlot, User } from "lucide-react";
 import useApi from "@/hooks/use_api";
 import { toast } from "sonner";
-import { SeedDetails } from "../model/crop/CropCoreModel";
+import { CropAssetSeedDetails } from "../model/crop/CropGetModel";
+import { IoMdKeypad } from "react-icons/io";
 
 interface CropStageModalTabsProps {
   stageOneData: any;
   stageTwoData?: any;
+}
+
+// ✅ Define interface for Land (based on your API fields)
+interface LandData {
+  land_id: number;
+  land_name: string;
+  [key: string]: any; // Keep open for other land fields if needed
 }
 
 const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
@@ -20,8 +28,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
 }) => {
   const { get } = useApi();
   const [activeTab, setActiveTab] = useState("stage1");
-  const [landName, setLandName] = useState<SeedDetails>();
+  const [landInfo, setLandInfo] = useState<LandData | null>(null);
 
+  // ✅ Tabs setup (kept exactly as before)
   const tabs = ["stage1", "stage2"];
   const numTabs = tabs.length;
   const tabWidthPercent = 100 / numTabs;
@@ -40,74 +49,80 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
         return null;
     }
   };
-  console.log(stageTwoData);
 
-  // Finding land according to the selected crop
-  if (stageOneData.land_id) {
-    useEffect(() => {
-      const getLandData = async () => {
-        try {
-          const response = await get("/lams/land-info-service", {
-            params: { start_record: 1, page_size: 10 },
-          });
-          // console.log(response);
+  // ✅ Fetch land info using the land_id from crop data
+  useEffect(() => {
+    const fetchLandData = async () => {
+      if (!stageOneData?.land_id) return; // no land id, no call
 
-          if (response.status === "success") {
-            const data = response.data;
-            const findName = data.find(
-              (land: { land_id: any }) => land.land_id === stageOneData.land_id
-            );
-            setLandName(findName);
-          }
-        } catch (error) {
-          toast.error(`${error}`);
+      try {
+        const response = await get("/lams/land-info-service", {
+          params: { start_record: 1, page_size: 10 },
+        });
+
+        if (response.status === "success" && Array.isArray(response.data)) {
+          const matchedLand = response.data.find(
+            (land: LandData) => land.land_id === stageOneData.land_id
+          );
+          setLandInfo(matchedLand || null);
         }
-      };
-      getLandData();
-    }, []);
-  }
+      } catch (error: any) {
+        const message =
+          error?.response?.data?.message ||
+          error.message ||
+          "Failed to fetch land info.";
+        toast.error(message);
+      }
+    };
 
-  console.log(stageOneData);
+    fetchLandData();
+  }, [stageOneData?.land_id]);
+
+  console.log("Crop Data:", stageOneData);
+  console.log("Fetched Land Info:", landInfo);
+
   return (
-    <div className="p-3 md:p-4 text-gray-800">
+    <div className="p-3 text-gray-800">
       {/* Master Details */}
-      <div className="bg-white max-h-[80vh] overflow-y-auto mb-10">
+      <div className="bg-white min-h-[30vh] overflow-y-auto mb-7">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
           Crop Details
         </h2>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {/* Crop Name */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-green-100 text-green-700 rounded-full">
-              <GiPlantRoots className="text-xl" />
+              <GiPlantRoots className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Crop</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.crop_asset_seed_details[0].crop_name || "N/A"}
+                {stageOneData.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
               </p>
             </div>
           </div>
 
           {/* Variety */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-blue-100 text-blue-700 rounded-full">
-              <PiPlantDuotone className="text-xl" />
+              <PiPlantDuotone className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Variety</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.crop_asset_seed_details[0].seed_variety || "N/A"}
+                {stageOneData.crop_asset_seed_details?.[0]?.seed_variety ||
+                  stageOneData.variety ||
+                  "N/A"}
               </p>
             </div>
           </div>
 
           {/* Plantation Date */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-amber-100 text-amber-700 rounded-full">
-              <PiCalendar className="text-xl" />
+              <PiCalendar className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Plantation Date</p>
@@ -118,54 +133,81 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           </div>
 
           {/* Land Information */}
-          <div className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50 hover:shadow-sm transition">
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-yellow-100 text-yellow-600 rounded-full">
-              <LandPlot className="text-" />
+              <LandPlot className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Land</p>
               <p className="font-medium text-gray-800">
-                {landName?.land_name || "N/A"}
+                {landInfo?.land_name || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Farmer name */}
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
+            <span className="p-2 bg-pink-100 text-pink-600 rounded-full">
+              <User className="text-3xl"/>
+            </span>
+            <div>
+              <p className="text-sm text-gray-500">Farmer Name</p>
+              <p className="font-medium text-gray-800">
+                {landInfo?.farmer_name || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Farmer mobile*/}
+          <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
+            <span className="p-2 bg-purple-100 text-purple-600 rounded-full">
+              <IoMdKeypad className="text-2xl"/>
+            </span>
+            <div>
+              <p className="text-sm text-gray-500">Farmer Mobile</p>
+              <p className="font-medium text-gray-800">
+                {landInfo?.mobile_number || "N/A"}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs Header */}
-      <div className="relative flex justify-between items-center bg-gray-100 rounded-lg p-1 shadow-sm mb-">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex flex-col md:flex-row items-center gap-2 flex-1 justify-center py-2 rounded-md text-sm z-10 transition-all duration-200 cursor-pointer
+      <div className="border rounded-xl p-2">
+        {/* Tabs Header */}
+        <div className="relative flex justify-between items-center bg-gray-100 rounded-lg p-1 shadow-sm mb-">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex flex-col md:flex-row items-center gap-2 flex-1 justify-center py-2 rounded-md text-sm z-10 transition-all duration-200 cursor-pointer
               ${
                 activeTab === tab
                   ? "text-green-800 font-bold md:text-[17px]"
                   : "text-gray-600 hover:text-green-600 hover:scale-105 font-semibold"
               }`}
-          >
-            {tab === "stage1" && <GiPlantRoots className="text-xl" />}
-            {tab === "stage2" && <PiPlantDuotone className="text-xl" />}
-            <span>
-              {tab === "stage1" ? "Stage 1 Details" : "Stage 2 Details"}
-            </span>
-          </button>
-        ))}
+            >
+              {tab === "stage1" && <GiPlantRoots className="text-xl" />}
+              {tab === "stage2" && <PiPlantDuotone className="text-xl" />}
+              <span>
+                {tab === "stage1" ? "Stage 1 Details" : "Stage 2 Details"}
+              </span>
+            </button>
+          ))}
 
-        {/* Sliding Active Background */}
-        <div
-          className="absolute top-1 left-0 h-[calc(100%-0.5rem)] bg-white rounded-md shadow transition-all duration-300 ease-in-out"
-          style={{
-            width: `${slidingWidthPercent}%`,
-            left: `${slidingLeftPercent}%`,
-          }}
-        />
-      </div>
-
-      {/* Tab Content */}
-      <div className="rounded bg-white shadow-inner max-h-[80vh] overflow-y-auto p-4 md:p-6">
-        {renderTabContent()}
+          {/* Sliding Active Background */}
+          <div
+            className="absolute top-1 left-0 h-[calc(100%-0.5rem)] bg-white rounded-md shadow transition-all duration-300 ease-in-out"
+            style={{
+              width: `${slidingWidthPercent}%`,
+              left: `${slidingLeftPercent}%`,
+            }}
+          />
+        </div>
+        {/* Tab Content */}
+        <div className=" bg-white pt-2">
+          {renderTabContent()}
+        </div>
       </div>
     </div>
   );

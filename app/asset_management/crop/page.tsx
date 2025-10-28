@@ -2,12 +2,12 @@
 import AddCropDetailsModal from "@/components/AddCropDetailsModal";
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
 import StageTwo from "@/components/addCropForms/StageTwo";
-import { CropData } from "@/components/model/crop/CropCoreModel";
-// import AddCrop from "@/components/AddCropDetailsModal";
+import { CropGetData } from "@/components/model/crop/CropGetModel";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
 import Loading from "@/components/utils/Loading";
+import { SearchFilter } from "@/components/utils/SearchFilter";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
 import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
@@ -17,18 +17,24 @@ import { toast, Toaster } from "sonner";
 
 const CropsPage = () => {
   const { get } = useApi();
+
+  /************************* Declare states here *************************/
   const [isLoading, setIsLoading] = useState(false);
   const [isModal, setIsModal] = React.useState(false);
   const [isStageOneModal, setIsStageOneModal] = React.useState(false);
   const [isStageTwoModal, setIsStageTwoModal] = React.useState(false);
   const [isCropView, setIsCropView] = useState(false);
-  const [selectedCrop, setSelectedCrop] = useState<CropData>();
-  const [crops, setCrops] = useState<CropData[]>([]);
+  const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
+  const [crops, setCrops] = useState<CropGetData[]>([]);
+  const [filteredCrops, setFilteredCrops] = useState(crops);
+  /************************************************************************/
 
+  /************************* GET Data Functions *************************/
   useEffect(() => {
     fetchCropData();
   }, []);
 
+  // GET all crop data from API
   const fetchCropData = async () => {
     setIsLoading(true);
     try {
@@ -42,6 +48,7 @@ const CropsPage = () => {
 
       if (response.status === "success") {
         setCrops(response.data);
+        setFilteredCrops(response.data);
       }
     } catch (error: any) {
       const message =
@@ -53,7 +60,9 @@ const CropsPage = () => {
       setIsLoading(false);
     }
   };
+  /************************************************************************/
 
+  /************************* Handler Functions *************************/
   const handleAddCropDetails = (cropId: number) => {
     if (!cropId) return;
     const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
@@ -79,7 +88,9 @@ const CropsPage = () => {
     setIsCropView(true);
     console.log("View Crop", viewCrop);
   };
+  /************************************************************************/
 
+  /************************* Utility Functions *************************/
   const runFunctionOnSuccess = () => {
     fetchCropData();
     setIsStageOneModal(false);
@@ -89,13 +100,17 @@ const CropsPage = () => {
     setIsStageTwoModal(false);
   };
 
+  // function for stage one data update
+  const runOnClose = () => {
+    setIsStageOneModal(false);
+    fetchCropData();
+  };
+
   // Flag for stage one complete
   const isStageOneCompleted = (cropId: number) => {
     return localStorage.getItem(`stageOneCompleted_${cropId}`) === "true";
   };
-
-  // console.log("Selected crop :", selectedCrop);
-
+  /************************************************************************/
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -125,9 +140,16 @@ const CropsPage = () => {
         </div>
       </div>
       {/* Body */}
-      <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
-        <p>Crop details Page</p>
-      </div>
+      <SearchFilter
+        placeholder="Search by farmer name or mobile number"
+        data={crops}
+        setFilteredData={setFilteredCrops}
+        searchKeys={[
+          "crop_asset_seed_details.farmer_name",
+          "crop_asset_seed_details.mobile_number",
+        ]}
+      />
+
       {/* Table */}
       <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5">
@@ -172,7 +194,7 @@ const CropsPage = () => {
                 </tr>
               ) : (
                 <>
-                  {crops.map((crop, idx) => {
+                  {filteredCrops.map((crop, idx) => {
                     const seed = crop.crop_asset_seed_details?.[0];
                     return (
                       <tr
@@ -259,13 +281,13 @@ const CropsPage = () => {
         </div>
       </div>
 
+      {/* Register Crop Modal */}
       {isModal && (
         <GenericModal
           title="Register Crop"
           closeModal={() => setIsModal(false)}
           widthValue={"w-full max-w-xl"}
         >
-          {/* <AddCrop /> */}
           <RegisterCrop
             onSuccess={() => fetchCropData()}
             closeModal={() => setIsModal(false)}
@@ -278,10 +300,17 @@ const CropsPage = () => {
         <GenericModal
           title={
             <h1 className="flex flex-col">
-              {`Add Details for ${
-                selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
-              } `}
-              <small className="font-medium text-gray-500">
+              {
+                <div className="flex gap-1">
+                  <span>Add details for</span>
+                  <span className="font-extrabold">
+                    {" "}
+                    {selectedCrop?.crop_asset_seed_details?.[0]?.crop_name ||
+                      "Crop"}
+                  </span>
+                </div>
+              }
+              <small className="font-medium text-gray-500 tracking-wide">
                 Variety:{" "}
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
@@ -289,12 +318,9 @@ const CropsPage = () => {
             </h1>
           }
           closeModal={() => setIsStageOneModal(false)}
-          widthValue={"w-full min-w-sm md:max-w-xl"}
+          widthValue={"w-full min-w-sm md:max-w-3xl"}
         >
-          <AddCropDetailsModal
-            selectedCrop={selectedCrop!}
-            onSuccess={runFunctionOnSuccess}
-          />
+          <AddCropDetailsModal crop={selectedCrop!} onClose={runOnClose} />
         </GenericModal>
       )}
 
@@ -332,10 +358,7 @@ const CropsPage = () => {
           }`}
           height={true}
         >
-          <CropStageModalTabs
-            stageOneData={selectedCrop}
-            stageTwoData={selectedCrop?.crop_id}
-          />
+          <CropStageModalTabs stageOneData={selectedCrop} />
         </GenericModal>
       )}
 

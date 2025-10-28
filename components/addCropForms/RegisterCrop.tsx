@@ -103,7 +103,7 @@ export interface LandData {
   mobile_number?: string;
 }
 
-interface CropType {
+export interface CropType {
   crop_name: string;
   crop_type_id: number;
 }

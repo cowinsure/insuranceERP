@@ -1,7 +1,11 @@
 "use client";
 
+import DropdownField from "@/components/DropDownField";
 import InputField from "@/components/InputField";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { CropType } from "../RegisterCrop";
+import useApi from "@/hooks/use_api";
+import { toast } from "sonner";
 
 interface HistoryProps {
   data: any;
@@ -9,13 +13,64 @@ interface HistoryProps {
 }
 
 const History = ({ data, onChange }: HistoryProps) => {
-  // Handle input changes and notify parent
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    // Parse number inputs
-    const val = type === "number" ? Number(value) : value;
-    onChange({ ...data, [name]: val });
+  const { get } = useApi();
+  const [cropType, setCropType] = useState<CropType[]>([]);
+
+  useEffect(() => {
+    getCropType();
+  }, []);
+
+  const getCropType = async () => {
+    try {
+      const response = await get("/cms/crop-type-service", {
+        params: { start_record: 1, page_size: 10, crop_id: -1 },
+      });
+      if (response.status === "success") setCropType(response.data);
+    } catch (error) {
+      toast.error(`${error}`);
+    }
   };
+
+  // Handle input changes and notify parent
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const val = type === "number" ? Number(value) : value;
+    console.log("From history form:", name, val);
+
+    // When dropdown changes, also sync crop name
+    if (name === "last_year_crop_type_id") {
+      const selectedCrop = cropType.find(
+        (crop) => crop.crop_type_id === Number(val)
+      );
+      onChange({
+        ...data,
+        last_year_crop_type_id: Number(val),
+        last_year_crop_type_name: selectedCrop ? selectedCrop.crop_name : "",
+      });
+    } else {
+      onChange({ ...data, [name]: val });
+    }
+  };
+
+  // Auto-sync crop name if ID exists and list has loaded
+  useEffect(() => {
+    if (data.last_year_crop_type_id && cropType.length > 0) {
+      const selected = cropType.find(
+        (c) => c.crop_type_id === data.last_year_crop_type_id
+      );
+      if (
+        selected &&
+        selected.crop_name !== data.last_year_crop_type_name
+      ) {
+        onChange({
+          ...data,
+          last_year_crop_type_name: selected.crop_name,
+        });
+      }
+    }
+  }, [data.last_year_crop_type_id, cropType]);
 
   return (
     <form className="p-3">
@@ -33,13 +88,18 @@ const History = ({ data, onChange }: HistoryProps) => {
           onChange={handleChange}
         />
 
-        <InputField
-          placeholder="Ex - Aman"
+        {/* ✅ FIXED: value should use ID, not name */}
+        <DropdownField
           label="Last Year's Crop"
           id="lastYearsCrop"
-          name="last_year_crop_type_name"
-          value={data.last_year_crop_type_name || ""}
+          name="last_year_crop_type_id"
+          value={data.last_year_crop_type_id || ""}
           onChange={handleChange}
+          required
+          options={cropType.map((crop) => ({
+            value: crop.crop_type_id,
+            label: crop.crop_name,
+          }))}
         />
 
         <InputField

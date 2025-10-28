@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
+import Loading from "@/components/utils/Loading";
 
 interface PestsDiseaseProps {
   data: { pestIds?: number[]; diseaseIds?: number[] };
@@ -14,7 +15,7 @@ interface PestsDiseaseProps {
 }
 
 const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
-  const { get } = useApi();
+  const { get, loading } = useApi();
 
   const [pestOptions, setPestOptions] = useState<
     { id: number; name: string }[]
@@ -128,26 +129,32 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
 
-          {pestOptions.map((pest) => (
-            <div
-              key={pest.id}
-              className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
-            >
-              <input
-                type="checkbox"
-                id={`pest-${pest.id}`} // ✅ add this line
-                checked={selectedPests.includes(pest.id)}
-                onChange={() => togglePest(pest.id)}
-                className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
-              />
-              <label
-                htmlFor={`pest-${pest.id}`} // ✅ connect label to input
-                className="cursor-pointer"
-              >
-                {pest.name}
-              </label>
-            </div>
-          ))}
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              {pestOptions.map((pest) => (
+                <div
+                  key={pest.id}
+                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                >
+                  <input
+                    type="checkbox"
+                    id={`pest-${pest.id}`} // ✅ add this line
+                    checked={selectedPests.includes(pest.id)}
+                    onChange={() => togglePest(pest.id)}
+                    className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
+                  />
+                  <label
+                    htmlFor={`pest-${pest.id}`} // ✅ connect label to input
+                    className="cursor-pointer"
+                  >
+                    {pest.name}
+                  </label>
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Disease Section */}
@@ -157,26 +164,32 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
 
-          {diseaseOptions.map((disease) => (
-            <div
-              key={disease.id}
-              className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
-            >
-              <input
-                type="checkbox"
-                id={`disease-${disease.id}`} // ✅ add this line
-                checked={selectedDiseases.includes(disease.id)}
-                onChange={() => toggleDisease(disease.id)}
-                className="cursor-pointer accent-green-600 custom-checkbox mt-2"
-              />
-              <label
-                htmlFor={`disease-${disease.id}`} // ✅ connect label to input
-                className="cursor-pointer"
-              >
-                {disease.name}
-              </label>
-            </div>
-          ))}
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              {diseaseOptions.map((disease) => (
+                <div
+                  key={disease.id}
+                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                >
+                  <input
+                    type="checkbox"
+                    id={`disease-${disease.id}`} // ✅ add this line
+                    checked={selectedDiseases.includes(disease.id)}
+                    onChange={() => toggleDisease(disease.id)}
+                    className="cursor-pointer accent-green-600 custom-checkbox mt-2"
+                  />
+                  <label
+                    htmlFor={`disease-${disease.id}`} // ✅ connect label to input
+                    className="cursor-pointer"
+                  >
+                    {disease.name}
+                  </label>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

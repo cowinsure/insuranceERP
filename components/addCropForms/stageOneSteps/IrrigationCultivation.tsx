@@ -132,7 +132,7 @@ const IrrigationCultivation = ({
       [`${name}_name`]: selectedLabel,
     });
   };
-
+console.log(cultivationSystemOptions);
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">

@@ -122,7 +122,6 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
       const selected = seedVarietyOptions.find((v) => v.value === value);
       current.seed_variety_name = selected?.label || "";
     }
-    console.log(seedCompanyTypeOptions);
     if (field === "seed_company_type_id") {
       const selected = seedCompanyTypeOptions.find((v) => v.value === value);
       current.seed_company_type_name = selected?.label || "";
@@ -137,7 +136,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     onChange(updated);
   };
 
-  console.log("Seed Details Data:", data);
+  // console.log("Seed Details Data:", data);
 
   return (
     <div className="p-3">

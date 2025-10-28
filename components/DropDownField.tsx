@@ -20,7 +20,6 @@ function renderStyledText(text: string) {
   const index = match.index;
   const englishPart = text.slice(0, index).trim();
   const bengaliPart = text.slice(index).trim();
-console.log(englishPart);
   return (
     <>
       {englishPart} <span className="">{bengaliPart}</span>

@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { MapPin, Calendar, Edit, Trash2 } from "lucide-react"
+import { MapPin, Calendar, Edit, Trash2, User, Phone, Ruler } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import { GoogleMap, InfoWindow, Marker, Polygon, useJsApiLoader } from "@react-google-maps/api"
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
@@ -61,6 +62,10 @@ interface Plot {
   nMarkDist?: number | null
   eMarkDist?: number | null
   intersection?: Coordinate | null
+  length?: string | null
+  width?: string | null
+  farmer_name: string | null,
+  mobile_number: string | null,
 }
 
 interface PlotDetailsDialogProps {
@@ -110,6 +115,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
   const [showApiKeyInput, setShowApiKeyInput] = useState(false)
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null)
   const [watchId, setWatchId] = useState<number | null>(null)
+  const [showMyLocation, setShowMyLocation] = useState<boolean>(false)
   const [openInfoFor, setOpenInfoFor] = useState<string | null>(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -123,9 +129,17 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
     }
   }, [open, plot, apiKey])
 
-  // Real-time location tracking
+  // Real-time location tracking — only active when user enables the toggle
   useEffect(() => {
-    if (open && navigator.geolocation) {
+    if (open && navigator.geolocation && showMyLocation) {
+      // get current position once
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        },
+        () => setUserLocation(null)
+      )
+
       const id = navigator.geolocation.watchPosition(
         (pos) => {
           setUserLocation({
@@ -140,12 +154,28 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
       )
       setWatchId(id)
       return () => {
-        if (watchId !== null) {
-          navigator.geolocation.clearWatch(watchId)
+        try {
+          navigator.geolocation.clearWatch(id)
+        } catch (e) {
+          /* ignore */
         }
+        setWatchId(null)
       }
     }
-  }, [open])
+
+    // if toggle is off or dialog closed, clear any existing watch and userLocation
+    if (!showMyLocation) {
+      setUserLocation(null)
+      if (watchId !== null && navigator.geolocation) {
+        try {
+          navigator.geolocation.clearWatch(watchId)
+        } catch (e) {
+          /* ignore */
+        }
+        setWatchId(null)
+      }
+    }
+  }, [open, showMyLocation])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -163,6 +193,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
   const handleApiKeySubmit = () => {
     if (apiKey.trim()) {
       setShowApiKeyInput(false)
+      
     }
   }
 
@@ -194,32 +225,61 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
             {/* <img src={plot.imageUrl || "/placeholder.svg"} alt={plot.plotName} className="w-full h-full object-cover" /> */}
           </div>
 
-          {/* Plot Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Land Information */}
+          <div className="grid grid-cols-1 md:grid-rows-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Plot Information</CardTitle>
+                <CardTitle className="text-lg">Land Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Area:</span>
-                  <span className="font-medium">{plot.area}</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Farmer</span>
+                    </div>
+                    <span className="font-medium">{plot.farmer_name ?? "-"}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Phone</span>
+                    </div>
+                    <span className="font-medium">{plot.mobile_number ?? "-"}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Ruler className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Length</span>
+                    </div>
+                    <span className="font-medium">{plot.length ?? "-"}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Ruler className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Width</span>
+                    </div>
+                    <span className="font-medium">{plot.width ?? "-"}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span className="text-muted-foreground">Total Points:</span>
                   <span className="font-medium">{plot.coordinates.length}</span>
-                </div>
-                <div className="flex justify-between">
+                </div> */}
+                {/* <div className="flex justify-between">
                   <span className="text-muted-foreground">Created:</span>
                   <span className="font-medium flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {new Date(plot.createdAt).toLocaleDateString()}
                   </span>
-                </div>
-                <div className="flex justify-between">
+                </div> */}
+                {/* <div className="flex justify-between">
                   <span className="text-muted-foreground">Plot ID:</span>
                   <span className="font-medium">{plot.id}</span>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
 
@@ -247,6 +307,10 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Plot Location</CardTitle>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Show my location</span>
+                <Switch checked={showMyLocation} onCheckedChange={(v) => setShowMyLocation(Boolean(v))} />
+              </div>
             </CardHeader>
             <CardContent>
               {isLoaded ? (
@@ -266,7 +330,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
                     zoom={15}
                   >
                     {/* User real-time GPS marker */}
-                    {userLocation && (
+                    {showMyLocation && userLocation && (
                       <Marker
                         position={userLocation}
                         icon={{

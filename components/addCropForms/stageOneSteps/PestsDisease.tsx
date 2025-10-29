@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
+import Loading from "@/components/utils/Loading";
 
 interface PestsDiseaseProps {
   data: { pestIds?: number[]; diseaseIds?: number[] };
@@ -14,11 +15,12 @@ interface PestsDiseaseProps {
 }
 
 const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
-  const { get } = useApi();
+  const { get, loading } = useApi();
 
   const [pestOptions, setPestOptions] = useState<
     { id: number; name: string }[]
   >([]);
+
   const [diseaseOptions, setDiseaseOptions] = useState<
     { id: number; name: string }[]
   >([]);
@@ -71,8 +73,9 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     fetchOptions();
   }, [get]);
 
-  // Selecte pest
+  // Select pest
   const togglePest = (id: number) => {
+    console.log("Toggling pest ID:", id);
     const updated = selectedPests.includes(id)
       ? selectedPests.filter((i) => i !== id)
       : [...selectedPests, id];
@@ -84,7 +87,13 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       selectedDiseases.includes(d.id)
     );
 
-    onChange(updated, selectedDiseases, pestDetails, diseaseDetails);
+    // ✅ Send IDs + names for preview
+    onChange(
+      updated,
+      selectedDiseases,
+      pestDetails.map((p) => ({ id: p.id, name: p.name })),
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
+    );
   };
 
   // Select disease
@@ -98,10 +107,17 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     const pestDetails = pestOptions.filter((p) => selectedPests.includes(p.id));
     const diseaseDetails = diseaseOptions.filter((d) => updated.includes(d.id));
 
-    onChange(selectedPests, updated, pestDetails, diseaseDetails);
+    onChange(
+      selectedPests,
+      updated,
+      pestDetails.map((p) => ({ id: p.id, name: p.name })),
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
+    );
   };
 
-  console.log(selectedDiseases);
+  console.log(pestOptions);
+  console.log("Data from parent", data);
+  console.log(selectedPests);
   return (
     <div className="p-3">
       <h2 className="text-xl font-semibold mb-5 underline text-center">
@@ -116,23 +132,32 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
 
-          {pestOptions.map((pest) => (
-            <div key={pest.id} className="flex items-center gap-2 space-y-2 font-semibold text-[15px]">
-              <input
-                type="checkbox"
-                id={`pest-${pest.id}`} // ✅ add this line
-                checked={selectedPests.includes(pest.id)}
-                onChange={() => togglePest(pest.id)}
-                className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
-              />
-              <label
-                htmlFor={`pest-${pest.id}`} // ✅ connect label to input
-                className="cursor-pointer"
-              >
-                {pest.name}
-              </label>
-            </div>
-          ))}
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              {pestOptions.map((pest) => (
+                <div
+                  key={pest.id}
+                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                >
+                  <input
+                    type="checkbox"
+                    id={`pest-${pest.id}`} // ✅ add this line
+                    checked={selectedPests.includes(pest.id)}
+                    onChange={() => togglePest(pest.id)}
+                    className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
+                  />
+                  <label
+                    htmlFor={`pest-${pest.id}`} // ✅ connect label to input
+                    className="cursor-pointer"
+                  >
+                    {pest.name}
+                  </label>
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Disease Section */}
@@ -142,23 +167,32 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
 
-          {diseaseOptions.map((disease) => (
-            <div key={disease.id} className="flex items-center gap-2 space-y-2 font-semibold text-[15px]">
-              <input
-                type="checkbox"
-                id={`disease-${disease.id}`} // ✅ add this line
-                checked={selectedDiseases.includes(disease.id)}
-                onChange={() => toggleDisease(disease.id)}
-                className="cursor-pointer accent-green-600 custom-checkbox mt-2"
-              />
-              <label
-                htmlFor={`disease-${disease.id}`} // ✅ connect label to input
-                className="cursor-pointer"
-              >
-                {disease.name}
-              </label>
-            </div>
-          ))}
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              {diseaseOptions.map((disease) => (
+                <div
+                  key={disease.id}
+                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                >
+                  <input
+                    type="checkbox"
+                    id={`disease-${disease.id}`} // ✅ add this line
+                    checked={selectedDiseases.includes(disease.id)}
+                    onChange={() => toggleDisease(disease.id)}
+                    className="cursor-pointer accent-green-600 custom-checkbox mt-2"
+                  />
+                  <label
+                    htmlFor={`disease-${disease.id}`} // ✅ connect label to input
+                    className="cursor-pointer"
+                  >
+                    {disease.name}
+                  </label>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

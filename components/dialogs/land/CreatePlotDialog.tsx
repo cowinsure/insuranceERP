@@ -11,10 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, MapPin, ImageIcon, Trash2, Plus, LocateFixed } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import useApi from "@/hooks/use_api"
 import { GoogleMap, Marker, Polygon, InfoWindow, useJsApiLoader } from "@react-google-maps/api"
 import { LandCoordinatePoint, LandSubmissionModel, LandSuitabilityRemark, normalizeLandSubmission } from "@/components/model/Land/LandSubmissionModel"
+
+
 
 const mapContainerStyle = {
   width: "100%",
@@ -118,8 +121,8 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   )
   const [measureSWSE, setMeasureSWSE] = useState("")
   const [measureSWNW, setMeasureSWNW] = useState("")
-  const [measureNWNE, setMeasureNWNE] = useState("")
-  const [measureSENE, setMeasureSENE] = useState("")
+  const [measureNWNE, setMeasureNWNE] = useState("randomly generated width")
+  const [measureSENE, setMeasureSENE] = useState("randomly generated length")
   const [isGenerating, setIsGenerating] = useState(false)
   // farmers list and selection
   const [farmers, setFarmers] = useState<FarmerProfile[]>([])
@@ -141,6 +144,41 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       f.mobile_number.toLowerCase().includes(q)
     )
   }, [farmers, farmerQuery])
+
+
+  
+
+  useEffect(()=>{
+function generateRandomNumber(maxNumber: number): number {
+  if (maxNumber <= 0) return 0;
+
+  const range = Math.floor(maxNumber * 0.7); // 70% of the limit
+  return Math.floor(Math.random() * range) + 1; // between 1 and range
+}
+    // create random number and asignt it to random length field
+    const randomLength = generateRandomNumber(parseInt(measureSWSE)) + 7;
+    setMeasureSENE(randomLength.toString());
+    console.log("measuring lenght" + randomLength);
+    
+
+  },[measureSWSE]);
+
+
+  useEffect(()=>{
+function generateRandomNumber(maxNumber: number): number {
+   if (maxNumber <= 0) return 0;
+
+  const range = Math.floor(maxNumber * 0.7); // 70% of the limit
+  return Math.floor(Math.random() * range) + 1; // between 1 and range
+}
+    // create random number and asignt it to random length field
+    const randomWidth = generateRandomNumber(parseInt(measureSWNW))+7;
+
+    setMeasureNWNE(randomWidth.toString());
+    console.log("measuring width" + randomWidth);
+    
+
+  },[measureSWNW]);
 
   useEffect(() => {
     // reset focused index when query changes
@@ -169,6 +207,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [plotData, setPlotData] = useState<PlotData | null>(null)
   const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [watchId, setWatchId] = useState<number | null>(null);
+  const [showMyLocation, setShowMyLocation] = useState<boolean>(false);
   const [apiPayload, setApiPayload] = useState<any>(null);
   const { toast } = useToast()
   const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
@@ -246,8 +285,8 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   };
 
   useEffect(() => {
-    if (open && navigator.geolocation) {
-      // Preview map: get current position once
+    // Only fetch once when dialog is open and user enabled the location toggle
+    if (open && navigator.geolocation && showMyLocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setUserLocation({
@@ -260,11 +299,23 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
         }
       );
     }
-  }, [open]);
+    if (!showMyLocation) {
+      // If the toggle is off, clear any stored location
+      setUserLocation(null);
+      if (watchId !== null && navigator.geolocation) {
+        try {
+          navigator.geolocation.clearWatch(watchId);
+        } catch (e) {
+          /* ignore */
+        }
+        setWatchId(null);
+      }
+    }
+  }, [open, showMyLocation]);
 
-  // Real-time location tracking for Plot Location map
+  // Real-time location tracking for Plot Location map (only when user enabled the toggle)
   useEffect(() => {
-    if (showResults && navigator.geolocation) {
+    if (showResults && showMyLocation && navigator.geolocation) {
       const id = navigator.geolocation.watchPosition(
         (pos) => {
           setUserLocation({
@@ -279,12 +330,26 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       );
       setWatchId(id);
       return () => {
-        if (watchId !== null) {
-          navigator.geolocation.clearWatch(watchId);
+        try {
+          navigator.geolocation.clearWatch(id);
+        } catch (e) {
+          /* ignore */
         }
+        setWatchId(null);
       };
     }
-  }, [showResults]);
+    // if conditions not met, ensure any existing watch is cleared
+    return () => {
+      if (watchId !== null && navigator.geolocation) {
+        try {
+          navigator.geolocation.clearWatch(watchId);
+        } catch (e) {
+          /* ignore */
+        }
+        setWatchId(null);
+      }
+    };
+  }, [showResults, showMyLocation]);
 
   const addCoordinate = () => {
     setCoordinates([...coordinates, { lat: "", lng: "" }])
@@ -341,6 +406,28 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       })
       return
     }
+
+    // Validate manual measurements SW->SE and SW->NW
+    const swseVal = Number(measureSWSE)
+    const swnwVal = Number(measureSWNW)
+    if (!measureSWSE.trim() || isNaN(swseVal) || swseVal <= 0) {
+      toast({
+        title: "Invalid measurement",
+        description: "Please enter a valid numeric value (meters) for SW → SE.",
+        variant: "default",
+      })
+      return
+    }
+    if (!measureSWNW.trim() || isNaN(swnwVal) || swnwVal <= 0) {
+      toast({
+        title: "Invalid measurement",
+        description: "Please enter a valid numeric value (meters) for SW → NW.",
+        variant: "default",
+      })
+      return
+    }
+
+    
 
     if (!validateCoordinates()) {
       toast({
@@ -668,6 +755,8 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
       }
     }
 
+
+
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="w-screen max-w-none max-h-[95vh] overflow-y-auto">
@@ -870,15 +959,53 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 {/* Land Measurements */}
                 <div className="space-y-2">
                   <Label>Land Measurements</Label>
+                  
+                  <div className="flex flex-row gap-4">
+
+
+                 
+                  <div className="">
                   <div className="text-sm text-muted-foreground">SW → SE (meters)</div>
-                  <Input placeholder="Enter measurement" value={measureSWSE} onChange={(e) => setMeasureSWSE(e.target.value)} />
-                  <div className="text-sm text-muted-foreground">SE → NE (meters)</div>
+                  <Input placeholder="Enter measurement" value={measureSWSE} onChange={(e) =>
+                   {
+                        setMeasureSWSE(e.target.value)
+                     
+                    }
+                  } />
+                  </div>
+
+                   <div>
+                  <div className="text-sm text-muted-foreground">Length (meters)</div>
+                  <Input placeholder="Random Length" disabled value={measureSENE} onChange={(e) => setMeasureSENE(e.target.value)} />
+                  </div>
+
+                   </div>
+                  
+                 
+                  {/* <div className="text-sm text-muted-foreground">SE → NE (meters)</div>
                   <Input placeholder="Enter measurement" value={measureSENE} onChange={(e) => setMeasureSENE(e.target.value)} />
+                  
                   <div className="text-sm text-muted-foreground"> NE → NW (meters)</div>
-                  <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e) => setMeasureNWNE(e.target.value)} />
-                  <div className="text-sm text-muted-foreground">NW → SW (meters)</div>
+                  <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e) => setMeasureNWNE(e.target.value)} /> */}
+                    
+
+                    <div className="flex flex-row gap-4">
+
+<div>
+                  <div className="text-sm text-muted-foreground">SW  → NW (meters)</div>
                   <Input placeholder="Enter measurement" value={measureSWNW} onChange={(e) => setMeasureSWNW(e.target.value)} />
-                </div>
+</div>
+
+                  <div>
+                   <div className="text-sm text-muted-foreground"> Width (meters)</div>
+                  <Input placeholder="Random Width" disabled value={measureNWNE} onChange={(e) => setMeasureNWNE(e.target.value)} />
+                  </div>
+                  </div>
+                  
+                  </div>
+
+               
+
 
                 {/* Coordinates Input */}
                 <div className="space-y-4">
@@ -939,11 +1066,15 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
                 {isLoaded && (
                   <div className="mt-4">
                     <Card>
-                      <CardHeader>
+                      <CardHeader className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
                           <MapPin className="h-5 w-5" />
                           Map Preview
                         </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Show my location</span>
+                          <Switch checked={showMyLocation} onCheckedChange={(v) => setShowMyLocation(Boolean(v))} />
+                        </div>
                       </CardHeader>
                       <CardContent>
                         <GoogleMap

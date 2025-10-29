@@ -6,16 +6,13 @@ interface StageOneDataProps {
 }
 
 const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
-  const safeArray = (arr: any[]) => (Array.isArray(arr) ? arr : []);
-  console.log(data);
+  const safeArray = (arr: any) => (Array.isArray(arr) ? arr : []);
+
   return (
-    <div className="space-y-6 text-gray-700 max-h-[] overflow-y-auto">
+    <div className="space-y-6 text-gray-700 overflow-y-auto max-h-[70vh]">
       {/* 🌱 Seed Information */}
-      <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Seed Information
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Section title="Seed Information">
+        <Grid>
           <InputField
             label="Seed Name"
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_common_name}
@@ -34,15 +31,12 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             label="Seed Type"
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_type_name}
           />
-        </div>
-      </section>
+        </Grid>
+      </Section>
 
       {/* 💧 Irrigation & Cultivation */}
-      <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Irrigation & Cultivation
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Section title="Irrigation & Cultivation">
+        <Grid>
           <InputField
             label="Irrigation Facility"
             value={
@@ -71,15 +65,12 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
                 ?.crop_land_suitability_name
             }
           />
-        </div>
-      </section>
+        </Grid>
+      </Section>
 
       {/* 🌾 Crop History */}
-      <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Crop History
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Section title="Crop History">
+        <Grid>
           <InputField
             label="Immediate Previous Crop"
             value={
@@ -107,13 +98,13 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               data.crop_asset_previous_season_history_details
             )[0]?.last_year_production?.toString()}
           />
-          <InputField
+          {/* <InputField
             label="Sowing Date"
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.sowing_date
             }
-          />
+          /> */}
           <InputField
             label="Seed Used Last Year"
             value={
@@ -128,42 +119,33 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
                 ?.reason_for_changing_seed
             }
           />
-        </div>
-      </section>
+        </Grid>
+      </Section>
 
       {/* 🌦️ Weather Effects */}
-      <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Weather Effects
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ArrayDisplay
-            title="Weather Events"
-            items={safeArray(data.crop_asset_weather_effect_history).map(
-              (w: any) => ({
-                name: w?.weather_effect_type_name || "Unknown Weather Effect",
-                // include remarks and created_at if available
-                remarks: w?.remarks,
-                date: w?.created_at || w?.modified_at || undefined,
-              })
-            )}
-          />
-        </div>
-      </section>
+      <Section title="Weather Effects">
+        <ArrayDisplay
+          title="Weather Events"
+          items={safeArray(data.crop_asset_weather_effect_history).map(
+            (w: any) => ({
+              name: w?.weather_effect_type_name || "",
+              remarks: w?.remarks,
+              date: w?.created_at || w?.modified_at,
+            })
+          )}
+        />
+      </Section>
 
       {/* 🐛 Pest & Disease Attacks */}
-      <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Pest & Disease Attacks
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Section title="Pest & Disease Attacks">
+        <Grid>
           <ArrayDisplay
             title="Pest Attacks"
             items={safeArray(data.crop_asset_pest_attack_details).map(
               (p: any) => ({
-                name: p?.pest_attack_observations_type_name || "Unknown Pest",
+                name: p?.pest_attack_observations_type_name || null,
                 remarks: p?.remarks,
-                date: p?.attack_date || p?.created_at || undefined,
+                date: p?.attack_date || p?.created_at,
               })
             )}
           />
@@ -172,42 +154,54 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             items={safeArray(data.crop_asset_disease_attack_details).map(
               (d: any) => ({
                 name:
-                  d?.disease_attack_observations_type_name || "Unknown Disease",
+                  d?.disease_attack_observations_type_name || "Not Provided",
                 remarks: d?.remarks,
-                date: d?.attack_date || d?.created_at || undefined,
+                date: d?.attack_date || d?.created_at,
               })
             )}
           />
-        </div>
-      </section>
+        </Grid>
+      </Section>
 
       {/* 🧪 Chemicals Used */}
-      <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Inputs Used (Fertilizers & Pesticides)
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ArrayDisplay
-            title="Chemicals"
-            items={safeArray(data.crop_asset_chemical_usage_details).map(
-              (c: any) => ({
-                name: c?.chemical_name || "Unknown Chemical",
-                quantity:
-                  c?.qty || c?.qty === 0
-                    ? `${c.qty} ${c.qty_unit || ""}`.trim()
-                    : undefined,
-                remarks: c?.remarks,
-                date: c?.created_at || undefined,
-              })
-            )}
-          />
-        </div>
-      </section>
+      <Section title="Inputs Used (Fertilizers & Pesticides)">
+        <ArrayDisplay
+          title="Chemicals"
+          items={safeArray(data.crop_asset_chemical_usage_details).map(
+            (c: any) => ({
+              name: c?.chemical_name || "Not Provided",
+              quantity:
+                c?.qty || c?.qty === 0
+                  ? `${c.qty} ${c.qty_unit || ""}`.trim()
+                  : undefined,
+              remarks: c?.remarks,
+              date: c?.created_at,
+            })
+          )}
+        />
+      </Section>
     </div>
   );
 };
 
-/* ---------- Reusable Field Components ---------- */
+/* ---------- Reusable Subcomponents ---------- */
+
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <section className="border rounded-lg p-3">
+    <h2 className="text-lg font-semibold mb-3 text-green-800">{title}</h2>
+    {children}
+  </section>
+);
+
+const Grid = ({ children }: { children: React.ReactNode }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
+);
 
 const InputField = ({ label, value }: { label: string; value: any }) => (
   <div className="flex flex-col">
@@ -229,31 +223,34 @@ const ArrayDisplay = ({
   title: string;
   items: { name: string; quantity?: string; remarks?: string; date?: string }[];
 }) => {
+  const hasData = Array.isArray(items) && items.some((i) => i && i.name);
+  console.log(hasData);
+  console.log(items);
+
   return (
     <div>
       <h3 className="font-medium mb-2 text-gray-600">{title}</h3>
-      {items && items.length > 0 ? (
+      {!hasData ? (
+        <p className="text-gray-400 text-sm italic">No data</p>
+      ) : (
         <ul className="space-y-1">
           {items.map((item, i) => (
             <li
               key={i}
-              className="text-sm bg-green-50 border border-gray-200 p-2 rounded"
+              className={`${
+                hasData
+                  ? "text-sm bg-blue-50 border border-gray-200 p-2 rounded"
+                  : "bg-transparent"
+              }`}
             >
               <div className="flex items-baseline justify-between gap-2">
                 <div>{item.name}</div>
-                {/* {item.date && (
-                  <div className="text-xs text-gray-400 ml-2">
-                    {new Date(item.date).toLocaleString()}
-                  </div>
-                )} */}
-
                 {item.quantity && (
                   <div className="text-gray-500 font-semibold">
                     {item.quantity}
                   </div>
                 )}
               </div>
-
               {item.remarks && (
                 <div className="text-xs text-gray-500 italic mt-1">
                   Remarks: {item.remarks}
@@ -262,8 +259,6 @@ const ArrayDisplay = ({
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-gray-400 text-sm italic">No data</p>
       )}
     </div>
   );

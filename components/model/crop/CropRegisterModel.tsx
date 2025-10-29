@@ -79,7 +79,7 @@ export interface CropAssetPestAttackDetail {
 
 export interface CropAssetPreviousSeasonHistoryDetail {
   immediate_previous_crop: string;
-  harvest_date: string;
+  harvest_date?: string;
   last_year_crop_type_id: number;
   last_year_production: number;
   sowing_date: string;

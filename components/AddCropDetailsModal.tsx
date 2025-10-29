@@ -468,6 +468,8 @@ export default function AddCropDetailsModal({
       await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });
+
+      localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
       toast.success("Crop data submitted successfully!");
       onClose();
     } catch (err) {

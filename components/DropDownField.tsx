@@ -57,7 +57,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
           className={clsx(
             "p-2 border rounded-md bg-gray-50 font-semibold",
             "focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-blue-50",
-            "hover:bg-blue-50 hover:border-blue-300",
+            "hover:bg-blue-50 hover:border-blue-300 cursor-pointer",
             error ? "border-red-600" : "border-gray-300"
           )}
         >

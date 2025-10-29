@@ -400,7 +400,7 @@ const StageTwo = ({ selectedCrop, onSuccess }: StageTwoProps) => {
     // Final save before submission
     saveData(data);
     toast.success("Stage Two data saved successfully!");
-    onSuccess?.()
+    onSuccess?.();
   };
 
   return (

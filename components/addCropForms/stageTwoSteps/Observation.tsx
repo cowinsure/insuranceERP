@@ -12,6 +12,7 @@ interface ObservationProps {
 
 const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   const [selectedVariety, setSelectedVariety] = useState("");
+  const [remarks, setRemarks] = useState(""); // State for remarks
 
   const varietyDescriptions: Record<string, string> = {
     "Local variety":
@@ -29,8 +30,15 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
     });
   };
 
+  const handleManageableChange = (value: string) => {
+    onChange("observationData", { manageable: value });
+    if (value === "No") {
+      setRemarks(""); // Reset remarks when user selects "No"
+    }
+  };
+
   return (
-    <div className="p-4 md:p-6 bg-white rounded-xl shadow-inner">
+    <div className="p-4 md:p-6 bg-white rounded-xl space-y-5">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
         Harvesting Observations
       </h2>
@@ -57,7 +65,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
 
       {/* Good Agricultural Practices */}
       <div className="mt-4">
-        <label className="block text-gray-700 font-medium mb-2">
+        <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
           Good Agricultural Practices
         </label>
         <textarea
@@ -74,7 +82,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
 
       {/* Manageable */}
       <div className="mt-4">
-        <label className="block text-gray-700 font-medium mb-2">
+        <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
           Was it Manageable?
         </label>
         <div className="flex gap-6">
@@ -85,15 +93,28 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
                 name="manageable"
                 value={val}
                 checked={data.observationData.manageable === val}
-                onChange={(e) =>
-                  onChange("observationData", { manageable: e.target.value })
-                }
+                onChange={(e) => handleManageableChange(e.target.value)}
               />
               {val}
             </label>
           ))}
         </div>
       </div>
+
+      {/* Remarks / Comments for "No" */}
+      {data.observationData.manageable === "No" && (
+        <div className="mt-4">
+          <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
+            Remarks / Comments
+          </label>
+          <textarea
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+            placeholder="Please provide remarks or comments"
+            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none min-h-[80px]"
+          />
+        </div>
+      )}
 
       {/* Harvesting Timing */}
       <DropdownField

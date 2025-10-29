@@ -7,7 +7,7 @@ interface StageOneDataProps {
 
 const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
   const safeArray = (arr: any[]) => (Array.isArray(arr) ? arr : []);
-console.log(data)
+  console.log(data);
   return (
     <div className="space-y-6 text-gray-700 max-h-[] overflow-y-auto">
       {/* 🌱 Seed Information */}
@@ -248,7 +248,9 @@ const ArrayDisplay = ({
                 )} */}
 
                 {item.quantity && (
-                  <div className="text-gray-500 font-semibold">{item.quantity}</div>
+                  <div className="text-gray-500 font-semibold">
+                    {item.quantity}
+                  </div>
                 )}
               </div>
 

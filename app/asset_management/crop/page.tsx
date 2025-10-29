@@ -158,10 +158,13 @@ const CropsPage = () => {
           </CardTitle>
           <p className="text-sm text-gray-600">{crops.length} crops found</p>
         </div>
-        <div className="overflow-x-auto">
+        <div className="max-h-[550px] overflow-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  SL
+                </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Crop Name
                 </th>
@@ -202,6 +205,7 @@ const CropsPage = () => {
                         className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
                         style={{ animationDelay: `${idx * 100}ms` }}
                       >
+                        <td className="py-4 px-4">{idx + 1}</td>
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
                             {seed?.crop_name || "N/A"}

@@ -338,7 +338,7 @@ console.log(grouped_ref);
                     >
                       <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
                         <img
-                          src={'https://dev-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
+                          src={'https://insuranceportal-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
                           alt={plot.land_name}
                           className="w-auto object-fit"
                         />

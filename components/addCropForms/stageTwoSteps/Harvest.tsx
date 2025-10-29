@@ -9,8 +9,8 @@ interface HarvestProps {
 
 const Harvest = ({ data, onChange }: HarvestProps) => {
   return (
-    <div className="space-y-5 bg-white p-4 rounded-lg">
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">
+    <div className="space-y-5 bg-white rounded-lg p-3">
+      <h2 className="text-xl font-semibold mb-5 text-center underline">
         Harvest Details
       </h2>
       <InputField

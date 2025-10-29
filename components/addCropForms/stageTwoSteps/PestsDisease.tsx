@@ -1,53 +1,88 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-interface ObservationItem {
-  id: number;
-  label: string;
-}
+import React, { useEffect, useState } from "react";
+import useApi from "@/hooks/use_api";
+import Loading from "@/components/utils/Loading";
+import { StageTwoData } from "../StageTwo";
 
 interface PestsDiseaseProps {
-  pests: Record<string, boolean>; // boolean object from StageTwo
-  diseases: Record<string, boolean>;
-  onChange: (data: {
-    pests: Record<string, boolean>;
-    diseases: Record<string, boolean>;
-  }) => void;
+  data: any;
+  onChange: (field: keyof StageTwoData, value: any) => void;
 }
 
-const PestsDisease = ({ pests, diseases, onChange }: PestsDiseaseProps) => {
-  // Dummy options
-  const pestOptions: ObservationItem[] = [
-    { id: 1, label: "Stem Borer" },
-    { id: 2, label: "Leaf Folder" },
-    { id: 3, label: "Brown Planthopper" },
-    { id: 4, label: "Green Leafhopper" },
-    { id: 5, label: "Stink Bug" },
-    { id: 6, label: "Others" },
-    { id: 7, label: "None" },
-  ];
+const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
+  const { get, loading } = useApi();
 
-  const diseaseOptions: ObservationItem[] = [
-    { id: 1, label: "Leaf Blast" },
-    { id: 2, label: "Bacterial Leaf Blight" },
-    { id: 3, label: "Sheath Blight" },
-    { id: 4, label: "Bakanae" },
-    { id: 5, label: "Brown Spot" },
-    { id: 6, label: "Leaf Scald" },
-    { id: 7, label: "Hispa" },
-    { id: 8, label: "Tungro" },
-    { id: 9, label: "None" },
-  ];
+  const [pestOptions, setPestOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [diseaseOptions, setDiseaseOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
 
-  const toggleCheckbox = (type: "pest" | "disease", label: string) => {
-    if (type === "pest") {
-      const updated = { ...pests, [label]: !pests[label] };
-      onChange({ pests: updated, diseases });
-    } else {
-      const updated = { ...diseases, [label]: !diseases[label] };
-      onChange({ pests, diseases: updated });
-    }
+  const [selectedPests, setSelectedPests] = useState<number[]>(
+    data.pestIds || []
+  );
+  const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
+    data.diseaseIds || []
+  );
+
+  /** Fetch pest & disease options from API */
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [pestRes, diseaseRes] = await Promise.all([
+          get("/cms/crop-pest-attack-observations-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+          get("/cms/crop-disease-attack-observations-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+        ]);
+
+        if (pestRes.status === "success" && Array.isArray(pestRes.data)) {
+          setPestOptions(
+            pestRes.data.map((item: any) => ({
+              id: item.id,
+              name: item.pest_attack_observations_type_name,
+            }))
+          );
+        }
+
+        if (diseaseRes.status === "success" && Array.isArray(diseaseRes.data)) {
+          setDiseaseOptions(
+            diseaseRes.data.map((item: any) => ({
+              id: item.id,
+              name: item.disease_attack_observations_type_name,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching pest/disease data:", err);
+      }
+    };
+
+    fetchOptions();
+  }, [get]);
+
+  /** Handle pest toggle */
+  const togglePest = (id: number) => {
+    const updated = selectedPests.includes(id)
+      ? selectedPests.filter((pid) => pid !== id)
+      : [...selectedPests, id];
+
+    setSelectedPests(updated);
+    onChange("pestIds", updated);
+  };
+
+  /** Handle disease toggle */
+  const toggleDisease = (id: number) => {
+    const updated = selectedDiseases.includes(id)
+      ? selectedDiseases.filter((did) => did !== id)
+      : [...selectedDiseases, id];
+
+    setSelectedDiseases(updated);
+    onChange("diseaseIds", updated);
   };
 
   return (
@@ -59,44 +94,68 @@ const PestsDisease = ({ pests, diseases, onChange }: PestsDiseaseProps) => {
       <div className="space-y-6 max-h-[500px] overflow-auto">
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
-          <h3 className="font-semibold text-base">
-            Pest Attack Observations (Multiple Selection)
+          <h3 className="font-semibold">
+            Pest Attack Observations{" "}
+            <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
-          {pestOptions.map((p) => (
-            <label
-              key={p.id}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={!!pests[p.label]}
-                onChange={() => toggleCheckbox("pest", p.label)}
-                className="accent-blue-600 custom-checkbox"
-              />
-              {p.label}
-            </label>
-          ))}
+
+          {loading ? (
+            <Loading />
+          ) : (
+            pestOptions.map((pest) => (
+              <div
+                key={pest.id}
+                className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+              >
+                <input
+                  type="checkbox"
+                  id={`pest-${pest.id}`}
+                  checked={selectedPests.includes(pest.id)}
+                  onChange={() => togglePest(pest.id)}
+                  className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
+                />
+                <label
+                  htmlFor={`pest-${pest.id}`}
+                  className="cursor-pointer flex items-center gap-2"
+                >
+                  {pest.name}
+                </label>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Disease Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
-          <h3 className="font-semibold text-base">
-            Disease Attack Observations (Multiple Selection)
+          <h3 className="font-semibold">
+            Disease Attack Observations{" "}
+            <span className="text-sm text-gray-400">(Multiple Selection)</span>
           </h3>
-          {diseaseOptions.map((d) => (
-            <label
-              key={d.id}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={!!diseases[d.label]}
-                onChange={() => toggleCheckbox("disease", d.label)}
-                className="accent-green-600 custom-checkbox"
-              />
-              {d.label}
-            </label>
-          ))}
+
+          {loading ? (
+            <Loading />
+          ) : (
+            diseaseOptions.map((disease) => (
+              <div
+                key={disease.id}
+                className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+              >
+                <input
+                  type="checkbox"
+                  id={`disease-${disease.id}`}
+                  checked={selectedDiseases.includes(disease.id)}
+                  onChange={() => toggleDisease(disease.id)}
+                  className="cursor-pointer accent-green-600 custom-checkbox mt-2"
+                />
+                <label
+                  htmlFor={`disease-${disease.id}`}
+                  className="cursor-pointer flex items-center gap-2"
+                >
+                  {disease.name}
+                </label>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

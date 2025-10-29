@@ -178,7 +178,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
                 >
                   <input
                     type="checkbox"
-                    id={`disease-${disease.id}`} // ✅ add this line
+                    id={`disease-${disease.id}`}
                     checked={selectedDiseases.includes(disease.id)}
                     onChange={() => toggleDisease(disease.id)}
                     className="cursor-pointer accent-green-600 custom-checkbox mt-2"

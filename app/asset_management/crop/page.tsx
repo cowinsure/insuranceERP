@@ -344,7 +344,7 @@ const CropsPage = () => {
             </h1>
           }
           closeModal={() => setIsStageTwoModal(false)}
-          widthValue={"w-full min-w-sm md:max-w-xl"}
+          widthValue={"w-full min-w-sm md:max-w-3xl"}
         >
           <StageTwo
             selectedCrop={selectedCrop!}

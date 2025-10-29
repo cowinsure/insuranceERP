@@ -375,17 +375,7 @@ const StageTwo = ({ selectedCrop, onSuccess }: StageTwoProps) => {
             .filter(([_, v]) => v)
             .map(([key], index) => ({ id: index + 1, label: key }));
 
-        return (
-          <PestsDisease
-            pests={data.pestAttack}
-            diseases={data.diseaseAttack}
-            onChange={({ pests, diseases }) => {
-              handleChange("pestAttack", pests);
-              handleChange("diseaseAttack", diseases);
-              saveData({ ...data, pestAttack: pests, diseaseAttack: diseases });
-            }}
-          />
-        );
+        return <PestsDisease data={data} onChange={handleChange} />;
       }
       case 3:
         return <Weather data={data} onChange={handleChange} />;

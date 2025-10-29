@@ -13,11 +13,13 @@ import {
   MoreHorizontal,
   ChevronUp,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import { PiFlowerTulipFill } from "react-icons/pi";
 import { BsClipboardCheck, BsClipboardCheckFill } from "react-icons/bs";
 import { GiCow } from "react-icons/gi";
 import { MdOutlineManageAccounts, MdOutlineSettings } from "react-icons/md";
+import { useAuth } from "@/core/context/AuthContext";
 
 const allNavItems = [
   {
@@ -92,6 +94,11 @@ const MobileNav = () => {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openMore, setOpenMore] = useState(false);
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   const handleToggle = (url: string) => {
     setOpenMenu((prev) => (prev === url ? null : url));
@@ -105,6 +112,8 @@ const MobileNav = () => {
     setOpenMenu(null);
     setOpenMore(false);
   };
+  console.log(pathname);
+  if (pathname === "/login") return null;
 
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-white border-t z-50 shadow-lg lg:hidden">
@@ -202,7 +211,7 @@ const MobileNav = () => {
           </button>
 
           {openMore && (
-            <div className="absolute bottom-14 right-16 translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-md min-w-[180px] animate-slide-up max-h-[250px] overflow-y-auto">
+            <div className="absolute bottom-14 right-16 translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-md min-w-[180px] animate-slide-up max-h-[250px] overflow-y-auto space-y-0.5">
               {moreItems.map((item) => {
                 const isActive =
                   pathname === item.url ||
@@ -221,11 +230,25 @@ const MobileNav = () => {
                         : "text-gray-600 hover:bg-blue-100 hover:text-blue-700"
                     }`}
                   >
-                    {item.icon && <item.icon className="w-4 h-4" />}
+                    {item.icon && <item.icon className="w-5 h-5" />}
                     {item.title}
                   </Link>
                 );
               })}
+
+              <div className="group px-4 py-2">
+                <button
+                  onClick={handleLogout}
+                  className={`flex items-center justify-center gap-2 w-full cursor-pointer font-medium text-red-500 hover:text-white bg-white border border-red-600 hover:bg-red-600 rounded-sm transition duration-200 shadow-sm text-sm py-1`}
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span
+                    className={`transition-all duration-200 whitespace-nowrap`}
+                  >
+                    Logout
+                  </span>
+                </button>
+              </div>
             </div>
           )}
         </div>

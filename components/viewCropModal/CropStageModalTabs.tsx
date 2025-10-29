@@ -82,9 +82,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   console.log("Fetched Land Info:", landInfo);
 
   return (
-    <div className="p-3 text-gray-800">
+    <div className="p-3 text-gray-800 relative">
       {/* Master Details */}
-      <div className="bg-white min-h-[30vh] overflow-y-auto mb-7">
+      <div className="bg-white min-h-[25vh] overflow-y-auto mb-7">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
           Crop Details
@@ -173,9 +173,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
         </div>
       </div>
 
-      <div className="border rounded-xl p-2">
+      <div className="border rounded-xl p-2 sticky top-40">
         {/* Tabs Header */}
-        <div className="relative flex justify-between items-center bg-gray-100 rounded-lg p-1 shadow-sm mb-">
+        <div className="relative flex justify-between items-center bg-gray-100 rounded-lg p-1 shadow-sm">
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -205,7 +205,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           />
         </div>
         {/* Tab Content */}
-        <div className=" bg-white pt-2">
+        <div className=" bg-white pt-2 max-h-[650px] overflow-auto">
           {renderTabContent()}
         </div>
       </div>

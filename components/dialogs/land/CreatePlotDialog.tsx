@@ -1154,7 +1154,7 @@ function generateRandomNumber(maxNumber: number): number {
                     <CardContent>
                       <div className="aspect-video w-full overflow-hidden rounded-lg border">
                         <img
-                          src={plotData?.imageUrl || "/placeholder.svg"}
+                          src={'https://insuranceportal-backend.insurecow.com/'+plotData?.imageUrl || "/placeholder.svg"}
                           alt="Generated plot"
                           className="h-full w-full object-cover"
                         />

@@ -217,7 +217,7 @@ const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotD
           <div className="aspect-video relative overflow-hidden rounded-lg border">
             <Zoom>
               <img
-                src={'https://dev-backend.insurecow.com/'+plot.imageUrl || "/placeholder.svg"}
+                src={'https://insuranceportal-backend.insurecow.com/'+plot.imageUrl || "/placeholder.svg"}
                 alt={plot.plotName}
                 className="w-full h-full object-cover"
               />

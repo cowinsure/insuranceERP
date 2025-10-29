@@ -112,6 +112,8 @@ const MobileNav = () => {
     setOpenMenu(null);
     setOpenMore(false);
   };
+  console.log(pathname);
+  if (pathname === "/login") return null;
 
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-white border-t z-50 shadow-lg lg:hidden">

@@ -4,10 +4,11 @@ import React, { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
+import { StageTwoData } from "../StageTwo";
 
 interface WeatherProps {
   data: any;
-  onChange: (updatedData: any) => void;
+  onChange: (field: keyof StageTwoData, value: any) => void;
 }
 
 interface WeatherOption {
@@ -70,13 +71,13 @@ const Weather = ({ data, onChange }: WeatherProps) => {
       }),
     };
 
-    onChange(updatedData);
+    // onChange(updatedData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log("From weather form:", name, value);
-    onChange({ ...data, [name]: value });
+    // onChange({ ...data, [name]: value });
   };
 
   return (

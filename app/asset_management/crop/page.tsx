@@ -15,6 +15,11 @@ import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
 
+type StageAccess = {
+  stage1Enabled: boolean;
+  stage2Enabled: boolean;
+};
+
 const CropsPage = () => {
   const { get } = useApi();
 
@@ -27,6 +32,13 @@ const CropsPage = () => {
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [crops, setCrops] = useState<CropGetData[]>([]);
   const [filteredCrops, setFilteredCrops] = useState(crops);
+
+  const stageRules: Record<number, StageAccess> = {
+    1: { stage1Enabled: true, stage2Enabled: false },
+    2: { stage1Enabled: true, stage2Enabled: true },
+    3: { stage1Enabled: false, stage2Enabled: true },
+  };
+
   /************************************************************************/
 
   /************************* GET Data Functions *************************/
@@ -106,11 +118,12 @@ const CropsPage = () => {
     fetchCropData();
   };
 
-  // Flag for stage one complete
-  const isStageOneCompleted = (cropId: number) => {
-    return localStorage.getItem(`stageOneCompleted_${cropId}`) === "true";
+  // Stage handler function
+  const getStageAccess = (stageId?: number): StageAccess => {
+    return stageRules[stageId ?? 1] || stageRules[1];
   };
   /************************************************************************/
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -199,6 +212,9 @@ const CropsPage = () => {
                 <>
                   {filteredCrops.map((crop, idx) => {
                     const seed = crop.crop_asset_seed_details?.[0];
+                    const { stage1Enabled, stage2Enabled } = getStageAccess(
+                      crop.current_stage_id
+                    );
                     return (
                       <tr
                         key={idx}
@@ -227,42 +243,48 @@ const CropsPage = () => {
                           </div>
                         </td>
                         {/* Stage one */}
-                        <td className="flex justify-center items-center py-4 px-4">
+                        <td className="text-center py-4 px-4">
                           <Button
-                            variant={"ghost"}
-                            className="bg-white text-blue-900"
+                            variant="ghost"
+                            className={`bg-white ${
+                              stage1Enabled
+                                ? "text-blue-900"
+                                : "text-gray-400 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              if (!stage1Enabled) {
+                                toast.error(
+                                  "Stage 1 cannot be edited at this stage"
+                                );
+                              } else {
+                                handleAddCropDetails(crop.crop_id);
+                              }
+                            }}
                             title="Add crop details"
-                            onClick={() => handleAddCropDetails(crop.crop_id)}
                           >
                             <FilePlus />
                           </Button>
                         </td>
                         {/* Stage two */}
-                        <td>
-                          <div className="flex items-center justify-center py-4 px-4">
-                            <Button
-                              variant={"ghost"}
-                              className={`bg-white ${
-                                isStageOneCompleted(crop.crop_id)
-                                  ? "text-blue-900"
-                                  : "text-gray-400 cursor-not-allowed"
-                              }`}
-                              title={
-                                isStageOneCompleted(crop.crop_id)
-                                  ? "Add revisit data"
-                                  : ""
+                        <td className="text-center py-4 px-4">
+                          <Button
+                            variant="ghost"
+                            className={`bg-white ${
+                              stage2Enabled
+                                ? "text-blue-900"
+                                : "text-gray-400 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              if (!stage2Enabled) {
+                                toast.error("Complete Stage 1 first");
+                              } else {
+                                handleRevisitData(crop.crop_id);
                               }
-                              onClick={() => {
-                                if (!isStageOneCompleted(crop.crop_id)) {
-                                  toast.error("Complete Stage one first");
-                                } else {
-                                  handleRevisitData(crop.crop_id);
-                                }
-                              }}
-                            >
-                              <ClipboardCheck />
-                            </Button>
-                          </div>
+                            }}
+                            title="Add revisit data"
+                          >
+                            <ClipboardCheck />
+                          </Button>
                         </td>
                         {/* Action btn */}
                         <td>

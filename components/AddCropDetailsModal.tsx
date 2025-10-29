@@ -14,7 +14,6 @@ import History from "./addCropForms/stageOneSteps/History";
 import Weather from "./addCropForms/stageOneSteps/Weather";
 import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
 import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
-import PreviewSubmit from "./PreviewForm";
 import CropDetailsPreview from "./CropDetailsPreview";
 
 // Define ChemicalItem for consistency
@@ -69,6 +68,7 @@ export default function AddCropDetailsModal({
     estimated_yield: estimatedYield,
     planting_date: plantingDate,
     harvest_date: harvestDate,
+    current_stage_id: currentStageId,
   },
   onClose,
 }: AddCropDetailsModalProps) {
@@ -469,7 +469,7 @@ export default function AddCropDetailsModal({
         params: { crop_id: cropId },
       });
 
-      localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
+      // localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
       toast.success("Crop data submitted successfully!");
       onClose();
     } catch (err) {
@@ -542,7 +542,7 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
-
+  console.log(currentStageId);
   console.log(cropData);
   return (
     <div>

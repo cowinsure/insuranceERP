@@ -10,6 +10,7 @@ export interface CropGetData {
   harvest_date: string;
   planting_date: string;
   estimated_yield: number;
+  current_stage_id: number;
 
   crop_asset_seed_details: CropAssetSeedDetails[];
   crop_asset_pest_attack_details: CropAssetPestAttackDetails[];

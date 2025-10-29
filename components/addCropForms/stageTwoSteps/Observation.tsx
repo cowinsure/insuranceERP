@@ -21,21 +21,19 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   const [goodPracticesList, setGoodPracticesList] = useState<PracticeItem[]>(
     []
   );
+  const [harvestSeedVarietyOptions, setHarvestSeedVarietyOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [harvestTimingOptions, setHarvestTimingOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [remarks, setRemarks] = useState("");
 
-  /** Variety Descriptions **/
-  const varietyDescriptions: Record<string, string> = {
-    "Local variety":
-      "Local variety: tall plants, late maturity, small panicle, thick grains, low yield",
-    "Improved variety":
-      "Improved variety: moderate height, medium maturity, higher yield, uniform grains",
-    "Hybrid variety":
-      "Hybrid variety: short plants, early maturity, high yield, uniform and bold grains",
-  };
-
-  /** Fetch Good Agricultural Practices **/
+  /** Fetch all data **/
   useEffect(() => {
     getGoodPracticesOptions();
+    getHarvestSeedVarietyOptions();
+    getHarvestTimingOptions();
   }, []);
 
   const getGoodPracticesOptions = async () => {
@@ -56,6 +54,47 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       }
     } catch (error) {
       console.error("Error fetching Good Practices:", error);
+    }
+  };
+
+  const getHarvestSeedVarietyOptions = async () => {
+    try {
+      const res = await get(
+        "/cms/crop-harvest-seed-variety-observation-service/",
+        {
+          params: { page_size: 50, start_record: 1 },
+        }
+      );
+      console.log(res);
+
+      if (res.status === "success" && Array.isArray(res.data)) {
+        const formatted = res.data.map((item: any) => ({
+          id: item.harvest_seed_variety_observation_id,
+          label: item.harvest_seed_variety_observation_type_name,
+        }));
+        setHarvestSeedVarietyOptions(formatted);
+      }
+    } catch (error) {
+      console.error("Error fetching Seed Varieties:", error);
+    }
+  };
+
+  /** Fetch Harvest Timing **/
+  const getHarvestTimingOptions = async () => {
+    try {
+      const res = await get("/cms/crop-harvest-harvesting-timing-service/", {
+        params: { page_size: 50, start_record: 1 },
+      });
+      console.log(res);
+      if (res.status === "success" && Array.isArray(res.data)) {
+        const formatted = res.data.map((item: any) => ({
+          id: item.harvesting_timing_id,
+          label: item.harvesting_timing_name,
+        }));
+        setHarvestTimingOptions(formatted);
+      }
+    } catch (error) {
+      console.error("Error fetching Harvest Timing:", error);
     }
   };
 
@@ -86,70 +125,63 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       goodPractices: updated,
     });
   };
+  console.log("Seed variety", harvestSeedVarietyOptions);
 
+  console.log("Harvest time", harvestTimingOptions);
+  console.log("Good Practice", goodPracticesList);
   return (
     <div className="p-3 bg-white rounded-xl space-y-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
         Harvesting Observations
       </h2>
 
-      {/* Seed Variety Observation */}
+      {/* ✅ Seed Variety Observation Dropdown */}
       <DropdownField
         id="seedVarietyObservation"
         name="seedVarietyObservation"
         label="Seed Variety Observation"
         value={data.observationData.seedVarietyObservation}
         onChange={(e) => handleVarietyChange(e.target.value)}
-        options={[
-          { value: "", label: "Select variety" },
-          { value: "Local variety", label: "Local variety" },
-          { value: "Improved variety", label: "Improved variety" },
-          { value: "Hybrid variety", label: "Hybrid variety" },
-        ]}
+        options={[...harvestSeedVarietyOptions]}
       />
-      {selectedVariety && (
-        <p className="text-sm text-gray-500 mt-1">
-          {varietyDescriptions[selectedVariety]}
-        </p>
-      )}
 
-      {/* ✅ Good Agricultural Practices */}
+      {/* ✅ Good Agricultural Practices Checkboxes */}
       <div className="bg-gray-50 p-4 border rounded-lg space-y-2 mt-4">
         <h3 className="font-semibold">
           Good Agricultural Practices{" "}
           <span className="text-sm text-gray-400">(Multiple Selection)</span>
         </h3>
 
-        {goodPracticesList.length === 0 && (
+        {goodPracticesList.length === 0 ? (
           <p className="text-gray-400 text-sm italic">Loading options...</p>
-        )}
-
-        {goodPracticesList.map((practice) => (
-          <div
-            key={practice.id}
-            className="flex items-center gap-2 font-semibold text-[15px]"
-          >
-            <input
-              id={`practice-${practice.id}`}
-              type="checkbox"
-              checked={!!data.observationData.goodPractices?.[practice.label]}
-              onChange={() => toggleGoodPractice(practice.label)}
-              className="cursor-pointer accent-green-600 custom-checkbox mt-2"
-            />
-            <label
-              htmlFor={`practice-${practice.id}`}
-              className="flex items-center gap-2 cursor-pointer"
-              title={practice.label}
+        ) : (
+          goodPracticesList.map((practice) => (
+            <div
+              key={practice.id}
+              className="flex items-center gap-2 font-semibold text-[15px]"
             >
-              {practice.label.length > 90
-                ? practice.label.slice(0, 90) + "..."
-                : practice.label}
-            </label>
-          </div>
-        ))}
+              <input
+                id={`practice-${practice.id}`}
+                type="checkbox"
+                checked={!!data.observationData.goodPractices?.[practice.label]}
+                onChange={() => toggleGoodPractice(practice.label)}
+                className="cursor-pointer accent-green-600 custom-checkbox mt-2"
+              />
+              <label
+                htmlFor={`practice-${practice.id}`}
+                className="flex items-center gap-2 cursor-pointer"
+                title={practice.label}
+              >
+                {practice.label.length > 90
+                  ? practice.label.slice(0, 90) + "..."
+                  : practice.label}
+              </label>
+            </div>
+          ))
+        )}
       </div>
 
-      {/* Manageable */}
+      {/* ✅ Manageable Radio */}
       <div className="mt-4">
         <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
           Was it Manageable?
@@ -171,7 +203,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
         </div>
       </div>
 
-      {/* Remarks / Comments for "No" */}
+      {/* ✅ Remarks for "No" */}
       {data.observationData.manageable === "No" && (
         <div className="mt-4">
           <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
@@ -186,7 +218,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
         </div>
       )}
 
-      {/* Harvesting Timing */}
+      {/* ✅ Harvesting Timing Dropdown */}
       <DropdownField
         id="harvestTiming"
         name="harvestTiming"
@@ -198,12 +230,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
             harvestingTiming: e.target.value,
           })
         }
-        options={[
-          { value: "", label: "Select timing" },
-          { value: "Early Harvesting", label: "Early Harvesting" },
-          { value: "Late Harvesting", label: "Late Harvesting" },
-          { value: "On Time Harvesting", label: "On Time Harvesting" },
-        ]}
+        options={[...harvestTimingOptions]}
       />
     </div>
   );

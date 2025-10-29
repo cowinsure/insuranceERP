@@ -14,7 +14,7 @@ interface DropdownFieldProps {
 }
 
 function renderStyledText(text: string) {
-  const match = text.match(/[\u0980-\u09FF]/);
+  const match = text?.match(/[\u0980-\u09FF]/);
   if (!match) return text;
 
   const index = match.index;

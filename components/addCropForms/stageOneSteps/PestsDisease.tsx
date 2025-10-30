@@ -75,7 +75,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
 
   // Select pest
   const togglePest = (id: number) => {
-    console.log("Toggling pest ID:", id);
+    //("Toggling pest ID:", id);
     const updated = selectedPests.includes(id)
       ? selectedPests.filter((i) => i !== id)
       : [...selectedPests, id];
@@ -115,9 +115,9 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     );
   };
 
-  console.log(pestOptions);
-  console.log("Data from parent", data);
-  console.log(selectedPests);
+  //(pestOptions);
+  //("Data from parent", data);
+  //(selectedPests);
   return (
     <div className="p-3">
       <h2 className="text-xl font-semibold mb-5 underline text-center">

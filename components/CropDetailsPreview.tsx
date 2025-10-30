@@ -107,7 +107,7 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
 
   if (loading) return <Loading />;
 
-  console.log("🌾 data passed to preview from parent:", data);
+  //("🌾 data passed to preview from parent:", data);
 
   return (
     <div className="max-w-4xl mx-auto text-gray-700 max-h-[75vh] overflow-y-auto p-6 bg-white rounded-2xl shadow-md border border-gray-100 space-y-6">

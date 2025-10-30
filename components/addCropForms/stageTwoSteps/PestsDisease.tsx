@@ -5,8 +5,11 @@ import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
 
 interface PestsDiseaseProps {
-  data: any;
-  onChange: () => void;
+  data: {
+    pestIds?: number[];
+    diseaseIds?: number[];
+  };
+  onChange: (updatedData: { pestIds: number[]; diseaseIds: number[] }) => void;
 }
 
 const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
@@ -20,11 +23,17 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   >([]);
 
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data?.pestIds || []
+    data.pestIds || []
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data?.diseaseIds || []
+    data.diseaseIds || []
   );
+
+  // Sync with parent data if it changes
+  useEffect(() => {
+    setSelectedPests(data.pestIds || []);
+    setSelectedDiseases(data.diseaseIds || []);
+  }, [data]);
 
   /** Fetch pest & disease options from API */
   useEffect(() => {
@@ -41,7 +50,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
         if (pestRes.status === "success" && Array.isArray(pestRes.data)) {
           setPestOptions(
-            pestRes.data?.map((item: any) => ({
+            pestRes.data.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
             }))
@@ -50,7 +59,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
         if (diseaseRes.status === "success" && Array.isArray(diseaseRes.data)) {
           setDiseaseOptions(
-            diseaseRes.data?.map((item: any) => ({
+            diseaseRes.data.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
             }))
@@ -71,6 +80,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       : [...selectedPests, id];
 
     setSelectedPests(updated);
+    onChange({ pestIds: updated, diseaseIds: selectedDiseases });
   };
 
   /** Handle disease toggle */
@@ -80,10 +90,11 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       : [...selectedDiseases, id];
 
     setSelectedDiseases(updated);
+    onChange({ pestIds: selectedPests, diseaseIds: updated });
   };
 
   return (
-    <div className="p-3">
+    <div>
       <h2 className="text-xl font-semibold mb-5 underline text-center">
         Pest & Disease Observations
       </h2>
@@ -98,11 +109,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
           {loading ? (
             <Loading />
+          ) : pestOptions.length === 0 ? (
+            <p className="text-gray-400 text-sm italic">
+              No pest options available.
+            </p>
           ) : (
             pestOptions.map((pest) => (
               <div
                 key={pest.id}
-                className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                className="flex items-center gap-2 font-semibold text-[15px]"
               >
                 <input
                   type="checkbox"
@@ -111,10 +126,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
                   onChange={() => togglePest(pest.id)}
                   className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
                 />
-                <label
-                  htmlFor={`pest-${pest.id}`}
-                  className="cursor-pointer flex items-center gap-2"
-                >
+                <label htmlFor={`pest-${pest.id}`} className="cursor-pointer">
                   {pest.name}
                 </label>
               </div>
@@ -131,11 +143,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
           {loading ? (
             <Loading />
+          ) : diseaseOptions.length === 0 ? (
+            <p className="text-gray-400 text-sm italic">
+              No disease options available.
+            </p>
           ) : (
             diseaseOptions.map((disease) => (
               <div
                 key={disease.id}
-                className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                className="flex items-center gap-2 font-semibold text-[15px]"
               >
                 <input
                   type="checkbox"
@@ -146,7 +162,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
                 />
                 <label
                   htmlFor={`disease-${disease.id}`}
-                  className="cursor-pointer flex items-center gap-2"
+                  className="cursor-pointer"
                 >
                   {disease.name}
                 </label>

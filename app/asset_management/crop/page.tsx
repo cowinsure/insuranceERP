@@ -1,7 +1,7 @@
 "use client";
 import AddCropDetailsModal from "@/components/AddCropDetailsModal";
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
-import StageTwo from "@/components/addCropForms/StageTwo";
+import AddCropStageTwoModal from "@/components/AddCropStageTwoModal";
 import { CropGetData } from "@/components/model/crop/CropGetModel";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
@@ -98,7 +98,7 @@ const CropsPage = () => {
 
     setSelectedCrop(viewCrop);
     setIsCropView(true);
-    console.log("View Crop", viewCrop);
+    //("View Crop", viewCrop);
   };
   /************************************************************************/
 
@@ -123,9 +123,6 @@ const CropsPage = () => {
     return stageRules[stageId ?? 1] || stageRules[1];
   };
   /************************************************************************/
-
-  console.log(crops);
-  console.log(filteredCrops);
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -371,7 +368,7 @@ const CropsPage = () => {
           closeModal={() => setIsStageTwoModal(false)}
           widthValue={"w-full min-w-sm md:max-w-3xl"}
         >
-          <StageTwo
+          <AddCropStageTwoModal
             selectedCrop={selectedCrop!}
             onSuccess={runFunctionOnSuccessStageTwo}
           />

@@ -124,7 +124,7 @@ const IrrigationCultivation = ({
           landSuitabilityOptions.find((opt) => opt.value === numericValue)
             ?.label || "";
         break;
-    }console.log(irrigationFacilityOptions, selectedLabel);
+    }//(irrigationFacilityOptions, selectedLabel);
     // Send both ID and name to parent
     onChange({
       ...data,
@@ -132,7 +132,7 @@ const IrrigationCultivation = ({
       [`${name}_name`]: selectedLabel,
     });
   };
-console.log(cultivationSystemOptions);
+//(cultivationSystemOptions);
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">

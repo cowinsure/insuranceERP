@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { toast } from "sonner";
-
 import useApi from "@/hooks/use_api";
 import { Stepper } from "./Stepper";
-
 import CropDetailsForm from "./SeedDetails";
 import IrrigationCultivation from "./addCropForms/stageOneSteps/IrrigationCultivation";
 import History from "./addCropForms/stageOneSteps/History";
@@ -78,12 +76,12 @@ export default function AddCropDetailsModal({
   useEffect(() => {
     const fetchExistingCropData = async () => {
       if (!cropId) return;
-      console.log("Got crop data for crop ID:", cropId);
+      //("Got crop data for crop ID:", cropId);
       try {
         const res = await get(`/cms/crop-info-service/?crop_id=${cropId}`);
         if (res.status === "success" && res.data) {
           const d = res.data[0];
-          console.log(d);
+          //(d);
 
           // 🧩 Normalize data into same shape used by your state
           setCropData({
@@ -464,7 +462,7 @@ export default function AddCropDetailsModal({
         ],
       };
 
-      console.log("Submitting payload:", payload);
+      //("Submitting payload:", payload);
       await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });

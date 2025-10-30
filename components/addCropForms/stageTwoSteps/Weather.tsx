@@ -7,7 +7,7 @@ import Loading from "@/components/utils/Loading";
 
 interface WeatherProps {
   data: any;
-  onChange: () => void;
+  onChange: (updatedData: any) => void; // <-- accept updated value
 }
 
 interface WeatherOption {
@@ -47,12 +47,20 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log("From weather form:", name, value);
-    // onChange({ ...data, [name]: value });
+    onChange({ ...data, [name]: value });
+  };
+
+  const toggleWeatherEffect = (id: number) => {
+    const updated = selectedWeatherEffects.includes(id)
+      ? selectedWeatherEffects.filter((wId) => wId !== id)
+      : [...selectedWeatherEffects, id];
+
+    setSelectedWeatherEffects(updated);
+    onChange({ ...data, weather_effects: updated });
   };
 
   return (
-    <form className="p-3 max-h-[60vh] overflow-auto space-y-5">
+    <form className="max-h-[60vh] overflow-auto space-y-5">
       <h2 className="text-xl font-semibold mb-5 underline text-center">
         Weather Details
       </h2>
@@ -73,7 +81,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
                   type="checkbox"
                   id={`weather_${w.id}`}
                   checked={selectedWeatherEffects.includes(w.id)}
-                  onChange={() => {}}
+                  onChange={() => toggleWeatherEffect(w.id)}
                   className="mt-1 accent-green-600 custom-checkbox"
                 />
                 <label

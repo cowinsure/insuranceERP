@@ -78,8 +78,8 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
     fetchLandData();
   }, [stageOneData?.land_id]);
 
-  console.log("Crop Data:", stageOneData);
-  console.log("Fetched Land Info:", landInfo);
+  //("Crop Data:", stageOneData);
+  //("Fetched Land Info:", landInfo);
 
   return (
     <div className="p-3 text-gray-800 relative">

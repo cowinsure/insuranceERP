@@ -108,7 +108,7 @@ const defaultCenter = {
 
 const PlotDetailsDialog = ({ open, onOpenChange, plot, onEdit, onDelete }: PlotDetailsDialogProps) => {
 
-  console.log(plot);
+  //(plot);
 
   const [mapError, setMapError] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState("")

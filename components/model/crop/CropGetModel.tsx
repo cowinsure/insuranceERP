@@ -4,15 +4,19 @@ export interface CropGetData {
   crop_id: number;
   land_id: number;
   variety: string;
+  crop_name: string;
+  land_name: string;
   created_at: string;
   updated_at: string;
+  stage_name: string;
   crop_type_id: number;
   harvest_date: string;
   planting_date: string;
   estimated_yield: number;
   current_stage_id: number;
-  stage_name: string;
 
+  // ✅ New + existing arrays
+  crop_harvest_info: CropHarvestInfo[];
   crop_asset_seed_details: CropAssetSeedDetails[];
   crop_asset_pest_attack_details: CropAssetPestAttackDetails[];
   crop_asset_stage_history_details: CropAssetStageHistoryDetails[];
@@ -21,6 +25,32 @@ export interface CropGetData {
   crop_asset_weather_effect_history: CropAssetWeatherEffectHistory[];
   crop_asset_irrigation_cultivation_details: CropAssetIrrigationCultivationDetails[];
   crop_asset_previous_season_history_details: CropAssetPreviousSeasonHistoryDetails[];
+}
+
+// 🌾 Harvest Info (NEW)
+export interface CropHarvestInfo {
+  crop_id: number;
+  harvest_date: string;
+  harvest_info_id: number;
+  total_production_kg: number;
+  harvesting_timing_id: number;
+  moisture_content_percentage: number;
+  is_manageable_harvest: boolean;
+  reason_for_is_manageable_harvest: string;
+  harvest_seed_variety_observation_id: number;
+  crop_harvest_details: CropHarvestDetail[];
+}
+
+// 🌾 Harvest Details (nested)
+export interface CropHarvestDetail {
+  created_at: string;
+  created_by: number;
+  modified_at: string | null;
+  modified_by: number | null;
+  harvest_info_id: number;
+  harvest_details_id: number;
+  good_agricultural_practices_type_id: number;
+  good_agricultural_practices_type_name: string;
 }
 
 // 🌱 Seed details
@@ -47,28 +77,28 @@ export interface CropAssetSeedDetails {
 // 🐛 Pest attack details
 export interface CropAssetPestAttackDetails {
   crop_id: number;
-  remarks: string | null;
+  remarks: string;
   crop_name: string;
   land_name: string;
   created_at: string;
-  stage_name: string | null;
-  attack_date: string;
+  stage_name: string;
+  attack_date: string | null;
   farmer_name: string;
   modified_at: string | null;
   mobile_number: string;
   crop_pest_attack_id: number;
   pest_attack_type_id: number;
-  pest_attack_observations_type_name: string | null;
+  pest_attack_observations_type_name: string;
 }
 
 // 🦠 Disease attack details
 export interface CropAssetDiseaseAttackDetails {
   crop_id: number;
-  remarks: string | null;
+  remarks: string;
   crop_name: string;
   land_name: string;
   created_at: string;
-  stage_name: string | null;
+  stage_name: string;
   attack_date: string | null;
   farmer_name: string;
   modified_at: string | null;
@@ -87,7 +117,7 @@ export interface CropAssetChemicalUsageDetails {
   crop_name: string;
   land_name: string;
   created_at: string;
-  stage_name: string | null;
+  stage_name: string;
   farmer_name: string;
   modified_at: string | null;
   chemical_name: string;
@@ -102,7 +132,7 @@ export interface CropAssetIrrigationCultivationDetails {
   crop_name: string;
   land_name: string;
   created_at: string;
-  stage_name: string | null;
+  stage_name: string;
   farmer_name: string;
   modified_at: string | null;
   mobile_number: string;
@@ -126,11 +156,13 @@ export interface CropAssetWeatherEffectHistory {
   created_at: string;
   stage_name: string;
   farmer_name: string;
-  modified_at: string;
+  modified_at: string | null;
   mobile_number: string;
   weather_effect_type_id: number;
   weather_effect_type_name: string;
   land_weather_effect_history_id: number;
+  date_from?: string;
+  date_to?: string;
 }
 
 // 🕓 Stage history
@@ -154,7 +186,7 @@ export interface CropAssetPreviousSeasonHistoryDetails {
   crop_name: string;
   land_name: string;
   created_at: string;
-  stage_name: string | null;
+  stage_name: string;
   farmer_name: string;
   modified_at: string | null;
   sowing_date: string;
@@ -164,7 +196,7 @@ export interface CropAssetPreviousSeasonHistoryDetails {
   last_year_production: number;
   last_year_crop_type_id: number;
   immediate_previous_crop: string;
-  last_year_crop_type_name: string | null;
+  last_year_crop_type_name: string;
   reason_for_changing_seed: string;
   previous_season_history_id: number;
 }

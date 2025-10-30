@@ -92,7 +92,7 @@ const Login: React.FC<LoginProps> = ({
   // New function with improved error handling
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("Function from error-fixing");
+    //("Function from error-fixing");
     // Reset errors
     setPhoneError(false);
     setPasswordError(false);

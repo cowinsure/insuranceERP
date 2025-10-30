@@ -36,7 +36,7 @@ const CropsPage = () => {
   const stageRules: Record<number, StageAccess> = {
     1: { stage1Enabled: true, stage2Enabled: false },
     2: { stage1Enabled: true, stage2Enabled: true },
-    3: { stage1Enabled: false, stage2Enabled: true },
+    3: { stage1Enabled: true, stage2Enabled: true },
   };
 
   /************************************************************************/

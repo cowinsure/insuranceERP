@@ -427,6 +427,15 @@ function generateRandomNumber(maxNumber: number): number {
       return
     }
 
+    if(farmerQuery.trim() === "" || selectedFarmerId === null){
+      toast({
+        title: "Please select a farmer",
+        description: "Please select a farmer from the dropdown list to proceed.",
+        variant: "default",
+      })
+      return
+    }
+
     
 
     if (!validateCoordinates()) {

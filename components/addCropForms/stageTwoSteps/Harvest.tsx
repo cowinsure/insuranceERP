@@ -1,10 +1,9 @@
 import InputField from "@/components/InputField";
 import React from "react";
-import { StageTwoData } from "../StageTwo";
 
 interface HarvestProps {
-  data: StageTwoData;
-  onChange: (field: keyof StageTwoData, value: any) => void;
+  data: any;
+  onChange: () => void;
 }
 
 const Harvest = ({ data, onChange }: HarvestProps) => {
@@ -18,8 +17,8 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         name="harvestDate"
         label="Harvest Date"
         type="date"
-        value={data.harvestDate}
-        onChange={(e) => onChange("harvestDate", e.target.value)}
+        value={data?.harvestDate}
+        onChange={(e) => {}}
       />
       <InputField
         id="totalProduction"
@@ -27,8 +26,8 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         placeholder="e.g. 42.8"
         name="totalProduction"
         label="Total Production (kg)"
-        value={data.totalProduction}
-        onChange={(e) => onChange("totalProduction", e.target.value)}
+        value={data?.totalProduction}
+        onChange={(e) => {}}
       />
       <InputField
         id="moistureContent"
@@ -36,8 +35,8 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         placeholder="e.g. 16.7"
         name="moistureContent"
         label="Moisture Content (%)"
-        value={data.moistureContent}
-        onChange={(e) => onChange("moistureContent", e.target.value)}
+        value={data?.moistureContent}
+        onChange={(e) => {}}
       />
     </div>
   );

@@ -4,11 +4,10 @@ import React, { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
-import { StageTwoData } from "../StageTwo";
 
 interface WeatherProps {
   data: any;
-  onChange: (field: keyof StageTwoData, value: any) => void;
+  onChange: () => void;
 }
 
 interface WeatherOption {
@@ -24,7 +23,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
   // selected checkboxes ids
   const [selectedWeatherEffects, setSelectedWeatherEffects] = useState<
     number[]
-  >(data.weather_effects?.map((w: any) => w.weather_effect_type_id) || []);
+  >(data?.weather_effects?.map((w: any) => w.weather_effect_type_id) || []);
 
   // Fetch weather options from API
   useEffect(() => {
@@ -45,34 +44,6 @@ const Weather = ({ data, onChange }: WeatherProps) => {
     };
     fetchWeatherOptions();
   }, []);
-
-  const handleCheckboxChange = (id: number) => {
-    let updated: number[] = [];
-    if (selectedWeatherEffects.includes(id)) {
-      updated = selectedWeatherEffects.filter((w) => w !== id);
-    } else {
-      updated = [...selectedWeatherEffects, id];
-    }
-    setSelectedWeatherEffects(updated);
-
-    // Map IDs to names for preview
-    const updatedData = {
-      ...data,
-      weather_effects: updated.map((weather_effect_type_id) => {
-        const weatherObj = weatherOptions.find(
-          (w) => w.id === weather_effect_type_id
-        );
-        return {
-          weather_effect_type_id,
-          weather_effect_type_name: weatherObj?.weather_effect_type_name || "",
-          remarks: "",
-          is_active: true,
-        };
-      }),
-    };
-
-    // onChange(updatedData);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -102,7 +73,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
                   type="checkbox"
                   id={`weather_${w.id}`}
                   checked={selectedWeatherEffects.includes(w.id)}
-                  onChange={() => handleCheckboxChange(w.id)}
+                  onChange={() => {}}
                   className="mt-1 accent-green-600 custom-checkbox"
                 />
                 <label
@@ -131,7 +102,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             id="date_from"
             name="date_from"
             type="date"
-            value={data.date_from || ""}
+            value={data?.date_from || ""}
             onChange={handleChange}
           />
           <InputField
@@ -139,7 +110,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             id="date_to"
             name="date_to"
             type="date"
-            value={data.date_to || ""}
+            value={data?.date_to || ""}
             onChange={handleChange}
           />
         </div>
@@ -152,7 +123,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
         name="remarks"
         type="text"
         placeholder="Add remarks if any"
-        value={data.remarks || ""}
+        value={data?.remarks || ""}
         onChange={handleChange}
       />
     </form>

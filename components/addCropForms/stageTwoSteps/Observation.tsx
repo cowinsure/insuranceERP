@@ -3,11 +3,10 @@
 import React, { useEffect, useState } from "react";
 import DropdownField from "@/components/DropDownField";
 import useApi from "@/hooks/use_api";
-import { StageTwoData } from "../StageTwo";
 
 interface ObservationProps {
   data: any;
-  onChange: (field: keyof StageTwoData, value: any) => void;
+  onChange: () => void;
 }
 
 interface PracticeItem {
@@ -56,7 +55,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       console.error("Error fetching Good Practices:", error);
     }
   };
-
+  /** Fetch Harvest Seed Variety **/
   const getHarvestSeedVarietyOptions = async () => {
     try {
       const res = await get(
@@ -101,17 +100,9 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   /** Handlers **/
   const handleVarietyChange = (value: string) => {
     setSelectedVariety(value);
-    onChange("observationData", {
-      ...data.observationData,
-      seedVarietyObservation: value,
-    });
   };
 
   const handleManageableChange = (value: string) => {
-    onChange("observationData", {
-      ...data.observationData,
-      manageable: value,
-    });
     if (value === "No") setRemarks("");
   };
 
@@ -120,10 +111,6 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       ...data.observationData.goodPractices,
       [label]: !data.observationData.goodPractices?.[label],
     };
-    onChange("observationData", {
-      ...data.observationData,
-      goodPractices: updated,
-    });
   };
   console.log("Seed variety", harvestSeedVarietyOptions);
 
@@ -140,7 +127,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
         id="seedVarietyObservation"
         name="seedVarietyObservation"
         label="Seed Variety Observation"
-        value={data.observationData.seedVarietyObservation}
+        value={data?.observationData.seedVarietyObservation}
         onChange={(e) => handleVarietyChange(e.target.value)}
         options={[...harvestSeedVarietyOptions]}
       />
@@ -163,7 +150,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
               <input
                 id={`practice-${practice.id}`}
                 type="checkbox"
-                checked={!!data.observationData.goodPractices?.[practice.label]}
+                checked={!!data?.observationData.goodPractices?.[practice.label]}
                 onChange={() => toggleGoodPractice(practice.label)}
                 className="cursor-pointer accent-green-600 custom-checkbox mt-2"
               />
@@ -193,7 +180,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
                 type="radio"
                 name="manageable"
                 value={val}
-                checked={data.observationData.manageable === val}
+                checked={data?.observationData.manageable === val}
                 onChange={(e) => handleManageableChange(e.target.value)}
                 className="accent-green-600"
               />
@@ -204,7 +191,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       </div>
 
       {/* ✅ Remarks for "No" */}
-      {data.observationData.manageable === "No" && (
+      {data?.observationData.manageable === "No" && (
         <div className="mt-4">
           <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
             Remarks / Comments
@@ -223,13 +210,8 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
         id="harvestTiming"
         name="harvestTiming"
         label="Harvesting Timing"
-        value={data.observationData.harvestingTiming}
-        onChange={(e) =>
-          onChange("observationData", {
-            ...data.observationData,
-            harvestingTiming: e.target.value,
-          })
-        }
+        value={data?.observationData.harvestingTiming}
+        onChange={(e) => {}}
         options={[...harvestTimingOptions]}
       />
     </div>

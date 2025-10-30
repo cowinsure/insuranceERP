@@ -124,6 +124,9 @@ const CropsPage = () => {
   };
   /************************************************************************/
 
+  console.log(crops);
+  console.log(filteredCrops);
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -182,7 +185,7 @@ const CropsPage = () => {
                   Crop Name
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Variety
+                  Current Stage
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Planting Date
@@ -204,7 +207,7 @@ const CropsPage = () => {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center">
+                  <td colSpan={8} className="py-6 text-center">
                     <Loading />
                   </td>
                 </tr>
@@ -221,15 +224,15 @@ const CropsPage = () => {
                         className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
                         style={{ animationDelay: `${idx * 100}ms` }}
                       >
-                        <td className="py-4 px-4">{idx + 1}</td>
+                        <td className="py-4 px-4 text-gray-600">{idx + 1}</td>
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
                             {seed?.crop_name || "N/A"}
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
-                            {seed?.seed_variety || crop.variety || "N/A"}
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                            {crop.stage_name || "N/A"}
                           </div>
                         </td>
                         <td className="py-4 px-4">
@@ -238,7 +241,7 @@ const CropsPage = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize">
                             {seed?.land_name || "N/A"}
                           </div>
                         </td>
@@ -260,7 +263,7 @@ const CropsPage = () => {
                                 handleAddCropDetails(crop.crop_id);
                               }
                             }}
-                            title="Add crop details"
+                            title="Add Planting & Cultivation Details"
                           >
                             <FilePlus />
                           </Button>

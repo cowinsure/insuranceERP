@@ -3,11 +3,10 @@
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
-import { StageTwoData } from "../StageTwo";
 
 interface PestsDiseaseProps {
   data: any;
-  onChange: (field: keyof StageTwoData, value: any) => void;
+  onChange: () => void;
 }
 
 const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
@@ -21,10 +20,10 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   >([]);
 
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data.pestIds || []
+    data?.pestIds || []
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data.diseaseIds || []
+    data?.diseaseIds || []
   );
 
   /** Fetch pest & disease options from API */
@@ -42,7 +41,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
         if (pestRes.status === "success" && Array.isArray(pestRes.data)) {
           setPestOptions(
-            pestRes.data.map((item: any) => ({
+            pestRes.data?.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
             }))
@@ -51,7 +50,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
         if (diseaseRes.status === "success" && Array.isArray(diseaseRes.data)) {
           setDiseaseOptions(
-            diseaseRes.data.map((item: any) => ({
+            diseaseRes.data?.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
             }))
@@ -72,7 +71,6 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       : [...selectedPests, id];
 
     setSelectedPests(updated);
-    onChange("pestIds", updated);
   };
 
   /** Handle disease toggle */
@@ -82,7 +80,6 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       : [...selectedDiseases, id];
 
     setSelectedDiseases(updated);
-    onChange("diseaseIds", updated);
   };
 
   return (

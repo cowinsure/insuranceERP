@@ -6,7 +6,7 @@ import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
 
 interface WeatherProps {
-  data: any;
+  data: any; // { weather_effects_full: [], date_from, date_to, remarks }
   onChange: (updatedData: any) => void;
 }
 
@@ -20,23 +20,20 @@ const Weather = ({ data, onChange }: WeatherProps) => {
   const { get, loading } = useApi();
   const [weatherOptions, setWeatherOptions] = useState<WeatherOption[]>([]);
 
-  // Local state for selected weather effects (objects with id, name, remarks)
   const [selectedWeatherEffects, setSelectedWeatherEffects] = useState<any[]>(
-    data?.weather_effects_full || [] // Stage 2 full objects for preview
+    data?.weather_effects_full || []
   );
 
-  // Sync local state with parent data when coming back to this step
   useEffect(() => {
     setSelectedWeatherEffects(data?.weather_effects_full || []);
   }, [data?.weather_effects_full]);
 
-  // Fetch weather options from API
   useEffect(() => {
     const fetchWeatherOptions = async () => {
       try {
         const response = await get(
           "/cms/crop-adverse-weather-effect-type-service/",
-          { params: { page_size: 10, start_record: 1 } }
+          { params: { page_size: 50, start_record: 1 } }
         );
 
         if (response.status === "success" && Array.isArray(response.data)) {
@@ -49,12 +46,6 @@ const Weather = ({ data, onChange }: WeatherProps) => {
     fetchWeatherOptions();
   }, [get]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    onChange({ ...data, [name]: value });
-  };
-
-  // Toggle weather effect selection
   const toggleWeatherEffect = (id: number) => {
     const exists = selectedWeatherEffects.find(
       (w) => w.weather_effect_type_id === id
@@ -73,18 +64,40 @@ const Weather = ({ data, onChange }: WeatherProps) => {
           weather_effect_type_id: id,
           weather_effect_type_name: option?.weather_effect_type_name || "",
           remarks: "",
+          date_from: data?.date_from || null,
+          date_to: data?.date_to || null,
         },
       ];
     }
 
     setSelectedWeatherEffects(updatedEffects);
-
-    // Send both IDs and full objects for preview to parent
     onChange({
       ...data,
-      weather_effects: updatedEffects.map((w) => w.weather_effect_type_id),
       weather_effects_full: updatedEffects,
+      weather_effects: updatedEffects.map((w) => w.weather_effect_type_id),
     });
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Update parent
+    onChange({ ...data, [name]: value });
+
+    // Update all selected weather objects
+    const updated = selectedWeatherEffects.map((w) => ({
+      ...w,
+      [name]: value,
+    }));
+    setSelectedWeatherEffects(updated);
+    onChange({ ...data, weather_effects_full: updated });
+  };
+
+  const handleRemarksChange = (idx: number, value: string) => {
+    const updated = [...selectedWeatherEffects];
+    updated[idx].remarks = value;
+    setSelectedWeatherEffects(updated);
+    onChange({ ...data, weather_effects_full: updated });
   };
 
   return (
@@ -93,7 +106,6 @@ const Weather = ({ data, onChange }: WeatherProps) => {
         Weather Details
       </h2>
 
-      {/* ✅ Adverse Weather Effects */}
       <div className="space-y-3 bg-gray-50 p-3 border rounded-lg">
         <h3 className="font-semibold">
           Adverse Weather Type{" "}
@@ -130,7 +142,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
         )}
       </div>
 
-      {/* ✅ Period of Adverse Weather */}
+      {/* Period of Adverse Weather */}
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Period of Adverse Weather</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -140,7 +152,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             name="date_from"
             type="date"
             value={data?.date_from || ""}
-            onChange={handleChange}
+            onChange={handleDateChange}
           />
           <InputField
             label="To"
@@ -148,12 +160,12 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             name="date_to"
             type="date"
             value={data?.date_to || ""}
-            onChange={handleChange}
+            onChange={handleDateChange}
           />
         </div>
       </div>
 
-      {/* ✅ Remarks per weather effect */}
+      {/* Remarks per weather effect */}
       {/* {selectedWeatherEffects.map((we, idx) => (
         <div
           key={we.weather_effect_type_id}
@@ -163,26 +175,17 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             {we.weather_effect_type_name} Remarks
           </p>
           <InputField
-          id="Rea"
             label="Remarks"
+            id={`remarks_${we.weather_effect_type_id}`}
             name={`remarks_${we.weather_effect_type_id}`}
             type="text"
             value={we.remarks || ""}
-            onChange={(e: any) => {
-              const updated = [...selectedWeatherEffects];
-              updated[idx].remarks = e.target.value;
-              setSelectedWeatherEffects(updated);
-              onChange({
-                ...data,
-                weather_effects: updated.map((w) => w.weather_effect_type_id),
-                weather_effects_full: updated,
-              });
-            }}
+            onChange={(e: any) => handleRemarksChange(idx, e.target.value)}
           />
         </div>
       ))} */}
 
-      {/* ✅ General Remarks */}
+      {/* General Remarks */}
       <InputField
         label="General Remarks"
         id="remarks"
@@ -190,7 +193,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
         type="text"
         placeholder="Add remarks if any"
         value={data?.remarks || ""}
-        onChange={handleChange}
+        onChange={(e) => onChange({ ...data, remarks: e.target.value })}
       />
     </form>
   );

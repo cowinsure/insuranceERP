@@ -330,7 +330,7 @@ const CropsPage = () => {
       {isStageOneModal && (
         <GenericModal
           title={
-            <h1 className="flex flex-col">
+            <span className="flex flex-col">
               {
                 <div className="flex gap-1">
                   <span>Add details for</span>
@@ -346,7 +346,7 @@ const CropsPage = () => {
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
               </small>
-            </h1>
+            </span>
           }
           closeModal={() => setIsStageOneModal(false)}
           widthValue={"w-full min-w-sm md:max-w-3xl"}

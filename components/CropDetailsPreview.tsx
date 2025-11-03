@@ -122,8 +122,11 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         </h3>
         {data.seed && data.seed.length > 0 ? (
           <div className="grid gap-4">
-            {data.seed.map((s: any, i: number) => (
-              <div key={i} className="border rounded-xl bg-white shadow-sm p-3">
+            {data.seed.map((s: any, idx: number) => (
+              <div
+                key={idx}
+                className="border rounded-xl bg-white shadow-sm p-3"
+              >
                 {renderRow("Seed Name", s.seed_common_name)}
                 {renderRow("Company", s.seed_company_name)}
                 {renderRow(
@@ -227,9 +230,9 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
                   <div className="mt-2 space-y-2">
                     {data.weather.weather_effects
                       .filter((w: any) => w.weather_effect_type_id !== 0)
-                      .map((w: any, i: number) => (
+                      .map((w: any, idx: number) => (
                         <div
-                          key={i}
+                          key={idx}
                           className="border rounded-lg bg-gray-50 p-2 shadow-sm"
                         >
                           {renderRow("Effect Type", w.weather_effect_type_name)}
@@ -262,8 +265,8 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
           <div className="mb-3">
             <h4 className="font-semibold text-gray-700">Pests:</h4>
             <ul className="list-disc list-inside text-gray-600">
-              {data.pestDetails.map((p: any) => (
-                <li key={p.id}>{p.name}</li>
+              {data.pestDetails.map((p: any, idx: number) => (
+                <li key={idx}>{p.name}</li>
               ))}
             </ul>
           </div>
@@ -275,8 +278,8 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
           <div>
             <h4 className="font-semibold text-gray-700">Diseases:</h4>
             <ul className="list-disc list-inside text-gray-600">
-              {data.diseaseDetails.map((d: any) => (
-                <li key={d.id}>{d.name}</li>
+              {data.diseaseDetails.map((d: any, idx: number) => (
+                <li key={idx}>{d.name}</li>
               ))}
             </ul>
           </div>
@@ -297,9 +300,9 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
             </h4>
             {data.chemicals.fertilizers?.length ? (
               <div className="grid gap-3">
-                {data.chemicals.fertilizers.map((f: any, i: number) => (
+                {data.chemicals.fertilizers.map((f: any, idx: number) => (
                   <div
-                    key={i}
+                    key={idx}
                     className="border rounded-lg bg-white p-3 shadow-sm"
                   >
                     {renderRow("Name", f.chemical_name)}
@@ -320,9 +323,9 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
             </h4>
             {data.chemicals.pesticides?.length ? (
               <div className="grid gap-3">
-                {data.chemicals.pesticides.map((p: any, i: number) => (
+                {data.chemicals.pesticides.map((p: any, idx: number) => (
                   <div
-                    key={i}
+                    key={idx}
                     className="border rounded-lg bg-white p-3 shadow-sm"
                   >
                     {renderRow("Name", p.chemical_name)}

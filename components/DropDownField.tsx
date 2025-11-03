@@ -13,19 +13,19 @@ interface DropdownFieldProps {
   error?: string;
 }
 
-function renderStyledText(text: string) {
-  const match = text?.match(/[\u0980-\u09FF]/);
-  if (!match) return text;
+// function renderStyledText(text: string) {
+//   const match = text?.match(/[\u0980-\u09FF]/);
+//   if (!match) return text;
 
-  const index = match.index;
-  const englishPart = text.slice(0, index).trim();
-  const bengaliPart = text.slice(index).trim();
-  return (
-    <>
-      {englishPart} <span className="">{bengaliPart}</span>
-    </>
-  );
-}
+//   const index = match.index;
+//   const englishPart = text.slice(0, index).trim();
+//   const bengaliPart = text.slice(index).trim();
+//   return (
+//     <>
+//       {englishPart} <span className="">{bengaliPart}</span>
+//     </>
+//   );
+// }
 
 const DropdownField: React.FC<DropdownFieldProps> = ({
   label,
@@ -68,7 +68,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
               value={option.value}
               className="font-semibold tracking-wide space-y-2"
             >
-              {renderStyledText(option.label)}
+              {option.label}
             </option>
           ))}
         </select>

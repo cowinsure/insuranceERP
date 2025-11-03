@@ -104,6 +104,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   /** Handlers */
   const handleVarietyChange = (value: number) => {
     onChange({ ...data, harvest_seed_variety_observation_id: value });
+    console.log({ harvest_seed_variety_observation_id: value });
   };
 
   const toggleGoodPractice = (id: number) => {
@@ -121,6 +122,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       updated.push({ good_agricultural_practices_type_id: id });
     }
     onChange({ ...data, crop_harvest_details: updated });
+    console.log({ crop_harvest_details: updated });
   };
 
   const handleManageableChange = (value: string) => {

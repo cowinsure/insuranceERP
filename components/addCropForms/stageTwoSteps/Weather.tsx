@@ -23,7 +23,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
   // selected checkboxes ids
   const [selectedWeatherEffects, setSelectedWeatherEffects] = useState<
     number[]
-  >(data?.weather_effects?.map((w: any) => w.weather_effect_type_id) || []);
+  >(data?.weather_effects?.map((w: any) => w?.weather_effect_type_id) || []);
 
   // Fetch weather options from API
   useEffect(() => {
@@ -57,6 +57,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
     setSelectedWeatherEffects(updated);
     onChange({ ...data, weather_effects: updated });
+    console.log({weather_effects: updated});
   };
 
   return (

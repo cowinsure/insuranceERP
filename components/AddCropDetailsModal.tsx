@@ -55,7 +55,7 @@ interface AddCropData {
 
 interface AddCropDetailsModalProps {
   crop: any;
-  onClose: () => void;
+  onClose: (payload?: any) => void;
 }
 
 export default function AddCropDetailsModal({
@@ -462,14 +462,14 @@ export default function AddCropDetailsModal({
         ],
       };
 
-      //("Submitting payload:", payload);
+      console.log("Submitting payload:", payload);
       await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });
 
       // localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
       toast.success("Crop data submitted successfully!");
-      onClose();
+      onClose(payload);
     } catch (err) {
       console.error(err);
       toast.error("Failed to submit crop data");

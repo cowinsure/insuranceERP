@@ -93,6 +93,8 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     onChange({ pestIds: selectedPests, diseaseIds: updated });
   };
 
+  console.log(data);
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-5 underline text-center">

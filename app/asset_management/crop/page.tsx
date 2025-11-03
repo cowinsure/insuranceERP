@@ -32,6 +32,9 @@ const CropsPage = () => {
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [crops, setCrops] = useState<CropGetData[]>([]);
   const [filteredCrops, setFilteredCrops] = useState(crops);
+  const [stageOnePayloads, setStageOnePayloads] = useState<Record<number, any>>(
+    {}
+  );
 
   const stageRules: Record<number, StageAccess> = {
     1: { stage1Enabled: true, stage2Enabled: false },
@@ -113,8 +116,17 @@ const CropsPage = () => {
   };
 
   // function for stage one data update
-  const runOnClose = () => {
+  // Stage 1 modal success callback
+  const runOnClose = (updatedPayload?: any) => {
     setIsStageOneModal(false);
+
+    if (updatedPayload) {
+      setStageOnePayloads((prev) => ({
+        ...prev,
+        [updatedPayload.crop_id]: updatedPayload,
+      }));
+    }
+
     fetchCropData();
   };
 
@@ -123,6 +135,8 @@ const CropsPage = () => {
     return stageRules[stageId ?? 1] || stageRules[1];
   };
   /************************************************************************/
+
+  console.log("Received payload from stage 1", stageOnePayloads);
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -238,7 +252,7 @@ const CropsPage = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize w-[190px] mx-auto truncate">
                             {seed?.land_name || "N/A"}
                           </div>
                         </td>
@@ -370,6 +384,7 @@ const CropsPage = () => {
         >
           <AddCropStageTwoModal
             selectedCrop={selectedCrop!}
+            stageOneData={stageOnePayloads[selectedCrop!.crop_id]} // <-- pass Stage 1 payload
             onSuccess={runFunctionOnSuccessStageTwo}
           />
         </GenericModal>

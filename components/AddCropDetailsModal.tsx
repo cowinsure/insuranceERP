@@ -469,7 +469,7 @@ export default function AddCropDetailsModal({
 
       // localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
       toast.success("Crop data submitted successfully!");
-      onClose(payload);
+      onClose();
     } catch (err) {
       console.error(err);
       toast.error("Failed to submit crop data");

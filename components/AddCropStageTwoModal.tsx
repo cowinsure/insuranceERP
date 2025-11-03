@@ -10,10 +10,10 @@ import PestsDisease from "./addCropForms/stageTwoSteps/PestsDisease";
 import Weather from "./addCropForms/stageTwoSteps/Weather";
 import PreviewSubmit from "./PreviewForm";
 import useApi from "@/hooks/use_api";
+import StageTwoPreview from "./StageTwoPreview";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
-  stageOneData?: any;
   onSuccess: () => void;
 }
 
@@ -25,8 +25,7 @@ interface HarvestData {
   harvesting_timing_id: number;
   is_manageable_harvest: boolean;
   reason_for_is_manageable_harvest: string;
-  crop_harvest_details: { good_agricultural_practices_type_id: number }[]; // <- required nested array
-  // observation fields
+  crop_harvest_details: { good_agricultural_practices_type_id: number }[];
   seedVarietyObservation?: string;
   harvestingTiming?: string;
   goodPractices?: Record<string, boolean>;
@@ -41,14 +40,13 @@ interface PestsDiseaseData {
 
 interface StageTwoData {
   harvest: HarvestData;
-  pestsDisease: PestsDiseaseData; // <-- use object, not array
+  pestsDisease: PestsDiseaseData;
   weather: any[];
 }
 
 const AddCropStageTwoModal = ({
   selectedCrop,
   onSuccess,
-  stageOneData,
 }: AddCropStageTwoModalProps) => {
   const steps = [
     "Harvest",
@@ -78,65 +76,39 @@ const AddCropStageTwoModal = ({
     remarks: "",
   };
 
-  // const [stageTwoData, setStageTwoData] = useState<StageTwoData>({
-  //   harvest: defaultHarvest,
-  //   pestsDisease: {
-  //     pestIds:
-  //       stageOneData?.crop_asset_pest_attack_details?.map(
-  //         (p: any) => p.pest_attack_type_id
-  //       ) || [],
-  //     diseaseIds:
-  //       stageOneData?.crop_asset_disease_attack_details?.map(
-  //         (d: any) => d.disease_attack_type_id
-  //       ) || [],
-  //   },
-  //   weather: stageOneData?.crop_asset_weather_effect_history || [],
-  // });
-
   const [stageTwoData, setStageTwoData] = useState<StageTwoData>({
     harvest: defaultHarvest,
-    pestsDisease: { pestIds: [], diseaseIds: [] }, // only Stage 2 IDs
-    weather: [], // only Stage 2 weather
+    pestsDisease: { pestIds: [], diseaseIds: [] },
+    weather: [],
   });
 
   useEffect(() => {
-    if (stageOneData) {
+    if (selectedCrop) {
       setStageTwoData({
         harvest: {
           ...defaultHarvest,
-          ...(stageOneData.crop_harvest_info || {}),
+          ...(selectedCrop.crop_harvest_info?.[0] || {}),
         },
-        pestsDisease: { pestIds: [], diseaseIds: [] }, // empty! Stage 2 only
-        weather: [], // empty! Stage 2 only
+        pestsDisease: {
+          pestIds:
+            selectedCrop.crop_asset_pest_attack_details?.map(
+              (p: any) => p.pest_attack_type_id
+            ) || [],
+          diseaseIds:
+            selectedCrop.crop_asset_disease_attack_details?.map(
+              (d: any) => d.disease_attack_type_id
+            ) || [],
+        },
+        weather:
+          selectedCrop.crop_asset_weather_effect_history?.map((w: any) => ({
+            weather_effect_type_id: w.weather_effect_type_id,
+            remarks: w.remarks || "",
+            date_from: w.date_from || null,
+            date_to: w.date_to || null,
+          })) || [],
       });
     }
-  }, [stageOneData]);
-
-  // const mapPestsDisease = (data: any) => {
-  //   const { pestIds, diseaseIds } = data || { pestIds: [], diseaseIds: [] };
-
-  //   const pests = Array.isArray(pestIds)
-  //     ? pestIds.filter(Boolean).map((id) => ({
-  //         crop_pest_attack_id: 0,
-  //         pest_attack_type_id: id,
-  //         attack_date: null,
-  //         remarks: "",
-  //         stage_name: "Harvest and Observation",
-  //       }))
-  //     : [];
-
-  //   const diseases = Array.isArray(diseaseIds)
-  //     ? diseaseIds.filter(Boolean).map((id) => ({
-  //         crop_disease_attack_id: 0,
-  //         disease_attack_type_id: id,
-  //         attack_date: null,
-  //         remarks: "",
-  //         stage_name: "Harvest and Observation",
-  //       }))
-  //     : [];
-
-  //   return { pests, diseases };
-  // };
+  }, [selectedCrop]);
 
   const mapPestsDisease = (data: any) => {
     const { pestIds, diseaseIds } = data || { pestIds: [], diseaseIds: [] };
@@ -147,7 +119,6 @@ const AddCropStageTwoModal = ({
           pest_attack_type_id: id,
           attack_date: null,
           remarks: "",
-          stage_name: "Harvest and Observation", // ONLY for Stage 2
         }))
       : [];
 
@@ -157,7 +128,6 @@ const AddCropStageTwoModal = ({
           disease_attack_type_id: id,
           attack_date: null,
           remarks: "",
-          stage_name: "Harvest and Observation", // ONLY for Stage 2
         }))
       : [];
 
@@ -176,7 +146,6 @@ const AddCropStageTwoModal = ({
         is_active: true,
         date_from: w.date_from || null,
         date_to: w.date_to || null,
-        stage_name: "Harvest and Observation",
       }));
   };
 
@@ -195,27 +164,26 @@ const AddCropStageTwoModal = ({
 
   const handleSubmit = async () => {
     try {
-      if (!stageOneData) return;
+      if (!selectedCrop) return;
 
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
 
-      // Merge with existing Stage 1 arrays (preserve stage 1 records)
       const mergedPests = [
-        ...(stageOneData.crop_asset_pest_attack_details || []),
+        ...(selectedCrop.crop_asset_pest_attack_details || []),
         ...pests,
       ];
       const mergedDiseases = [
-        ...(stageOneData.crop_asset_disease_attack_details || []),
+        ...(selectedCrop.crop_asset_disease_attack_details || []),
         ...diseases,
       ];
       const mergedWeather = [
-        ...(stageOneData.crop_asset_weather_effect_history || []),
+        ...(selectedCrop.crop_asset_weather_effect_history || []),
         ...weather,
       ];
 
       const payload = {
-        ...stageOneData,
+        ...selectedCrop,
         stage_id: 3,
         crop_harvest_info: {
           harvest_date: stageTwoData.harvest.harvest_date,
@@ -228,8 +196,6 @@ const AddCropStageTwoModal = ({
           is_manageable_harvest: stageTwoData.harvest.is_manageable_harvest,
           reason_for_is_manageable_harvest:
             stageTwoData.harvest.reason_for_is_manageable_harvest,
-          // <-- Use crop_harvest_details directly (exact backend structure).
-          // If children provide crop_harvest_details, use them. Otherwise fallback to mapping goodPractices.
           crop_harvest_details:
             stageTwoData.harvest.crop_harvest_details &&
             stageTwoData.harvest.crop_harvest_details.length > 0
@@ -240,6 +206,7 @@ const AddCropStageTwoModal = ({
                     good_agricultural_practices_type_id: Number(label),
                   })),
         },
+
         crop_asset_pest_attack_details: mergedPests,
         crop_asset_disease_attack_details: mergedDiseases,
         crop_asset_weather_effect_history: mergedWeather,
@@ -247,9 +214,8 @@ const AddCropStageTwoModal = ({
 
       console.log("Final PUT Payload:", payload);
 
-      // Call API here
       await put("/cms/crop-info-service/", payload, {
-        params: { crop_id: stageOneData?.crop_id },
+        params: { crop_id: selectedCrop?.crop_id },
       });
 
       toast.success("Stage Two data saved successfully!");
@@ -266,7 +232,7 @@ const AddCropStageTwoModal = ({
         return (
           <Harvest
             data={[stageTwoData.harvest]}
-            onChange={(val) => handleChange("harvest", val[0])} // unwrap when updating
+            onChange={(val) => handleChange("harvest", val[0])}
           />
         );
       case 1:
@@ -291,13 +257,14 @@ const AddCropStageTwoModal = ({
           />
         );
       case 4:
-        return <PreviewSubmit data={stageTwoData} />;
+        return <StageTwoPreview data={stageTwoData} />;
       default:
         return null;
     }
   };
 
-  console.log("Stage one data received in stage 2", stageOneData);
+  // console.log("Selected crop received in stage 2", selectedCrop);
+  console.log("Stage two data", stageTwoData);
   return (
     <div>
       <div className="bg-white rounded-xl mb-4">

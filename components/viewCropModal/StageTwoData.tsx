@@ -1,10 +1,11 @@
 "use client";
 
+import useApi from "@/hooks/use_api";
 import React, { useEffect, useState } from "react";
 
 /* ---------- Props ---------- */
 interface StageTwoDataProps {
-  cropId?: string | number; // only the ID is needed
+  cropData?: any;
 }
 
 /* ---------- Labels for display ---------- */
@@ -39,74 +40,197 @@ const weatherLabels: Record<string, string> = {
 };
 
 /* ---------- Component ---------- */
-const StageTwoData: React.FC<StageTwoDataProps> = ({ cropId }) => {
-  const [data, setData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
+  const { get } = useApi();
 
-  const storageKey = cropId ? `stageTwo_${cropId}` : null;
+  const [harvestSeedVarietyOptions, setHarvestSeedVarietyOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [harvestTimingOptions, setHarvestTimingOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [goodPracticesList, setGoodPracticesList] = useState<
+    { id: number; label: string }[]
+  >([]);
 
+  // Call the type api
   useEffect(() => {
-    if (!storageKey) return;
+    getHarvestSeedVarietyOptions();
+    getHarvestTimingOptions();
+    getGoodPracticesOptions();
+  }, []);
 
+  // Get harvest seed variety options
+  const getHarvestSeedVarietyOptions = async () => {
     try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) setData(JSON.parse(saved));
-      else setData(null);
-    } catch (err) {
-      console.error("Error loading Stage 2 data:", err);
-      setError("Failed to load Stage 2 data.");
+      const res = await get(
+        "/cms/crop-harvest-seed-variety-observation-service/",
+        {
+          params: { page_size: 50, start_record: 1 },
+        }
+      );
+      if (res.status === "success" && Array.isArray(res.data)) {
+        const formatted = res.data.map((item: any) => ({
+          value: item.harvest_seed_variety_observation_id,
+          label: item.harvest_seed_variety_observation_type_name,
+        }));
+        setHarvestSeedVarietyOptions(formatted);
+      }
+    } catch (error) {
+      console.error(error);
     }
-  }, [storageKey]);
+  };
 
-  if (error) {
-    return <p className="text-red-500 italic">{error}</p>;
-  }
+  const getGoodPracticesOptions = async () => {
+    try {
+      const res = await get(
+        "/cms/crop-harvest-good-agricultural-practices-service/",
+        {
+          params: { page_size: 50, start_record: 1 },
+        }
+      );
+      if (res.status === "success" && Array.isArray(res.data)) {
+        const formatted = res.data.map((item: any) => ({
+          id: item.good_agricultural_practices_type_id,
+          label: item.good_agricultural_practices_type_name,
+        }));
+        setGoodPracticesList(formatted);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  if (!data) {
+  const getHarvestTimingOptions = async () => {
+    try {
+      const res = await get("/cms/crop-harvest-harvesting-timing-service/", {
+        params: { page_size: 50, start_record: 1 },
+      });
+      if (res.status === "success" && Array.isArray(res.data)) {
+        const formatted = res.data.map((item: any) => ({
+          value: item.harvesting_timing_id,
+          label: item.harvesting_timing_name,
+        }));
+        setHarvestTimingOptions(formatted);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (!cropData) {
     return (
       <div className="text-gray-500 italic">
-        No Stage Two data available for this crop.
+        No Stage Two cropData available for this crop.
       </div>
     );
   }
+  const crop = cropData.crop_harvest_info[0];
 
+  // Get the seed variety name using id
+  const seedVarietyName = crop?.harvest_seed_variety_observation_id
+    ? harvestSeedVarietyOptions?.find(
+        (option) => option?.value === crop?.harvest_seed_variety_observation_id
+      )?.label
+    : "";
+
+  // Get the harvest timing names
+  const harvestingTimingName = crop?.harvesting_timing_id
+    ? harvestTimingOptions?.find(
+        (option) => option?.value === crop?.harvesting_timing_id
+      )?.label
+    : "";
+
+  // Get the good practices
+  const goodPracticeNames =
+    crop?.crop_harvest_details && crop?.crop_harvest_details.length > 0
+      ? crop?.crop_harvest_details
+          .map((detail: any) => {
+            const match = goodPracticesList?.find(
+              (p) => p?.id === detail?.good_agricultural_practices_type_id
+            );
+            return match ? match.label : null;
+          })
+          .filter(Boolean) // remove nulls
+      : [];
+
+  console.log("View crop for stage 2", cropData);
+  console.log(goodPracticesList);
   /* ---------- Render ---------- */
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">
       {/* 🌾 Harvest */}
-      <section>
+      <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">Harvest</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DisplayField label="Harvest Date" value={data.harvestDate} />
-          <DisplayField label="Total Production" value={data.totalProduction} />
-          <DisplayField label="Moisture Content" value={data.moistureContent} />
+          <DisplayField label="Harvest Date" value={crop?.harvest_date} />
+          <DisplayField
+            label="Total Production"
+            value={`${
+              crop?.total_production_kg === undefined
+                ? ""
+                : `${crop?.total_production_kg} kg`
+            }`}
+          />
+          <DisplayField
+            label="Moisture Content"
+            value={`${
+              crop?.moisture_content_percentage === undefined
+                ? ""
+                : `${crop?.moisture_content_percentage} %`
+            }`}
+          />
         </div>
       </section>
 
       {/* 🌱 Observations */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3 text-green-800">Observations</h2>
+      <section className="border rounded-lg p-3">
+        <h2 className="text-lg font-semibold mb-3 text-green-800">
+          Observations
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DisplayField label="Seed Variety Observation" value={data.observationData?.seedVarietyObservation} />
-          <DisplayField label="Good Practices" value={data.observationData?.goodPractices} />
-          <DisplayField label="Manageable" value={data.observationData?.manageable} />
-          <DisplayField label="Harvesting Timing" value={data.observationData?.harvestingTiming} />
+          <DisplayField
+            label="Seed Variety Observation"
+            value={seedVarietyName}
+          />
+          <DisplayField
+            label="Harvesting Timing"
+            value={harvestingTimingName}
+          />
+          <DisplayField
+            label="Manageable"
+            value={
+              crop?.is_manageable_harvest === true ? "It was manageable" : "No"
+            }
+          />
+          <DisplayField
+            label="Remarks"
+            value={crop?.reason_for_is_manageable_harvest}
+          />
+          <div className="col-span-2">
+            <ArrayDisplay
+              title="Good Practices"
+              items={goodPracticeNames.map((name: string) => ({ name }))}
+            />
+          </div>
         </div>
       </section>
 
       {/* 🐛 Pest & Disease */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3 text-green-800">Pest & Disease Attacks</h2>
+      <section className="border rounded-lg p-3">
+        <h2 className="text-lg font-semibold mb-3 text-green-800">
+          Pest & Disease Attacks
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ArrayDisplay
             title="Pest Attacks"
-            items={Object.entries(data.pestAttack || {})
+            items={Object.entries(cropData.pestAttack || {})
               .filter(([_, v]) => v)
               .map(([key]) => ({ name: pestLabels[key] || key }))}
           />
           <ArrayDisplay
             title="Disease Attacks"
-            items={Object.entries(data.diseaseAttack || {})
+            items={Object.entries(cropData.diseaseAttack || {})
               .filter(([_, v]) => v)
               .map(([key]) => ({ name: diseaseLabels[key] || key }))}
           />
@@ -114,17 +238,19 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropId }) => {
       </section>
 
       {/* 🌤 Weather */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3 text-green-800">Adverse Weather Effects</h2>
+      <section className="border rounded-lg p-3">
+        <h2 className="text-lg font-semibold mb-3 text-green-800">
+          Adverse Weather Effects
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ArrayDisplay
             title="Weather Effects"
-            items={Object.entries(data.adverseWeatherEffects || {})
+            items={Object.entries(cropData.adverseWeatherEffects || {})
               .filter(([_, v]) => v)
               .map(([key]) => ({ name: weatherLabels[key] || key }))}
           />
-          <DisplayField label="Period From" value={data.periodFrom} />
-          <DisplayField label="Period To" value={data.periodTo} />
+          <DisplayField label="Period From" value={cropData.periodFrom} />
+          <DisplayField label="Period To" value={cropData.periodTo} />
         </div>
       </section>
     </div>
@@ -159,14 +285,14 @@ const ArrayDisplay = ({
         {items.map((item, i) => (
           <li
             key={i}
-            className="text-sm bg-gray-50 border border-gray-200 p-2 rounded"
+            className="text-sm bg-blue-50 border border-gray-200 p-2 rounded"
           >
             {item.name}
           </li>
         ))}
       </ul>
     ) : (
-      <p className="text-gray-400 text-sm italic">No data</p>
+      <p className="text-gray-400 text-sm italic">Not Provided</p>
     )}
   </div>
 );

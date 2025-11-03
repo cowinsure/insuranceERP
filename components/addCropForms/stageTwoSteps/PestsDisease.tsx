@@ -9,7 +9,12 @@ interface PestsDiseaseProps {
     pestIds?: number[];
     diseaseIds?: number[];
   };
-  onChange: (updatedData: { pestIds: number[]; diseaseIds: number[] }) => void;
+  onChange: (updatedData: {
+    pestIds: number[];
+    pestNames?: string[]; // added for preview
+    diseaseIds: number[];
+    diseaseNames?: string[]; // added for preview
+  }) => void;
 }
 
 const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
@@ -75,22 +80,48 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
   /** Handle pest toggle */
   const togglePest = (id: number) => {
-    const updated = selectedPests.includes(id)
+    const updatedIds = selectedPests.includes(id)
       ? selectedPests.filter((pid) => pid !== id)
       : [...selectedPests, id];
 
-    setSelectedPests(updated);
-    onChange({ pestIds: updated, diseaseIds: selectedDiseases });
+    setSelectedPests(updatedIds);
+
+    // Get names of selected pests
+    const updatedNames = pestOptions
+      .filter((p) => updatedIds.includes(p.id))
+      .map((p) => p.name);
+
+    onChange({
+      pestIds: updatedIds,
+      pestNames: updatedNames, // new field for preview
+      diseaseIds: selectedDiseases,
+      diseaseNames: diseaseOptions
+        .filter((d) => selectedDiseases.includes(d.id))
+        .map((d) => d.name), // maintain disease names
+    });
   };
 
   /** Handle disease toggle */
   const toggleDisease = (id: number) => {
-    const updated = selectedDiseases.includes(id)
+    const updatedIds = selectedDiseases.includes(id)
       ? selectedDiseases.filter((did) => did !== id)
       : [...selectedDiseases, id];
 
-    setSelectedDiseases(updated);
-    onChange({ pestIds: selectedPests, diseaseIds: updated });
+    setSelectedDiseases(updatedIds);
+
+    // Get names of selected diseases
+    const updatedNames = diseaseOptions
+      .filter((d) => updatedIds.includes(d.id))
+      .map((d) => d.name);
+
+    onChange({
+      pestIds: selectedPests,
+      pestNames: pestOptions
+        .filter((p) => selectedPests.includes(p.id))
+        .map((p) => p.name), // maintain pest names
+      diseaseIds: updatedIds,
+      diseaseNames: updatedNames, // new field for preview
+    });
   };
 
   console.log(data);

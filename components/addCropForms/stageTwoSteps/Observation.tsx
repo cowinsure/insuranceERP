@@ -1,3 +1,5 @@
+"use client";
+
 import InputField from "@/components/InputField";
 import DropdownField from "@/components/DropDownField";
 import React, { useEffect, useState } from "react";
@@ -6,8 +8,13 @@ import useApi from "@/hooks/use_api";
 interface ObservationProps {
   data: {
     harvest_seed_variety_observation_id?: number;
+    harvest_seed_variety_observation_name?: string; // preview name
     harvesting_timing_id?: number;
-    crop_harvest_details?: { good_agricultural_practices_type_id: number }[];
+    harvesting_timing_name?: string; // preview name
+    crop_harvest_details?: {
+      good_agricultural_practices_type_id: number;
+      good_agricultural_practices_type_name?: string; // preview name
+    }[];
     is_manageable_harvest?: boolean;
     reason_for_is_manageable_harvest?: string;
   };
@@ -48,9 +55,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
     try {
       const res = await get(
         "/cms/crop-harvest-good-agricultural-practices-service/",
-        {
-          params: { page_size: 50, start_record: 1 },
-        }
+        { params: { page_size: 50, start_record: 1 } }
       );
       if (res.status === "success" && Array.isArray(res.data)) {
         const formatted = res.data.map((item: any) => ({
@@ -68,9 +73,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
     try {
       const res = await get(
         "/cms/crop-harvest-seed-variety-observation-service/",
-        {
-          params: { page_size: 50, start_record: 1 },
-        }
+        { params: { page_size: 50, start_record: 1 } }
       );
       if (res.status === "success" && Array.isArray(res.data)) {
         const formatted = res.data.map((item: any) => ({
@@ -103,11 +106,17 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
 
   /** Handlers */
   const handleVarietyChange = (value: number) => {
-    onChange({ ...data, harvest_seed_variety_observation_id: value });
-    console.log({ harvest_seed_variety_observation_id: value });
+    const selected = harvestSeedVarietyOptions.find(
+      (opt) => Number(opt.value) === value
+    );
+    onChange({
+      ...data,
+      harvest_seed_variety_observation_id: value,
+      harvest_seed_variety_observation_name: selected?.label || "",
+    });
   };
-
   const toggleGoodPractice = (id: number) => {
+    const practice = goodPracticesList.find((p) => p.id === id);
     const exists = data.crop_harvest_details?.some(
       (d) => d.good_agricultural_practices_type_id === id
     );
@@ -119,10 +128,12 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
         (d) => d.good_agricultural_practices_type_id !== id
       );
     } else {
-      updated.push({ good_agricultural_practices_type_id: id });
+      updated.push({
+        good_agricultural_practices_type_id: id,
+        good_agricultural_practices_type_name: practice?.label || "", // send name for preview
+      });
     }
     onChange({ ...data, crop_harvest_details: updated });
-    console.log({ crop_harvest_details: updated });
   };
 
   const handleManageableChange = (value: string) => {
@@ -140,7 +151,14 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   };
 
   const handleTimingChange = (value: number) => {
-    onChange({ ...data, harvesting_timing_id: value });
+    const selected = harvestTimingOptions.find(
+      (opt) => Number(opt.value) === value
+    );
+    onChange({
+      ...data,
+      harvesting_timing_id: value,
+      harvesting_timing_name: selected?.label || "",
+    });
   };
 
   return (

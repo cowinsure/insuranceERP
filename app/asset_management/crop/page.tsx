@@ -113,20 +113,13 @@ const CropsPage = () => {
 
   const runFunctionOnSuccessStageTwo = () => {
     setIsStageTwoModal(false);
+    fetchCropData();
   };
 
   // function for stage one data update
   // Stage 1 modal success callback
   const runOnClose = (updatedPayload?: any) => {
     setIsStageOneModal(false);
-
-    if (updatedPayload) {
-      setStageOnePayloads((prev) => ({
-        ...prev,
-        [updatedPayload.crop_id]: updatedPayload,
-      }));
-    }
-
     fetchCropData();
   };
 
@@ -135,8 +128,6 @@ const CropsPage = () => {
     return stageRules[stageId ?? 1] || stageRules[1];
   };
   /************************************************************************/
-
-  console.log("Received payload from stage 1", stageOnePayloads);
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -384,7 +375,6 @@ const CropsPage = () => {
         >
           <AddCropStageTwoModal
             selectedCrop={selectedCrop!}
-            stageOneData={stageOnePayloads[selectedCrop!.crop_id]} // <-- pass Stage 1 payload
             onSuccess={runFunctionOnSuccessStageTwo}
           />
         </GenericModal>
@@ -399,7 +389,7 @@ const CropsPage = () => {
           }`}
           height={true}
         >
-          <CropStageModalTabs stageOneData={selectedCrop} />
+          <CropStageModalTabs data={selectedCrop} />
         </GenericModal>
       )}
 

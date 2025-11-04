@@ -28,6 +28,7 @@ import { useAuth } from "@/core/context/AuthContext";
 import { BsClipboardCheck, BsClipboardCheckFill } from "react-icons/bs";
 import { IoIosArrowForward } from "react-icons/io";
 import { GiCow } from "react-icons/gi";
+import { RiSurveyLine } from "react-icons/ri";
 
 // Menu configuration with children
 const mainMenuItems = [
@@ -66,6 +67,12 @@ const mainMenuItems = [
     url: "/land",
     icon: MdOutlineLandscape,
     activeIcon: MdOutlineLandscape,
+  },
+    {
+    title: "Surveys",
+    url: "/survey",
+    icon: RiSurveyLine,
+    activeIcon: RiSurveyLine,
   },
   {
     title: "Products",

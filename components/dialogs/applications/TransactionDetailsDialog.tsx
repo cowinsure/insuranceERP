@@ -144,13 +144,12 @@ export default function TransactionDetailsDialog({
         if (response.status === "success") {
           setPaymentData(response.data);
         }
-        //(
-          "Fetching applications from API..." + JSON.stringify(response)
-        );
+        // console.log("Fetching applications from API...", response);
       } catch (error) {
         //("Error fetching applications from API...", error);
       }
     };
+    
     fetchPaymentData();
   }, []);
 

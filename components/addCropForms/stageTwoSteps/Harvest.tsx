@@ -1,16 +1,30 @@
 import InputField from "@/components/InputField";
 import React from "react";
-import { StageTwoData } from "../StageTwo";
 
 interface HarvestProps {
-  data: StageTwoData;
-  onChange: (field: keyof StageTwoData, value: any) => void;
+  data: any;
+  onChange: (val: any) => void; // parent handler
 }
 
 const Harvest = ({ data, onChange }: HarvestProps) => {
+  // Take the first harvest entry if exists, or empty defaults
+  const harvest = data[0] || {
+    harvest_date: "",
+    total_production_kg: "",
+    moisture_content_percentage: "",
+  };
+
+  const handleChange = (field: string, value: any) => {
+    const updated = {
+      ...harvest,
+      [field]: value,
+    };
+    onChange([updated]); // pass back as array to match parent state
+  };
+
   return (
-    <div className="space-y-4 bg-white p-4 rounded-lg shadow-inner">
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">
+    <div className="space-y-5 bg-white rounded-lg">
+      <h2 className="text-xl font-semibold mb-5 text-center underline">
         Harvest Details
       </h2>
       <InputField
@@ -18,8 +32,8 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         name="harvestDate"
         label="Harvest Date"
         type="date"
-        value={data.harvestDate}
-        onChange={(e) => onChange("harvestDate", e.target.value)}
+        value={harvest.harvest_date}
+        onChange={(e) => handleChange("harvest_date", e.target.value)}
       />
       <InputField
         id="totalProduction"
@@ -27,8 +41,8 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         placeholder="e.g. 42.8"
         name="totalProduction"
         label="Total Production (kg)"
-        value={data.totalProduction}
-        onChange={(e) => onChange("totalProduction", e.target.value)}
+        value={harvest.total_production_kg}
+        onChange={(e) => handleChange("total_production_kg", e.target.value)}
       />
       <InputField
         id="moistureContent"
@@ -36,8 +50,10 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         placeholder="e.g. 16.7"
         name="moistureContent"
         label="Moisture Content (%)"
-        value={data.moistureContent}
-        onChange={(e) => onChange("moistureContent", e.target.value)}
+        value={harvest.moisture_content_percentage}
+        onChange={(e) =>
+          handleChange("moisture_content_percentage", e.target.value)
+        }
       />
     </div>
   );

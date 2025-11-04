@@ -6,7 +6,8 @@ interface StageOneDataProps {
 }
 
 const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
-  const safeArray = (arr: any) => (Array.isArray(arr) ? arr : []);
+  const safeArray = (arr: any[]) => (Array.isArray(arr) ? arr : []);
+  //(data);
 
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto max-h-[70vh]">
@@ -224,8 +225,8 @@ const ArrayDisplay = ({
   items: { name: string; quantity?: string; remarks?: string; date?: string }[];
 }) => {
   const hasData = Array.isArray(items) && items.some((i) => i && i.name);
-  console.log(hasData);
-  console.log(items);
+  //(hasData);
+  //(items);
 
   return (
     <div>

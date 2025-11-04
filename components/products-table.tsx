@@ -66,21 +66,21 @@ export function ProductsTable() {
         const response = await get("ims/insurance-product-service/", {
           params: { start_record: 1 },
         });
-        console.log("Response from API:", response.status);
+        //("Response from API:", response.status);
 
         if (response.status === "success") {
           setProductData(response.data);
           setFilteredProducts(response.data); // initialize filtered
         }
-        // console.log(response.data.length + " farmers found");
+        // //(response.data.length + " farmers found");
 
         // for (let index = 0; index < response.date.length; index++) {
         //   const element = response.data[index];
 
-        //   console.log("Fetching applications from API..." + element);
+        //   //("Fetching applications from API..." + element);
         // }
       } catch (error) {
-        console.log("Error fetching applications from API...");
+        //("Error fetching applications from API...");
       } finally {
         setLoading(false);
       }

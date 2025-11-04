@@ -37,7 +37,7 @@ const History = ({ data, onChange }: HistoryProps) => {
   ) => {
     const { name, value, type } = e.target;
     const val = type === "number" ? Number(value) : value;
-    console.log("From history form:", name, val);
+    //("From history form:", name, val);
 
     // When dropdown changes, also sync crop name
     if (name === "last_year_crop_type_id") {
@@ -72,7 +72,7 @@ const History = ({ data, onChange }: HistoryProps) => {
     }
   }, [data.last_year_crop_type_id, cropType]);
 
-  console.log("History data:", data);
+  //("History data:", data);
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">

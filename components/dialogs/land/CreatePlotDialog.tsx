@@ -88,7 +88,7 @@ export function CreatePlotDialog({ open, onOpenChange, onPlotCreated }: CreatePl
   const [overallSuitability, setOverallSuitability] = useState<string>("")
   // land suitability options will be fetched from API
 
-  console.log(suitabilityReasons);
+  //(suitabilityReasons);
 
   interface LandSuitability {
     type: string
@@ -158,7 +158,7 @@ function generateRandomNumber(maxNumber: number): number {
     // create random number and asignt it to random length field
     const randomLength = generateRandomNumber(parseInt(measureSWSE)) + 7;
     setMeasureSENE(randomLength.toString());
-    console.log("measuring lenght" + randomLength);
+    //("measuring lenght" + randomLength);
     
 
   },[measureSWSE]);
@@ -175,7 +175,7 @@ function generateRandomNumber(maxNumber: number): number {
     const randomWidth = generateRandomNumber(parseInt(measureSWNW))+7;
 
     setMeasureNWNE(randomWidth.toString());
-    console.log("measuring width" + randomWidth);
+    //("measuring width" + randomWidth);
     
 
   },[measureSWNW]);
@@ -229,7 +229,7 @@ function generateRandomNumber(maxNumber: number): number {
       setFarmersLoading(true)
       try {
         const resp = await get(`ims/farmer-service`, { params: { start_record: 1 } })
-        console.log(resp);
+        //(resp);
 
         if (!cancelled && resp?.status === 'success' && Array.isArray(resp.data)) {
           setFarmers(resp.data)
@@ -458,7 +458,7 @@ function generateRandomNumber(maxNumber: number): number {
         }))
       };
 
-      console.log(requestBody);
+      //(requestBody);
       // https://cropploting.dev.insurecow.com/landmap/generate/
 
       // Make the API call
@@ -491,7 +491,7 @@ function generateRandomNumber(maxNumber: number): number {
       }
 
       const data = await response.json();
-      console.log(data);
+      //(data);
 
       // Extract fields from the correct structure
       const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
@@ -682,7 +682,7 @@ function generateRandomNumber(maxNumber: number): number {
 
         }
 
-        console.log(landSubmissionModel);
+        //(landSubmissionModel);
 
 
 

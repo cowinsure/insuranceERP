@@ -1,171 +1,200 @@
-import { CropData } from "@/components/AddCropDetailsModal";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
-import React, { useState } from "react";
-import { StageTwoData } from "../StageTwo";
+import useApi from "@/hooks/use_api";
+import Loading from "@/components/utils/Loading";
 
-const Weather = ({
-  data,
-  onChange,
-}: {
-  data: StageTwoData;
-  onChange: (
-    field: keyof StageTwoData,
-    value:
-      | string
-      | boolean
-      | {
-          flood: boolean;
-          drought: boolean;
-          excessRainfall: boolean;
-          storms: boolean;
-          hailstorm: boolean;
+interface WeatherProps {
+  data: any; // { weather_effects_full: [], date_from, date_to, remarks }
+  onChange: (updatedData: any) => void;
+}
+
+interface WeatherOption {
+  id: number;
+  weather_effect_type_name: string;
+  desc?: string;
+}
+
+const Weather = ({ data, onChange }: WeatherProps) => {
+  const { get, loading } = useApi();
+  const [weatherOptions, setWeatherOptions] = useState<WeatherOption[]>([]);
+
+  const [selectedWeatherEffects, setSelectedWeatherEffects] = useState<any[]>(
+    data?.weather_effects_full || []
+  );
+
+  useEffect(() => {
+    setSelectedWeatherEffects(data?.weather_effects_full || []);
+  }, [data?.weather_effects_full]);
+
+  useEffect(() => {
+    const fetchWeatherOptions = async () => {
+      try {
+        const response = await get(
+          "/cms/crop-adverse-weather-effect-type-service/",
+          { params: { page_size: 50, start_record: 1 } }
+        );
+
+        if (response.status === "success" && Array.isArray(response.data)) {
+          setWeatherOptions(response.data);
         }
-  ) => void;
-}) => {
-  const [errors, setErrors] = useState({
-    adverseWeatherEffects: "",
-    periodFrom: "",
-    periodTo: "",
-  });
+      } catch (err) {
+        console.error("Failed to fetch weather options", err);
+      }
+    };
+    fetchWeatherOptions();
+  }, [get]);
 
-  // Handle change for all form fields (Checkbox and Date)
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, type, value, checked } = e.target;
+  const toggleWeatherEffect = (id: number) => {
+    const exists = selectedWeatherEffects.find(
+      (w) => w.weather_effect_type_id === id
+    );
 
-    if (type === "checkbox") {
-      // Update nested adverseWeatherEffects
-      onChange("adverseWeatherEffects", {
-        ...data.adverseWeatherEffects,
-        [name]: checked,
-      });
+    let updatedEffects;
+    if (exists) {
+      updatedEffects = selectedWeatherEffects.filter(
+        (w) => w.weather_effect_type_id !== id
+      );
     } else {
-      // Update date fields
-      onChange(name as keyof StageTwoData, value);
+      const option = weatherOptions.find((w) => w.id === id);
+      updatedEffects = [
+        ...selectedWeatherEffects,
+        {
+          weather_effect_type_id: id,
+          weather_effect_type_name: option?.weather_effect_type_name || "",
+          remarks: "",
+          date_from: data?.date_from || null,
+          date_to: data?.date_to || null,
+        },
+      ];
     }
+
+    setSelectedWeatherEffects(updatedEffects);
+    onChange({
+      ...data,
+      weather_effects_full: updatedEffects,
+      weather_effects: updatedEffects.map((w) => w.weather_effect_type_id),
+    });
   };
 
-  // Form validation
-  const validateForm = () => {
-    const newErrors = {
-      adverseWeatherEffects: "",
-      periodFrom: "",
-      periodTo: "",
-    };
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
 
-    const effects = data.adverseWeatherEffects;
-    if (
-      !effects.flood &&
-      !effects.drought &&
-      !effects.excessRainfall &&
-      !effects.storms &&
-      !effects.hailstorm
-    ) {
-      newErrors.adverseWeatherEffects =
-        "Please select at least one adverse weather effect";
-    }
+    // Update parent
+    onChange({ ...data, [name]: value });
 
-    if (!data.periodFrom) newErrors.periodFrom = "This field is required";
-    if (!data.periodTo) newErrors.periodTo = "This field is required";
+    // Update all selected weather objects
+    const updated = selectedWeatherEffects.map((w) => ({
+      ...w,
+      [name]: value,
+    }));
+    setSelectedWeatherEffects(updated);
+    onChange({ ...data, weather_effects_full: updated });
+  };
 
-    setErrors(newErrors);
+  const handleRemarksChange = (idx: number, value: string) => {
+    const updated = [...selectedWeatherEffects];
+    updated[idx].remarks = value;
+    setSelectedWeatherEffects(updated);
+    onChange({ ...data, weather_effects_full: updated });
   };
 
   return (
-    <form className="p-3">
+    <form className="max-h-[60vh] overflow-auto space-y-5">
       <h2 className="text-xl font-semibold mb-5 underline text-center">
         Weather Details
       </h2>
-      <div className="space-y-5">
-        {/* Adverse Weather Effects (Checkboxes) */}
-        <div className="space-y-5">
-          <div className="space-y-3 bg-gray-50 p-2 border rounded-lg">
-            <p className="ml-1">(Multiple Selection)</p>
-            {[
-              {
-                label: "Flood",
-                name: "flood",
-                description: "Floods cause full or partial damage.",
-              },
-              {
-                label: "Drought",
-                name: "drought",
-                description: "Some plants dry up prematurely or lodge down.",
-              },
-              {
-                label: "Excess Rainfall",
-                name: "excessRainfall",
-                description: "Some plants dry up prematurely or lodge down.",
-              },
-              {
-                label: "Storms",
-                name: "storms",
-                description: "Storms cause crop lodging or destruction.",
-              },
-              {
-                label: "Hailstorm",
-                name: "hailstorm",
-                description:
-                  "Hailstorms cause physical damage to grains or panicles.",
-              },
-            ].map((effect) => (
-              <div key={effect.name} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={effect.name}
-                  name={effect.name}
-                  checked={
-                    data.adverseWeatherEffects[
-                      effect.name as keyof typeof data.adverseWeatherEffects
-                    ]
-                  }
-                  onChange={handleChange}
-                  className="mr-2 custom-checkbox"
-                />
-                <label
-                  htmlFor={effect.name}
-                  className="text-gray-600 flex flex-col"
-                >
-                  <strong className="text-[15px]">{effect.label}</strong>
-                  <span className="text-gray-400">{effect.description}</span>
-                </label>
-              </div>
-            ))}
-          </div>
-          {errors.adverseWeatherEffects && (
-            <p className="text-red-600 text-sm mt-1">
-              {errors.adverseWeatherEffects}
-            </p>
-          )}
-        </div>
 
-        {/* Period of Adverse Weather (Date Inputs) */}
-        <div>
-          <h1 className="text-lg font-semibold mb-1">
-            Period of Adverse Weather
-          </h1>
-          <div className="grid grid-cols-2 gap-6">
-            <InputField
-              label="From"
-              id="periodFrom"
-              name="periodFrom"
-              type="date"
-              value={data.periodFrom}
-              onChange={handleChange}
-              error={errors.periodFrom}
-            />
+      <div className="space-y-3 bg-gray-50 p-3 border rounded-lg">
+        <h3 className="font-semibold">
+          Adverse Weather Type{" "}
+          <span className="text-sm text-gray-400">(Multiple Selection)</span>
+        </h3>
 
-            <InputField
-              label="To"
-              id="periodTo"
-              name="periodTo"
-              type="date"
-              value={data.periodTo}
-              onChange={handleChange}
-              error={errors.periodTo}
-            />
-          </div>
+        {loading ? (
+          <Loading />
+        ) : (
+          weatherOptions.map((w) => (
+            <div key={w.id} className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                id={`weather_${w.id}`}
+                checked={selectedWeatherEffects.some(
+                  (we) => we.weather_effect_type_id === w.id
+                )}
+                onChange={() => toggleWeatherEffect(w.id)}
+                className="mt-1 accent-green-600 custom-checkbox"
+              />
+              <label
+                htmlFor={`weather_${w.id}`}
+                className="flex flex-col cursor-pointer"
+              >
+                <strong className="text-[15px] text-gray-700">
+                  {w.weather_effect_type_name}
+                </strong>
+                {w.desc && (
+                  <span className="text-gray-400 text-sm">{w.desc}</span>
+                )}
+              </label>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Period of Adverse Weather */}
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Period of Adverse Weather</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <InputField
+            label="From"
+            id="date_from"
+            name="date_from"
+            type="date"
+            value={data?.date_from || ""}
+            onChange={handleDateChange}
+          />
+          <InputField
+            label="To"
+            id="date_to"
+            name="date_to"
+            type="date"
+            value={data?.date_to || ""}
+            onChange={handleDateChange}
+          />
         </div>
       </div>
+
+      {/* Remarks per weather effect */}
+      {/* {selectedWeatherEffects.map((we, idx) => (
+        <div
+          key={we.weather_effect_type_id}
+          className="border rounded-lg bg-gray-50 p-2 shadow-sm space-y-1"
+        >
+          <p className="font-semibold text-gray-700">
+            {we.weather_effect_type_name} Remarks
+          </p>
+          <InputField
+            label="Remarks"
+            id={`remarks_${we.weather_effect_type_id}`}
+            name={`remarks_${we.weather_effect_type_id}`}
+            type="text"
+            value={we.remarks || ""}
+            onChange={(e: any) => handleRemarksChange(idx, e.target.value)}
+          />
+        </div>
+      ))} */}
+
+      {/* General Remarks */}
+      <InputField
+        label="General Remarks"
+        id="remarks"
+        name="remarks"
+        type="text"
+        placeholder="Add remarks if any"
+        value={data?.remarks || ""}
+        onChange={(e) => onChange({ ...data, remarks: e.target.value })}
+      />
     </form>
   );
 };

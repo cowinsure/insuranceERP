@@ -243,7 +243,7 @@ const CropsPage = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize w-[190px] mx-auto truncate">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize w-[150px] mx-auto truncate">
                             {seed?.land_name || "N/A"}
                           </div>
                         </td>

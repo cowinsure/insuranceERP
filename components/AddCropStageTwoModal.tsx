@@ -10,6 +10,7 @@ import PestsDisease from "./addCropForms/stageTwoSteps/PestsDisease";
 import Weather from "./addCropForms/stageTwoSteps/Weather";
 import StageTwoPreview from "./StageTwoPreview";
 import useApi from "@/hooks/use_api";
+import Survey, { SurveyData } from "./addCropForms/stageTwoSteps/Survey";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
@@ -22,19 +23,17 @@ interface HarvestData {
   moisture_content_percentage: number;
   harvest_seed_variety_observation_id: number;
   harvesting_timing_id: number;
-  is_manageable_harvest: boolean;
-  reason_for_is_manageable_harvest: string;
   crop_harvest_details: { good_agricultural_practices_type_id: number }[];
   seedVarietyObservation?: string;
   harvestingTiming?: string;
   goodPractices?: Record<string, boolean>;
-  manageable?: string;
-  remarks?: string;
 }
 
 interface PestsDiseaseData {
   pestIds: number[];
   diseaseIds: number[];
+  is_manageable_harvest?: boolean;
+  reason_for_is_manageable_harvest?: string;
 }
 
 interface WeatherData {
@@ -49,6 +48,7 @@ interface StageTwoData {
   harvest: HarvestData;
   pestsDisease: PestsDiseaseData;
   weather: WeatherData[];
+  survey: SurveyData[];
 }
 
 const AddCropStageTwoModal = ({
@@ -60,6 +60,7 @@ const AddCropStageTwoModal = ({
     "Observation",
     "Pests & Disease",
     "Weather",
+    "Survey (FGD)",
     "Preview",
   ];
   const [currentStep, setCurrentStep] = useState(0);
@@ -72,27 +73,40 @@ const AddCropStageTwoModal = ({
     moisture_content_percentage: 0,
     harvest_seed_variety_observation_id: 0,
     harvesting_timing_id: 0,
-    is_manageable_harvest: true,
-    reason_for_is_manageable_harvest: "",
     crop_harvest_details: [],
     seedVarietyObservation: "",
     harvestingTiming: "",
     goodPractices: {},
-    manageable: "Yes",
-    remarks: "",
   };
 
   const [stageTwoData, setStageTwoData] = useState<StageTwoData>({
     harvest: defaultHarvest,
-    pestsDisease: { pestIds: [], diseaseIds: [] },
+    pestsDisease: {
+      pestIds: [],
+      diseaseIds: [],
+      is_manageable_harvest: true,
+      reason_for_is_manageable_harvest: "",
+    },
     weather: [],
+    survey: [
+      {
+        top_three_varieties: [],
+        avg_production_this_year: "",
+        avg_production_last_year: "",
+        yield_loss: "",
+        key_reasons_yield_losses: [],
+        weather_effects: [],
+        pests: [],
+        diseases: [],
+        remarks: "",
+      },
+    ],
   });
 
   // ---------------- Prefill Stage 2 data with stage_name validation ----------------
   useEffect(() => {
     if (!selectedCrop) return;
 
-    // Stage 2 pests/diseases: only include those with stage_name = "Harvest & Observation"
     const stage2Pests = (selectedCrop.crop_asset_pest_attack_details || [])
       .filter((p: any) => p.stage_name === "Harvest & Observation")
       .map((p: any) => p.pest_attack_type_id);
@@ -121,14 +135,50 @@ const AddCropStageTwoModal = ({
       pestsDisease: {
         pestIds: stage2Pests.length ? stage2Pests : [],
         diseaseIds: stage2Diseases.length ? stage2Diseases : [],
+        is_manageable_harvest:
+          selectedCrop.crop_harvest_info?.[0]?.is_manageable_harvest ?? true,
+        reason_for_is_manageable_harvest:
+          selectedCrop.crop_harvest_info?.[0]
+            ?.reason_for_is_manageable_harvest || "",
       },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
+      survey: [
+        {
+          top_three_varieties: selectedCrop.survey?.top_three_varieties || [],
+          avg_production_this_year:
+            selectedCrop.survey?.avg_production_this_year || "",
+          avg_production_last_year:
+            selectedCrop.survey?.avg_production_last_year || "",
+          yield_loss: selectedCrop.survey?.yield_loss || false,
+          yield_loss_reasons: selectedCrop.survey?.yield_loss_reasons || [],
+          weather_effects: selectedCrop.survey?.weather_effects || [],
+          pests: (selectedCrop.survey?.pests || []).map((p: any) => ({
+            id: p.id ?? 0,
+            name: p.name ?? "",
+          })),
+          diseases: (selectedCrop.survey?.diseases || []).map((d: any) => ({
+            id: d.id ?? 0,
+            name: d.name ?? "",
+          })),
+          remarks: selectedCrop.survey?.remarks || "",
+        },
+      ],
     }));
   }, [selectedCrop]);
   // -------------------------------------------------------------------------------
 
   const mapPestsDisease = (data: any) => {
-    const { pestIds, diseaseIds } = data || { pestIds: [], diseaseIds: [] };
+    const {
+      pestIds,
+      diseaseIds,
+      is_manageable_harvest,
+      reason_for_is_manageable_harvest,
+    } = data || {
+      pestIds: [],
+      diseaseIds: [],
+      is_manageable_harvest: true,
+      reason_for_is_manageable_harvest: "",
+    };
 
     const pests = Array.isArray(pestIds)
       ? pestIds.filter(Boolean).map((id) => ({
@@ -136,6 +186,8 @@ const AddCropStageTwoModal = ({
           pest_attack_type_id: id,
           attack_date: null,
           remarks: "",
+          is_manageable_harvest,
+          reason_for_is_manageable_harvest,
         }))
       : [];
 
@@ -160,9 +212,9 @@ const AddCropStageTwoModal = ({
     return effects
       .filter(
         (w: any) =>
-          w?.weather_effect_type_id && // valid type
+          w?.weather_effect_type_id &&
           (!w?.land_weather_effect_history_id ||
-            w.land_weather_effect_history_id === 0) // exclude existing DB records
+            w.land_weather_effect_history_id === 0)
       )
       .map((w: any) => ({
         land_weather_effect_history_id: 0,
@@ -193,9 +245,22 @@ const AddCropStageTwoModal = ({
     try {
       if (!selectedCrop) return;
 
+      // Preventing sending name with good practices
+      const cleanedHarvestDetails =
+        stageTwoData.harvest.crop_harvest_details &&
+        stageTwoData.harvest.crop_harvest_details.length > 0
+          ? stageTwoData.harvest.crop_harvest_details.map((item) => ({
+              good_agricultural_practices_type_id:
+                item.good_agricultural_practices_type_id,
+            }))
+          : Object.entries(stageTwoData.harvest.goodPractices || {})
+              .filter(([_, v]) => v)
+              .map(([label]) => ({
+                good_agricultural_practices_type_id: Number(label),
+              }));
+
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
-      console.log(weather);
 
       const mergedPests = [
         ...(selectedCrop.crop_asset_pest_attack_details || []),
@@ -221,31 +286,18 @@ const AddCropStageTwoModal = ({
           harvest_seed_variety_observation_id:
             stageTwoData.harvest.harvest_seed_variety_observation_id,
           harvesting_timing_id: stageTwoData.harvest.harvesting_timing_id,
-          is_manageable_harvest: stageTwoData.harvest.is_manageable_harvest,
-          reason_for_is_manageable_harvest:
-            stageTwoData.harvest.reason_for_is_manageable_harvest,
-          crop_harvest_details:
-            stageTwoData.harvest.crop_harvest_details &&
-            stageTwoData.harvest.crop_harvest_details.length > 0
-              ? stageTwoData.harvest.crop_harvest_details
-              : Object.entries(stageTwoData.harvest.goodPractices || {})
-                  .filter(([_, v]) => v)
-                  .map(([label]) => ({
-                    good_agricultural_practices_type_id: Number(label),
-                  })),
+          crop_harvest_details: cleanedHarvestDetails,
         },
-
         crop_asset_pest_attack_details: mergedPests,
         crop_asset_disease_attack_details: mergedDiseases,
         crop_asset_weather_effect_history: mergedWeather,
+        survey_info: stageTwoData.survey[0],
       };
 
       console.log("Final PUT Payload:", payload);
-
       // await put("/cms/crop-info-service/", payload, {
       //   params: { crop_id: selectedCrop?.crop_id },
       // });
-
       toast.success("Stage Two data saved successfully!");
       onSuccess?.();
     } catch (error) {
@@ -253,7 +305,7 @@ const AddCropStageTwoModal = ({
       toast.error("Failed to save Stage Two data.");
     }
   };
-  console.log("Stage two data", stageTwoData);
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -285,11 +337,20 @@ const AddCropStageTwoModal = ({
           />
         );
       case 4:
+        return (
+          <Survey
+            data={stageTwoData.survey}
+            onChange={(val) => handleChange("survey", val)}
+          />
+        );
+      case 5:
         return <StageTwoPreview data={stageTwoData} />;
       default:
         return null;
     }
   };
+
+  console.log("Stage two data received from childrens", stageTwoData);
 
   return (
     <div>

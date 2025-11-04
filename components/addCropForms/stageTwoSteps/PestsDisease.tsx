@@ -8,12 +8,16 @@ interface PestsDiseaseProps {
   data: {
     pestIds?: number[];
     diseaseIds?: number[];
+    is_manageable_harvest?: boolean;
+    reason_for_is_manageable_harvest?: string;
   };
   onChange: (updatedData: {
     pestIds: number[];
-    pestNames?: string[]; // added for preview
+    pestNames?: string[]; // for preview
     diseaseIds: number[];
-    diseaseNames?: string[]; // added for preview
+    diseaseNames?: string[]; // for preview
+    is_manageable_harvest?: boolean;
+    reason_for_is_manageable_harvest?: string;
   }) => void;
 }
 
@@ -33,11 +37,19 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
     data.diseaseIds || []
   );
+  const [manageable, setManageable] = useState(
+    data.is_manageable_harvest ? "Yes" : "No"
+  );
+  const [remarks, setRemarks] = useState(
+    data.reason_for_is_manageable_harvest || ""
+  );
 
-  // Sync with parent data if it changes
+  /** Sync with parent data if it changes */
   useEffect(() => {
     setSelectedPests(data.pestIds || []);
     setSelectedDiseases(data.diseaseIds || []);
+    setManageable(data.is_manageable_harvest ? "Yes" : "No");
+    setRemarks(data.reason_for_is_manageable_harvest || "");
   }, [data]);
 
   /** Fetch pest & disease options from API */
@@ -78,53 +90,73 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     fetchOptions();
   }, [get]);
 
-  /** Handle pest toggle */
-  const togglePest = (id: number) => {
-    const updatedIds = selectedPests.includes(id)
-      ? selectedPests.filter((pid) => pid !== id)
-      : [...selectedPests, id];
-
-    setSelectedPests(updatedIds);
-
-    // Get names of selected pests
-    const updatedNames = pestOptions
-      .filter((p) => updatedIds.includes(p.id))
-      .map((p) => p.name);
-
-    onChange({
-      pestIds: updatedIds,
-      pestNames: updatedNames, // new field for preview
-      diseaseIds: selectedDiseases,
-      diseaseNames: diseaseOptions
-        .filter((d) => selectedDiseases.includes(d.id))
-        .map((d) => d.name), // maintain disease names
-    });
-  };
-
-  /** Handle disease toggle */
-  const toggleDisease = (id: number) => {
-    const updatedIds = selectedDiseases.includes(id)
-      ? selectedDiseases.filter((did) => did !== id)
-      : [...selectedDiseases, id];
-
-    setSelectedDiseases(updatedIds);
-
-    // Get names of selected diseases
-    const updatedNames = diseaseOptions
-      .filter((d) => updatedIds.includes(d.id))
-      .map((d) => d.name);
-
+  /** Handlers */
+  const updateParent = (updated: Partial<PestsDiseaseProps["data"]>) => {
     onChange({
       pestIds: selectedPests,
       pestNames: pestOptions
         .filter((p) => selectedPests.includes(p.id))
-        .map((p) => p.name), // maintain pest names
-      diseaseIds: updatedIds,
-      diseaseNames: updatedNames, // new field for preview
+        .map((p) => p.name),
+      diseaseIds: selectedDiseases,
+      diseaseNames: diseaseOptions
+        .filter((d) => selectedDiseases.includes(d.id))
+        .map((d) => d.name),
+      is_manageable_harvest: manageable === "Yes",
+      reason_for_is_manageable_harvest: manageable === "No" ? remarks : "",
+      ...updated,
     });
   };
 
-  console.log(data);
+  const togglePest = (id: number) => {
+    const updatedIds = selectedPests.includes(id)
+      ? selectedPests.filter((pid) => pid !== id)
+      : [...selectedPests, id];
+    setSelectedPests(updatedIds);
+
+    updateParent({
+      pestIds: updatedIds,
+      diseaseIds: selectedDiseases,
+      is_manageable_harvest: manageable === "Yes",
+      reason_for_is_manageable_harvest: remarks || undefined,
+    });
+  };
+
+  const toggleDisease = (id: number) => {
+    const updatedIds = selectedDiseases.includes(id)
+      ? selectedDiseases.filter((did) => did !== id)
+      : [...selectedDiseases, id];
+    setSelectedDiseases(updatedIds);
+
+    updateParent({
+      pestIds: selectedPests,
+      diseaseIds: updatedIds,
+      is_manageable_harvest: manageable === "Yes",
+      reason_for_is_manageable_harvest: remarks || undefined,
+    });
+  };
+
+  const handleManageableChange = (value: string) => {
+    setManageable(value);
+    if (value === "Yes") setRemarks("");
+
+    updateParent({
+      pestIds: selectedPests,
+      diseaseIds: selectedDiseases,
+      is_manageable_harvest: value === "Yes",
+      reason_for_is_manageable_harvest: value === "Yes" ? undefined : remarks,
+    });
+  };
+
+  const handleRemarksChange = (val: string) => {
+    setRemarks(val);
+
+    updateParent({
+      pestIds: selectedPests,
+      diseaseIds: selectedDiseases,
+      is_manageable_harvest: manageable === "Yes",
+      reason_for_is_manageable_harvest: val,
+    });
+  };
 
   return (
     <div>
@@ -201,6 +233,43 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
                 </label>
               </div>
             ))
+          )}
+        </div>
+
+        {/* Manageable Harvest Section */}
+        <div className="bg-gray-50 p-4 border rounded-lg space-y-3">
+          <h3 className="font-semibold">Was the pest & disease manageable?</h3>
+          <div className="flex gap-6">
+            {["Yes", "No"].map((val) => (
+              <label
+                key={val}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  name="manageable"
+                  value={val}
+                  checked={manageable === val}
+                  onChange={(e) => handleManageableChange(e.target.value)}
+                  className="accent-green-600 cursor-pointer"
+                />
+                {val}
+              </label>
+            ))}
+          </div>
+
+          {manageable === "No" && (
+            <div className="mt-2">
+              <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
+                Remarks / Comments
+              </label>
+              <textarea
+                value={remarks}
+                onChange={(e) => handleRemarksChange(e.target.value)}
+                placeholder="Please provide remarks or comments"
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none min-h-[80px] font-medium"
+              />
+            </div>
           )}
         </div>
       </div>

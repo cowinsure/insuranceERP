@@ -82,9 +82,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   //("Fetched Land Info:", landInfo);
 
   return (
-    <div className="p-3 text-gray-800 relative">
+    <div className="text-gray-800 relative">
       {/* Master Details */}
-      <div className="bg-white min-h-[25vh] overflow-y-auto mb-7">
+      <div className="bg-white min-h-[25vh] overflow-y-auto mb-7 p-2">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
           Crop Details

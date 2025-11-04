@@ -15,8 +15,6 @@ interface ObservationProps {
       good_agricultural_practices_type_id: number;
       good_agricultural_practices_type_name?: string; // preview name
     }[];
-    is_manageable_harvest?: boolean;
-    reason_for_is_manageable_harvest?: string;
   };
   onChange: (updatedData: any) => void; // send updated harvest to parent
 }
@@ -38,12 +36,6 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   const [harvestTimingOptions, setHarvestTimingOptions] = useState<
     { value: string; label: string }[]
   >([]);
-  const [manageable, setManageable] = useState(
-    data.is_manageable_harvest ? "Yes" : "No"
-  );
-  const [remarks, setRemarks] = useState(
-    data.reason_for_is_manageable_harvest || ""
-  );
 
   useEffect(() => {
     getGoodPracticesOptions();
@@ -115,6 +107,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       harvest_seed_variety_observation_name: selected?.label || "",
     });
   };
+
   const toggleGoodPractice = (id: number) => {
     const practice = goodPracticesList.find((p) => p.id === id);
     const exists = data.crop_harvest_details?.some(
@@ -130,24 +123,10 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
     } else {
       updated.push({
         good_agricultural_practices_type_id: id,
-        good_agricultural_practices_type_name: practice?.label || "", // send name for preview
+        good_agricultural_practices_type_name: practice?.label || "",
       });
     }
     onChange({ ...data, crop_harvest_details: updated });
-  };
-
-  const handleManageableChange = (value: string) => {
-    setManageable(value);
-    onChange({
-      ...data,
-      is_manageable_harvest: value === "Yes",
-      reason_for_is_manageable_harvest: value === "No" ? remarks : "",
-    });
-  };
-
-  const handleRemarksChange = (val: string) => {
-    setRemarks(val);
-    onChange({ ...data, reason_for_is_manageable_harvest: val });
   };
 
   const handleTimingChange = (value: number) => {
@@ -214,41 +193,6 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
           })
         )}
       </div>
-
-      <div className="mt-4">
-        <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
-          Was it Manageable?
-        </label>
-        <div className="flex gap-6">
-          {["Yes", "No"].map((val) => (
-            <label key={val} className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="manageable"
-                value={val}
-                checked={manageable === val}
-                onChange={(e) => handleManageableChange(e.target.value)}
-                className="accent-green-600"
-              />
-              {val}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {manageable === "No" && (
-        <div className="mt-4">
-          <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
-            Remarks / Comments
-          </label>
-          <textarea
-            value={remarks}
-            onChange={(e) => handleRemarksChange(e.target.value)}
-            placeholder="Please provide remarks or comments"
-            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none min-h-[80px]"
-          />
-        </div>
-      )}
 
       <DropdownField
         id="harvestTiming"

@@ -19,7 +19,6 @@ interface WeatherOption {
 const Weather = ({ data, onChange }: WeatherProps) => {
   const { get, loading } = useApi();
   const [weatherOptions, setWeatherOptions] = useState<WeatherOption[]>([]);
-
   const [selectedWeatherEffects, setSelectedWeatherEffects] = useState<any[]>(
     data?.weather_effects_full || []
   );
@@ -64,8 +63,6 @@ const Weather = ({ data, onChange }: WeatherProps) => {
           weather_effect_type_id: id,
           weather_effect_type_name: option?.weather_effect_type_name || "",
           remarks: "",
-          date_from: data?.date_from || null,
-          date_to: data?.date_to || null,
         },
       ];
     }
@@ -75,22 +72,20 @@ const Weather = ({ data, onChange }: WeatherProps) => {
       ...data,
       weather_effects_full: updatedEffects,
       weather_effects: updatedEffects.map((w) => w.weather_effect_type_id),
+      // keep master dates intact
+      date_from: data?.date_from || null,
+      date_to: data?.date_to || null,
     });
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Update parent
-    onChange({ ...data, [name]: value });
-
-    // Update all selected weather objects
-    const updated = selectedWeatherEffects.map((w) => ({
-      ...w,
-      [name]: value,
-    }));
-    setSelectedWeatherEffects(updated);
-    onChange({ ...data, weather_effects_full: updated });
+    onChange({
+      ...data,
+      [name]: value, // master date fields updated here
+      weather_effects_full: selectedWeatherEffects, // keep effects intact
+    });
   };
 
   const handleRemarksChange = (idx: number, value: string) => {
@@ -106,6 +101,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
         Weather Details
       </h2>
 
+      {/* Weather Type Selection */}
       <div className="space-y-3 bg-gray-50 p-3 border rounded-lg">
         <h3 className="font-semibold">
           Adverse Weather Type{" "}
@@ -142,7 +138,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
         )}
       </div>
 
-      {/* Period of Adverse Weather */}
+      {/* Master Date Fields */}
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Period of Adverse Weather</h3>
         <div className="grid md:grid-cols-2 gap-4">

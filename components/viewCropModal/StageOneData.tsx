@@ -10,7 +10,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
   //(data);
 
   return (
-    <div className="space-y-6 text-gray-700 overflow-y-auto max-h-[70vh]">
+    <div className="space-y-6 text-gray-700 overflow-y-auto ">
       {/* 🌱 Seed Information */}
       <Section title="Seed Information">
         <Grid>
@@ -230,7 +230,7 @@ const ArrayDisplay = ({
 
   return (
     <div>
-      <h3 className="font-medium mb-2 text-gray-600">{title}</h3>
+      <h3 className="font-semibold mb-2 text-gray-600">{title}</h3>
       {!hasData ? (
         <p className="text-gray-400 text-sm italic">No data</p>
       ) : (

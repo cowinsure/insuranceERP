@@ -260,7 +260,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 /* ---------- Reusable Components ---------- */
 const DisplayField = ({ label, value }: { label: string; value: any }) => (
   <div className="flex flex-col">
-    <span className="text-sm text-gray-500">{label}</span>
+    <span className="text-gray-500">{label}</span>
     <div className="border border-gray-200 rounded-md p-2 bg-gray-50 text-wrap">
       {value !== undefined && value !== null && value !== "" ? (
         value
@@ -279,7 +279,7 @@ const ArrayDisplay = ({
   items: { name: string }[];
 }) => (
   <div>
-    <h3 className="font-medium mb-2 text-gray-600">{title}</h3>
+    <h3 className="font-semibold mb-2 text-gray-600">{title}</h3>
     {items && items.length > 0 ? (
       <ul className="space-y-1">
         {items.map((item, i) => (

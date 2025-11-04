@@ -41,6 +41,7 @@ const renderList = (label: string, items: any[]) => (
 export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
   if (!data) return <p className="text-gray-400 italic">No data available</p>;
 
+  console.log(data);
   return (
     <div className="max-w-4xl mx-auto text-gray-700 max-h-[75vh] overflow-y-auto p-6 bg-white rounded-2xl shadow-md border space-y-6">
       <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
@@ -52,16 +53,61 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
         <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
           Harvest
         </h3>
-        <div className="rounded-lg bg-white shadow-sm p-3">
+        <div className="rounded-lg bg-white shadow-sm p-3 space-y-2">
           {renderRow("Harvest Date", data.harvest?.harvest_date)}
-          {renderRow(
-            "Total Production (Kg)",
-            data.harvest?.total_production_kg
-          )}
-          {renderRow(
-            "Moisture Content (%)",
-            data.harvest?.moisture_content_percentage
-          )}
+
+          {/* ✅ Total Production (array display) */}
+          <div className="p-2 flex items-center justify-between">
+            <span className="font-medium text-gray-600 text-sm">
+              Total Production (Kg)
+            </span>
+            {Array.isArray(data.harvest?.total_production_kg) &&
+            data.harvest.total_production_kg.length > 0 ? (
+              <ul className="list-inside text-gray-800 font-semibold mt-1 text-right">
+                {data.harvest.total_production_kg.map(
+                  (val: number, idx: number) => (
+                    <li
+                      key={idx}
+                      className="bg-gray-50 rounded-full border px-4 py-1 mb-1"
+                    >
+                      {" "}
+                      {val} kg
+                    </li>
+                  )
+                )}
+              </ul>
+            ) : (
+              <p className="text-gray-400 italic text-right">
+                No data provided
+              </p>
+            )}
+          </div>
+
+          {/* ✅ Moisture Content (array display) */}
+          <div className="p-2 flex items-center justify-between">
+            <span className="font-medium text-gray-600 text-sm">
+              Moisture Content (%)
+            </span>
+            {Array.isArray(data.harvest?.moisture_content_percentage) &&
+            data.harvest.moisture_content_percentage.length > 0 ? (
+              <ul className="list-inside text-gray-800 font-semibold mt-1 text-right">
+                {data.harvest.moisture_content_percentage.map(
+                  (val: number, idx: number) => (
+                    <li
+                      key={idx}
+                      className="bg-gray-50 rounded-full border px-4 py-1 mb-1"
+                    >
+                      {val} %
+                    </li>
+                  )
+                )}
+              </ul>
+            ) : (
+              <p className="text-gray-400 italic text-right">
+                No data provided
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -118,44 +164,31 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
           ) : (
             <p className="text-gray-400 italic mt-1">No practices selected</p>
           )}
-
-          {/* Manageable Harvest */}
-          {typeof data.harvest?.is_manageable_harvest === "boolean" && (
-            <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
-              <span className="font-medium text-gray-600">
-                Manageable Harvest
-              </span>
-              <span
-                className="text-gray-800 font-semibold tracking-wide col-span-2 text-right"
-                title={data.harvest.is_manageable_harvest ? "Yes" : "No"}
-              >
-                {data.harvest.is_manageable_harvest ? "Yes" : "No"}
-              </span>
-            </div>
-          )}
-
-          {/* Remarks if not manageable */}
-          {data.harvest?.is_manageable_harvest === false &&
-            data.harvest?.reason_for_is_manageable_harvest && (
-              <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
-                <span className="font-medium text-gray-600">Remarks</span>
-                <span
-                  className="text-gray-800 font-semibold tracking-wide col-span-2 text-right"
-                  title={data.harvest.reason_for_is_manageable_harvest}
-                >
-                  {data.harvest.reason_for_is_manageable_harvest}
-                </span>
-              </div>
-            )}
         </div>
       </section>
 
-      {/* 🐛 Pests & Diseases */}
+      {/* 🐛 Pests & Diseases + Manageable Harvest */}
       <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
         <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
-          Pests & Disease
+          Pests, Disease
         </h3>
         <div className="rounded-lg bg-white shadow-sm p-3">
+          {/* ✅ Manageable Harvest */}
+          {typeof data.pestsDisease?.is_manageable_harvest === "boolean" && (
+            <>
+              {renderRow(
+                "Manageable Harvest",
+                data.pestsDisease.is_manageable_harvest ? "Yes" : "No"
+              )}
+              {!data.pestsDisease.is_manageable_harvest &&
+                data.pestsDisease.reason_for_is_manageable_harvest &&
+                renderRow(
+                  "Remarks",
+                  data.pestsDisease.reason_for_is_manageable_harvest
+                )}
+            </>
+          )}
+
           {renderList(
             "Pests",
             data.pestsDisease?.pestNames?.map((name: string) => ({ name })) ||
@@ -178,12 +211,10 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
 
         {data.weather?.weather_effects_full?.length ? (
           <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
-            {/* Period & General Remarks */}
             {renderRow("Period From", data.weather.date_from)}
             {renderRow("Period To", data.weather.date_to)}
             {renderRow("General Remarks", data.weather.remarks)}
 
-            {/* Individual Weather Effects */}
             <div className="mt-2 space-y-2">
               {data.weather.weather_effects_full.map((w: any, i: number) => (
                 <div
@@ -198,6 +229,93 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
           </div>
         ) : (
           <p className="text-gray-400 italic">No weather effects recorded</p>
+        )}
+      </section>
+
+      {/* 📝 Survey (FGD) */}
+      <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
+        <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
+          Survey (FGD)
+        </h3>
+
+        {data.survey?.length ? (
+          <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
+            {data.survey.map((s: any, idx: number) => (
+              <div key={idx} className="space-y-2">
+                {s.top_three_varieties?.length ? (
+                  <div className="border rounded-lg p-2 bg-gray-50">
+                    <span className="font-semibold text-gray-700">
+                      Top Three Varieties
+                    </span>
+                    <ul className="list-disc list-inside text-gray-600 mt-1">
+                      {s.top_three_varieties.map((v: string, i: number) => (
+                        <li key={i}>{v}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">No varieties provided</p>
+                )}
+
+                {renderRow(
+                  "Average Production This Year (kg)",
+                  s.avg_production_this_year
+                )}
+                {renderRow(
+                  "Average Production Last Year (kg)",
+                  s.avg_production_last_year
+                )}
+
+                {renderRow("Yield Loss", s.yield_loss === "yes" ? "Yes" : "No")}
+
+                {s.yield_loss === "yes" &&
+                s.key_reasons_yield_losses?.length ? (
+                  <div className="border rounded-lg p-2 bg-gray-50">
+                    <span className="font-semibold text-gray-700">
+                      Key Reasons of Yield Loss
+                    </span>
+                    <ul className="list-disc list-inside text-gray-600 mt-1">
+                      {s.key_reasons_yield_losses.map(
+                        (reason: string, i: number) => (
+                          <li key={i}>{reason}</li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {s.weather_effects?.length ? (
+                  <div className="border rounded-lg p-2 bg-gray-50">
+                    <span className="font-semibold text-gray-700">
+                      Weather Effects
+                    </span>
+                    <ul className="list-disc list-inside text-gray-600 mt-1">
+                      {s.weather_effects.map((w: string, i: number) => (
+                        <li key={i}>{w}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {s.pest_and_disease?.length ? (
+                  <div className="border rounded-lg p-2 bg-gray-50">
+                    <span className="font-semibold text-gray-700">
+                      Pest & Disease
+                    </span>
+                    <ul className="list-disc list-inside text-gray-600 mt-1">
+                      {s.pest_and_disease.map((pd: string, i: number) => (
+                        <li key={i}>{pd}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {s.remarks ? renderRow("Remarks", s.remarks) : null}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 italic">No survey data available</p>
         )}
       </section>
 

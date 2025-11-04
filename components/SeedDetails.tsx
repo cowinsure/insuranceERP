@@ -136,7 +136,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     onChange(updated);
   };
 
-  // console.log("Seed Details Data:", data);
+  // //("Seed Details Data:", data);
 
   return (
     <div className="p-3">

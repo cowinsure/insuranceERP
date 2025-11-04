@@ -11,8 +11,8 @@ import { CropAssetSeedDetails } from "../model/crop/CropGetModel";
 import { IoMdKeypad } from "react-icons/io";
 
 interface CropStageModalTabsProps {
-  stageOneData: any;
-  stageTwoData?: any;
+  data: any;
+  // stageTwoData?: any;
 }
 
 // ✅ Define interface for Land (based on your API fields)
@@ -23,8 +23,8 @@ interface LandData {
 }
 
 const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
-  stageOneData,
-  stageTwoData,
+  data,
+  // stageTwoData,
 }) => {
   const { get } = useApi();
   const [activeTab, setActiveTab] = useState("stage1");
@@ -42,9 +42,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   const renderTabContent = () => {
     switch (activeTab) {
       case "stage1":
-        return <StageOneData data={stageOneData} />;
+        return <StageOneData data={data} />;
       case "stage2":
-        return <StageTwoData cropId={stageTwoData} />;
+        return <StageTwoData cropData={data} />;
       default:
         return null;
     }
@@ -53,7 +53,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   // ✅ Fetch land info using the land_id from crop data
   useEffect(() => {
     const fetchLandData = async () => {
-      if (!stageOneData?.land_id) return; // no land id, no call
+      if (!data?.land_id) return; // no land id, no call
 
       try {
         const response = await get("/lams/land-info-service", {
@@ -62,7 +62,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
 
         if (response.status === "success" && Array.isArray(response.data)) {
           const matchedLand = response.data.find(
-            (land: LandData) => land.land_id === stageOneData.land_id
+            (land: LandData) => land.land_id === data.land_id
           );
           setLandInfo(matchedLand || null);
         }
@@ -76,15 +76,15 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
     };
 
     fetchLandData();
-  }, [stageOneData?.land_id]);
+  }, [data?.land_id]);
 
-  console.log("Crop Data:", stageOneData);
-  console.log("Fetched Land Info:", landInfo);
+  //("Crop Data:", data);
+  //("Fetched Land Info:", landInfo);
 
   return (
-    <div className="p-3 text-gray-800 relative">
+    <div className="text-gray-800 relative">
       {/* Master Details */}
-      <div className="bg-white min-h-[25vh] overflow-y-auto mb-7">
+      <div className="bg-white min-h-[25vh] overflow-y-auto mb-7 p-2">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
           Crop Details
@@ -99,7 +99,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Crop</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
+                {data.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
               </p>
             </div>
           </div>
@@ -112,8 +112,8 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Variety</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.crop_asset_seed_details?.[0]?.seed_variety ||
-                  stageOneData.variety ||
+                {data.crop_asset_seed_details?.[0]?.seed_variety ||
+                  data.variety ||
                   "N/A"}
               </p>
             </div>
@@ -127,7 +127,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
             <div>
               <p className="text-sm text-gray-500">Plantation Date</p>
               <p className="font-medium text-gray-800">
-                {stageOneData.planting_date || "N/A"}
+                {data.planting_date || "N/A"}
               </p>
             </div>
           </div>
@@ -148,7 +148,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           {/* Farmer name */}
           <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-pink-100 text-pink-600 rounded-full">
-              <User className="text-3xl"/>
+              <User className="text-3xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Farmer Name</p>
@@ -161,7 +161,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
           {/* Farmer mobile*/}
           <div className="flex items-center gap-3 p-3 border-gray-200 rounded-lg rounded-l-full bg-gray-50 drop-shadow-md transition">
             <span className="p-2 bg-purple-100 text-purple-600 rounded-full">
-              <IoMdKeypad className="text-2xl"/>
+              <IoMdKeypad className="text-2xl" />
             </span>
             <div>
               <p className="text-sm text-gray-500">Farmer Mobile</p>

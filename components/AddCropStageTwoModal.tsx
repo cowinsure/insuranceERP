@@ -10,7 +10,6 @@ import PestsDisease from "./addCropForms/stageTwoSteps/PestsDisease";
 import Weather from "./addCropForms/stageTwoSteps/Weather";
 import StageTwoPreview from "./StageTwoPreview";
 import useApi from "@/hooks/use_api";
-import Survey, { SurveyData } from "./addCropForms/stageTwoSteps/Survey";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
@@ -48,7 +47,6 @@ interface StageTwoData {
   harvest: HarvestData;
   pestsDisease: PestsDiseaseData;
   weather: WeatherData[];
-  survey: SurveyData[];
 }
 
 const AddCropStageTwoModal = ({
@@ -60,7 +58,6 @@ const AddCropStageTwoModal = ({
     "Observation",
     "Pests & Disease",
     "Weather",
-    "Survey (FGD)",
     "Preview",
   ];
   const [currentStep, setCurrentStep] = useState(0);
@@ -88,19 +85,6 @@ const AddCropStageTwoModal = ({
       reason_for_is_manageable_harvest: "",
     },
     weather: [],
-    survey: [
-      {
-        top_three_varieties: [],
-        avg_production_this_year: "",
-        avg_production_last_year: "",
-        yield_loss: "",
-        key_reasons_yield_losses: [],
-        weather_effects: [],
-        pests: [],
-        diseases: [],
-        remarks: "",
-      },
-    ],
   });
 
   // ---------------- Prefill Stage 2 data with stage_name validation ----------------
@@ -142,27 +126,6 @@ const AddCropStageTwoModal = ({
             ?.reason_for_is_manageable_harvest || "",
       },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
-      survey: [
-        {
-          top_three_varieties: selectedCrop.survey?.top_three_varieties || [],
-          avg_production_this_year:
-            selectedCrop.survey?.avg_production_this_year || "",
-          avg_production_last_year:
-            selectedCrop.survey?.avg_production_last_year || "",
-          yield_loss: selectedCrop.survey?.yield_loss || false,
-          yield_loss_reasons: selectedCrop.survey?.yield_loss_reasons || [],
-          weather_effects: selectedCrop.survey?.weather_effects || [],
-          pests: (selectedCrop.survey?.pests || []).map((p: any) => ({
-            id: p.id ?? 0,
-            name: p.name ?? "",
-          })),
-          diseases: (selectedCrop.survey?.diseases || []).map((d: any) => ({
-            id: d.id ?? 0,
-            name: d.name ?? "",
-          })),
-          remarks: selectedCrop.survey?.remarks || "",
-        },
-      ],
     }));
   }, [selectedCrop]);
   // -------------------------------------------------------------------------------
@@ -291,7 +254,6 @@ const AddCropStageTwoModal = ({
         crop_asset_pest_attack_details: mergedPests,
         crop_asset_disease_attack_details: mergedDiseases,
         crop_asset_weather_effect_history: mergedWeather,
-        survey_info: stageTwoData.survey[0],
       };
 
       console.log("Final PUT Payload:", payload);
@@ -337,13 +299,6 @@ const AddCropStageTwoModal = ({
           />
         );
       case 4:
-        return (
-          <Survey
-            data={stageTwoData.survey}
-            onChange={(val) => handleChange("survey", val)}
-          />
-        );
-      case 5:
         return <StageTwoPreview data={stageTwoData} />;
       default:
         return null;

@@ -10,8 +10,8 @@
 //   // Take the first harvest entry if exists, or empty defaults
 //   const harvest = data[0] || {
 //     harvest_date: "",
-//     total_production_kg: "",
-//     moisture_content_percentage: "",
+//     crop_harvest_production_details: "",
+//     crop_harvest_moisture_content_details: "",
 //   };
 
 //   const handleChange = (field: string, value: any) => {
@@ -41,8 +41,8 @@
 //         placeholder="e.g. 42.8"
 //         name="totalProduction"
 //         label="Total Production (kg)"
-//         value={harvest.total_production_kg}
-//         onChange={(e) => handleChange("total_production_kg", e.target.value)}
+//         value={harvest.crop_harvest_production_details}
+//         onChange={(e) => handleChange("crop_harvest_production_details", e.target.value)}
 //       />
 //       <InputField
 //         id="moistureContent"
@@ -50,9 +50,9 @@
 //         placeholder="e.g. 16.7"
 //         name="moistureContent"
 //         label="Moisture Content (%)"
-//         value={harvest.moisture_content_percentage}
+//         value={harvest.crop_harvest_moisture_content_details}
 //         onChange={(e) =>
-//           handleChange("moisture_content_percentage", e.target.value)
+//           handleChange("crop_harvest_moisture_content_details", e.target.value)
 //         }
 //       />
 //     </div>
@@ -72,24 +72,18 @@ interface HarvestProps {
   onChange: (val: any) => void;
 }
 
-const Harvest = ({ data, onChange }: HarvestProps) => {
-  const initialHarvest = data[0] || {};
+interface HarvestData {
+  harvest_date: string;
+  crop_harvest_production_details: number[];
+  crop_harvest_moisture_content_details: number[];
+}
 
+const Harvest = ({ data, onChange }: HarvestProps) => {
   // Ensure values are always arrays
-  const [harvest, setHarvest] = useState({
-    harvest_date: initialHarvest.harvest_date || "",
-    total_production_kg: Array.isArray(initialHarvest.total_production_kg)
-      ? initialHarvest.total_production_kg
-      : initialHarvest.total_production_kg
-      ? [initialHarvest.total_production_kg]
-      : [],
-    moisture_content_percentage: Array.isArray(
-      initialHarvest.moisture_content_percentage
-    )
-      ? initialHarvest.moisture_content_percentage
-      : initialHarvest.moisture_content_percentage
-      ? [initialHarvest.moisture_content_percentage]
-      : [],
+  const [harvest, setHarvest] = useState<HarvestData>({
+    harvest_date: "",
+    crop_harvest_production_details: [],
+    crop_harvest_moisture_content_details: [],
   });
 
   const [totalProductionInput, setTotalProductionInput] = useState("");
@@ -97,11 +91,46 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
 
   // Update parent whenever harvest state changes
   useEffect(() => {
+    // Only send to parent after first mount when harvest has valid values
+    if (!harvest) return;
     onChange([harvest]);
-  }, [harvest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    harvest.harvest_date,
+    harvest.crop_harvest_production_details,
+    harvest.crop_harvest_moisture_content_details,
+  ]);
+
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    const initialHarvest = data[0] || {};
+
+    setHarvest({
+      harvest_date: initialHarvest.harvest_date || "",
+      crop_harvest_production_details: Array.isArray(
+        initialHarvest.crop_harvest_production_details
+      )
+        ? initialHarvest.crop_harvest_production_details
+        : initialHarvest.crop_harvest_production_details
+        ? [initialHarvest.crop_harvest_production_details]
+        : [],
+      crop_harvest_moisture_content_details: Array.isArray(
+        initialHarvest.crop_harvest_moisture_content_details
+      )
+        ? initialHarvest.crop_harvest_moisture_content_details
+        : initialHarvest.crop_harvest_moisture_content_details
+        ? [initialHarvest.crop_harvest_moisture_content_details]
+        : [],
+    });
+    // Run only when data FIRST comes in (e.g. when modal opens)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddValue = (
-    field: "total_production_kg" | "moisture_content_percentage",
+    field:
+      | "crop_harvest_production_details"
+      | "crop_harvest_moisture_content_details",
     value: string
   ) => {
     if (!value) return;
@@ -114,12 +143,15 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
     };
     setHarvest(updated);
 
-    if (field === "total_production_kg") setTotalProductionInput("");
+    if (field === "crop_harvest_production_details")
+      setTotalProductionInput("");
     else setMoistureInput("");
   };
 
   const handleRemoveValue = (
-    field: "total_production_kg" | "moisture_content_percentage",
+    field:
+      | "crop_harvest_production_details"
+      | "crop_harvest_moisture_content_details",
     index: number
   ) => {
     const currentArray = harvest[field] || [];
@@ -163,10 +195,14 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
           <button
             type="button"
             onClick={() =>
-              handleAddValue("total_production_kg", totalProductionInput)
+              handleAddValue(
+                "crop_harvest_production_details",
+                totalProductionInput
+              )
             }
             disabled={
-              !totalProductionInput || harvest.total_production_kg.length >= 3
+              !totalProductionInput ||
+              harvest.crop_harvest_production_details.length >= 3
             }
             className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50 cursor-pointer"
           >
@@ -175,23 +211,27 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         </div>
 
         <ul className="mt-2 flex flex-col md:flex-row sm:items-start md:items-center gap-3 md:gap-8">
-          {harvest.total_production_kg.map((val: number, idx: number) => (
-            <li
-              key={idx}
-              className="flex justify-between items-center bg-gray-50 border px-3 py-2 rounded-md md:w-[20%] animate__animated animate__fadeIn"
-            >
-              <span className="font-semibold">{val} kg</span>
-              <button
-                onClick={() => handleRemoveValue("total_production_kg", idx)}
-                className="text-red-500 hover:text-red-700 cursor-pointer"
+          {harvest.crop_harvest_production_details.map(
+            (val: number, idx: number) => (
+              <li
+                key={idx}
+                className="flex justify-between items-center bg-gray-50 border px-3 py-2 rounded-md md:w-[20%] animate__animated animate__fadeIn"
               >
-                <X size={18} />
-              </button>
-            </li>
-          ))}
+                <span className="font-semibold">{val} kg</span>
+                <button
+                  onClick={() =>
+                    handleRemoveValue("crop_harvest_production_details", idx)
+                  }
+                  className="text-red-500 hover:text-red-700 cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </li>
+            )
+          )}
         </ul>
 
-        {harvest.total_production_kg.length >= 3 && (
+        {harvest.crop_harvest_production_details.length >= 3 && (
           <p className="text-sm text-orange-400 mt-1">
             Maximum of 3 entries reached.
           </p>
@@ -214,10 +254,14 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
           <button
             type="button"
             onClick={() =>
-              handleAddValue("moisture_content_percentage", moistureInput)
+              handleAddValue(
+                "crop_harvest_moisture_content_details",
+                moistureInput
+              )
             }
             disabled={
-              !moistureInput || harvest.moisture_content_percentage.length >= 3
+              !moistureInput ||
+              harvest.crop_harvest_moisture_content_details.length >= 3
             }
             className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50 cursor-pointer"
           >
@@ -226,7 +270,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
         </div>
 
         <ul className="mt-2 flex flex-col md:flex-row sm:items-start md:items-center gap-3 md:gap-8">
-          {harvest.moisture_content_percentage.map(
+          {harvest.crop_harvest_moisture_content_details.map(
             (val: number, idx: number) => (
               <li
                 key={idx}
@@ -235,18 +279,21 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
                 <span className="font-semibold">{val}%</span>
                 <button
                   onClick={() =>
-                    handleRemoveValue("moisture_content_percentage", idx)
+                    handleRemoveValue(
+                      "crop_harvest_moisture_content_details",
+                      idx
+                    )
                   }
                   className="text-red-500 hover:text-red-700 cursor-pointer"
                 >
-                  <XCircleIcon size={18} />
+                  <X size={18} />
                 </button>
               </li>
             )
           )}
         </ul>
 
-        {harvest.moisture_content_percentage.length >= 3 && (
+        {harvest.crop_harvest_moisture_content_details.length >= 3 && (
           <p className="text-sm text-orange-400 mt-1">
             Maximum of 3 entries reached.
           </p>

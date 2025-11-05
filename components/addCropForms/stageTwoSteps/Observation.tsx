@@ -4,6 +4,7 @@ import InputField from "@/components/InputField";
 import DropdownField from "@/components/DropDownField";
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
+import Loading from "@/components/utils/Loading";
 
 interface ObservationProps {
   data: {
@@ -161,7 +162,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
           <span className="text-sm text-gray-400">(Multiple Selection)</span>
         </h3>
         {goodPracticesList.length === 0 ? (
-          <p className="text-gray-400 text-sm italic">Loading options...</p>
+          <Loading />
         ) : (
           goodPracticesList.map((practice) => {
             const checked = data.crop_harvest_details?.some(

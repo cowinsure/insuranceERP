@@ -65,13 +65,12 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
             data.harvest.crop_harvest_production_details.length > 0 ? (
               <ul className="list-inside text-gray-800 font-semibold mt-1 text-right">
                 {data.harvest.crop_harvest_production_details.map(
-                  (val: number, idx: number) => (
+                  (val: any, idx: number) => (
                     <li
                       key={idx}
                       className="bg-gray-50 rounded-full border px-4 py-1 mb-1"
                     >
-                      {" "}
-                      {val} kg
+                      {val.production_kg} kg
                     </li>
                   )
                 )}
@@ -88,16 +87,18 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
             <span className="font-medium text-gray-600 text-sm">
               Moisture Content (%)
             </span>
-            {Array.isArray(data.harvest?.crop_harvest_moisture_content_details) &&
+            {Array.isArray(
+              data.harvest?.crop_harvest_moisture_content_details
+            ) &&
             data.harvest.crop_harvest_moisture_content_details.length > 0 ? (
               <ul className="list-inside text-gray-800 font-semibold mt-1 text-right">
                 {data.harvest.crop_harvest_moisture_content_details.map(
-                  (val: number, idx: number) => (
+                  (val: any, idx: number) => (
                     <li
                       key={idx}
                       className="bg-gray-50 rounded-full border px-4 py-1 mb-1"
                     >
-                      {val} %
+                      {val.moisture_content_per} %
                     </li>
                   )
                 )}

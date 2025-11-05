@@ -39,6 +39,7 @@ interface HarvestData {
   crop_harvest_production_details: HarvestProductionDetail[];
   crop_harvest_moisture_content_details: HarvestMoistureDetail[];
   seedVarietyObservation?: string;
+  moisture_content_percentage: number;
   harvestingTiming?: string;
   goodPractices?: Record<string, boolean>;
 }
@@ -81,6 +82,7 @@ const AddCropStageTwoModal = ({
 
   const defaultHarvest: HarvestData = {
     harvest_date: "",
+    moisture_content_percentage: 0,
     total_production_kg: 0,
     harvest_seed_variety_observation_id: 0,
     harvesting_timing_id: 0,
@@ -131,19 +133,20 @@ const AddCropStageTwoModal = ({
       harvest: {
         ...defaultHarvest,
         ...(selectedCrop.crop_harvest_info?.[0] || {}),
-      },
-      pestsDisease: {
-        pestIds: stage2Pests.length ? stage2Pests : [],
-        diseaseIds: stage2Diseases.length ? stage2Diseases : [],
         is_manageable_harvest:
           selectedCrop.crop_harvest_info?.[0]?.is_manageable_harvest ?? true,
         reason_for_is_manageable_harvest:
           selectedCrop.crop_harvest_info?.[0]
             ?.reason_for_is_manageable_harvest || "",
       },
+      pestsDisease: {
+        pestIds: stage2Pests.length ? stage2Pests : [],
+        diseaseIds: stage2Diseases.length ? stage2Diseases : [],
+      },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
     }));
   }, [selectedCrop]);
+
   // -------------------------------------------------------------------------------
 
   const mapPestsDisease = (data: any) => {
@@ -238,23 +241,23 @@ const AddCropStageTwoModal = ({
                 good_agricultural_practices_type_id: Number(label),
               }));
 
-      const productionDetails = (
-        stageTwoData.harvest.crop_harvest_production_details || []
-      ).map((val, idx) => ({
-        harvest_production_id: 0,
-        production_no: idx + 1,
-        production_kg: Number(val) || 0,
-        remarks: "",
-      }));
+      // const productionDetails = (
+      //   stageTwoData.harvest.crop_harvest_production_details || []
+      // ).map((val, idx) => ({
+      //   harvest_production_id: 0,
+      //   production_no: idx + 1,
+      //   production_kg: Number(val) || 0,
+      //   remarks: "",
+      // }));
 
-      const moistureDetails = (
-        stageTwoData.harvest.crop_harvest_moisture_content_details || []
-      ).map((val, idx) => ({
-        harvest_moisture_content_id: 0,
-        production_no: idx + 1,
-        moisture_content_per: Number(val) || 0,
-        remarks: "",
-      }));
+      // const moistureDetails = (
+      //   stageTwoData.harvest.crop_harvest_moisture_content_details || []
+      // ).map((val, idx) => ({
+      //   harvest_moisture_content_id: 0,
+      //   production_no: idx + 1,
+      //   moisture_content_per: Number(val) || 0,
+      //   remarks: "",
+      // }));
 
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
@@ -278,6 +281,8 @@ const AddCropStageTwoModal = ({
         crop_harvest_info: {
           harvest_date: stageTwoData.harvest.harvest_date,
           total_production_kg: stageTwoData.harvest.total_production_kg,
+          moisture_content_percentage:
+            stageTwoData.harvest.moisture_content_percentage,
           harvest_seed_variety_observation_id:
             stageTwoData.harvest.harvest_seed_variety_observation_id,
           harvesting_timing_id: stageTwoData.harvest.harvesting_timing_id,
@@ -286,8 +291,10 @@ const AddCropStageTwoModal = ({
             stageTwoData.pestsDisease.is_manageable_harvest ?? true,
           reason_for_is_manageable_harvest:
             stageTwoData.pestsDisease.reason_for_is_manageable_harvest || "",
-          crop_harvest_production_details: productionDetails,
-          crop_harvest_moisture_content_details: moistureDetails,
+          crop_harvest_production_details:
+            stageTwoData.harvest.crop_harvest_production_details,
+          crop_harvest_moisture_content_details:
+            stageTwoData.harvest.crop_harvest_moisture_content_details,
         },
         crop_asset_pest_attack_details: mergedPests,
         crop_asset_disease_attack_details: mergedDiseases,
@@ -295,9 +302,9 @@ const AddCropStageTwoModal = ({
       };
 
       console.log("Final PUT Payload:", payload);
-      await put("/cms/crop-info-service/", payload, {
-        params: { crop_id: selectedCrop?.crop_id },
-      });
+      // await put("/cms/crop-info-service/", payload, {
+      //   params: { crop_id: selectedCrop?.crop_id },
+      // });
       toast.success("Stage Two data saved successfully!");
       onSuccess?.();
     } catch (error) {
@@ -312,7 +319,7 @@ const AddCropStageTwoModal = ({
         return (
           <Harvest
             data={[stageTwoData.harvest]}
-            onChange={(val) => handleChange("harvest", val[0])}
+            onChange={(val) => handleChange("harvest", val)}
           />
         );
       case 1:

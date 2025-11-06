@@ -10,6 +10,7 @@ import PestsDisease from "./addCropForms/stageTwoSteps/PestsDisease";
 import Weather from "./addCropForms/stageTwoSteps/Weather";
 import StageTwoPreview from "./StageTwoPreview";
 import useApi from "@/hooks/use_api";
+import StageTwoData from "./viewCropModal/StageTwoData";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
@@ -42,6 +43,7 @@ interface HarvestData {
   moisture_content_percentage: number;
   harvestingTiming?: string;
   goodPractices?: Record<string, boolean>;
+  reason_for_is_manageable_harvest?: string;
 }
 
 interface PestsDiseaseData {
@@ -142,6 +144,11 @@ const AddCropStageTwoModal = ({
       pestsDisease: {
         pestIds: stage2Pests.length ? stage2Pests : [],
         diseaseIds: stage2Diseases.length ? stage2Diseases : [],
+        is_manageable_harvest:
+          selectedCrop.crop_harvest_info?.[0]?.is_manageable_harvest ?? true,
+        reason_for_is_manageable_harvest:
+          selectedCrop.crop_harvest_info?.[0]
+            ?.reason_for_is_manageable_harvest || "",
       },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
     }));
@@ -241,24 +248,6 @@ const AddCropStageTwoModal = ({
                 good_agricultural_practices_type_id: Number(label),
               }));
 
-      // const productionDetails = (
-      //   stageTwoData.harvest.crop_harvest_production_details || []
-      // ).map((val, idx) => ({
-      //   harvest_production_id: 0,
-      //   production_no: idx + 1,
-      //   production_kg: Number(val) || 0,
-      //   remarks: "",
-      // }));
-
-      // const moistureDetails = (
-      //   stageTwoData.harvest.crop_harvest_moisture_content_details || []
-      // ).map((val, idx) => ({
-      //   harvest_moisture_content_id: 0,
-      //   production_no: idx + 1,
-      //   moisture_content_per: Number(val) || 0,
-      //   remarks: "",
-      // }));
-
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
 
@@ -279,7 +268,7 @@ const AddCropStageTwoModal = ({
         ...selectedCrop,
         stage_id: 3,
         crop_harvest_info: {
-          harvest_date: stageTwoData.harvest.harvest_date,
+          harvest_date: stageTwoData.harvest.harvest_date || null,
           total_production_kg: stageTwoData.harvest.total_production_kg,
           moisture_content_percentage:
             stageTwoData.harvest.moisture_content_percentage,

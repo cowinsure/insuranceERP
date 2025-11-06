@@ -44,6 +44,8 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     data.reason_for_is_manageable_harvest || ""
   );
 
+  console.log(data.reason_for_is_manageable_harvest);
+
   /** Sync with parent data if it changes */
   useEffect(() => {
     setSelectedPests(data.pestIds || []);

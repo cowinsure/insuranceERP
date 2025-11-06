@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import InputField from "@/components/InputField";
 import { X } from "lucide-react";
 
+
 interface HarvestProps {
   data: any;
   onChange: (val: any) => void;
@@ -40,11 +41,18 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
   }, [data]);
 
   // 🧮 Compute totals
-  const getTotalProduction = (values: number[]) =>
-    values.reduce((a, b) => a + b, 0);
+  const getTotalProduction = (values: number[]) => {
+    if (!values.length) return 0;
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    return parseFloat(avg.toFixed(2));
+  };
 
-  const getAverageMoisture = (values: number[]) =>
-    values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+  const getAverageMoisture = (values: number[]) => {
+    const avg = values.length
+      ? values.reduce((a, b) => a + b, 0) / values.length
+      : 0;
+    return parseFloat(avg.toFixed(2));
+  };
 
   // 🔄 Send formatted payload to parent
   const updateParent = (
@@ -115,6 +123,8 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
     }
   };
 
+  console.log(productionValues.length);
+
   return (
     <div className="space-y-5 bg-white rounded-lg p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
@@ -134,7 +144,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
       {/* Total Production */}
       <div>
         <label className="font-semibold text-sm text-gray-500">
-          Total Production (kg)
+          Total Production (kg) <span className="text-gray-400">(Max : 3)</span>
         </label>
         <div className="flex gap-2 mt-1">
           <input
@@ -149,7 +159,11 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
             type="button"
             onClick={() => handleAddValue("production", productionInput)}
             disabled={!productionInput || productionValues.length >= 3}
-            className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50 cursor-pointer"
+            className={`${
+              productionValues.length >= 3
+                ? "cursor-not-allowed"
+                : "cursor-pointer"
+            } bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50`}
           >
             Add
           </button>
@@ -172,15 +186,15 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
           ))}
         </ul>
 
-        {productionValues.length >= 3 && (
+        {/* {productionValues.length >= 3 && (
           <p className="text-sm text-orange-400 mt-1">
             Maximum of 3 entries reached.
           </p>
-        )}
+        )} */}
 
         {/* Show total production */}
-        <p className="text-sm text-gray-600 mt-2">
-          Total:{" "}
+        <p className=" text-blue-400 mt-2 font-semibold">
+          Average weight:{" "}
           <span className="font-semibold">
             {getTotalProduction(productionValues)} kg
           </span>
@@ -190,7 +204,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
       {/* Moisture Content */}
       <div>
         <label className="font-semibold text-sm text-gray-500">
-          Moisture Content (%)
+          Moisture Content (%) <span className="text-gray-400">(Max : 3)</span>
         </label>
         <div className="flex gap-2 mt-1">
           <input
@@ -205,7 +219,11 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
             type="button"
             onClick={() => handleAddValue("moisture", moistureInput)}
             disabled={!moistureInput || moistureValues.length >= 3}
-            className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50 cursor-pointer"
+            className={`${
+              moistureValues.length >= 3
+                ? "cursor-not-allowed"
+                : "cursor-pointer"
+            } bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50`}
           >
             Add
           </button>
@@ -228,20 +246,21 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
           ))}
         </ul>
 
-        {moistureValues.length >= 3 && (
+        {/* {moistureValues.length >= 3 && (
           <p className="text-sm text-orange-400 mt-1">
             Maximum of 3 entries reached.
           </p>
-        )}
+        )} */}
 
         {/* Show average moisture */}
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-blue-400 mt-2 font-semibold">
           Average:{" "}
           <span className="font-semibold">
             {getAverageMoisture(moistureValues).toFixed(1)}%
           </span>
         </p>
       </div>
+
     </div>
   );
 };

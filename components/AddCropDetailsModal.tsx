@@ -83,6 +83,16 @@ export default function AddCropDetailsModal({
           const d = res.data[0];
           //(d);
 
+          const pestsStage2 =
+            d.crop_asset_pest_attack_details?.filter(
+              (p: any) => p.stage_id === 2
+            ) || [];
+
+          const diseasesStage2 =
+            d.crop_asset_disease_attack_details?.filter(
+              (dd: any) => dd.stage_id === 2
+            ) || [];
+
           // 🧩 Normalize data into same shape used by your state
           setCropData({
             seed: d.crop_asset_seed_details || [],
@@ -101,28 +111,18 @@ export default function AddCropDetailsModal({
                 d.crop_asset_weather_effect_history?.[0]?.date_from || "",
               date_to: d.crop_asset_weather_effect_history?.[0]?.date_to || "",
             },
-            pests:
-              d.crop_asset_pest_attack_details?.map((p: any) =>
-                Number(p.pest_attack_type_id)
-              ) || [],
-
-            // ✅ store details for preview
-            pestDetails:
-              d.crop_asset_pest_attack_details?.map((p: any) => ({
-                id: Number(p.pest_attack_type_id),
-                name: p.pest_attack_observations_type_name || "",
-              })) || [],
-
-            diseases:
-              d.crop_asset_disease_attack_details?.map((d: any) =>
-                Number(d.disease_attack_type_id)
-              ) || [],
-
-            diseaseDetails:
-              d.crop_asset_disease_attack_details?.map((d: any) => ({
-                id: Number(d.disease_attack_type_id),
-                name: d.disease_attack_observations_type_name || "",
-              })) || [],
+            pests: pestsStage2.map((p: any) => Number(p.pest_attack_type_id)),
+            pestDetails: pestsStage2.map((p: any) => ({
+              id: Number(p.pest_attack_type_id),
+              name: p.pest_attack_observations_type_name || "",
+            })),
+            diseases: diseasesStage2.map((d: any) =>
+              Number(d.disease_attack_type_id)
+            ),
+            diseaseDetails: diseasesStage2.map((d: any) => ({
+              id: Number(d.disease_attack_type_id),
+              name: d.disease_attack_observations_type_name || "",
+            })),
 
             chemicals: {
               fertilizers:

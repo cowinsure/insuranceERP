@@ -291,9 +291,9 @@ const AddCropStageTwoModal = ({
       };
 
       console.log("Final PUT Payload:", payload);
-      // await put("/cms/crop-info-service/", payload, {
-      //   params: { crop_id: selectedCrop?.crop_id },
-      // });
+      await put("/cms/crop-info-service/", payload, {
+        params: { crop_id: selectedCrop?.crop_id },
+      });
       toast.success("Stage Two data saved successfully!");
       onSuccess?.();
     } catch (error) {

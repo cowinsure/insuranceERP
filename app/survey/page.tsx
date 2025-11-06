@@ -10,7 +10,9 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { SurveyTable, initialSurveys } from "@/components/survey-table";
 import { SurveySearch } from "@/components/survey-search";
-import BasicInfoForm, { BasicInfoRef } from "@/components/surveyForms/BasicInfoForm";
+import BasicInfoForm, {
+  BasicInfoRef,
+} from "@/components/surveyForms/BasicInfoForm";
 import { SurveyFormData } from "@/components/model/survey/types";
 import Survey from "@/components/addCropForms/stageTwoSteps/Survey";
 
@@ -65,16 +67,13 @@ export default function SurveyPage() {
     };
   });
 
-  const onOpen = () => setIsOpen(true);
+  const onOpen = () => {
+    setIsOpen(true);
+    resetForm();
+  };
   const onClose = () => setIsOpen(false);
 
-  const steps = [
-   
-   
-    "Survey Details",
-  
-    "Preview",
-  ];
+  const steps = ["Survey Details", "Preview"];
 
   const resetForm = () => {
     setSurveyData({
@@ -106,8 +105,9 @@ export default function SurveyPage() {
     try {
       // Add API call logic here
       toast.success("Survey submitted successfully!");
+      console.log(surveyData);
       resetForm();
-      
+
       setTimeout(() => {
         setIsLoading(false);
         setCurrentStep(0);
@@ -125,7 +125,9 @@ export default function SurveyPage() {
 
   // table/search data (lifted to page so SurveySearch can control filtering)
   const [surveys, setSurveys] = useState(() => initialSurveys);
-  const [filteredSurveys, setFilteredSurveys] = useState<typeof initialSurveys>([]);
+  const [filteredSurveys, setFilteredSurveys] = useState<typeof initialSurveys>(
+    []
+  );
 
   // Effect to save form data to localStorage
   useEffect(() => {
@@ -134,7 +136,10 @@ export default function SurveyPage() {
     }
   }, [surveyData]);
 
-  const handleSurveyDataChange = (field: keyof SurveyFormData, value: string) => {
+  const handleSurveyDataChange = (
+    field: keyof SurveyFormData,
+    value: string
+  ) => {
     setSurveyData((prev: SurveyFormData) => {
       const updated = { ...prev, [field]: value };
       localStorage.setItem("surveyFormData", JSON.stringify(updated));
@@ -144,11 +149,9 @@ export default function SurveyPage() {
 
   const renderStep = () => {
     switch (currentStep) {
-   
       case 0:
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Crop Planning</h2>
             <Survey
               data={[
                 {
@@ -161,17 +164,23 @@ export default function SurveyPage() {
                     surveyData.avg_production_last_year === ""
                       ? ""
                       : Number(surveyData.avg_production_last_year),
-                  yield_loss: (surveyData.yield_loss as "" | "yes" | "no") || "",
-                  key_reasons_yield_losses: surveyData.key_reasons_yield_losses || [],
+                  yield_loss:
+                    (surveyData.yield_loss as "" | "yes" | "no") || "",
+                  key_reasons_yield_losses:
+                    surveyData.key_reasons_yield_losses || [],
                   weather_effects: surveyData.weather_effects || [],
-                  pests: (surveyData.pests || []).map((name: string, idx: number) => ({
-                    id: idx + 1,
-                    name,
-                  })),
-                  diseases: (surveyData.diseases || []).map((name: string, idx: number) => ({
-                    id: idx + 1,
-                    name,
-                  })),
+                  pests: (surveyData.pests || []).map(
+                    (name: string, idx: number) => ({
+                      id: idx + 1,
+                      name,
+                    })
+                  ),
+                  diseases: (surveyData.diseases || []).map(
+                    (name: string, idx: number) => ({
+                      id: idx + 1,
+                      name,
+                    })
+                  ),
                   remarks: surveyData.remarks || "",
                 },
               ]}
@@ -179,6 +188,8 @@ export default function SurveyPage() {
                 const s = val[0];
                 setSurveyData((prev: SurveyFormData) => ({
                   ...prev,
+                  farmer_id: s.farmer_id || prev.farmer_id,
+                  farmer_name: s.farmer_name || prev.farmer_name,
                   top_three_varieties: s.top_three_varieties,
                   avg_production_this_year:
                     s.avg_production_this_year === ""
@@ -191,19 +202,22 @@ export default function SurveyPage() {
                   yield_loss: s.yield_loss,
                   key_reasons_yield_losses: s.key_reasons_yield_losses || [],
                   weather_effects: s.weather_effects || [],
-                  pests: (s.pests || []).map((p: { id: number; name: string }) => p.name),
-                  diseases: (s.diseases || []).map((d: { id: number; name: string }) => d.name),
+                  pests: (s.pests || []).map(
+                    (p: { id: number; name: string }) => p.name
+                  ),
+                  diseases: (s.diseases || []).map(
+                    (d: { id: number; name: string }) => d.name
+                  ),
                   remarks: s.remarks || "",
                 }));
               }}
             />
           </div>
         );
-     
-      
+
       case 1:
         return (
-          <div className="max-w-4xl mx-auto text-gray-700 max-h-[75vh] overflow-y-auto p-6 bg-white rounded-2xl shadow-md border space-y-6">
+          <div className="max-w-4xl mx-auto text-gray-700  overflow-y-auto p-6 bg-white rounded-2xl shadow-md border space-y-6">
             <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
               Survey Data Preview
             </h2>
@@ -217,13 +231,17 @@ export default function SurveyPage() {
                 <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
                   <span className="font-medium text-gray-600">Farmer ID</span>
                   <span className="text-gray-800 font-semibold tracking-wide col-span-2 text-right">
-                    {surveyData.farmer_id || <span className="text-gray-400">N/A</span>}
+                    {surveyData.farmer_id || (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
                   <span className="font-medium text-gray-600">Farmer Name</span>
                   <span className="text-gray-800 font-semibold tracking-wide col-span-2 text-right">
-                    {surveyData.farmer_name || <span className="text-gray-400">N/A</span>}
+                    {surveyData.farmer_name || (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </span>
                 </div>
               </div>
@@ -237,31 +255,71 @@ export default function SurveyPage() {
               <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
                 {surveyData.top_three_varieties?.length > 0 && (
                   <div className="border rounded-lg p-2 bg-gray-50">
-                    <span className="font-semibold text-gray-700">Top Three Varieties</span>
+                    <span className="font-semibold text-gray-700">
+                      Top Three Varieties
+                    </span>
                     <ul className="list-disc list-inside text-gray-600 mt-1">
-                      {surveyData.top_three_varieties.map((variety: string, idx: number) => (
-                        <li key={idx}>{variety}</li>
-                      ))}
+                      {surveyData.top_three_varieties.map(
+                        (variety: string, idx: number) => (
+                          <li key={idx}>{variety}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 )}
                 <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
-                  <span className="font-medium text-gray-600">Average Production This Year</span>
+                  <span className="font-medium text-gray-600">
+                    Average Production This Year
+                  </span>
                   <span className="text-gray-800 font-semibold tracking-wide col-span-2 text-right">
-                    {surveyData.avg_production_this_year ? `${surveyData.avg_production_this_year} kg` : <span className="text-gray-400">N/A</span>}
+                    {surveyData.avg_production_this_year ? (
+                      `${surveyData.avg_production_this_year} kg`
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
-                  <span className="font-medium text-gray-600">Average Production Last Year</span>
+                  <span className="font-medium text-gray-600">
+                    Average Production Last Year
+                  </span>
                   <span className="text-gray-800 font-semibold tracking-wide col-span-2 text-right">
-                    {surveyData.avg_production_last_year ? `${surveyData.avg_production_last_year} kg` : <span className="text-gray-400">N/A</span>}
+                    {surveyData.avg_production_last_year ? (
+                      `${surveyData.avg_production_last_year} kg`
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 border-b border-gray-100 p-2 text-sm">
                   <span className="font-medium text-gray-600">Yield Loss</span>
                   <span className="text-gray-800 font-semibold tracking-wide col-span-2 text-right">
-                    {surveyData.yield_loss ? (surveyData.yield_loss === 'yes' ? 'Yes' : 'No') : <span className="text-gray-400">N/A</span>}
+                    {surveyData.yield_loss ? (
+                      surveyData.yield_loss === "yes" ? (
+                        "Yes"
+                      ) : (
+                        "No"
+                      )
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </span>
+                  <div className="col-span-3 mt-7">
+                    {surveyData.key_reasons_yield_losses?.length > 0 && (
+                      <div className="border rounded-lg p-2 bg-gray-50">
+                        <span className="font-semibold text-gray-700">
+                          Key Reasons for Yield Loss
+                        </span>
+                        <ul className="list-disc list-inside text-gray-600 mt-1">
+                          {surveyData.key_reasons_yield_losses.map(
+                            (reason: string, idx: number) => (
+                              <li key={idx}>{reason}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
@@ -272,23 +330,17 @@ export default function SurveyPage() {
                 Risk Factors
               </h3>
               <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
-                {surveyData.key_reasons_yield_losses?.length > 0 && (
-                  <div className="border rounded-lg p-2 bg-gray-50">
-                    <span className="font-semibold text-gray-700">Key Reasons for Yield Loss</span>
-                    <ul className="list-disc list-inside text-gray-600 mt-1">
-                      {surveyData.key_reasons_yield_losses.map((reason: string, idx: number) => (
-                        <li key={idx}>{reason}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
                 {surveyData.weather_effects?.length > 0 && (
                   <div className="border rounded-lg p-2 bg-gray-50">
-                    <span className="font-semibold text-gray-700">Weather Effects</span>
+                    <span className="font-semibold text-gray-700">
+                      Weather Effects
+                    </span>
                     <ul className="list-disc list-inside text-gray-600 mt-1">
-                      {surveyData.weather_effects.map((effect: string, idx: number) => (
-                        <li key={idx}>{effect}</li>
-                      ))}
+                      {surveyData.weather_effects.map(
+                        (effect: string, idx: number) => (
+                          <li key={idx}>{effect}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 )}
@@ -313,11 +365,15 @@ export default function SurveyPage() {
                 )}
                 {surveyData.diseases?.length > 0 && (
                   <div className="border rounded-lg p-2 bg-gray-50">
-                    <span className="font-semibold text-gray-700">Diseases</span>
+                    <span className="font-semibold text-gray-700">
+                      Diseases
+                    </span>
                     <ul className="list-disc list-inside text-gray-600 mt-1">
-                      {surveyData.diseases.map((disease: string, idx: number) => (
-                        <li key={idx}>{disease}</li>
-                      ))}
+                      {surveyData.diseases.map(
+                        (disease: string, idx: number) => (
+                          <li key={idx}>{disease}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 )}
@@ -346,11 +402,15 @@ export default function SurveyPage() {
     }
   };
 
+  console.log("Survey from child:", surveyData);
+
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Survey Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Survey Management
+          </h1>
           <p className="text-gray-600">
             Manage and conduct land surveys for insurance assessment
           </p>
@@ -371,12 +431,16 @@ export default function SurveyPage() {
           <SurveySearch data={surveys} setFilteredData={setFilteredSurveys} />
         </div>
         <div className="animate__animated animate__fadeIn">
-          <SurveyTable data={surveys} filteredData={filteredSurveys} setFilteredData={setFilteredSurveys} />
+          <SurveyTable
+            data={surveys}
+            filteredData={filteredSurveys}
+            setFilteredData={setFilteredSurveys}
+          />
         </div>
       </div>
 
       {isOpen && (
-        <GenericModal closeModal={onClose}>
+        <GenericModal closeModal={onClose} title={"Add New Survey"}>
           <div>
             <div className="bg-white rounded-xl mb-4">
               <Stepper
@@ -386,7 +450,7 @@ export default function SurveyPage() {
               />
             </div>
 
-            <div className="overflow-y-auto h-[550px] bg-white rounded-b-xl p-5 border rounded-lg">
+            <div className="overflow-y-auto h-[550px] bg-white rounded-b-xl p-5 rounded-lg">
               {renderStep()}
             </div>
 

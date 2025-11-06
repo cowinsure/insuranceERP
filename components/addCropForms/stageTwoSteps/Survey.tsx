@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import InputField from "@/components/InputField";
 import keyReasons from "../../../public/key_reasons_yield_losses.json";
 import useApi from "@/hooks/use_api";
 import { MdArrowRight, MdArrowRightAlt } from "react-icons/md";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export interface SurveyData {
+  farmer_id?: string;
+  farmer_name?: string;
   top_three_varieties: string[];
   avg_production_this_year: number | "";
   avg_production_last_year: number | "";
@@ -29,6 +33,15 @@ const weatherOptions = ["Heavy Rain", "Drought", "Storm", "Flood", "Heat Wave"];
 const Survey = ({ data, onChange }: SurveyProps) => {
   const { get } = useApi();
 
+  const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
+  const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null);
+  const [farmersLoading, setFarmersLoading] = useState(false);
+  const [farmerQuery, setFarmerQuery] = useState("");
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [showResults, setShowResults] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   const [pestOptions, setPestOptions] = useState<
     { id: number; name: string }[]
   >([]);
@@ -37,6 +50,8 @@ const Survey = ({ data, onChange }: SurveyProps) => {
   >([]);
 
   const [survey, setSurvey] = useState<SurveyData>({
+    farmer_id: data[0]?.farmer_id || "",
+    farmer_name: data[0]?.farmer_name || "",
     top_three_varieties: data[0]?.top_three_varieties || [],
     avg_production_this_year: data[0]?.avg_production_this_year || "",
     avg_production_last_year: data[0]?.avg_production_last_year || "",
@@ -91,6 +106,64 @@ const Survey = ({ data, onChange }: SurveyProps) => {
 
     fetchOptions();
   }, [get]);
+
+  useEffect(() => {
+    // fetch farmers when dialog opens
+    if (!open) return;
+    let cancelled = false;
+    const fetchFarmers = async () => {
+      setFarmersLoading(true);
+      try {
+        const resp = await get(`ims/farmer-service`, {
+          params: { start_record: 1 },
+        });
+        //(resp);
+
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setFarmers(resp.data);
+        }
+      } catch (err) {
+        // ignore silently; toast could be added
+      } finally {
+        if (!cancelled) setFarmersLoading(false);
+      }
+    };
+    fetchFarmers();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!comboboxOpen) setFocusedIndex(-1);
+  }, [comboboxOpen]);
+
+  const filteredFarmers = useMemo(() => {
+    const q = farmerQuery.trim().toLowerCase();
+    if (!q) return farmers;
+    return farmers.filter(
+      (f) =>
+        String(f.user_id).toLowerCase().includes(q) ||
+        f.farmer_name.toLowerCase().includes(q) ||
+        f.mobile_number.toLowerCase().includes(q)
+    );
+  }, [farmers, farmerQuery]);
+
+  function selectFarmer(f: FarmerProfile) {
+    setSelectedFarmerId(String(f.user_id));
+    setFarmerQuery(`${f.farmer_name} - ${f.mobile_number}`);
+    setComboboxOpen(false);
+    // 🟢 Update survey data with farmer info
+    setSurvey((prev) => ({
+      ...prev,
+      farmer_id: String(f.user_id),
+      farmer_name: f.farmer_name,
+    }));
+  }
 
   // ---- Handlers ----
   const handleAddVariety = () => {
@@ -156,16 +229,96 @@ const Survey = ({ data, onChange }: SurveyProps) => {
         value === "no" ? [] : prev.key_reasons_yield_losses,
     }));
   };
-
+  console.log(selectedFarmerId);
+  console.log(farmerQuery);
   return (
     <div className="space-y-6 bg-white rounded-lg">
       <h2 className="text-xl font-semibold text-center underline">
         Survey Information
       </h2>
 
+      {/* Farmer selector*/}
+      <div className="space-y-2">
+        <Label htmlFor="plotFarmer" className="font-bold text-gray-400">
+          Farmer
+        </Label>
+        <div className="relative" ref={containerRef}>
+          {/* Combobox input (acts like trigger) */}
+          <Input
+            id="plotFarmer"
+            placeholder={
+              farmersLoading
+                ? "Loading farmers..."
+                : "Search or select a farmer "
+            }
+            value={farmerQuery}
+            onChange={(e) => {
+              setFarmerQuery(e.target.value);
+              setComboboxOpen(true);
+            }}
+            onFocus={() => setComboboxOpen(true)}
+            onKeyDown={(e) => {
+              const filtered = filteredFarmers;
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setFocusedIndex((i) => Math.min(i + 1, filtered.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setFocusedIndex((i) => Math.max(i - 1, 0));
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (filtered.length > 0 && focusedIndex >= 0) {
+                  const f = filtered[focusedIndex];
+                  if (f) selectFarmer(f);
+                } else if (filtered.length === 1) {
+                  selectFarmer(filtered[0]);
+                }
+              } else if (e.key === "Escape") {
+                setComboboxOpen(false);
+              }
+            }}
+          />
+
+          {/* Dropdown list */}
+          <div
+            className={`absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-auto ${
+              comboboxOpen ? "block" : "hidden"
+            }`}
+          >
+            <div className="p-2 text-sm text-muted-foreground">
+              Search results
+            </div>
+            <div className="divide-y">
+              {filteredFarmers.length === 0 ? (
+                <div className="p-2 text-sm">No results</div>
+              ) : (
+                filteredFarmers.map((f, idx) => (
+                  <div
+                    key={String(f.user_id)}
+                    role="option"
+                    aria-selected={selectedFarmerId === String(f.user_id)}
+                    className={`px-3 py-2 cursor-pointer hover:bg-accent/20 ${
+                      idx === focusedIndex ? "bg-accent/25" : ""
+                    }`}
+                    onMouseEnter={() => setFocusedIndex(idx)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectFarmer(f)}
+                  >
+                    <div className="font-medium">{f.farmer_name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {f.mobile_number}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Top Three Varieties */}
       <div>
-        <label className="font-bold text-gray-500">
+        <label className="font-bold text-gray-400">
           Top Three Varieties of Seeds
         </label>
         <div className="flex gap-2 mt-1">
@@ -310,7 +463,8 @@ const Survey = ({ data, onChange }: SurveyProps) => {
       {/* Weather Effects */}
       <div className="bg-gray-50 p-4 rounded-lg border">
         <label className="font-bold text-gray-500 text-[15px] flex items-center">
-         <MdArrowRight size={25} /> Was there any extreme weather event last year?
+          <MdArrowRight size={25} /> Was there any extreme weather event last
+          year?
         </label>
         <div className="grid grid-cols-2 gap-3 mt-5">
           {weatherOptions.map((opt) => (
@@ -333,7 +487,8 @@ const Survey = ({ data, onChange }: SurveyProps) => {
       {/* Pest & Disease */}
       <div className="bg-gray-50 p-4 rounded-lg border">
         <label className="font-bold text-gray-500 text-[15px] flex items-center">
-         <MdArrowRight size={25} /> Was there any widespread pests & disease attack last year?
+          <MdArrowRight size={25} /> Was there any widespread pests & disease
+          attack last year?
         </label>
 
         {/* Pests */}

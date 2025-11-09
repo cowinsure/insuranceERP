@@ -43,7 +43,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         },
       ]);
     }
-  }, []); // <-- only once, prevents overwriting existing data
+  }, []);
 
   // Fetch Seed Variety options
   useEffect(() => {

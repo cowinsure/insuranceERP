@@ -236,7 +236,7 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
                           className="border rounded-lg bg-gray-50 p-2 shadow-sm"
                         >
                           {renderRow("Effect Type", w.weather_effect_type_name)}
-                          {renderRow("Remarks", w.remarks || "")}
+                          {/* {renderRow("Remarks", w.remarks || "")} */}
                         </div>
                       ))}
                   </div>
@@ -310,7 +310,7 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
                       "Quantity",
                       `${f.qty || 0} ${f.qty_unit || ""}kg`
                     )}
-                    {renderRow("Remarks", truncate(f.remarks))}
+                    {/* {renderRow("Remarks", truncate(f.remarks))} */}
                   </div>
                 ))}
               </div>
@@ -333,7 +333,7 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
                       "Quantity",
                       `${p.qty || 0} ${p.qty_unit || ""}kg`
                     )}
-                    {renderRow("Remarks", truncate(p.remarks))}
+                    {/* {renderRow("Remarks", truncate(p.remarks))} */}
                   </div>
                 ))}
               </div>

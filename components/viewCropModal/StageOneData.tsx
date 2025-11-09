@@ -7,7 +7,11 @@ interface StageOneDataProps {
 
 const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
   const safeArray = (arr: any[]) => (Array.isArray(arr) ? arr : []);
-  //(data);
+  console.log(data);
+
+  // ✅ Helper to filter by stage_id = 2
+  const filterByStage = (arr: any[]) =>
+    safeArray(arr).filter((item) => item?.stage_id === 2);
 
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto ">
@@ -16,21 +20,25 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
         <Grid>
           <InputField
             label="Seed Name"
-            value={safeArray(data.crop_asset_seed_details)[0]?.seed_common_name}
+            value={
+              filterByStage(data.crop_asset_seed_details)[0]?.seed_common_name
+            }
           />
           <InputField
             label="Variety"
-            value={safeArray(data.crop_asset_seed_details)[0]?.seed_variety}
+            value={filterByStage(data.crop_asset_seed_details)[0]?.seed_variety}
           />
           <InputField
             label="Seed Company"
             value={
-              safeArray(data.crop_asset_seed_details)[0]?.seed_company_name
+              filterByStage(data.crop_asset_seed_details)[0]?.seed_company_name
             }
           />
           <InputField
             label="Seed Type"
-            value={safeArray(data.crop_asset_seed_details)[0]?.seed_type_name}
+            value={
+              filterByStage(data.crop_asset_seed_details)[0]?.seed_type_name
+            }
           />
         </Grid>
       </Section>
@@ -41,28 +49,28 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           <InputField
             label="Irrigation Facility"
             value={
-              safeArray(data.crop_asset_irrigation_cultivation_details)[0]
+              filterByStage(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.irrigation_facility
             }
           />
           <InputField
             label="Irrigation Source"
             value={
-              safeArray(data.crop_asset_irrigation_cultivation_details)[0]
+              filterByStage(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.irrigation_source
             }
           />
           <InputField
             label="Cultivation System"
             value={
-              safeArray(data.crop_asset_irrigation_cultivation_details)[0]
+              filterByStage(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_cultivation_system_name
             }
           />
           <InputField
             label="Land Suitability"
             value={
-              safeArray(data.crop_asset_irrigation_cultivation_details)[0]
+              filterByStage(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_land_suitability_name
             }
           />
@@ -75,48 +83,48 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           <InputField
             label="Immediate Previous Crop"
             value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
+              filterByStage(data.crop_asset_previous_season_history_details)[0]
                 ?.immediate_previous_crop
             }
           />
           <InputField
             label="Harvest Date"
             value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
+              filterByStage(data.crop_asset_previous_season_history_details)[0]
                 ?.harvest_date
             }
           />
           <InputField
             label="Last Year's Crop"
             value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
+              filterByStage(data.crop_asset_previous_season_history_details)[0]
                 ?.last_year_crop_type_name
             }
           />
           <InputField
             label="Last Year Production"
-            value={safeArray(
+            value={filterByStage(
               data.crop_asset_previous_season_history_details
             )[0]?.last_year_production?.toString()}
           />
           {/* <InputField
             label="Sowing Date"
             value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
+              filterByStage(data.crop_asset_previous_season_history_details)[0]
                 ?.sowing_date
             }
           /> */}
           <InputField
             label="Seed Used Last Year"
             value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
+              filterByStage(data.crop_asset_previous_season_history_details)[0]
                 ?.seed_used_last_year
             }
           />
           <InputField
             label="Reason For Changing Seed"
             value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
+              filterByStage(data.crop_asset_previous_season_history_details)[0]
                 ?.reason_for_changing_seed
             }
           />
@@ -127,7 +135,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       <Section title="Weather Effects">
         <ArrayDisplay
           title="Weather Events"
-          items={safeArray(data.crop_asset_weather_effect_history).map(
+          items={filterByStage(data.crop_asset_weather_effect_history).map(
             (w: any) => ({
               name: w?.weather_effect_type_name || "",
               remarks: w?.remarks,
@@ -142,7 +150,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
         <Grid>
           <ArrayDisplay
             title="Pest Attacks"
-            items={safeArray(data.crop_asset_pest_attack_details).map(
+            items={filterByStage(data.crop_asset_pest_attack_details).map(
               (p: any) => ({
                 name: p?.pest_attack_observations_type_name || null,
                 remarks: p?.remarks,
@@ -152,7 +160,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           />
           <ArrayDisplay
             title="Disease Attacks"
-            items={safeArray(data.crop_asset_disease_attack_details).map(
+            items={filterByStage(data.crop_asset_disease_attack_details).map(
               (d: any) => ({
                 name:
                   d?.disease_attack_observations_type_name || "Not Provided",
@@ -168,7 +176,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       <Section title="Inputs Used (Fertilizers & Pesticides)">
         <ArrayDisplay
           title="Chemicals"
-          items={safeArray(data.crop_asset_chemical_usage_details).map(
+          items={filterByStage(data.crop_asset_chemical_usage_details).map(
             (c: any) => ({
               name: c?.chemical_name || "Not Provided",
               quantity:
@@ -206,7 +214,7 @@ const Grid = ({ children }: { children: React.ReactNode }) => (
 
 const InputField = ({ label, value }: { label: string; value: any }) => (
   <div className="flex flex-col">
-    <span className="text-sm text-gray-500">{label}</span>
+    <span className="font-semibold text-gray-500">{label}</span>
     <div className="border border-gray-200 rounded-md p-2 bg-gray-50">
       {value && value !== "null" ? (
         value
@@ -225,8 +233,6 @@ const ArrayDisplay = ({
   items: { name: string; quantity?: string; remarks?: string; date?: string }[];
 }) => {
   const hasData = Array.isArray(items) && items.some((i) => i && i.name);
-  //(hasData);
-  //(items);
 
   return (
     <div>

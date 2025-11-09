@@ -229,7 +229,7 @@ const CropsPage = () => {
                         <td className="py-4 px-4 text-gray-600">{idx + 1}</td>
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
-                            {seed?.crop_name || "N/A"}
+                            {seed?.crop_name || crop.crop_name}
                           </div>
                         </td>
                         <td className="py-4 px-4">

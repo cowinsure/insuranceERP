@@ -177,6 +177,18 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
           {/* ✅ Manageable Harvest */}
           {typeof data.pestsDisease?.is_manageable_harvest === "boolean" && (
             <>
+              {renderList(
+                "Pests",
+                data.pestsDisease?.pestNames?.map((name: string) => ({
+                  name,
+                })) || []
+              )}
+              {renderList(
+                "Diseases",
+                data.pestsDisease?.diseaseNames?.map((name: string) => ({
+                  name,
+                })) || []
+              )}
               {renderRow(
                 "Manageable Harvest",
                 data.pestsDisease.is_manageable_harvest ? "Yes" : "No"
@@ -189,18 +201,6 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
                 )}
             </>
           )}
-
-          {renderList(
-            "Pests",
-            data.pestsDisease?.pestNames?.map((name: string) => ({ name })) ||
-              []
-          )}
-          {renderList(
-            "Diseases",
-            data.pestsDisease?.diseaseNames?.map((name: string) => ({
-              name,
-            })) || []
-          )}
         </div>
       </section>
 
@@ -212,10 +212,6 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
 
         {data.weather?.weather_effects_full?.length ? (
           <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
-            {renderRow("Period From", data.weather.date_from)}
-            {renderRow("Period To", data.weather.date_to)}
-            {renderRow("General Remarks", data.weather.remarks)}
-
             <div className="mt-2 space-y-2">
               {data.weather.weather_effects_full.map((w: any, i: number) => (
                 <div
@@ -223,10 +219,13 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
                   className="border rounded-lg bg-gray-50 p-2 shadow-sm"
                 >
                   {renderRow("Effect Type", w.weather_effect_type_name)}
-                  {renderRow("Remarks", w.remarks || "")}
+                  {/* {renderRow("Remarks", w.remarks || "")} */}
                 </div>
               ))}
             </div>
+            {renderRow("Period From", data.weather.date_from)}
+            {renderRow("Period To", data.weather.date_to)}
+            {renderRow("General Remarks", data.weather.remarks)}
           </div>
         ) : (
           <p className="text-gray-400 italic">No weather effects recorded</p>

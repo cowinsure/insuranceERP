@@ -165,7 +165,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <DisplayField label="Harvest Date" value={crop?.harvest_date} />
           <DisplayField
-            label="Total Production"
+            label="Total Production (Avg)"
             value={`${
               crop?.total_production_kg === undefined
                 ? ""
@@ -173,7 +173,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             }`}
           />
           <DisplayField
-            label="Moisture Content"
+            label="Moisture Content (Avg)"
             value={`${
               crop?.moisture_content_percentage === undefined
                 ? ""
@@ -221,18 +221,26 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <h2 className="text-lg font-semibold mb-3 text-green-800">
           Pest & Disease Attacks
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* ✅ Pest Attacks filtered by stage_id = 3 */}
           <ArrayDisplay
             title="Pest Attacks"
-            items={Object.entries(cropData.pestAttack || {})
-              .filter(([_, v]) => v)
-              .map(([key]) => ({ name: pestLabels[key] || key }))}
+            items={(cropData.crop_asset_pest_attack_details || [])
+              .filter((item: any) => item.stage_id === 3)
+              .map((item: any) => ({
+                name: item.pest_attack_observations_type_name,
+              }))}
           />
+
+          {/* ✅ Disease Attacks filtered by stage_id = 3 */}
           <ArrayDisplay
             title="Disease Attacks"
-            items={Object.entries(cropData.diseaseAttack || {})
-              .filter(([_, v]) => v)
-              .map(([key]) => ({ name: diseaseLabels[key] || key }))}
+            items={(cropData.crop_asset_disease_attack_details || [])
+              .filter((item: any) => item.stage_id === 3)
+              .map((item: any) => ({
+                name: item.disease_attack_observations_type_name,
+              }))}
           />
         </div>
       </section>
@@ -242,15 +250,38 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <h2 className="text-lg font-semibold mb-3 text-green-800">
           Adverse Weather Effects
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ArrayDisplay
-            title="Weather Effects"
-            items={Object.entries(cropData.adverseWeatherEffects || {})
-              .filter(([_, v]) => v)
-              .map(([key]) => ({ name: weatherLabels[key] || key }))}
-          />
-          <DisplayField label="Period From" value={cropData.periodFrom} />
-          <DisplayField label="Period To" value={cropData.periodTo} />
+          {/* ✅ Filter weather effects for stage_id = 3 */}
+          <div className="col-span-2">
+            <ArrayDisplay
+              title="Weather Effects"
+              items={(cropData.crop_asset_weather_effect_history || [])
+                .filter((item: any) => item.stage_id === 3)
+                .map((item: any) => ({
+                  name: item.weather_effect_type_name,
+                }))}
+            />
+          </div>
+
+          {/* ✅ Period From & To (if available for stage_id 3) */}
+          {(() => {
+            const stage3Weather = (
+              cropData.crop_asset_weather_effect_history || []
+            ).find((item: any) => item.stage_id === 3);
+            return (
+              <>
+                <DisplayField
+                  label="Period From"
+                  value={stage3Weather?.date_from || "-"}
+                />
+                <DisplayField
+                  label="Period To"
+                  value={stage3Weather?.date_to || "-"}
+                />
+              </>
+            );
+          })()}
         </div>
       </section>
     </div>
@@ -260,7 +291,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 /* ---------- Reusable Components ---------- */
 const DisplayField = ({ label, value }: { label: string; value: any }) => (
   <div className="flex flex-col">
-    <span className="text-gray-500">{label}</span>
+    <span className="text-gray-500 font-semibold">{label}</span>
     <div className="border border-gray-200 rounded-md p-2 bg-gray-50 text-wrap">
       {value !== undefined && value !== null && value !== "" ? (
         value

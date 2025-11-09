@@ -95,6 +95,9 @@ const Weather = ({ data, onChange }: WeatherProps) => {
     onChange({ ...data, weather_effects_full: updated });
   };
 
+  console.log(data);
+
+
   return (
     <form className="max-h-[60vh] overflow-auto space-y-5">
       <h2 className="text-xl font-semibold mb-5 underline text-center">

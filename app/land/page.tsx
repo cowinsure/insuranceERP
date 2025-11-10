@@ -121,7 +121,7 @@ export default function CropPage() {
     (plot) =>
       plot.land_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plot.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plot.mobile_number.trim().includes(searchTerm.toLowerCase())
+      plot.mobile_number?.trim().includes(searchTerm.toLowerCase())
   );
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);

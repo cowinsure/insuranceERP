@@ -229,7 +229,7 @@ const CropsPage = () => {
                         <td className="py-4 px-4 text-gray-600">{idx + 1}</td>
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
-                            {seed?.crop_name || "N/A"}
+                            {seed?.crop_name || crop.crop_name || "N/A"}
                           </div>
                         </td>
                         <td className="py-4 px-4">
@@ -244,7 +244,7 @@ const CropsPage = () => {
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize w-[150px] mx-auto truncate">
-                            {seed?.land_name || "N/A"}
+                            {seed?.land_name || crop.land_name || "N/A"}
                           </div>
                         </td>
                         {/* Stage one */}

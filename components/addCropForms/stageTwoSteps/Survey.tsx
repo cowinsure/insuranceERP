@@ -231,6 +231,7 @@ const Survey = ({ data, onChange }: SurveyProps) => {
   };
   console.log(selectedFarmerId);
   console.log(farmerQuery);
+  console.log(survey);
   return (
     <div className="space-y-6 bg-white rounded-lg">
       <h2 className="text-xl font-semibold text-center underline">

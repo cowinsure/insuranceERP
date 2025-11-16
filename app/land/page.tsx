@@ -108,7 +108,7 @@ export default function CropPage() {
           "lams/land-info-service/?page_size=10&start_record=1&land_id=-1"
         );
         setLandData(response.data);
-        console.log(response.data);
+        //(response.data);
       } catch (error) {
         console.error("Failed to fetch land data", error);
       }
@@ -193,13 +193,13 @@ function groupByPointType(points: LandPoint[]) {
 
   const handleViewDetails = (plot: any) => {
     // Map API land payload to the Plot shape used by the details dialog
-    console.log(plot);
+    //(plot);
    const groupedData= groupByCoordinateType(plot.land_coordinate_point);
-   console.log(groupedData);
+   //(groupedData);
 
 
    const grouped_ref = groupByPointType(plot.land_reference_point);
-console.log(grouped_ref);
+//(grouped_ref);
    
     const mapped = {
       id: plot.land_id?.toString() ?? Date.now().toString(),
@@ -243,7 +243,7 @@ console.log(grouped_ref);
 
   const handleEditPlot = (plot: any) => {
     // TODO: Implement edit functionality
-    console.log("Edit plot:", plot);
+    //("Edit plot:", plot);
   };
 
   const handleSaveCoordinatesPlot = (coords: any[]) => {
@@ -338,7 +338,7 @@ console.log(grouped_ref);
                     >
                       <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
                         <img
-                          src={'https://insuranceportal-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
+                          src={'https://dev-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
                           alt={plot.land_name}
                           className="w-auto object-fit"
                         />

@@ -20,6 +20,7 @@ import { BsClipboardCheck, BsClipboardCheckFill } from "react-icons/bs";
 import { GiCow } from "react-icons/gi";
 import { MdOutlineManageAccounts, MdOutlineSettings } from "react-icons/md";
 import { useAuth } from "@/core/context/AuthContext";
+import { RiSurveyLine } from "react-icons/ri";
 
 const allNavItems = [
   {
@@ -55,6 +56,12 @@ const allNavItems = [
     url: "/land",
     icon: PiFlowerTulipFill,
   },
+     {
+      title: "Surveys",
+      url: "/survey",
+      icon: RiSurveyLine,
+      activeIcon: RiSurveyLine,
+    },
   {
     title: "Products",
     url: "/products",

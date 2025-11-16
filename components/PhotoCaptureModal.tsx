@@ -131,7 +131,7 @@ export default function PhotoCaptureModal({
         setFacingMode("environment");
         return;
       } catch (err) {
-        console.log("Back camera failed, trying front camera", err);
+        //("Back camera failed, trying front camera", err);
       }
 
       // If back camera fails, try front camera

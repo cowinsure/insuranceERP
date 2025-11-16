@@ -201,7 +201,7 @@ export default function FarmersPage() {
       };
 
       // 👉 Optional: Log or send data to API
-      console.log("Submitting data:", combinedFormData);
+      //("Submitting data:", combinedFormData);
 
       // Replace with real API call if needed
       // await api.post('/submit-farmer', formPayload);

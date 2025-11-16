@@ -20,5 +20,7 @@
   "area_acres": "এলাকা (একর)",
   "ownership": "মালিকানা",
   "actions": "কর্ম",
-  "search": "অনুসন্ধান" 
+  "search": "অনুসন্ধান" ,
+  "loading": "লোড হচ্ছে...",
+  "upgrade_to_premium": "প্রিমিয়ামে আপগ্রেড করুন"
 }

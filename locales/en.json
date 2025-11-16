@@ -19,5 +19,7 @@
   "area_acres": "Area (acres)",
   "ownership": "Ownership",
   "actions": "Actions",
-  "search": "Search"
+  "search": "Search",
+  "loading": "Loading...",
+  "upgrade_to_premium": "Upgrade to Premium"
 }

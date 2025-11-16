@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
+import { useLocalization } from "@/core/context/LocalizationContext"
 import { FileText, AlertCircle, Clock, DollarSign, HandCoins } from "lucide-react"
 
 const stats = [

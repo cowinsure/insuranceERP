@@ -1,0 +1,13 @@
+{
+  "key_reasons_yield_losses": [
+    { "id": 1, "label": "Pest attack" },
+    { "id": 2, "label": "Disease attack" },
+    { "id": 3, "label": "Adverse weather conditions" },
+    { "id": 4, "label": "Poor seed quality" },
+    { "id": 5, "label": "Inadequate irrigation" },
+    { "id": 6, "label": "Nutrient deficiency" },
+    { "id": 7, "label": "Late sowing" },
+    { "id": 8, "label": "Weed infestation" },
+    { "id": 9, "label": "Others" }
+  ]
+}

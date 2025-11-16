@@ -67,12 +67,12 @@ const Notifications = () => {
 
   const handleMarkAllRead = () => {
     // Handle mark all as read logic
-    console.log("Mark all as read");
+    //("Mark all as read");
   };
 
   const handleSettings = () => {
     // Handle settings logic
-    console.log("Open settings");
+    //("Open settings");
   };
 
   return (

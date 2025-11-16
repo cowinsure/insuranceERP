@@ -8,7 +8,7 @@ import AddCrop from "@/components/AddCropDetailsModal";
 const AssetManagement = () => {
   const [isCrop, setIsCrop] = useState(false);
   const [isLivestock, setIsLivestock] = useState(false);
-  console.log(isCrop, isLivestock);
+  //(isCrop, isLivestock);
   return (
     // <div className="flex-1 space-y-6 p-6">
     //   {/* Page header */}

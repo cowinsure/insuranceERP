@@ -1,7 +1,7 @@
 "use client";
 import AddCropDetailsModal from "@/components/AddCropDetailsModal";
 import RegisterCrop from "@/components/addCropForms/RegisterCrop";
-import StageTwo from "@/components/addCropForms/StageTwo";
+import AddCropStageTwoModal from "@/components/AddCropStageTwoModal";
 import { CropGetData } from "@/components/model/crop/CropGetModel";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
@@ -15,6 +15,11 @@ import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
 
+type StageAccess = {
+  stage1Enabled: boolean;
+  stage2Enabled: boolean;
+};
+
 const CropsPage = () => {
   const { get } = useApi();
 
@@ -27,6 +32,16 @@ const CropsPage = () => {
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [crops, setCrops] = useState<CropGetData[]>([]);
   const [filteredCrops, setFilteredCrops] = useState(crops);
+  const [stageOnePayloads, setStageOnePayloads] = useState<Record<number, any>>(
+    {}
+  );
+
+  const stageRules: Record<number, StageAccess> = {
+    1: { stage1Enabled: true, stage2Enabled: false },
+    2: { stage1Enabled: true, stage2Enabled: true },
+    3: { stage1Enabled: true, stage2Enabled: true },
+  };
+
   /************************************************************************/
 
   /************************* GET Data Functions *************************/
@@ -86,7 +101,7 @@ const CropsPage = () => {
 
     setSelectedCrop(viewCrop);
     setIsCropView(true);
-    console.log("View Crop", viewCrop);
+    //("View Crop", viewCrop);
   };
   /************************************************************************/
 
@@ -98,19 +113,22 @@ const CropsPage = () => {
 
   const runFunctionOnSuccessStageTwo = () => {
     setIsStageTwoModal(false);
+    fetchCropData();
   };
 
   // function for stage one data update
-  const runOnClose = () => {
+  // Stage 1 modal success callback
+  const runOnClose = (updatedPayload?: any) => {
     setIsStageOneModal(false);
     fetchCropData();
   };
 
-  // Flag for stage one complete
-  const isStageOneCompleted = (cropId: number) => {
-    return localStorage.getItem(`stageOneCompleted_${cropId}`) === "true";
+  // Stage handler function
+  const getStageAccess = (stageId?: number): StageAccess => {
+    return stageRules[stageId ?? 1] || stageRules[1];
   };
   /************************************************************************/
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Page header */}
@@ -169,7 +187,7 @@ const CropsPage = () => {
                   Crop Name
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Variety
+                  Current Stage
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Planting Date
@@ -191,7 +209,7 @@ const CropsPage = () => {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center">
+                  <td colSpan={8} className="py-6 text-center">
                     <Loading />
                   </td>
                 </tr>
@@ -199,21 +217,24 @@ const CropsPage = () => {
                 <>
                   {filteredCrops.map((crop, idx) => {
                     const seed = crop.crop_asset_seed_details?.[0];
+                    const { stage1Enabled, stage2Enabled } = getStageAccess(
+                      crop.current_stage_id
+                    );
                     return (
                       <tr
                         key={idx}
                         className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
                         style={{ animationDelay: `${idx * 100}ms` }}
                       >
-                        <td className="py-4 px-4">{idx + 1}</td>
+                        <td className="py-4 px-4 text-gray-600">{idx + 1}</td>
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
                             {seed?.crop_name || "N/A"}
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
-                            {seed?.seed_variety || crop.variety || "N/A"}
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                            {crop.stage_name || "N/A"}
                           </div>
                         </td>
                         <td className="py-4 px-4">
@@ -222,47 +243,53 @@ const CropsPage = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900">
+                          <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize w-[150px] mx-auto truncate">
                             {seed?.land_name || "N/A"}
                           </div>
                         </td>
                         {/* Stage one */}
-                        <td className="flex justify-center items-center py-4 px-4">
+                        <td className="text-center py-4 px-4">
                           <Button
-                            variant={"ghost"}
-                            className="bg-white text-blue-900"
-                            title="Add crop details"
-                            onClick={() => handleAddCropDetails(crop.crop_id)}
+                            variant="ghost"
+                            className={`bg-white ${
+                              stage1Enabled
+                                ? "text-blue-900"
+                                : "text-gray-400 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              if (!stage1Enabled) {
+                                toast.error(
+                                  "Stage 1 cannot be edited at this stage"
+                                );
+                              } else {
+                                handleAddCropDetails(crop.crop_id);
+                              }
+                            }}
+                            title="Add Planting & Cultivation Details"
                           >
                             <FilePlus />
                           </Button>
                         </td>
                         {/* Stage two */}
-                        <td>
-                          <div className="flex items-center justify-center py-4 px-4">
-                            <Button
-                              variant={"ghost"}
-                              className={`bg-white ${
-                                isStageOneCompleted(crop.crop_id)
-                                  ? "text-blue-900"
-                                  : "text-gray-400 cursor-not-allowed"
-                              }`}
-                              title={
-                                isStageOneCompleted(crop.crop_id)
-                                  ? "Add revisit data"
-                                  : ""
+                        <td className="text-center py-4 px-4">
+                          <Button
+                            variant="ghost"
+                            className={`bg-white ${
+                              stage2Enabled
+                                ? "text-blue-900"
+                                : "text-gray-400 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              if (!stage2Enabled) {
+                                toast.error("Complete Stage 1 first");
+                              } else {
+                                handleRevisitData(crop.crop_id);
                               }
-                              onClick={() => {
-                                if (!isStageOneCompleted(crop.crop_id)) {
-                                  toast.error("Complete Stage one first");
-                                } else {
-                                  handleRevisitData(crop.crop_id);
-                                }
-                              }}
-                            >
-                              <ClipboardCheck />
-                            </Button>
-                          </div>
+                            }}
+                            title="Add revisit data"
+                          >
+                            <ClipboardCheck />
+                          </Button>
                         </td>
                         {/* Action btn */}
                         <td>
@@ -303,7 +330,7 @@ const CropsPage = () => {
       {isStageOneModal && (
         <GenericModal
           title={
-            <h1 className="flex flex-col">
+            <span className="flex flex-col">
               {
                 <div className="flex gap-1">
                   <span>Add details for</span>
@@ -319,7 +346,7 @@ const CropsPage = () => {
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
               </small>
-            </h1>
+            </span>
           }
           closeModal={() => setIsStageOneModal(false)}
           widthValue={"w-full min-w-sm md:max-w-3xl"}
@@ -344,9 +371,9 @@ const CropsPage = () => {
             </h1>
           }
           closeModal={() => setIsStageTwoModal(false)}
-          widthValue={"w-full min-w-sm md:max-w-xl"}
+          widthValue={"w-full min-w-sm md:max-w-3xl"}
         >
-          <StageTwo
+          <AddCropStageTwoModal
             selectedCrop={selectedCrop!}
             onSuccess={runFunctionOnSuccessStageTwo}
           />
@@ -362,7 +389,7 @@ const CropsPage = () => {
           }`}
           height={true}
         >
-          <CropStageModalTabs stageOneData={selectedCrop} />
+          <CropStageModalTabs data={selectedCrop} />
         </GenericModal>
       )}
 

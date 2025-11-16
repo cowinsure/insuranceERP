@@ -198,7 +198,7 @@ const PersonalInfoForm = forwardRef<PersonalInfoRef, PersonalInfoFormProps>(
       // updateStep({
       //     [property]: file,
       // });
-      console.log("Photo captured:", file);
+      //("Photo captured:", file);
     };
 
     // Reset form data

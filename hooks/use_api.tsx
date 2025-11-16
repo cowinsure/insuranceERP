@@ -50,7 +50,7 @@ const useApi = () => {
       try {
         const response: AxiosResponse = await apiClient.get(url, config);
 
-        console.log(`Response status: ${response.data.status}`);
+        //(`Response status: ${response.data.status}`);
 
         if (response.data.status.toString() === "failed") {
           setError(new Error("Failed to fetch data"));

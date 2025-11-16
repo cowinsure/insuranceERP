@@ -4,17 +4,14 @@ import { useEffect, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { toast } from "sonner";
-
 import useApi from "@/hooks/use_api";
 import { Stepper } from "./Stepper";
-
 import CropDetailsForm from "./SeedDetails";
 import IrrigationCultivation from "./addCropForms/stageOneSteps/IrrigationCultivation";
 import History from "./addCropForms/stageOneSteps/History";
 import Weather from "./addCropForms/stageOneSteps/Weather";
 import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
 import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
-import PreviewSubmit from "./PreviewForm";
 import CropDetailsPreview from "./CropDetailsPreview";
 
 // Define ChemicalItem for consistency
@@ -58,7 +55,7 @@ interface AddCropData {
 
 interface AddCropDetailsModalProps {
   crop: any;
-  onClose: () => void;
+  onClose: (payload?: any) => void;
 }
 
 export default function AddCropDetailsModal({
@@ -69,6 +66,7 @@ export default function AddCropDetailsModal({
     estimated_yield: estimatedYield,
     planting_date: plantingDate,
     harvest_date: harvestDate,
+    current_stage_id: currentStageId,
   },
   onClose,
 }: AddCropDetailsModalProps) {
@@ -78,12 +76,12 @@ export default function AddCropDetailsModal({
   useEffect(() => {
     const fetchExistingCropData = async () => {
       if (!cropId) return;
-      console.log("Got crop data for crop ID:", cropId);
+      //("Got crop data for crop ID:", cropId);
       try {
         const res = await get(`/cms/crop-info-service/?crop_id=${cropId}`);
         if (res.status === "success" && res.data) {
           const d = res.data[0];
-          console.log(d);
+          //(d);
 
           // 🧩 Normalize data into same shape used by your state
           setCropData({
@@ -469,7 +467,7 @@ export default function AddCropDetailsModal({
         params: { crop_id: cropId },
       });
 
-      localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
+      // localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
       toast.success("Crop data submitted successfully!");
       onClose();
     } catch (err) {
@@ -543,7 +541,6 @@ export default function AddCropDetailsModal({
     }
   };
 
-  console.log(cropData);
   return (
     <div>
       <div className="bg-white rounded-xl mb-4">

@@ -38,7 +38,7 @@ const InputField: React.FC<InputFieldProps> = ({
     <div className="relative">
       <div className="flex flex-col">
         {label && (
-          <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-400">
+          <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-400 tracking-wide">
             {label}
           </label>
         )}
@@ -46,7 +46,7 @@ const InputField: React.FC<InputFieldProps> = ({
           type={type}
           id={id}
           name={name}
-          value={value}
+          value={value ?? ""}
           onChange={onChange}
           required={required}
           disabled={disabled}

@@ -71,14 +71,14 @@ export default function ApplicationDetailsModal({
     const fetchInsuranceStatus = async () => {
       try {
         const response = await get("ims/insurance-status-service/", {});
-        console.log("Response from API:", response.status);
+        //("Response from API:", response.status);
 
         if (response.status === "success") {
           setInsuranceStatus(response.data);
         }
-        // console.log("Fetching applications from API..." + response.data);
+        // //("Fetching applications from API..." + response.data);
       } catch (error) {
-        console.log("Error fetching applications from API...", error);
+        //("Error fetching applications from API...", error);
       }
     };
 

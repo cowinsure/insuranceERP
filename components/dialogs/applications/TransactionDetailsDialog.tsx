@@ -80,7 +80,7 @@ export default function TransactionDetailsDialog({
     current_status_id: selectedStatus,
     remarks: "",
   });
-console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${paymentData[0]?.transaction_document.toString()} `);
+//(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${paymentData[0]?.transaction_document.toString()} `);
 
   const getStatusColor = (status: string) => {
     const option = statusOptions.find((opt) => opt.value === status);
@@ -118,14 +118,14 @@ console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${paymentData[0]?.tra
     const fetchInsuranceStatus = async () => {
       try {
         const response = await get("ims/insurance-status-service/", {});
-        console.log("Response from API:", response.status);
+        //("Response from API:", response.status);
 
         if (response.status === "success") {
           setInsuranceStatus(response.data);
         }
-        console.log("Fetching applications from API..." + response.data);
+        //("Fetching applications from API..." + response.data);
       } catch (error) {
-        console.log("Error fetching applications from API...", error);
+        //("Error fetching applications from API...", error);
       }
     };
 
@@ -139,42 +139,41 @@ console.log(`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${paymentData[0]?.tra
           `ims/insurance-payment-service/?start_record=${1}&page_size=${10}&asset_insurance_id=${assetInsuranceId}`,
           {}
         );
-        console.log("Response from API:", response.status);
+        //("Response from API:", response.status);
 
         if (response.status === "success") {
           setPaymentData(response.data);
         }
-        console.log(
-          "Fetching applications from API..." + JSON.stringify(response)
-        );
+        // console.log("Fetching applications from API...", response);
       } catch (error) {
-        console.log("Error fetching applications from API...", error);
+        //("Error fetching applications from API...", error);
       }
     };
+    
     fetchPaymentData();
   }, []);
 
-  console.log(paymentData);
+  //(paymentData);
 
   const handleStatusChange = async () => {
     // Handle status change logic here
-    console.log("Form Data to be sent:", formData);
+    //("Form Data to be sent:", formData);
     try {
       const response = await postData("ims/insurance-status-history-service/", {
         id: assetInsuranceId,
         remarks: formData.remarks,
         current_status_id: selectedStatus,
       });
-      console.log("Response from API:", JSON.stringify(response));
+      //("Response from API:", JSON.stringify(response));
 
       if (response.status === "success") {
         onClose(); // Close the dialog on success
         toast.success("Status updated successfully!");
         // setInsuranceStatus(response.data);
       }
-      console.log("Updating Status applications from API..." + response.data);
+      //("Updating Status applications from API..." + response.data);
     } catch (error) {
-      console.log("Error Updating Status applications from API...", error);
+      //("Error Updating Status applications from API...", error);
     }
   };
 

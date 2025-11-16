@@ -44,7 +44,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
     };
     fetchWeatherOptions();
   }, []);
-  console.log(weatherOptions);
+  //(weatherOptions);
 
   const handleCheckboxChange = (id: number) => {
     let updated: number[] = [];
@@ -76,7 +76,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log("From weather form:", name, value);
+    //("From weather form:", name, value);
     onChange({ ...data, [name]: value });
   };
 

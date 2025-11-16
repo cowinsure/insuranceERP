@@ -124,9 +124,11 @@ const CropsPage = () => {
   };
 
   // Stage handler function
-  const getStageAccess = (stageId?: number): StageAccess => {
-    return stageRules[stageId ?? 1] || stageRules[1];
+  const getStageAccess = (stageId?: number | string): StageAccess => {
+    const id = Number(stageId) || 1; // convert string to number, fallback to 1
+    return stageRules[id] || stageRules[1];
   };
+
   /************************************************************************/
 
   return (

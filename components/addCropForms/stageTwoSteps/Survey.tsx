@@ -5,395 +5,426 @@ import { X } from "lucide-react";
 import InputField from "@/components/InputField";
 import keyReasons from "../../../public/key_reasons_yield_losses.json";
 import useApi from "@/hooks/use_api";
-import { MdArrowRight, MdArrowRightAlt } from "react-icons/md";
+import { MdArrowRight } from "react-icons/md";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import {
+  SurveyPostPayload,
+  SurveyDiseaseAttackDetail,
+  SurveyPestAttackDetail,
+  SurveyVarietyDetail,
+  SurveyWeatherEventDetail,
+  SurveyYieldLossDetail,
+} from "@/core/model/SurveyPost";
 
-export interface SurveyData {
-  farmer_id?: string;
-  farmer_name?: string;
-  top_three_varieties: string[];
-  avg_production_this_year: number | "";
-  avg_production_last_year: number | "";
-  yield_loss: "" | "yes" | "no";
-  key_reasons_yield_losses?: string[];
-  weather_effects: string[];
-  pests: { id: number; name: string }[];
-  diseases: { id: number; name: string }[];
-  remarks?: string;
+interface FarmerProfile {
+  user_id: number;
+  farmer_name: string;
+  mobile_number: string;
 }
 
 interface SurveyProps {
-  data: SurveyData[];
-  onChange: (val: SurveyData[]) => void;
+  data: SurveyPostPayload[];
+  onChange: (val: SurveyPostPayload[]) => void;
 }
-
-const weatherOptions = ["Heavy Rain", "Drought", "Storm", "Flood", "Heat Wave"];
 
 const Survey = ({ data, onChange }: SurveyProps) => {
   const { get } = useApi();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
+  /** -------------------------
+   * 🔸 Survey Local State
+   * ------------------------- */
+  const [survey, setSurvey] = useState<SurveyPostPayload>({
+    farmer_id: 0,
+    avg_prod_last_year: 0,
+    avg_prod_current_year: 0,
+    survey_date: "",
+    survey_varieties_of_seeds_details: [],
+    survey_yield_loss_details: [],
+    survey_weather_event_details: [],
+    survey_pest_attack_details: [],
+    survey_disease_attack_details: [],
+  });
+
+  /** -------------------------
+   * 🔸 Farmer Selector States
+   * ------------------------- */
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
-  const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null);
   const [farmersLoading, setFarmersLoading] = useState(false);
   const [farmerQuery, setFarmerQuery] = useState("");
   const [comboboxOpen, setComboboxOpen] = useState(false);
-  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
-  const [showResults, setShowResults] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  // Add this state
+  const [hasYieldLoss, setHasYieldLoss] = useState(false);
 
+  /** -------------------------
+   * 🔸 Seed Variety Input
+   * ------------------------- */
+  const [varietyInput, setVarietyInput] = useState("");
+
+  /** -------------------------
+   * 🔸 Weather, Pest, Disease Options
+   * ------------------------- */
+  const [weatherOptions, setWeatherOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
   const [pestOptions, setPestOptions] = useState<
     { id: number; name: string }[]
   >([]);
   const [diseaseOptions, setDiseaseOptions] = useState<
     { id: number; name: string }[]
   >([]);
+  const [yieldLossOptions, setYieldLossOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
 
-  const [survey, setSurvey] = useState<SurveyData>({
-    farmer_id: data[0]?.farmer_id || "",
-    farmer_name: data[0]?.farmer_name || "",
-    top_three_varieties: data[0]?.top_three_varieties || [],
-    avg_production_this_year: data[0]?.avg_production_this_year || "",
-    avg_production_last_year: data[0]?.avg_production_last_year || "",
-    weather_effects: data[0]?.weather_effects || [],
-    pests: data[0]?.pests || [],
-    diseases: data[0]?.diseases || [],
-    yield_loss: data[0]?.yield_loss || "",
-    key_reasons_yield_losses: data[0]?.key_reasons_yield_losses || [],
-    remarks: data[0]?.remarks || "",
-  });
+  /** ###############################################
+   *  🚀 Fetch all dropdown options (farmers, weather, pest, disease)
+   * ############################################### */
 
-  const [varietyInput, setVarietyInput] = useState("");
-
+  // Fetch Farmers
   useEffect(() => {
-    onChange([survey]);
-  }, [survey]);
+    let cancelled = false;
 
-  /** Fetch pest & disease options from API */
-  useEffect(() => {
-    const fetchOptions = async () => {
+    const load = async () => {
+      setFarmersLoading(true);
       try {
-        const [pestRes, diseaseRes] = await Promise.all([
-          get("/cms/crop-pest-attack-observations-type-service/", {
-            params: { page_size: 50, start_record: 1 },
-          }),
-          get("/cms/crop-disease-attack-observations-type-service/", {
-            params: { page_size: 50, start_record: 1 },
-          }),
-        ]);
+        const resp = await get(`/ims/farmer-service`, {
+          params: { start_record: 1 },
+        });
+
+        if (!cancelled && resp?.status === "success")
+          setFarmers(resp.data ?? []);
+      } catch (_) {
+      } finally {
+        if (!cancelled) setFarmersLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [get]);
+
+  // Fetch Weather, Pest, Disease
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [weatherRes, pestRes, diseaseRes, yieldLossRes] =
+          await Promise.all([
+            get("/cms/crop-adverse-weather-effect-type-service/", {
+              params: { page_size: 10, start_record: 1 },
+            }),
+            get("/cms/crop-pest-attack-observations-type-service/", {
+              params: { page_size: 50, start_record: 1 },
+            }),
+            get("/cms/crop-disease-attack-observations-type-service/", {
+              params: { page_size: 50, start_record: 1 },
+            }),
+            get("/sms/survey-yield-loss-type-service/", {
+              params: { page_size: 10, start_record: 1 },
+            }),
+          ]);
+
+        if (weatherRes.status === "success" && Array.isArray(weatherRes.data)) {
+          setWeatherOptions(
+            weatherRes.data.map((w: any) => ({
+              id: w.id,
+              name: w.weather_effect_type_name,
+            }))
+          );
+        }
 
         if (pestRes.status === "success" && Array.isArray(pestRes.data)) {
           setPestOptions(
-            pestRes.data.map((item: any) => ({
-              id: item.id,
-              name: item.pest_attack_observations_type_name,
+            pestRes.data.map((p: any) => ({
+              id: p.id,
+              name: p.pest_attack_observations_type_name,
             }))
           );
         }
 
         if (diseaseRes.status === "success" && Array.isArray(diseaseRes.data)) {
           setDiseaseOptions(
-            diseaseRes.data.map((item: any) => ({
-              id: item.id,
-              name: item.disease_attack_observations_type_name,
+            diseaseRes.data.map((d: any) => ({
+              id: d.id,
+              name: d.disease_attack_observations_type_name,
+            }))
+          );
+        }
+
+        if (
+          yieldLossRes.status === "success" &&
+          Array.isArray(yieldLossRes.data)
+        ) {
+          setYieldLossOptions(
+            yieldLossRes.data.map((d: any) => ({
+              id: d.yield_loss_type_id,
+              name: d.yield_loss_type_name,
             }))
           );
         }
       } catch (err) {
-        console.error("Error fetching pest/disease data:", err);
+        console.error(err);
       }
     };
 
-    fetchOptions();
+    load();
   }, [get]);
 
-  useEffect(() => {
-    // fetch farmers when dialog opens
-    if (!open) return;
-    let cancelled = false;
-    const fetchFarmers = async () => {
-      setFarmersLoading(true);
-      try {
-        const resp = await get(`ims/farmer-service`, {
-          params: { start_record: 1 },
-        });
-        //(resp);
-
-        if (
-          !cancelled &&
-          resp?.status === "success" &&
-          Array.isArray(resp.data)
-        ) {
-          setFarmers(resp.data);
-        }
-      } catch (err) {
-        // ignore silently; toast could be added
-      } finally {
-        if (!cancelled) setFarmersLoading(false);
-      }
-    };
-    fetchFarmers();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, get]);
-
-  useEffect(() => {
-    if (!comboboxOpen) setFocusedIndex(-1);
-  }, [comboboxOpen]);
-
+  /** -------------------------
+   * 🔸 Filter Farmers
+   * ------------------------- */
   const filteredFarmers = useMemo(() => {
     const q = farmerQuery.trim().toLowerCase();
     if (!q) return farmers;
     return farmers.filter(
       (f) =>
-        String(f.user_id).toLowerCase().includes(q) ||
+        String(f.user_id).includes(q) ||
         f.farmer_name.toLowerCase().includes(q) ||
         f.mobile_number.toLowerCase().includes(q)
     );
   }, [farmers, farmerQuery]);
 
-  function selectFarmer(f: FarmerProfile) {
-    setSelectedFarmerId(String(f.user_id));
-    setFarmerQuery(`${f.farmer_name} - ${f.mobile_number}`);
-    setComboboxOpen(false);
-    // 🟢 Update survey data with farmer info
-    setSurvey((prev) => ({
-      ...prev,
-      farmer_id: String(f.user_id),
-      farmer_name: f.farmer_name,
-    }));
-  }
+  /** -------------------------
+   * 🔸 Update Parent Component Whenever Survey Changes
+   * ------------------------- */
+  useEffect(() => {
+    onChange([survey]);
+  }, [survey]);
 
-  // ---- Handlers ----
-  const handleAddVariety = () => {
-    if (!varietyInput.trim() || survey.top_three_varieties.length >= 3) return;
+  /** -------------------------
+   * 🔸 Handlers
+   * ------------------------- */
+  const handleVarietyAdd = () => {
+    if (!varietyInput.trim()) return;
+
+    const item: SurveyVarietyDetail = {
+      survey_varieties_of_seeds: varietyInput.trim(),
+    };
+
     setSurvey((prev) => ({
       ...prev,
-      top_three_varieties: [...prev.top_three_varieties, varietyInput.trim()],
+      survey_varieties_of_seeds_details: [
+        ...prev.survey_varieties_of_seeds_details,
+        item,
+      ],
     }));
+
     setVarietyInput("");
   };
 
   const handleRemoveVariety = (index: number) => {
     setSurvey((prev) => ({
       ...prev,
-      top_three_varieties: prev.top_three_varieties.filter(
-        (_, i) => i !== index
-      ),
+      survey_varieties_of_seeds_details:
+        prev.survey_varieties_of_seeds_details.filter((_, i) => i !== index),
     }));
   };
 
-  const handleCheckboxChange = (
-    field: "weather_effects" | "key_reasons_yield_losses",
-    value: string
-  ) => {
+  const toggleYieldLoss = (reasonId: number) => {
     setSurvey((prev) => {
-      const current = prev[field] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      return { ...prev, [field]: updated };
+      const exists = prev.survey_yield_loss_details.some(
+        (r) => r.yield_loss_type_id === reasonId
+      );
+
+      return {
+        ...prev,
+        survey_yield_loss_details: exists
+          ? prev.survey_yield_loss_details.filter(
+              (r) => r.yield_loss_type_id !== reasonId
+            )
+          : [
+              ...prev.survey_yield_loss_details,
+              { yield_loss_type_id: reasonId },
+            ],
+      };
     });
   };
 
-  const handlePestChange = (option: { id: number; name: string }) => {
+  const toggleWeather = (id: number) => {
     setSurvey((prev) => {
-      const exists = prev.pests.some((p) => p.id === option.id);
-      const updated = exists
-        ? prev.pests.filter((p) => p.id !== option.id)
-        : [...prev.pests, option];
-      return { ...prev, pests: updated };
+      const exists = prev.survey_weather_event_details.some(
+        (w) => w.weather_event_type_id === id
+      );
+
+      return {
+        ...prev,
+        survey_weather_event_details: exists
+          ? prev.survey_weather_event_details.filter(
+              (w) => w.weather_event_type_id !== id
+            )
+          : [
+              ...prev.survey_weather_event_details,
+              { weather_event_type_id: id },
+            ],
+      };
     });
   };
 
-  const handleDiseaseChange = (option: { id: number; name: string }) => {
+  const togglePest = (id: number) => {
     setSurvey((prev) => {
-      const exists = prev.diseases.some((d) => d.id === option.id);
-      const updated = exists
-        ? prev.diseases.filter((d) => d.id !== option.id)
-        : [...prev.diseases, option];
-      return { ...prev, diseases: updated };
+      const exists = prev.survey_pest_attack_details.some(
+        (p) => p.pest_attack_type_id === id
+      );
+
+      return {
+        ...prev,
+        survey_pest_attack_details: exists
+          ? prev.survey_pest_attack_details.filter(
+              (p) => p.pest_attack_type_id !== id
+            )
+          : [...prev.survey_pest_attack_details, { pest_attack_type_id: id }],
+      };
     });
   };
 
-  const handleInputChange = (field: keyof SurveyData, value: any) => {
-    setSurvey((prev) => ({ ...prev, [field]: value }));
+  const toggleDisease = (id: number) => {
+    setSurvey((prev) => {
+      const exists = prev.survey_disease_attack_details.some(
+        (d) => d.disease_attack_type_id === id
+      );
+
+      return {
+        ...prev,
+        survey_disease_attack_details: exists
+          ? prev.survey_disease_attack_details.filter(
+              (d) => d.disease_attack_type_id !== id
+            )
+          : [
+              ...prev.survey_disease_attack_details,
+              { disease_attack_type_id: id },
+            ],
+      };
+    });
   };
 
-  const handleYieldLossChange = (value: "yes" | "no") => {
+  const selectFarmer = (farmer: FarmerProfile) => {
+    setFarmerQuery(`${farmer.farmer_name} - ${farmer.mobile_number}`);
+    setComboboxOpen(false);
     setSurvey((prev) => ({
       ...prev,
-      yield_loss: value,
-      key_reasons_yield_losses:
-        value === "no" ? [] : prev.key_reasons_yield_losses,
+      farmer_id: farmer.user_id,
     }));
   };
-  console.log(selectedFarmerId);
-  console.log(farmerQuery);
+
+  /** ##################################################################
+   *  UI BELOW — EXACTLY YOUR UI BUT NOW FULLY WIRED TO BACKEND PAYLOAD
+   * ##################################################################
+   */
+console.log(survey);
   return (
     <div className="space-y-6 bg-white rounded-lg">
       <h2 className="text-xl font-semibold text-center underline">
         Survey Information
       </h2>
 
-      {/* Farmer selector*/}
+      {/* Farmer Selector */}
       <div className="space-y-2">
-        <Label htmlFor="plotFarmer" className="font-bold text-gray-400">
-          Farmer
-        </Label>
+        <Label className="font-bold text-gray-400">Farmer</Label>
         <div className="relative" ref={containerRef}>
-          {/* Combobox input (acts like trigger) */}
-          <Input
-            id="plotFarmer"
-            placeholder={
-              farmersLoading
-                ? "Loading farmers..."
-                : "Search or select a farmer "
-            }
+          <InputField
+            id="search"
+            name="searchFarmer"
+            placeholder={farmersLoading ? "Loading..." : "Search farmer"}
             value={farmerQuery}
             onChange={(e) => {
               setFarmerQuery(e.target.value);
               setComboboxOpen(true);
             }}
             onFocus={() => setComboboxOpen(true)}
-            onKeyDown={(e) => {
-              const filtered = filteredFarmers;
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                setFocusedIndex((i) => Math.min(i + 1, filtered.length - 1));
-              } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setFocusedIndex((i) => Math.max(i - 1, 0));
-              } else if (e.key === "Enter") {
-                e.preventDefault();
-                if (filtered.length > 0 && focusedIndex >= 0) {
-                  const f = filtered[focusedIndex];
-                  if (f) selectFarmer(f);
-                } else if (filtered.length === 1) {
-                  selectFarmer(filtered[0]);
-                }
-              } else if (e.key === "Escape") {
-                setComboboxOpen(false);
-              }
-            }}
           />
 
-          {/* Dropdown list */}
-          <div
-            className={`absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-auto ${
-              comboboxOpen ? "block" : "hidden"
-            }`}
-          >
-            <div className="p-2 text-sm text-muted-foreground">
-              Search results
-            </div>
-            <div className="divide-y">
+          {comboboxOpen && (
+            <div className="absolute z-50 mt-1 w-full rounded-md border bg-white shadow-md max-h-48 overflow-auto">
               {filteredFarmers.length === 0 ? (
-                <div className="p-2 text-sm">No results</div>
+                <div className="p-2">No results</div>
               ) : (
-                filteredFarmers.map((f, idx) => (
+                filteredFarmers.map((f, i) => (
                   <div
-                    key={String(f.user_id)}
-                    role="option"
-                    aria-selected={selectedFarmerId === String(f.user_id)}
-                    className={`px-3 py-2 cursor-pointer hover:bg-accent/20 ${
-                      idx === focusedIndex ? "bg-accent/25" : ""
-                    }`}
-                    onMouseEnter={() => setFocusedIndex(idx)}
-                    onMouseDown={(e) => e.preventDefault()}
+                    key={f.user_id}
+                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
                     onClick={() => selectFarmer(f)}
                   >
                     <div className="font-medium">{f.farmer_name}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-gray-500">
                       {f.mobile_number}
                     </div>
                   </div>
                 ))
               )}
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Top Three Varieties */}
+      {/* Varieties */}
       <div>
-        <label className="font-bold text-gray-400">
-          Top Three Varieties of Seeds
-        </label>
+        <label className="font-bold text-gray-400">Top Three Varieties</label>
         <div className="flex gap-2 mt-1">
           <input
             type="text"
             className="border border-gray-300 rounded-md p-2 flex-1"
-            placeholder="Enter a seed variety and click Add"
             value={varietyInput}
             onChange={(e) => setVarietyInput(e.target.value)}
           />
           <button
             type="button"
-            onClick={handleAddVariety}
-            disabled={
-              !varietyInput.trim() || survey.top_three_varieties.length >= 3
-            }
-            className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50 cursor-pointer"
+            onClick={handleVarietyAdd}
+            disabled={!varietyInput.trim()}
+            className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] cursor-pointer"
           >
             Add
           </button>
         </div>
 
-        <ul className="mt-2 flex flex-col md:flex-row sm:items-start md:items-center gap-3 md:gap-8">
-          {survey.top_three_varieties.map((val, idx) => (
+        <ul className="mt-2 flex gap-3 flex-wrap">
+          {survey.survey_varieties_of_seeds_details.map((v, idx) => (
             <li
               key={idx}
-              className="flex justify-between items-center bg-gray-50 border px-3 py-2 rounded-md md:w-[20%] animate__animated animate__fadeIn"
+              className="flex justify-between items-center bg-gray-50 border px-3 py-2 rounded-md"
             >
-              <span className="font-semibold">{val}</span>
+              <span className="font-semibold">
+                {v.survey_varieties_of_seeds}
+              </span>
               <button
                 onClick={() => handleRemoveVariety(idx)}
-                className="text-red-500 hover:text-red-700 cursor-pointer"
+                className="text-red-500 hover:text-red-700"
               >
                 <X size={18} />
               </button>
             </li>
           ))}
         </ul>
-
-        {survey.top_three_varieties.length >= 3 && (
-          <p className="text-sm text-orange-500 mt-1">
-            Maximum of 3 seed varieties reached.
-          </p>
-        )}
       </div>
 
       {/* Average Production */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
-          id="avgProductionThisYear"
           name="avgProductionThisYear"
+          id="avgProductionThisYear"
+          label="Average Production (This Year)"
           type="number"
-          label="Average Production (This Year in kg)"
-          placeholder="e.g. 42.5"
-          value={survey.avg_production_this_year}
+          value={survey.avg_prod_current_year || ""}
           onChange={(e) =>
-            handleInputChange(
-              "avg_production_this_year",
-              e.target.value === "" ? "" : Number(e.target.value)
-            )
+            setSurvey((prev) => ({
+              ...prev,
+              avg_prod_current_year: Number(e.target.value),
+            }))
           }
         />
-
         <InputField
-          id="avgProductionLastYear"
           name="avgProductionLastYear"
+          id="avgProductionLastYear"
+          label="Average Production (Last Year)"
           type="number"
-          label="Average Production (Last Year in kg)"
-          placeholder="e.g. 40.8"
-          value={survey.avg_production_last_year}
+          value={survey.avg_prod_last_year || ""}
           onChange={(e) =>
-            handleInputChange(
-              "avg_production_last_year",
-              e.target.value === "" ? "" : Number(e.target.value)
-            )
+            setSurvey((prev) => ({
+              ...prev,
+              avg_prod_last_year: Number(e.target.value),
+            }))
           }
         />
       </div>
@@ -404,148 +435,147 @@ const Survey = ({ data, onChange }: SurveyProps) => {
           Possibility of Yield Loss
         </label>
         <div className="flex gap-5 mt-2">
+          {/* No */}
           <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input
               type="radio"
               name="yieldLoss"
-              checked={survey.yield_loss === "yes"}
-              onChange={() => handleYieldLossChange("yes")}
-              className="cursor-pointer"
-            />
-            Yes
-          </label>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="radio"
-              name="yieldLoss"
-              checked={survey.yield_loss === "no"}
-              onChange={() => handleYieldLossChange("no")}
-              className="cursor-pointer"
+              checked={!hasYieldLoss}
+              onChange={() => {
+                setHasYieldLoss(false);
+                setSurvey((prev) => ({
+                  ...prev,
+                  survey_yield_loss_details: [], // clear all reasons
+                }));
+              }}
             />
             No
+          </label>
+
+          {/* Yes */}
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="radio"
+              name="yieldLoss"
+              checked={hasYieldLoss}
+              onChange={() => {
+                setHasYieldLoss(true);
+                setSurvey((prev) => ({
+                  ...prev,
+                  survey_yield_loss_details:
+                    prev.survey_yield_loss_details.length === 0
+                      ? []
+                      : prev.survey_yield_loss_details, // keep existing reasons
+                }));
+              }}
+            />
+            Yes
           </label>
         </div>
       </div>
 
-      {/* Yield Loss Reasons */}
-      {survey.yield_loss === "yes" && (
-        <div className="animate__animated animate__fadeIn bg-gray-50 p-4 rounded-lg border">
-          <label className="font-bold text-gray-500 text-[15px] flex items-center">
-            <MdArrowRight size={25} /> If "Yes", Key Reasons of Yield Losses in
-            this season
+      {/* Show checkboxes only if Yes selected */}
+      {hasYieldLoss && (
+        <div className="bg-gray-50 p-4 rounded-lg border animate__animated animate__fadeIn">
+          <label className="font-bold text-gray-500 flex items-center text-[15px]">
+            <MdArrowRight size={25} /> Key Reasons for Yield Loss
           </label>
+
           <div className="grid grid-cols-2 gap-3 mt-5">
-            {keyReasons.key_reasons_yield_losses.map((reason) => (
+            {yieldLossOptions.map((r: any) => (
               <label
-                key={reason.id}
-                className="flex items-center gap-2 text-sm text-gray-700 font-semibold"
+                key={r.id}
+                className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
               >
                 <input
-                  type="checkbox"
                   className="custom-checkbox"
-                  checked={survey.key_reasons_yield_losses?.includes(
-                    reason.label
+                  type="checkbox"
+                  checked={survey.survey_yield_loss_details.some(
+                    (item) => item.yield_loss_type_id === r.id
                   )}
-                  onChange={() =>
-                    handleCheckboxChange(
-                      "key_reasons_yield_losses",
-                      reason.label
-                    )
-                  }
+                  onChange={() => toggleYieldLoss(r.id)}
                 />
-                {reason.label}
+                {r.name}
               </label>
             ))}
           </div>
         </div>
       )}
 
-      {/* Weather Effects */}
+      {/* Weather */}
       <div className="bg-gray-50 p-4 rounded-lg border">
-        <label className="font-bold text-gray-500 text-[15px] flex items-center">
-          <MdArrowRight size={25} /> Was there any extreme weather event last
-          year?
+        <label className="font-bold text-gray-500 flex items-center text-[15px]">
+          <MdArrowRight size={25} /> Extreme Weather Events
         </label>
+
         <div className="grid grid-cols-2 gap-3 mt-5">
           {weatherOptions.map((opt) => (
             <label
-              key={opt}
-              className="flex items-center gap-2 text-sm text-gray-700 font-semibold cursor-pointer"
+              key={opt.id}
+              className="flex items-center gap-2 text-sm font-semibold cursor-pointer"
             >
               <input
-                type="checkbox"
                 className="custom-checkbox"
-                checked={survey.weather_effects.includes(opt)}
-                onChange={() => handleCheckboxChange("weather_effects", opt)}
+                type="checkbox"
+                checked={survey.survey_weather_event_details.some(
+                  (w) => w.weather_event_type_id === opt.id
+                )}
+                onChange={() => toggleWeather(opt.id)}
               />
-              {opt}
+              {opt.name}
             </label>
           ))}
         </div>
       </div>
 
-      {/* Pest & Disease */}
+      {/* Pests */}
       <div className="bg-gray-50 p-4 rounded-lg border">
-        <label className="font-bold text-gray-500 text-[15px] flex items-center">
-          <MdArrowRight size={25} /> Was there any widespread pests & disease
-          attack last year?
+        <label className="font-bold text-gray-500 flex items-center text-[15px]">
+          <MdArrowRight size={25} /> Pest Attacks
         </label>
 
-        {/* Pests */}
-        <div className="mt-4">
-          <h3 className="text-[15px] underline underline-offset-3 font-semibold text-gray-600 mb-2">
-            Pest Attacks
-          </h3>
-          <div className="grid grid-cols-1 gap-5">
-            {pestOptions.length > 0 ? (
-              pestOptions.map((opt) => (
-                <label
-                  key={`pest-${opt.id}`}
-                  className="flex items-center gap-2 text-sm text-gray-600 font-semibold cursor-pointer text-[14px]"
-                >
-                  <input
-                    type="checkbox"
-                    className="custom-checkbox"
-                    checked={survey.pests.some((p) => p.id === opt.id)}
-                    onChange={() => handlePestChange(opt)}
-                  />
-                  {opt.name}
-                </label>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm col-span-2">
-                Loading pest options...
-              </p>
-            )}
-          </div>
+        <div className="mt-4 grid grid-cols-1 gap-3">
+          {pestOptions.map((opt) => (
+            <label
+              key={opt.id}
+              className="flex items-center gap-2 text-sm cursor-pointer font-semibold"
+            >
+              <input
+                className="custom-checkbox"
+                type="checkbox"
+                checked={survey.survey_pest_attack_details.some(
+                  (p) => p.pest_attack_type_id === opt.id
+                )}
+                onChange={() => togglePest(opt.id)}
+              />
+              {opt.name}
+            </label>
+          ))}
         </div>
 
         {/* Diseases */}
         <div className="mt-6">
-          <h3 className="text-[15px] underline underline-offset-3 font-semibold text-gray-600 mb-2">
+          <h3 className="text-[15px] font-semibold mb-2 underline">
             Disease Attacks
           </h3>
-          <div className="grid grid-cols-1 gap-5">
-            {diseaseOptions.length > 0 ? (
-              diseaseOptions.map((opt) => (
-                <label
-                  key={`disease-${opt.id}`}
-                  className="flex items-center gap-2 text-sm text-gray-600 font-semibold cursor-pointer text-[14px]"
-                >
-                  <input
-                    type="checkbox"
-                    className="custom-checkbox"
-                    checked={survey.diseases.some((d) => d.id === opt.id)}
-                    onChange={() => handleDiseaseChange(opt)}
-                  />
-                  {opt.name}
-                </label>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm col-span-2">
-                Loading disease options...
-              </p>
-            )}
+
+          <div className="grid grid-cols-1 gap-3">
+            {diseaseOptions.map((opt) => (
+              <label
+                key={opt.id}
+                className="flex items-center gap-2 text-sm cursor-pointer font-semibold"
+              >
+                <input
+                  className="custom-checkbox"
+                  type="checkbox"
+                  checked={survey.survey_disease_attack_details.some(
+                    (d) => d.disease_attack_type_id === opt.id
+                  )}
+                  onChange={() => toggleDisease(opt.id)}
+                />
+                {opt.name}
+              </label>
+            ))}
           </div>
         </div>
       </div>

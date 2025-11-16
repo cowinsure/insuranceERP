@@ -18,6 +18,7 @@ interface InputFieldProps {
   error?: string;
   max?: string;
   readOnly?: boolean;
+  onFocus?: () => void;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -33,12 +34,16 @@ const InputField: React.FC<InputFieldProps> = ({
   maxLength,
   readOnly = false,
   error,
+  onFocus,
 }) => {
   return (
     <div className="relative">
       <div className="flex flex-col">
         {label && (
-          <label htmlFor={id} className="mb-1 text-sm font-bold text-gray-400 tracking-wide">
+          <label
+            htmlFor={id}
+            className="mb-1 text-sm font-bold text-gray-400 tracking-wide"
+          >
             {label}
           </label>
         )}
@@ -53,6 +58,7 @@ const InputField: React.FC<InputFieldProps> = ({
           placeholder={placeholder}
           maxLength={maxLength}
           readOnly={readOnly}
+          onFocus={onFocus}
           className={clsx(
             "p-2 border border-gray-300 bg-gray-50 rounded-md font-semibold",
             "focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-blue-50",

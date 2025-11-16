@@ -8,6 +8,8 @@ import MobileNav from "@/components/Navigation/MobileNav";
 import "animate.css";
 import { AuthProvider } from "@/core/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
+import { LocalizationProvider } from "@/core/context/LocalizationContext";
+import LocalizationToggle from "@/components/utils/LocalizationToggle";
 
 export const metadata: Metadata = {
   title: "Insurance ERP",
@@ -33,11 +35,13 @@ export default function RootLayout({
       <body
         className={`${urbanist.className} bg-gradient-to-br from-sky-50 via-blue-200 to-blue-50 relative`}
       >
+        <LocalizationProvider>
         <AuthProvider>
         <div className="flex min-h-screen">
           <aside className="hidden lg:block">
             <DesktopSideBar />
           </aside>
+          <LocalizationToggle />
           <main className="flex-1">{children}</main>
 
           {/* Mobile nav at bottom */}
@@ -48,6 +52,7 @@ export default function RootLayout({
         <Toaster />
 
       </AuthProvider>
+      </LocalizationProvider>
       </body>
     </html>
   );

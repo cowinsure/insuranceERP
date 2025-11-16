@@ -3,18 +3,21 @@
   "login": "Login",
   "logout": "Logout",
   "dashboard": "Dashboard",
-  "language": "Languag",
-  "livestockInsurance": "Livestock Insurance",
-  "livestockDescription": "Comprehensive protection for your cattle and livestock. Safeguard your farm's most valuable assets with our specialized coverage.",
-  "applyNow": "Apply Now",
-
-  "HealthInsurance": "Health Insurance",
-  "HealthDescription": "Complete health coverage for you and your family. Access quality healthcare with our comprehensive medical insurance plans.",
-
-  "lifeInsurance": "Life Insurance",
-  "lifeDescription": "Secure your family's future with our reliable life insurance plans. Tailored  to meet your needs and provide peace of mind.",
-  "Welcome to": "Welcome to",
-  "InsureCow": "InsureCow",
-  "DashboardDescription": "Protect what matters most with our comprehensive insurance solutions designed for modern farming and life."
-
+  "language": "Language",
+  "land_management": "Land Management",
+  "create_land": "Create New Land",
+  "create_plot": "Create New Plot",
+  "land_list": "Land List",
+  "sub_title": "Create and manage lands and plots for insurance coverage",
+  "land_found": "Lands Found",
+  "no_lands_found": "No lands found",
+  "owner": "Owner",
+  "views": "Views",
+  "land_name": "Land Name",
+  "farmer_name": "Farmer Name",
+  "contact_number": "Contact Number",
+  "area_acres": "Area (acres)",
+  "ownership": "Ownership",
+  "actions": "Actions",
+  "search": "Search"
 }

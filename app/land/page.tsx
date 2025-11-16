@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
-import { Bell, Search, Plus, Sparkles, Badge, MapPin } from "lucide-react";
+import { Bell, Search, Plus, Sparkles, Badge, MapPin,Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GenericModal from "@/components/ui/GenericModal";
@@ -20,6 +20,8 @@ import PlotDetailsDialog from "@/components/dialogs/land/PlotDetailsDialog";
 import PlotCoordinatesDialog from "@/components/dialogs/land/PlotCoordinatesDialog";
 import useApi from "@/hooks/use_api";
 import { group } from "console";
+import {  useLocalization } from "../../core/context/LocalizationContext";
+
 
 interface LandData {
   image: string | null;
@@ -88,6 +90,7 @@ interface LandData {
 }
 
 export default function CropPage() {
+    const { t, setLocale, locale } = useLocalization();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isPlotCoordsDialogOpen, setIsPlotCoordsDialogOpen] = useState(false);
@@ -259,10 +262,10 @@ console.log(grouped_ref);
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Land Management
+            {t('land_management')}
           </h1>
           <p className="text-gray-600">
-            Create and manage lands and plots for insurance coverage
+           {t('sub_title')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -271,7 +274,7 @@ console.log(grouped_ref);
             onClick={() => setIsCreateDialogOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            Create Land
+            {t('create_land')}
           </Button>
         </div>
       </div>
@@ -296,10 +299,10 @@ console.log(grouped_ref);
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium text-gray-900">
-                Created Lands
+               {t('land_list')}
               </h2>
               <span className="text-sm text-gray-500">
-                {filteredPlots.length} lands found
+                {filteredPlots.length} {t('land_found')}
               </span>
             </div>
 
@@ -313,7 +316,7 @@ console.log(grouped_ref);
                   <MapPin className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No lands found
+                  {t('no_lands_found')}
                 </h3>
                 <p className="text-gray-500 mb-4">
                   {searchTerm
@@ -323,7 +326,7 @@ console.log(grouped_ref);
                 {!searchTerm && (
                   <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Land
+                    {t('create_land')}
                   </Button>
                 )}
               </div>
@@ -347,7 +350,7 @@ console.log(grouped_ref);
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="font-medium text-gray-900">{plot.land_name}</div>
-                            <div className="text-sm text-gray-600">Owner: {plot.farmer_name}</div>
+                            <div className="text-sm text-gray-600">{t('owner')}: {plot.farmer_name}</div>
                           </div>
                           <div className="text-sm text-gray-500">{new Date(plot.land_coordinate_point[0]?.created_at).toLocaleDateString()}</div>
                         </div>
@@ -356,7 +359,7 @@ console.log(grouped_ref);
                           <div className="text-sm text-gray-600">{plot.mobile_number}</div>
                           <div className="flex flex-col items-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
-                              View
+                                <Eye className="w-4 h-4" />
                             </Button>
                             {/* <Button
                               variant="outline"
@@ -389,22 +392,22 @@ console.log(grouped_ref);
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        Land Name
+                        {t('land_name')}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        Farmer Name
+                        {t('farmer_name')}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        Contact Number
+                        {t('contact_number')}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        Area (acres)
+                        {t('area_acres')}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        Ownership
+                        {t('ownership')}
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        Actions
+                        {t('actions')}
                       </th>
                     </tr>
                   </thead>
@@ -446,7 +449,7 @@ console.log(grouped_ref);
                             size="sm"
                             onClick={() => handleViewDetails(plot)}
                           >
-                            View Details
+                            <Eye className="w-4 h-4" />
                           </Button>
 
                           {/* <Button

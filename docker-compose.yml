@@ -1,0 +1,8 @@
+
+services:
+  frontend-insurecowportal-dev:
+    image: insurecow/insurecow_warehouse_repo:frontend-insurecowportal-dev
+    container_name: frontend-insurecowportal-dev
+    ports:
+      - "3003:3000"
+    restart: always

@@ -13,6 +13,7 @@ import { SurveySearch } from "@/components/survey-search";
 import Survey from "@/components/addCropForms/stageTwoSteps/Survey";
 import { SurveyPostPayload } from "@/core/model/SurveyPost";
 import useApi from "@/hooks/use_api";
+import SurveyPreview from "@/components/surveyForms/SurveyPreview";
 
 // Type for GET API response
 type SurveyApiResponse = {
@@ -25,12 +26,18 @@ type SurveyApiResponse = {
   location?: string;
   crop_type?: string;
   remarks?: string;
-  avg_production_last_year?: number;
-  avg_production_this_year?: number;
+  avg_prod_last_year?: number;
+  avg_prod_current_year?: number;
   survey_yield_loss_details?: { yield_loss_type_name: string }[];
-  survey_weather_event_details?: { weather_event_type_id: number }[];
-  survey_pest_attack_details?: { pest_attack_type_id: number }[];
-  survey_disease_attack_details?: { disease_attack_type_id: number }[];
+  survey_weather_event_details?: {
+    weather_effect_type_name: string;
+  }[];
+  survey_pest_attack_details?: {
+    pest_attack_observations_type_name: string;
+  }[];
+  survey_disease_attack_details?: {
+    disease_attack_observations_type_name: string;
+  }[];
   survey_varieties_of_seeds_details?: { survey_varieties_of_seeds: string }[];
 };
 
@@ -62,6 +69,7 @@ export default function SurveyPage() {
         id: item.survey_master_id.toString(),
         farmer_name: item.farmer_name,
         farmer_id: item.farmer_id,
+        mobile_number: item.mobile_number,
         plot_id: item.plot_id ?? "-",
         location: item.location ?? "-",
         crop_type: item.crop_type ?? "-",
@@ -70,22 +78,22 @@ export default function SurveyPage() {
         top_three_varieties: item.survey_varieties_of_seeds_details?.map(
           (v) => v.survey_varieties_of_seeds
         ),
-        avg_production_last_year: item.avg_production_last_year,
-        avg_production_this_year: item.avg_production_this_year,
+        avg_prod_last_year: item.avg_prod_last_year,
+        avg_prod_current_year: item.avg_prod_current_year,
         yield_loss: item.survey_yield_loss_details
           ?.map((y) => y.yield_loss_type_name)
           .join(", "),
         key_reasons_yield_losses: item.survey_yield_loss_details?.map(
           (y) => y.yield_loss_type_name
         ),
-        weather_effects: item.survey_weather_event_details?.map((w) =>
-          w.weather_event_type_id.toString()
+        weather_effects: item.survey_weather_event_details?.map(
+          (w) => w.weather_effect_type_name
         ),
-        pests: item.survey_pest_attack_details?.map((p) =>
-          p.pest_attack_type_id.toString()
+        pests: item.survey_pest_attack_details?.map(
+          (p) => p.pest_attack_observations_type_name
         ),
-        diseases: item.survey_disease_attack_details?.map((d) =>
-          d.disease_attack_type_id.toString()
+        diseases: item.survey_disease_attack_details?.map(
+          (d) => d.disease_attack_observations_type_name
         ),
         remarks: item.remarks ?? "",
       }));
@@ -103,12 +111,17 @@ export default function SurveyPage() {
     avg_prod_last_year: 0,
     avg_prod_current_year: 0,
     survey_date: "",
+    location_lat: 0,
+    location_long: 0,
     survey_varieties_of_seeds_details: [],
     survey_yield_loss_details: [],
     survey_weather_event_details: [],
     survey_pest_attack_details: [],
     survey_disease_attack_details: [],
   });
+
+  // Additional state for preview
+  const [surveyPreview, setSurveyPreview] = useState<any>({});
 
   const onOpen = () => {
     setIsOpen(true);
@@ -122,12 +135,15 @@ export default function SurveyPage() {
       avg_prod_last_year: 0,
       avg_prod_current_year: 0,
       survey_date: "",
+      location_lat: 0,
+      location_long: 0,
       survey_varieties_of_seeds_details: [],
       survey_yield_loss_details: [],
       survey_weather_event_details: [],
       survey_pest_attack_details: [],
       survey_disease_attack_details: [],
     });
+    setSurveyPreview({});
   };
 
   const steps = ["Survey Details", "Preview"];
@@ -143,9 +159,25 @@ export default function SurveyPage() {
     setIsLoading(true);
     try {
       const payload = {
-        ...surveyData,
-        survey_date: new Date().toISOString(),
+        farmer_id: Number(surveyData.farmer_id) || 0,
+        avg_prod_last_year: Number(surveyData.avg_prod_last_year) || 0,
+        avg_prod_current_year: Number(surveyData.avg_prod_current_year) || 0,
+        survey_date: surveyData.survey_date
+          ? new Date(surveyData.survey_date).toISOString()
+          : new Date().toISOString(),
+        survey_varieties_of_seeds_details:
+          surveyData.survey_varieties_of_seeds_details || [],
+        survey_yield_loss_details: surveyData.survey_yield_loss_details || [],
+        survey_weather_event_details:
+          surveyData.survey_weather_event_details || [],
+        survey_pest_attack_details: surveyData.survey_pest_attack_details || [],
+        survey_disease_attack_details:
+          surveyData.survey_disease_attack_details || [],
+        location_lat: 23.7507112982749,
+        location_long: 90.42181675406374,
+        // remarks: surveyData.remarks || "",s
       };
+      console.log(JSON.stringify(payload));
       await post("/sms/farmer-survey-service/", payload);
       toast.success("Survey submitted!");
       resetForm();
@@ -156,11 +188,13 @@ export default function SurveyPage() {
         setIsOpen(false);
         fetchSurveyData(); // refresh table after submit
       }, 1200);
-    } catch (error) {
-      toast.error("Something went wrong during submission.");
+    } catch (error: any) {
+      toast.error(error?.message || "Something went wrong during submission.");
       setIsLoading(false);
     }
   };
+
+  console.log(surveys);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -168,22 +202,11 @@ export default function SurveyPage() {
         return (
           <div className="space-y-4">
             <Survey
-              data={[surveyData] as any}
+              data={[surveyData]}
               onChange={(val) => {
-                const s = val[0];
-                setSurveyData({
-                  farmer_id: s.farmer_id,
-                  avg_prod_last_year: s.avg_prod_last_year,
-                  avg_prod_current_year: s.avg_prod_current_year,
-                  survey_date: s.survey_date,
-                  survey_varieties_of_seeds_details:
-                    s.survey_varieties_of_seeds_details,
-                  survey_yield_loss_details: s.survey_yield_loss_details,
-                  survey_weather_event_details: s.survey_weather_event_details,
-                  survey_pest_attack_details: s.survey_pest_attack_details,
-                  survey_disease_attack_details:
-                    s.survey_disease_attack_details,
-                });
+                // val[0] is the raw survey data, val[1] is optional preview
+                setSurveyData(val[0]);
+                if (val[1]) setSurveyPreview(val[1]); // store preview for step 2
               }}
             />
           </div>
@@ -191,13 +214,8 @@ export default function SurveyPage() {
 
       case 1:
         return (
-          <div className="max-w-4xl mx-auto text-gray-700 overflow-y-auto p-6 bg-white rounded-2xl shadow-md border space-y-6">
-            <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
-              Survey Data Preview
-            </h2>
-            <pre className="bg-gray-100 p-4 rounded-xl text-sm overflow-auto">
-              {JSON.stringify(surveyData, null, 2)}
-            </pre>
+          <div className="max-w-4xl mx-auto p-4">
+            <SurveyPreview data={surveyPreview || surveyData} />
           </div>
         );
 

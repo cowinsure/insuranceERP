@@ -39,6 +39,8 @@ const Survey = ({ data, onChange }: SurveyProps) => {
     avg_prod_last_year: 0,
     avg_prod_current_year: 0,
     survey_date: "",
+    location_lat: 0,
+    location_long: 0,
     survey_varieties_of_seeds_details: [],
     survey_yield_loss_details: [],
     survey_weather_event_details: [],
@@ -190,9 +192,11 @@ const Survey = ({ data, onChange }: SurveyProps) => {
   /** -------------------------
    * 🔸 Update Parent Component Whenever Survey Changes
    * ------------------------- */
-  useEffect(() => {
-    onChange([survey]);
-  }, [survey]);
+  // useEffect(() => {
+  //   const preview = buildPreview(survey);
+  //   console.log(preview);
+  //   onChange([survey, buildPreview(survey)]);
+  // }, [survey, weatherOptions, pestOptions, diseaseOptions, yieldLossOptions]);
 
   /** -------------------------
    * 🔸 Handlers
@@ -309,11 +313,49 @@ const Survey = ({ data, onChange }: SurveyProps) => {
     }));
   };
 
+  // Build preview labels
+  const buildPreview = (s: SurveyPostPayload) => ({
+    ...s,
+    yield_loss_labels: s.survey_yield_loss_details
+      .map(
+        (item) =>
+          yieldLossOptions.find((o) => o.id === item.yield_loss_type_id)?.name
+      )
+      .filter(Boolean),
+    weather_event_labels: s.survey_weather_event_details
+      .map(
+        (item) =>
+          weatherOptions.find((o) => o.id === item.weather_event_type_id)?.name
+      )
+      .filter(Boolean),
+    pest_attack_labels: s.survey_pest_attack_details
+      .map(
+        (item) =>
+          pestOptions.find((o) => o.id === item.pest_attack_type_id)?.name
+      )
+      .filter(Boolean),
+    disease_attack_labels: s.survey_disease_attack_details
+      .map(
+        (item) =>
+          diseaseOptions.find((o) => o.id === item.disease_attack_type_id)?.name
+      )
+      .filter(Boolean),
+    variety_labels: s.survey_varieties_of_seeds_details.map(
+      (item) => item.survey_varieties_of_seeds
+    ),
+  });
+
+  // Whenever survey state changes, notify parent with both raw data and preview
+  useEffect(() => {
+    const preview = buildPreview(survey);
+    onChange([survey, preview]);
+  }, [survey, weatherOptions, pestOptions, diseaseOptions, yieldLossOptions]);
+
   /** ##################################################################
    *  UI BELOW — EXACTLY YOUR UI BUT NOW FULLY WIRED TO BACKEND PAYLOAD
    * ##################################################################
    */
-console.log(survey);
+  console.log(survey);
   return (
     <div className="space-y-6 bg-white rounded-lg">
       <h2 className="text-xl font-semibold text-center underline">

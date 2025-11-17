@@ -4,6 +4,8 @@ export interface SurveyPostPayload {
   avg_prod_last_year: number;
   avg_prod_current_year: number;
   survey_date: string | null;
+  location_lat: number;
+  location_long: number;
 
   survey_varieties_of_seeds_details: SurveyVarietyDetail[];
   survey_yield_loss_details: SurveyYieldLossDetail[];

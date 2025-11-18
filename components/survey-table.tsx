@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Pagination from "./utils/Pagination";
-import { Eye, MapPin } from "lucide-react";
+import { Calendar, Eye, MapPin, Phone } from "lucide-react";
 import Loading from "./utils/Loading";
 import { Button } from "./ui/button";
 import GenericModal from "./ui/GenericModal";
@@ -118,7 +118,59 @@ export function SurveyTable({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* MOBILE VIEW — CARD LIST */}
+        <div className="grid gap-4 lg:hidden px-4">
+          {loading || paginatedSurveys.length === 0 ? (
+            <Loading />
+          ) : (
+            paginatedSurveys.map((survey, idx) => (
+              <div
+                key={idx}
+                className="border rounded-lg p-4 shadow-sm bg-white animate__animated animate__fadeIn"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-gray-900">
+                    {survey.farmer_name}
+                  </h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSurveyiew(survey)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
+                  <Phone className="w-4 h-4" /> {survey.mobile_number || "N/A"}
+                </p>
+
+                <p className="text-sm text-gray-600 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" /> {survey.survey_date}
+                </p>
+
+                <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="bg-gray-50 p-2 rounded">
+                    <p className="text-gray-500 text-xs">Avg Last Year</p>
+                    <p className="font-medium">
+                      {survey.avg_prod_last_year ?? "-"}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-2 rounded">
+                    <p className="text-gray-500 text-xs">Avg Current Year</p>
+                    <p className="font-medium">
+                      {survey.avg_prod_current_year ?? "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="overflow-x-auto hidden lg:block">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
@@ -235,7 +287,7 @@ export function SurveyTable({
         <GenericModal
           closeModal={() => setSurveyView(false)}
           title={"Survey Details"}
-          widthValue="w-full lg:w-[50%]"
+          widthValue="w-[20%] lg:w-[50%]"
         >
           <SurveyView survey={selectedSurvey} />
         </GenericModal>

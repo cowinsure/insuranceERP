@@ -38,10 +38,10 @@ const stats = [
 
 export function DashboardStats() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat) => (
         <Card key={stat.title} className="border border-gray-200">
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-medium text-gray-600">{stat.title}</span>
               <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />

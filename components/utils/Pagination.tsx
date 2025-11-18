@@ -65,53 +65,59 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2 mt-10 flex-wrap">
-      <div className="flex gap-2 flex-1 justify-center">
+    <div className="flex flex-col items-center justify-center mt-10 w-full gap-4">
+      {/* Page Navigation */}
+      <div className="flex items-center w-full justify-center gap-2">
         <button
           onClick={handlePrev}
           disabled={currentPage === 1}
-          className="px-3 py-1 rounded-lg border disabled:opacity-50 cursor-pointer"
+          className="px-3 py-1 rounded-lg border disabled:opacity-50 cursor-pointer shrink-0 text-sm"
         >
           Prev
         </button>
 
-        {showPageNumbers &&
-          pagesToShow.map((page, index) => (
-            <React.Fragment key={index}>
-              {page === "..." ? (
-                <span className="px-3 py-1 rounded-lg border text-gray-600">
-                  ...
-                </span>
-              ) : (
-                <button
-                  onClick={() => onPageChange(Number(page))}
-                  className={`px-3 py-1 rounded-lg border ${
-                    currentPage === page ? "bg-blue-600 text-white" : "bg-white"
-                  }`}
-                >
-                  {page}
-                </button>
-              )}
-            </React.Fragment>
-          ))}
+        {/* Responsive Scrollable Page Numbers */}
+        <div className="flex gap-2 max-w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-1 whitespace-nowrap">
+          {showPageNumbers &&
+            pagesToShow.map((page, index) => (
+              <React.Fragment key={index}>
+                {page === "..." ? (
+                  <span className="px-3 py-1 rounded-lg border text-gray-600 text-sm shrink-0">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => onPageChange(Number(page))}
+                    className={`px-3 py-1 rounded-lg border text-sm shrink-0 ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )}
+              </React.Fragment>
+            ))}
+        </div>
 
         <button
           onClick={handleNext}
           disabled={currentPage === totalPages}
-          className="px-3 py-1 rounded-lg border disabled:opacity-50 cursor-pointer"
+          className="px-3 py-1 rounded-lg border disabled:opacity-50 cursor-pointer shrink-0 text-sm"
         >
           Next
         </button>
       </div>
 
-      {/* Rows per page selector */}
-      <div className="ml-4 flex items-center gap-2">
+      {/* Page Size Selector */}
+      <div className="flex items-center gap-2">
         <span className="text-sm text-gray-600">Show:</span>
         <Select
           value={pageSize.toString()}
           onValueChange={(value) => {
             onPageSizeChange(value === "All" ? "All" : Number(value));
-            onPageChange(1); // Reset to first page when page size changes
+            onPageChange(1);
           }}
         >
           <SelectTrigger className="border rounded px-2 py-1 text-sm">

@@ -184,20 +184,6 @@ export default function SurveyPage() {
     getCurrentLocation();
     setIsLoading(true);
 
-    // 🔥 Wait for location first
-    // await new Promise<void>((resolve) => {
-    //   navigator.geolocation.getCurrentPosition(
-    //     (position) => {
-    //       setLatLong({
-    //         latitude: position.coords.latitude,
-    //         longitude: position.coords.longitude,
-    //       });
-    //       resolve();
-    //     },
-    //     () => resolve() // even if denied
-    //   );
-    // });
-
     try {
       const payload = {
         farmer_id: Number(surveyData.farmer_id) || 0,

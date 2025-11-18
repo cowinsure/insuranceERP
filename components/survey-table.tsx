@@ -131,16 +131,16 @@ export function SurveyTable({
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Survey Date
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[150px]">
                   Avg Last Year
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[180px]">
                   Avg Current Year
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                </th> */}
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Action
                 </th>
               </tr>
@@ -186,7 +186,7 @@ export function SurveyTable({
                         {survey.avg_prod_current_year ?? "-"}
                       </span>
                     </td>
-                    <td className="py-4 px-4">
+                    {/* <td className="py-4 px-4">
                       <Badge
                         className={
                           survey.status === "completed"
@@ -198,7 +198,7 @@ export function SurveyTable({
                       >
                         {survey.status ?? "pending"}
                       </Badge>
-                    </td>
+                    </td> */}
                     <td>
                       <div className="flex items-center justify-center py-4 px-4">
                         <Button

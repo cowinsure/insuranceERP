@@ -15,6 +15,7 @@ import {
   SurveyWeatherEventDetail,
   SurveyYieldLossDetail,
 } from "@/core/model/SurveyPost";
+import { toast, Toaster } from "sonner";
 
 interface FarmerProfile {
   user_id: number;
@@ -79,6 +80,12 @@ const Survey = ({ data, onChange }: SurveyProps) => {
   const [yieldLossOptions, setYieldLossOptions] = useState<
     { id: number; name: string }[]
   >([]);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setSurvey(data[0]); // restore parent state into child
+    }
+  }, []);
 
   /** ###############################################
    *  🚀 Fetch all dropdown options (farmers, weather, pest, disease)
@@ -202,6 +209,12 @@ const Survey = ({ data, onChange }: SurveyProps) => {
    * 🔸 Handlers
    * ------------------------- */
   const handleVarietyAdd = () => {
+    // limit 3 items
+    if (survey.survey_varieties_of_seeds_details.length >= 3) {
+      toast.warning("Maximum 3 varieties allowed");
+      return;
+    }
+
     if (!varietyInput.trim()) return;
 
     const item: SurveyVarietyDetail = {
@@ -414,7 +427,10 @@ const Survey = ({ data, onChange }: SurveyProps) => {
           <button
             type="button"
             onClick={handleVarietyAdd}
-            disabled={!varietyInput.trim()}
+            disabled={
+              !varietyInput.trim() ||
+              survey.survey_varieties_of_seeds_details.length >= 3
+            }
             className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] cursor-pointer"
           >
             Add
@@ -621,6 +637,7 @@ const Survey = ({ data, onChange }: SurveyProps) => {
           </div>
         </div>
       </div>
+      <Toaster richColors />
     </div>
   );
 };

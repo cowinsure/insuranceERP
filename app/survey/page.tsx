@@ -46,7 +46,10 @@ export default function SurveyPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
-  const[lat_long,setLatLong]=useState<{latitude:number,longitude:number}>({latitude:0,longitude:0});
+  const [lat_long, setLatLong] = useState<{
+    latitude: number;
+    longitude: number;
+  }>({ latitude: 0, longitude: 0 });
 
   const { get, post } = useApi();
 
@@ -54,21 +57,22 @@ export default function SurveyPage() {
   const [surveys, setSurveys] = useState<SurveyType[]>([]);
   const [filteredSurveys, setFilteredSurveys] = useState<SurveyType[]>([]);
 
-
-    const getCurrentLocation = () => {
+  const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
+      toast.warning("Geolocation is not supported by your browser.");
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        setLatLong({latitude,longitude});
+        setLatLong({ latitude, longitude });
       },
       (error) => {
         console.error(error);
-        alert("Unable to retrieve location. Please allow location access.");
+        toast.error(
+          "Unable to retrieve location. Please allow location access."
+        );
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -179,6 +183,21 @@ export default function SurveyPage() {
   const handleSubmit = async () => {
     getCurrentLocation();
     setIsLoading(true);
+
+    // 🔥 Wait for location first
+    // await new Promise<void>((resolve) => {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (position) => {
+    //       setLatLong({
+    //         latitude: position.coords.latitude,
+    //         longitude: position.coords.longitude,
+    //       });
+    //       resolve();
+    //     },
+    //     () => resolve() // even if denied
+    //   );
+    // });
+
     try {
       const payload = {
         farmer_id: Number(surveyData.farmer_id) || 0,
@@ -199,9 +218,13 @@ export default function SurveyPage() {
         location_long: lat_long.longitude,
         // remarks: surveyData.remarks || "",s
       };
-      console.log(JSON.stringify(payload));
-      await post("/sms/farmer-survey-service/", payload);
-      toast.success("Survey submitted!");
+      const res = await post("/sms/farmer-survey-service/", payload);
+      console.log(res);
+      if (res.status === "success") {
+        toast.success(res.message);
+      } else {
+        toast.error(res.error || res.message);
+      }
       resetForm();
       setTimeout(() => {
         setIsLoading(false);

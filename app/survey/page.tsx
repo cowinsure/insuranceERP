@@ -46,12 +46,33 @@ export default function SurveyPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const[lat_long,setLatLong]=useState<{latitude:number,longitude:number}>({latitude:0,longitude:0});
 
   const { get, post } = useApi();
 
   // ------------------ GET data for table ------------------
   const [surveys, setSurveys] = useState<SurveyType[]>([]);
   const [filteredSurveys, setFilteredSurveys] = useState<SurveyType[]>([]);
+
+
+    const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLatLong({latitude,longitude});
+      },
+      (error) => {
+        console.error(error);
+        alert("Unable to retrieve location. Please allow location access.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   useEffect(() => {
     fetchSurveyData();
@@ -156,6 +177,7 @@ export default function SurveyPage() {
   const handlePrev = () => setCurrentStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
+    getCurrentLocation();
     setIsLoading(true);
     try {
       const payload = {
@@ -173,8 +195,8 @@ export default function SurveyPage() {
         survey_pest_attack_details: surveyData.survey_pest_attack_details || [],
         survey_disease_attack_details:
           surveyData.survey_disease_attack_details || [],
-        location_lat: 23.7507112982749,
-        location_long: 90.42181675406374,
+        location_lat: lat_long.latitude,
+        location_long: lat_long.longitude,
         // remarks: surveyData.remarks || "",s
       };
       console.log(JSON.stringify(payload));

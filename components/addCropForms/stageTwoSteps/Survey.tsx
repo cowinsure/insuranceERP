@@ -15,6 +15,7 @@ import {
   SurveyWeatherEventDetail,
   SurveyYieldLossDetail,
 } from "@/core/model/SurveyPost";
+import { toast, Toaster } from "sonner";
 
 interface FarmerProfile {
   user_id: number;
@@ -39,6 +40,8 @@ const Survey = ({ data, onChange }: SurveyProps) => {
     avg_prod_last_year: 0,
     avg_prod_current_year: 0,
     survey_date: "",
+    location_lat: 0,
+    location_long: 0,
     survey_varieties_of_seeds_details: [],
     survey_yield_loss_details: [],
     survey_weather_event_details: [],
@@ -77,6 +80,12 @@ const Survey = ({ data, onChange }: SurveyProps) => {
   const [yieldLossOptions, setYieldLossOptions] = useState<
     { id: number; name: string }[]
   >([]);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setSurvey(data[0]); // restore parent state into child
+    }
+  }, []);
 
   /** ###############################################
    *  🚀 Fetch all dropdown options (farmers, weather, pest, disease)
@@ -190,14 +199,22 @@ const Survey = ({ data, onChange }: SurveyProps) => {
   /** -------------------------
    * 🔸 Update Parent Component Whenever Survey Changes
    * ------------------------- */
-  useEffect(() => {
-    onChange([survey]);
-  }, [survey]);
+  // useEffect(() => {
+  //   const preview = buildPreview(survey);
+  //   console.log(preview);
+  //   onChange([survey, buildPreview(survey)]);
+  // }, [survey, weatherOptions, pestOptions, diseaseOptions, yieldLossOptions]);
 
   /** -------------------------
    * 🔸 Handlers
    * ------------------------- */
   const handleVarietyAdd = () => {
+    // limit 3 items
+    if (survey.survey_varieties_of_seeds_details.length >= 3) {
+      toast.warning("Maximum 3 varieties allowed");
+      return;
+    }
+
     if (!varietyInput.trim()) return;
 
     const item: SurveyVarietyDetail = {
@@ -309,11 +326,49 @@ const Survey = ({ data, onChange }: SurveyProps) => {
     }));
   };
 
+  // Build preview labels
+  const buildPreview = (s: SurveyPostPayload) => ({
+    ...s,
+    yield_loss_labels: s.survey_yield_loss_details
+      .map(
+        (item) =>
+          yieldLossOptions.find((o) => o.id === item.yield_loss_type_id)?.name
+      )
+      .filter(Boolean),
+    weather_event_labels: s.survey_weather_event_details
+      .map(
+        (item) =>
+          weatherOptions.find((o) => o.id === item.weather_event_type_id)?.name
+      )
+      .filter(Boolean),
+    pest_attack_labels: s.survey_pest_attack_details
+      .map(
+        (item) =>
+          pestOptions.find((o) => o.id === item.pest_attack_type_id)?.name
+      )
+      .filter(Boolean),
+    disease_attack_labels: s.survey_disease_attack_details
+      .map(
+        (item) =>
+          diseaseOptions.find((o) => o.id === item.disease_attack_type_id)?.name
+      )
+      .filter(Boolean),
+    variety_labels: s.survey_varieties_of_seeds_details.map(
+      (item) => item.survey_varieties_of_seeds
+    ),
+  });
+
+  // Whenever survey state changes, notify parent with both raw data and preview
+  useEffect(() => {
+    const preview = buildPreview(survey);
+    onChange([survey, preview]);
+  }, [survey, weatherOptions, pestOptions, diseaseOptions, yieldLossOptions]);
+
   /** ##################################################################
    *  UI BELOW — EXACTLY YOUR UI BUT NOW FULLY WIRED TO BACKEND PAYLOAD
    * ##################################################################
    */
-console.log(survey);
+  console.log(survey);
   return (
     <div className="space-y-6 bg-white rounded-lg">
       <h2 className="text-xl font-semibold text-center underline">
@@ -372,7 +427,10 @@ console.log(survey);
           <button
             type="button"
             onClick={handleVarietyAdd}
-            disabled={!varietyInput.trim()}
+            disabled={
+              !varietyInput.trim() ||
+              survey.survey_varieties_of_seeds_details.length >= 3
+            }
             className="bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] cursor-pointer"
           >
             Add
@@ -579,6 +637,7 @@ console.log(survey);
           </div>
         </div>
       </div>
+      <Toaster richColors />
     </div>
   );
 };

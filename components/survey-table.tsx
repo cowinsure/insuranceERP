@@ -56,8 +56,8 @@ export type Survey = {
   plot_id?: string;
   location?: string;
   crop_type?: string;
-  avg_production_last_year?: number;
-  avg_production_this_year?: number;
+  avg_prod_last_year?: number;
+  avg_prod_current_year?: number;
   status?: "pending" | "completed" | "in-progress";
   survey_yield_loss_details?: SurveyYieldLoss[];
   survey_pest_attack_details?: SurveyPestAttack[];
@@ -131,16 +131,16 @@ export function SurveyTable({
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Survey Date
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[150px]">
                   Avg Last Year
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[180px]">
                   Avg Current Year
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                </th> */}
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
                   Action
                 </th>
               </tr>
@@ -178,15 +178,15 @@ export function SurveyTable({
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-sm text-gray-600">
-                        {survey.avg_production_last_year ?? "-"}
+                        {survey.avg_prod_last_year ?? "-"}
                       </span>
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-sm text-gray-600">
-                        {survey.avg_production_this_year ?? "-"}
+                        {survey.avg_prod_current_year ?? "-"}
                       </span>
                     </td>
-                    <td className="py-4 px-4">
+                    {/* <td className="py-4 px-4">
                       <Badge
                         className={
                           survey.status === "completed"
@@ -198,7 +198,7 @@ export function SurveyTable({
                       >
                         {survey.status ?? "pending"}
                       </Badge>
-                    </td>
+                    </td> */}
                     <td>
                       <div className="flex items-center justify-center py-4 px-4">
                         <Button
@@ -232,7 +232,11 @@ export function SurveyTable({
       </CardContent>
 
       {surveyView && (
-        <GenericModal closeModal={() => setSurveyView(false)} title={"Survey Details"}>
+        <GenericModal
+          closeModal={() => setSurveyView(false)}
+          title={"Survey Details"}
+          widthValue="w-full lg:w-[50%]"
+        >
           <SurveyView survey={selectedSurvey} />
         </GenericModal>
       )}

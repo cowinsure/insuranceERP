@@ -51,9 +51,9 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
 
       {/* Pest Attacks */}
       <Section title="Pest Attacks">
-        {survey.survey_pest_attack_details?.length ? (
-          survey.survey_pest_attack_details.map((item: any, i: number) => (
-            <ListItem key={i} text={`Type ID: ${item.pest_attack_type_id}`} />
+        {survey.pests?.length ? (
+          survey.pests.map((item: any, i: number) => (
+            <ListItem key={i} text={`${item}`} />
           ))
         ) : (
           <Empty />
@@ -62,12 +62,9 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
 
       {/* Weather Events */}
       <Section title="Weather Events">
-        {survey.survey_weather_event_details?.length ? (
-          survey.survey_weather_event_details.map((item: any, i: number) => (
-            <ListItem
-              key={i}
-              text={`Event ID: ${item.weather_event_type_id}`}
-            />
+        {survey.weather_effects?.length ? (
+          survey.weather_effects.map((item: any, i: number) => (
+            <ListItem key={i} text={`${item}`} />
           ))
         ) : (
           <Empty />
@@ -76,12 +73,9 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
 
       {/* Disease Attacks */}
       <Section title="Disease Attacks">
-        {survey.survey_disease_attack_details?.length ? (
-          survey.survey_disease_attack_details.map((item: any, i: number) => (
-            <ListItem
-              key={i}
-              text={`Type ID: ${item.disease_attack_type_id}`}
-            />
+        {survey.diseases?.length ? (
+          survey.diseases.map((item: any, i: number) => (
+            <ListItem key={i} text={`${item}`} />
           ))
         ) : (
           <Empty />
@@ -114,7 +108,7 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-    <h3 className="font-semibold text-gray-800">{title}</h3>
+    <h3 className="font-bold text-gray-800 text-xl">{title}</h3>
     {children}
   </div>
 );

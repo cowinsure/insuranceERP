@@ -85,9 +85,9 @@ export function FarmersTable() {
         />
       </div>
 
-      <Card className="border border-gray-200 py-6">
+      <Card className="border border-gray-200 py-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-semibold text-gray-900 pt-0">
             Registered Farmers
           </CardTitle>
           <p className="text-sm text-gray-600">
@@ -96,7 +96,7 @@ export function FarmersTable() {
         </CardHeader>
         <CardContent>
           {/* MOBILE/TABLET CARD VIEW ---- */}
-          <div className="lg:hidden space-y-4 px-4">
+          <div className="lg:hidden space-y-4">
             {loading || paginatedFarmers.length === 0 ? (
               <Loading />
             ) : (

@@ -351,7 +351,7 @@ const AddCropStageTwoModal = ({
         />
       </div>
 
-      <div className="overflow-y-auto bg-white rounded-b-xl p-4">
+      <div className="overflow-y-auto bg-white">
         {renderStep()}
       </div>
 

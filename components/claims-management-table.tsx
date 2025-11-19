@@ -92,9 +92,9 @@ export function ClaimsManagementTable() {
           ]}
         />
       </div>
-      <Card className="border border-gray-200 py-6">
+      <Card className="border border-gray-200 py-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-semibold text-gray-900 pt-0">
             Insurance Claims
           </CardTitle>
           <p className="text-sm text-gray-600">
@@ -105,8 +105,8 @@ export function ClaimsManagementTable() {
           </p>
         </CardHeader>
         <CardContent>
-          {/* Table */}
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -133,10 +133,11 @@ export function ClaimsManagementTable() {
                   </th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading || paginatedClaims.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center">
+                    <td colSpan={7} className="py-6 text-center">
                       <Loading />
                     </td>
                   </tr>
@@ -153,10 +154,10 @@ export function ClaimsManagementTable() {
                             {formatDate(claim.claim_date)}
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-900">
+                        <td className="py-4 px-4 text-sm">
                           {claim.insurance_number}
                         </td>
-                        <td className="py-4 px-4 text-sm font-medium text-gray-900">
+                        <td className="py-4 px-4 text-sm font-medium">
                           ৳ {formatMoney(claim.sum_insured)}
                         </td>
                         <td className="py-4 px-4 text-sm">
@@ -169,7 +170,7 @@ export function ClaimsManagementTable() {
                             {formatDate(claim.insurance_end_date)}
                           </p>
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-900">
+                        <td className="py-4 px-4 text-sm">
                           {claim.insurance_type_name}
                         </td>
                         <td className="py-4 px-4">
@@ -188,7 +189,108 @@ export function ClaimsManagementTable() {
               </tbody>
             </table>
 
-            {/* Pagination */}
+            {/* Pagination for Desktop */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
+            )}
+          </div>
+
+          {/* Mobile & Tablet Cards */}
+          <div className="space-y-4 lg:hidden">
+            {loading || paginatedClaims.length === 0 ? (
+              <div className="py-6 text-center">
+                <Loading />
+              </div>
+            ) : (
+              paginatedClaims.map((claim, idx) => (
+                <div
+                  key={claim.id}
+                  className="border border-gray-200 rounded-xl p-4 shadow-md bg-white animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-700">
+                        {formatDate(claim.claim_date)}
+                      </h3>
+
+                      <div className="mt-1 inline-block bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-md">
+                        #{claim.insurance_number}
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedClaim(claim)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="my-3 border-t border-gray-100" />
+
+                  {/* Money Section */}
+                  <div className="flex justify-between text-sm mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Sum Insured</p>
+                      <p className="font-semibold text-gray-900">
+                        ৳ {formatMoney(claim.sum_insured)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500">Premium</p>
+                      <p className="font-semibold text-gray-900">
+                        ৳ {formatMoney(claim.premium_amount)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="my-2 border-t border-gray-100" />
+
+                  {/* Period */}
+                  <div className="text-sm">
+                    <p className="text-xs text-gray-500">Period</p>
+                    <p className="font-medium text-gray-900">
+                      {claim.period_name}
+                    </p>
+
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatDate(claim.insurance_start_date)} →{" "}
+                      {formatDate(claim.insurance_end_date)}
+                    </p>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="my-2 border-t border-gray-100" />
+
+                  {/* Insurance Type */}
+                  <p className="text-sm">
+                    <span className="text-xs text-gray-500 block">
+                      Insurance Type
+                    </span>
+                    <span className="font-medium text-gray-900">
+                      {claim.insurance_type_name}
+                    </span>
+                  </p>
+                </div>
+              ))
+            )}
+
+            {/* Pagination for Mobile */}
             {totalPages > 1 && (
               <Pagination
                 currentPage={currentPage}

@@ -16,7 +16,7 @@ export function ClaimsChart() {
   return (
     <Card className="border border-gray-200 py-6">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">Claims vs Premium Trend</CardTitle>
+        <CardTitle className="text-lg font-semibold text-gray-900 pt-0">Claims vs Premium Trend</CardTitle>
         <p className="text-sm text-gray-600">Monthly comparison of claims processed and premium collected</p>
       </CardHeader>
       <CardContent>

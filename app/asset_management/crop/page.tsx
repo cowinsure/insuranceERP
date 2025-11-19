@@ -65,8 +65,7 @@ const CropsPage = () => {
       if (response.status === "success") {
         setCrops(response.data);
         setFilteredCrops(response.data);
-     console.log(response.data);
-     
+        console.log(response.data);
       }
     } catch (error: any) {
       const message =
@@ -132,20 +131,18 @@ const CropsPage = () => {
     return stageRules[id] || stageRules[1];
   };
 
-
-
   /************************************************************************/
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
+            <h1 className="hidden lg:inline-block text-xl lg:text-3xl font-bold text-gray-900">
               Asset Management
             </h1>
-            <IoIosArrowForward size={30} />
+            <IoIosArrowForward size={30} className="hidden lg:inline-block" />
             <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
               Crop Registration
             </h1>
@@ -178,12 +175,12 @@ const CropsPage = () => {
       {/* Table */}
       <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5">
-          <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
+          <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
             Registered Crops
           </CardTitle>
           <p className="text-sm text-gray-600">{crops.length} crops found</p>
         </div>
-        <div className="max-h-[550px] overflow-auto">
+        <div className="hidden lg:block max-h-[550px] overflow-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
@@ -223,8 +220,6 @@ const CropsPage = () => {
               ) : (
                 <>
                   {filteredCrops.map((crop, idx) => {
-                    
-                    
                     // const seed = crop.crop_asset_seed_details?.[0];
                     const { stage1Enabled, stage2Enabled } = getStageAccess(
                       crop.current_stage_id
@@ -319,6 +314,108 @@ const CropsPage = () => {
             </tbody>
           </table>
         </div>
+
+        {/* MOBILE / TABLET VIEW — CARDS */}
+        <div className="grid gap-4 lg:hidden mt-4">
+          {isLoading ? (
+            <Loading />
+          ) : (
+            filteredCrops.map((crop, idx) => {
+              const { stage1Enabled, stage2Enabled } = getStageAccess(
+                crop.current_stage_id
+              );
+
+              return (
+                <div
+                  key={idx}
+                  className="border rounded-xl p-5 shadow-sm bg-white animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  {/* Header */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900">
+                        {crop.crop_name || "N/A"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Stage:{" "}
+                        <span className="font-medium text-gray-700">
+                          {crop.stage_name || "N/A"}
+                        </span>
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleView(crop.crop_id)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Details */}
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-[11px] text-gray-500">Planting Date</p>
+                      <p className="text-sm font-medium">
+                        {crop.planting_date || "N/A"}
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-[11px] text-gray-500">Land Name</p>
+                      <p className="text-sm font-medium capitalize truncate">
+                        {crop.land_name || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    {/* Stage 1 */}
+                    <Button
+                      variant="secondary"
+                      className={`flex-1 py-2 ${
+                        stage1Enabled
+                          ? "text-blue-900 bg-blue-50"
+                          : "text-gray-400 bg-gray-100 cursor-not-allowed"
+                      }`}
+                      onClick={() => {
+                        if (!stage1Enabled) {
+                          toast.error("Stage 1 cannot be edited at this stage");
+                        } else {
+                          handleAddCropDetails(crop.crop_id);
+                        }
+                      }}
+                    >
+                      <FilePlus className="w-4 h-4 mr-2" /> Stage 1
+                    </Button>
+
+                    {/* Stage 2 */}
+                    <Button
+                      variant="secondary"
+                      className={`flex-1 py-2 ${
+                        stage2Enabled
+                          ? "text-blue-900 bg-blue-50"
+                          : "text-gray-400 bg-gray-100 cursor-not-allowed"
+                      }`}
+                      onClick={() => {
+                        if (!stage2Enabled) {
+                          toast.error("Complete Stage 1 first");
+                        } else {
+                          handleRevisitData(crop.crop_id);
+                        }
+                      }}
+                    >
+                      <ClipboardCheck className="w-4 h-4 mr-2" /> Stage 2
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Register Crop Modal */}
@@ -397,6 +494,7 @@ const CropsPage = () => {
             selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
           }`}
           height={true}
+          widthValue="sm:w-[35%] lg:min-w-[60%] lg:max-w-[70%]"
         >
           <CropStageModalTabs data={selectedCrop} />
         </GenericModal>

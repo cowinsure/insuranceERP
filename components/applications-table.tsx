@@ -283,9 +283,9 @@ export function ApplicationsTable() {
         />
       </div>
 
-      <Card className="border border-gray-200 py-6">
+      <Card className="border border-gray-200 py-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-semibold text-gray-900 pt-0">
             Insurance Applications
           </CardTitle>
           <p className="text-sm text-gray-600">
@@ -295,7 +295,7 @@ export function ApplicationsTable() {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto hidden lg:block">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -417,6 +417,107 @@ export function ApplicationsTable() {
                   }}
                 />
               </div>
+            )}
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="space-y-4 lg:hidden">
+            {loading ? (
+              <div className="py-6 text-center">
+                <Loading />
+              </div>
+            ) : paginatedApplications.length === 0 ? (
+              <div className="py-6 text-center text-gray-500">
+                No applications found.
+              </div>
+            ) : (
+              paginatedApplications.map((application, idx) => {
+                const statusInfo = getStatusBadge(application.insurance_status);
+
+                return (
+                  <div
+                    key={application.id}
+                    className="border border-gray-200 rounded-xl p-4 shadow-md bg-white animate__animated animate__fadeIn"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-blue-700">
+                          {application.insurance_number}
+                        </h3>
+
+                        <div
+                          className={`inline-block mt-1 px-2 py-1 text-xs rounded-md font-medium ${statusInfo.className}`}
+                        >
+                          {statusInfo.label}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1">
+                        {/* View */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedapplicationView(application);
+                            setSelectedApplicationDetailsDialog(application);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+
+                        {/* Payment Status Update */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setOpen(true);
+                            setSelectedapplications(application.id.toString());
+                            setSelectedapplicationsStatus(
+                              application.insurance_status
+                            );
+                          }}
+                        >
+                          <Banknote className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="my-3 border-t border-gray-100" />
+
+                    {/* Asset Info */}
+                    <div className="text-sm mb-3">
+                      <p className="text-xs text-gray-500">Asset Info</p>
+                      <p className="font-medium text-gray-900">
+                        {application.name} – {application.color}
+                      </p>
+                    </div>
+
+                    {/* Coverage Requested */}
+                    <div className="text-sm mb-3">
+                      <p className="text-xs text-gray-500">
+                        Coverage Requested
+                      </p>
+                      <p className="font-medium text-gray-900">
+                        {application.insurance_type_name}
+                      </p>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="my-2 border-t border-gray-100" />
+
+                    {/* Date */}
+                    <div className="text-sm">
+                      <p className="text-xs text-gray-500">Submitted On</p>
+                      <p className="font-medium text-gray-900">
+                        {formatDate(application.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </CardContent>

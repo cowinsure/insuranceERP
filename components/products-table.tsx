@@ -104,9 +104,9 @@ export function ProductsTable() {
           ]}
         />
       </div>
-      <Card className="border border-gray-200 py-6">
+      <Card className="border border-gray-200 py-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-semibold text-gray-900 pt-0">
             Insurance Products
           </CardTitle>
           <p className="text-sm text-gray-600">
@@ -115,7 +115,80 @@ export function ProductsTable() {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* MOBILE / TABLET — CARD VIEW */}
+          <div className="grid gap-4 lg:hidden">
+            {loading ? (
+              <Loading />
+            ) : (
+              paginatedProducts.map((product, idx) => (
+                <div
+                  key={product.id}
+                  className="border rounded-xl p-5 bg-white shadow-sm animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  {/* Header */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-base">
+                        {product.insurance_category}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {product.insurance_company_name}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-[11px] text-gray-500">
+                        Insurance Type
+                      </p>
+                      <p className="text-sm font-medium">
+                        {product.insurance_type_name}
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-[11px] text-gray-500">Period</p>
+                      <p className="text-sm font-medium">
+                        {product.period_name}
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg col-span-2">
+                      <p className="text-[11px] text-gray-500">Premium %</p>
+                      <p className="text-sm font-medium text-blue-600 flex items-center gap-1">
+                        {product.premium_percentage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {dataToPaginate.length === 0 && !loading && (
+              <p className="text-center text-sm text-gray-500">
+                No products found.
+              </p>
+            )}
+
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
+            )}
+          </div>
+
+          {/* DESKTOP — ORIGINAL TABLE */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -134,57 +207,52 @@ export function ProductsTable() {
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                     Premium Percentage
                   </th>
-                  {/* Commented code #003 */}
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center">
+                    <td colSpan={5} className="py-6 text-center">
                       <Loading />
                     </td>
                   </tr>
                 ) : (
-                  <>
-                    {paginatedProducts.map((product, idx) => (
-                      <tr
-                        key={product.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
-                        style={{ animationDelay: `${idx * 100}ms` }}
-                      >
-                        <td className="py-4 px-4">
-                          <div className="font-medium text-blue-600">
-                            {product.insurance_category}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="text-sm text-gray-900">
-                            {product.insurance_company_name}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-sm text-gray-900">
-                            {product.insurance_type_name}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-sm text-gray-900">
-                            {product.period_name}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
-                            {product.premium_percentage}{" "}
-                            <TbPercentage className="text-gray-500" />
-                          </span>
-                        </td>
-                        {/* Commented code #002 */}
-                      </tr>
-                    ))}
-                  </>
+                  paginatedProducts.map((product, idx) => (
+                    <tr
+                      key={product.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                      style={{ animationDelay: `${idx * 100}ms` }}
+                    >
+                      <td className="py-4 px-4">
+                        <div className="font-medium text-blue-600">
+                          {product.insurance_category}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-sm text-gray-900">
+                          {product.insurance_company_name}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm text-gray-900">
+                          {product.insurance_type_name}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm text-gray-900">
+                          {product.period_name}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm font-medium text-blue-600 flex items-center gap-1">
+                          {product.premium_percentage}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
                 )}
 
-                {/* If filtered results are empty AND search was made, show a row/message */}
                 {dataToPaginate.length === 0 && (
                   <tr>
                     <td
@@ -197,22 +265,22 @@ export function ProductsTable() {
                 )}
               </tbody>
             </table>
+
             {totalPages > 1 && (
-              <div className="">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={(size) => {
-                    setPageSize(size);
-                    setCurrentPage(1); // reset page to 1
-                  }}
-                />
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
             )}
           </div>
         </CardContent>
+
         {/* Comment code #001 */}
       </Card>
     </>

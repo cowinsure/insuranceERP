@@ -294,7 +294,7 @@ export default function CropPage() {
         <Card>
           <CardContent className="p-6">
             <div className=" mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900 pt-0">
                 Created Lands
               </h2>
               <span className="text-sm text-gray-500">

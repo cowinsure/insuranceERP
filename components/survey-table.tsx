@@ -108,9 +108,9 @@ export function SurveyTable({
   console.log(data);
 
   return (
-    <Card className="border border-gray-200 py-6">
+    <Card className="border border-gray-200 py-3 lg:py-6">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">
+        <CardTitle className="text-lg font-semibold text-gray-900 py-0">
           Registered Surveys
         </CardTitle>
         <p className="text-sm text-gray-600">
@@ -119,7 +119,7 @@ export function SurveyTable({
       </CardHeader>
       <CardContent>
         {/* MOBILE VIEW — CARD LIST */}
-        <div className="grid gap-4 lg:hidden px-4">
+        <div className="grid gap-4 lg:hidden">
           {loading || paginatedSurveys.length === 0 ? (
             <Loading />
           ) : (

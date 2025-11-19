@@ -48,10 +48,10 @@ export default function PoliciesPage() {
     //   </SidebarInset>
     // </SidebarProvider>
 
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
             Product Management
           </h1>
           <p className="text-gray-600">Create and manage insurance products</p>

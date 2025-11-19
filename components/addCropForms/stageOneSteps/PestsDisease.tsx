@@ -146,11 +146,11 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
                     id={`pest-${pest.id}`} // ✅ add this line
                     checked={selectedPests.includes(pest.id)}
                     onChange={() => togglePest(pest.id)}
-                    className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
+                    className="cursor-pointer accent-blue-600 custom-checkbox mt-2 shrink-0"
                   />
                   <label
                     htmlFor={`pest-${pest.id}`} // ✅ connect label to input
-                    className="cursor-pointer"
+                    className="cursor-pointer col-span-2"
                   >
                     {pest.name}
                   </label>
@@ -181,7 +181,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
                     id={`disease-${disease.id}`}
                     checked={selectedDiseases.includes(disease.id)}
                     onChange={() => toggleDisease(disease.id)}
-                    className="cursor-pointer accent-green-600 custom-checkbox mt-2"
+                    className="cursor-pointer accent-green-600 custom-checkbox mt-2 shrink-0"
                   />
                   <label
                     htmlFor={`disease-${disease.id}`} // ✅ connect label to input

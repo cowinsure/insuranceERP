@@ -191,7 +191,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
                   id={`pest-${pest.id}`}
                   checked={selectedPests.includes(pest.id)}
                   onChange={() => togglePest(pest.id)}
-                  className="cursor-pointer accent-blue-600 custom-checkbox mt-2"
+                  className="cursor-pointer accent-blue-600 custom-checkbox mt-2 shrink-0"
                 />
                 <label htmlFor={`pest-${pest.id}`} className="cursor-pointer">
                   {pest.name}
@@ -225,7 +225,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
                   id={`disease-${disease.id}`}
                   checked={selectedDiseases.includes(disease.id)}
                   onChange={() => toggleDisease(disease.id)}
-                  className="cursor-pointer accent-green-600 custom-checkbox mt-2"
+                  className="cursor-pointer accent-green-600 custom-checkbox mt-2 shrink-0"
                 />
                 <label
                   htmlFor={`disease-${disease.id}`}

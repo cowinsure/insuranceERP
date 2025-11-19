@@ -165,7 +165,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🧪 Chemicals Used */}
-      <Section title="Inputs Used (Fertilizers & Pesticides)">
+      <Section title="Fertilizers & Pesticides">
         <ArrayDisplay
           title="Chemicals"
           items={safeArray(data.crop_asset_chemical_usage_details).map(

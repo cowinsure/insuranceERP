@@ -30,6 +30,7 @@ import {
 } from "@react-google-maps/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 // Helper to get custom marker icon URLs by type
 function getMarkerIcon(type: string): string {
@@ -135,6 +136,7 @@ const PlotDetailsDialog = ({
   onEdit,
   onDelete,
 }: PlotDetailsDialogProps) => {
+  const { t } = useLocalization();
   //(plot);
 
   const [mapError, setMapError] = useState<string | null>(null);
@@ -264,14 +266,14 @@ const PlotDetailsDialog = ({
           <div className="grid grid-cols-1 md:grid-rows-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Land Information</CardTitle>
+                <CardTitle className="text-lg">{t('land_information')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Farmer</span>
+                      <span className="text-muted-foreground">{t('farmer')}</span>
                     </div>
                     <span className="font-medium">
                       {plot.farmer_name ?? "-"}
@@ -281,7 +283,7 @@ const PlotDetailsDialog = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Phone</span>
+                      <span className="text-muted-foreground">{t('phone')}</span>
                     </div>
                     <span className="font-medium">
                       {plot.mobile_number ?? "-"}
@@ -291,7 +293,7 @@ const PlotDetailsDialog = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Ruler className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Length</span>
+                      <span className="text-muted-foreground">{t('length')}</span>
                     </div>
                     <span className="font-medium">{plot.length ?? "-"}</span>
                   </div>
@@ -299,7 +301,7 @@ const PlotDetailsDialog = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Ruler className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Width</span>
+                      <span className="text-muted-foreground">{t('width')}</span>
                     </div>
                     <span className="font-medium">{plot.width ?? "-"}</span>
                   </div>
@@ -324,7 +326,7 @@ const PlotDetailsDialog = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Coordinates</CardTitle>
+                <CardTitle className="text-lg">{t('coordinates')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="max-h-48 overflow-y-auto space-y-2">
@@ -333,9 +335,9 @@ const PlotDetailsDialog = ({
                       key={index}
                       className="text-sm p-2 bg-muted rounded-md"
                     >
-                      <div className="font-medium">Point {index + 1}</div>
+                      <div className="font-medium">{t('point')} {index + 1}</div>
                       <div className="text-muted-foreground">
-                        Lat: {coord.latitude}, Lng: {coord?.longitude}
+                        {t('lat')} {coord.latitude}, {t('lng')} {coord?.longitude}
                       </div>
                     </div>
                   ))}
@@ -347,10 +349,10 @@ const PlotDetailsDialog = ({
           {/* Google Maps Preview (from CreatePlotDialog) */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Plot Location</CardTitle>
+              <CardTitle className="text-lg">{t('plot_location')}</CardTitle>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Show my location
+                  {t('show_my_location')}
                 </span>
                 <Switch
                   checked={showMyLocation}
@@ -556,7 +558,7 @@ const PlotDetailsDialog = ({
                           >
                             <div className="text-sm">
                               <div className="font-semibold">
-                                Plot Point {idx + 1}
+                                {t('plot_point')} {idx + 1}
                               </div>
                               <div className="font-mono">
                                 {coord.latitude}, {coord.longitude}
@@ -580,7 +582,7 @@ const PlotDetailsDialog = ({
                           >
                             <div className="text-sm">
                               <div className="font-semibold">
-                                Land Point {idx + 1}
+                                {t('land_point')} {idx + 1}
                               </div>
                               <div className="font-mono">
                                 {coord.latitude}, {coord.longitude}
@@ -598,7 +600,7 @@ const PlotDetailsDialog = ({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">SW Mark</div>
+                          <div className="font-semibold">{t('sw_mark')}</div>
                           <div className="font-mono">
                             {plot.swMark.latitude}, {plot.swMark.longitude}
                           </div>
@@ -614,7 +616,7 @@ const PlotDetailsDialog = ({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">N Corner</div>
+                          <div className="font-semibold">{t('n_corner')}</div>
                           <div className="font-mono">
                             {plot.nCorner.latitude}, {plot.nCorner.longitude}
                           </div>
@@ -630,7 +632,7 @@ const PlotDetailsDialog = ({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">E Corner</div>
+                          <div className="font-semibold">{t('e_corner')}</div>
                           <div className="font-mono">
                             {plot.eCorner.latitude}, {plot.eCorner.longitude}
                           </div>
@@ -647,8 +649,8 @@ const PlotDetailsDialog = ({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">N Mark</div>
-                          <div>{(plot.nMarkDist ?? 0).toFixed(2)} meters</div>
+                          <div className="font-semibold">{t('n_mark')}</div>
+                          <div>{(plot.nMarkDist ?? 0).toFixed(2)} {t('meters')}</div>
                         </div>
                       </InfoWindow>
                     )}
@@ -661,8 +663,8 @@ const PlotDetailsDialog = ({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">E Mark</div>
-                          <div>{(plot.eMarkDist ?? 0).toFixed(2)} meters</div>
+                          <div className="font-semibold">{t('e_mark')}</div>
+                          <div>{(plot.eMarkDist ?? 0).toFixed(2)} {t('meters')}</div>
                         </div>
                       </InfoWindow>
                     )}
@@ -673,7 +675,7 @@ const PlotDetailsDialog = ({
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground mb-2">
-                      Loading map...
+                      {t('loading_map')}
                     </p>
                   </div>
                 </div>
@@ -687,7 +689,7 @@ const PlotDetailsDialog = ({
         <div className="mt-3 flex flex-wrap gap-3 items-center justify-center">
           <div className="flex items-center gap-2 text-sm">
             <img src={getMarkerIcon("sw")} alt="sw" className="w-4 h-4" />{" "}
-            <span>SW Mark</span>
+            <span>{t('sw_mark')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <img
@@ -695,7 +697,7 @@ const PlotDetailsDialog = ({
               alt="n_corner"
               className="w-4 h-4"
             />{" "}
-            <span>N Corner</span>
+            <span>{t('n_corner')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <img
@@ -703,7 +705,7 @@ const PlotDetailsDialog = ({
               alt="e_corner"
               className="w-4 h-4"
             />{" "}
-            <span>E Corner</span>
+            <span>{t('e_corner')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <img
@@ -711,7 +713,7 @@ const PlotDetailsDialog = ({
               alt="n_mark"
               className="w-4 h-4"
             />{" "}
-            <span>N Mark</span>
+            <span>{t('n_mark')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <img
@@ -719,7 +721,7 @@ const PlotDetailsDialog = ({
               alt="e_mark"
               className="w-4 h-4"
             />{" "}
-            <span>E Mark</span>
+            <span>{t('e_mark')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <img
@@ -727,7 +729,7 @@ const PlotDetailsDialog = ({
               alt="intersection"
               className="w-4 h-4"
             />{" "}
-            <span>Intersection</span>
+            <span>{t('intersection')}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm">
@@ -736,7 +738,7 @@ const PlotDetailsDialog = ({
               alt="intersection"
               className="w-4 h-4"
             />{" "}
-            <span>Land Outer area</span>
+            <span>{t('land_outer_area')}</span>
           </div>
         </div>
 
@@ -746,7 +748,7 @@ const PlotDetailsDialog = ({
             {onEdit && (
               <Button variant="outline" onClick={() => onEdit(plot)}>
                 <Edit className="h-4 w-4 mr-2" />
-                Edit Plot
+                {t('edit_plot')}
               </Button>
             )}
             {/* {onDelete && (
@@ -760,7 +762,7 @@ const PlotDetailsDialog = ({
               </Button>
             )} */}
           </div>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('close')}</Button>
         </div>
       </DialogContent>
     </Dialog>

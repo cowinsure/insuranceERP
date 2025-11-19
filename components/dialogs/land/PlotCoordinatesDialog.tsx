@@ -10,6 +10,7 @@ import { Plus, Trash2, LocateFixed, MapPin } from "lucide-react"
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
+import { useLocalization } from "@/core/context/LocalizationContext"
 
 interface Coordinate {
   lat: string
@@ -96,6 +97,7 @@ interface PlotCoordinatesDialogProps {
 }
 
 export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landData }: PlotCoordinatesDialogProps) {
+  const { t } = useLocalization()
   const [coordinates, setCoordinates] = useState<Coordinate[]>([
     { lat: "", lng: "" },
     { lat: "", lng: "" },
@@ -152,7 +154,7 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
 
   const getCurrentLocation = (index: number) => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.")
+      alert(t('geolocation_not_supported'))
       return
     }
     navigator.geolocation.getCurrentPosition(
@@ -160,7 +162,7 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
         updateCoordinate(index, "lat", position.coords.latitude.toFixed(6))
         updateCoordinate(index, "lng", position.coords.longitude.toFixed(6))
       },
-      () => alert("Unable to retrieve location. Please allow location access."),
+      () => alert(t('unable_retrieve_location')),
       { enableHighAccuracy: true }
     )
   }
@@ -168,41 +170,41 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
   const handleSave = () => {
     // Validate all coordinate slots
     if (coordinates.length === 0) {
-      alert("Please add at least one coordinate.")
+      alert(t('please_add_at_least_one_coordinate'))
       return
     }
     for (let i = 0; i < coordinates.length; i++) {
       const c = coordinates[i]
       if (!c.lat || !c.lng) {
-        alert(`Please fill latitude and longitude for point ${i + 1}`)
+        alert(t('please_fill_lat_lng_for_point') + (i + 1))
         return
       }
       const lat = Number.parseFloat(c.lat)
       const lng = Number.parseFloat(c.lng)
       if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        alert(`Please enter valid numeric coordinates for point ${i + 1}`)
+        alert(t('please_enter_valid_numeric_coordinates') + (i + 1))
         return
       }
     }
 
-    
-//             //inner land  coordinate mapping
-//    const innerCoordinates: LandCoordinatePoint[] = coordinates.map(coord => ({
-//               coordinate_type: 'inner_area',
-//               latitude: coord.lat,
-//               longitude: coord.lng
-//             })) || []
 
-        
-// const updatedLandData = {
-//   ...landData,
-//   land_coordinate_point: [
-//     ...landData.land_coordinate_point, // keep existing points
-//     ...innerCoordinates,                 // add new ones
-//   ],
-// };
+    //             //inner land  coordinate mapping
+    //    const innerCoordinates: LandCoordinatePoint[] = coordinates.map(coord => ({
+    //               coordinate_type: 'inner_area',
+    //               latitude: coord.lat,
+    //               longitude: coord.lng
+    //             })) || []
 
- toast({ title: 'Plot saved', description: `Plot saved successfully ` })
+
+    // const updatedLandData = {
+    //   ...landData,
+    //   land_coordinate_point: [
+    //     ...landData.land_coordinate_point, // keep existing points
+    //     ...innerCoordinates,                 // add new ones
+    //   ],
+    // };
+
+    toast({ title: t('plot_saved'), description: t('plot_saved_successfully') })
 
     // onSave(coordinates)
     onOpenChange(false)
@@ -212,12 +214,12 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-screen max-w-none max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Plot Coordinates</DialogTitle>
+          <DialogTitle>{t('plot_coordinates')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Coordinates (Latitude, Longitude)</Label>
+            <Label>{t('coordinates_lat_lng')}</Label>
           </div>
 
           <div className="space-y-3 max-h-60 overflow-y-auto">
@@ -227,14 +229,14 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
                 <div className="flex-1 grid grid-cols-2 gap-3">
                   <div>
                     <Input
-                      placeholder="Latitude (e.g., 40.7128)"
+                      placeholder={t('latitude_example')}
                       value={coord.lat}
                       onChange={(e) => updateCoordinate(index, "lat", e.target.value)}
                     />
                   </div>
                   <div>
                     <Input
-                      placeholder="Longitude (e.g., -74.0060)"
+                      placeholder={t('longitude_example')}
                       value={coord.lng}
                       onChange={(e) => updateCoordinate(index, "lng", e.target.value)}
                     />
@@ -256,7 +258,7 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
                     size="sm"
                     onClick={() => removeCoordinate(index)}
                     className="text-destructive hover:text-destructive"
-                    title="Remove coordinate"
+                    title={t('remove_coordinate')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -266,7 +268,7 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
 
             <div className="pt-2">
               <Button type="button" variant="ghost" size="sm" onClick={addCoordinate} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" /> Add Coordinate
+                <Plus className="w-4 h-4" /> {t('add_coordinate')}
               </Button>
             </div>
           </div>
@@ -278,7 +280,7 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Map Preview
+                    {t('map_preview')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -322,9 +324,9 @@ export default function PlotCoordinatesDialog({ open, onOpenChange, onSave,landD
 
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
-            <Button onClick={handleSave}>Save Coordinates</Button>
+            <Button onClick={handleSave}>{t('save_coordinates')}</Button>
           </div>
         </div>
       </DialogContent>

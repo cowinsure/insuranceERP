@@ -15,6 +15,7 @@ import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 type StageAccess = {
   stage1Enabled: boolean;
@@ -23,6 +24,7 @@ type StageAccess = {
 
 const CropsPage = () => {
   const { get } = useApi();
+  const { t } = useLocalization();
 
   /************************* Declare states here *************************/
   const [isLoading, setIsLoading] = useState(false);
@@ -140,15 +142,15 @@ const CropsPage = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="hidden lg:inline-block text-xl lg:text-3xl font-bold text-gray-900">
-              Asset Management
+              {t('asset_management')}
             </h1>
             <IoIosArrowForward size={30} className="hidden lg:inline-block" />
             <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
-              Crop Registration
+              {t('crop_registration')}
             </h1>
           </div>
           <p className="text-gray-500 mt-1">
-            Register your crop details for tracking and management
+            {t('register_crop_details')}
           </p>
         </div>
         <div className="flex">
@@ -157,13 +159,13 @@ const CropsPage = () => {
             onClick={() => setIsModal(true)}
           >
             <Plus className="w-4 h-4" />
-            Add Crop
+            {t('add_crop')}
           </Button>
         </div>
       </div>
       {/* Body */}
       <SearchFilter
-        placeholder="Search by farmer name or mobile number"
+        placeholder={t('search_farmer_mobile')}
         data={crops}
         setFilteredData={setFilteredCrops}
         searchKeys={[
@@ -176,37 +178,37 @@ const CropsPage = () => {
       <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5">
           <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
-            Registered Crops
+            {t('registered_crops')}
           </CardTitle>
-          <p className="text-sm text-gray-600">{crops.length} crops found</p>
+          <p className="text-sm text-gray-600">{crops.length} {t('crops_found')}</p>
         </div>
         <div className="hidden lg:block max-h-[550px] overflow-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  SL
+                  {t('sl')}
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Crop Name
+                  {t('crop_name')}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Current Stage
+                  {t('current_stage')}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Planting Date
+                  {t('planting_date')}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Land Name
+                  {t('land_name')}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Stage 1
+                  {t('stage_1')}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Stage 2
+                  {t('stage_2')}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  View Crop
+                  {t('view_crop')}
                 </th>
               </tr>
             </thead>
@@ -263,13 +265,13 @@ const CropsPage = () => {
                             onClick={() => {
                               if (!stage1Enabled) {
                                 toast.error(
-                                  "Stage 1 cannot be edited at this stage"
+                                  t('stage_1_cannot_edit')
                                 );
                               } else {
                                 handleAddCropDetails(crop.crop_id);
                               }
                             }}
-                            title="Add Planting & Cultivation Details"
+                            title={t('add_planting_details')}
                           >
                             <FilePlus />
                           </Button>
@@ -285,12 +287,12 @@ const CropsPage = () => {
                             }`}
                             onClick={() => {
                               if (!stage2Enabled) {
-                                toast.error("Complete Stage 1 first");
+                                toast.error(t('complete_stage_1_first'));
                               } else {
                                 handleRevisitData(crop.crop_id);
                               }
                             }}
-                            title="Add revisit data"
+                            title={t('add_revisit_data')}
                           >
                             <ClipboardCheck />
                           </Button>
@@ -338,7 +340,7 @@ const CropsPage = () => {
                         {crop.crop_name || "N/A"}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        Stage:{" "}
+                        {t('stage_label')}{" "}
                         <span className="font-medium text-gray-700">
                           {crop.stage_name || "N/A"}
                         </span>
@@ -357,14 +359,14 @@ const CropsPage = () => {
                   {/* Details */}
                   <div className="grid grid-cols-2 gap-3 mt-4">
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">Planting Date</p>
+                      <p className="text-[11px] text-gray-500">{t('planting_date')}</p>
                       <p className="text-sm font-medium">
                         {crop.planting_date || "N/A"}
                       </p>
                     </div>
 
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">Land Name</p>
+                      <p className="text-[11px] text-gray-500">{t('land_name')}</p>
                       <p className="text-sm font-medium capitalize truncate">
                         {crop.land_name || "N/A"}
                       </p>
@@ -389,7 +391,7 @@ const CropsPage = () => {
                         }
                       }}
                     >
-                      <FilePlus className="w-4 h-4 mr-2" /> Stage 1
+                      <FilePlus className="w-4 h-4 mr-2" /> {t('stage_1')}
                     </Button>
 
                     {/* Stage 2 */}
@@ -408,7 +410,7 @@ const CropsPage = () => {
                         }
                       }}
                     >
-                      <ClipboardCheck className="w-4 h-4 mr-2" /> Stage 2
+                      <ClipboardCheck className="w-4 h-4 mr-2" /> {t('stage_2')}
                     </Button>
                   </div>
                 </div>
@@ -421,7 +423,7 @@ const CropsPage = () => {
       {/* Register Crop Modal */}
       {isModal && (
         <GenericModal
-          title="Register Crop"
+          title={t('register_crop')}
           closeModal={() => setIsModal(false)}
           widthValue={"w-full max-w-xl"}
         >
@@ -439,7 +441,7 @@ const CropsPage = () => {
             <span className="flex flex-col">
               {
                 <div className="flex gap-1">
-                  <span>Add details for</span>
+                  <span>{t('add_details_for')}</span>
                   <span className="font-extrabold">
                     {" "}
                     {selectedCrop?.crop_asset_seed_details?.[0]?.crop_name ||
@@ -448,7 +450,7 @@ const CropsPage = () => {
                 </div>
               }
               <small className="font-medium text-gray-500 tracking-wide">
-                Variety:{" "}
+                {t('variety')}{" "}
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
               </small>
@@ -466,11 +468,11 @@ const CropsPage = () => {
         <GenericModal
           title={
             <h1 className="flex flex-col">
-              {`Revisit data for ${
+              {`${t('revisit_data_for')} ${
                 selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
               } `}
               <small className="font-medium text-gray-500">
-                Variety:{" "}
+                {t('variety')}{" "}
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
               </small>
@@ -490,7 +492,7 @@ const CropsPage = () => {
       {isCropView && (
         <GenericModal
           closeModal={() => setIsCropView(false)}
-          title={`Viewing details of ${
+          title={`${t('viewing_details_of')} ${
             selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
           }`}
           height={true}

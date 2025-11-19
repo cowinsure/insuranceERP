@@ -3,104 +3,89 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
 import Pagination from "./utils/Pagination";
-// import { useApi } from "@/hooks/use_api";
-import { MapPin } from "lucide-react";
+import { Eye, MapPin } from "lucide-react";
 import Loading from "./utils/Loading";
+import { Button } from "./ui/button";
+import GenericModal from "./ui/GenericModal";
+import SurveyView from "./SurveyView";
 
-// Temporary type definition - move to models folder later
-type Survey = {
-  id: string;
-  farmer_name: string;
-  farmer_id?: string;
-  plot_id: string;
-  survey_date: string;
-  location: string;
-  crop_type: string;
-  status: "pending" | "completed" | "in-progress";
-  // optional extended fields
-  top_three_varieties?: string[];
-  avg_production_this_year?: string;
-  avg_production_last_year?: string;
-  yield_loss?: string;
-  key_reasons_yield_losses?: string[];
-  weather_effects?: string[];
-  pests?: string[];
-  diseases?: string[];
-  remarks?: string;
+export type SurveyYieldLoss = {
+  survey_yield_loss_details_id: number;
+  survey_master_id: number;
+  yield_loss_type_id: number;
+  yield_loss_type_name: string;
+  remarks?: string | null;
 };
 
-// Temporary data - replace with API call later
-export const initialSurveys: Survey[] = [
-  {
-    id: "SRV001",
-    farmer_name: "Md Mustakim",
-    farmer_id: "F001",
-    plot_id: "PLT001",
-    survey_date: "2025-11-01",
-    location: "Pabna, Bangladesh",
-    crop_type: "Rice",
-    status: "completed",
-  },
-  {
-    id: "SRV002",
-    farmer_name: "Ali Asgar",
-    farmer_id: "F002",
-    plot_id: "PLT003",
-    survey_date: "2025-11-02",
-    location: "Bogura, Bangladesh",
-    crop_type: "Wheat",
-    status: "in-progress",
-  },
-  {
-    id: "SRV003",
-    farmer_name: "Nur Mohammad",
-    farmer_id: "F003",
-    plot_id: "PLT007",
-    survey_date: "2025-11-03",
-    location: "Bogura, Bangladesh",
-    crop_type: "Corn",
-    status: "pending",
-  },
-  {
-    id: "SRV004",
-    farmer_name: "MD Rahmat",
-    farmer_id: "F004",
-    plot_id: "PLT012",
-    survey_date: "2025-11-04",
-    location: "Shariatpur, Bangladesh",
-    crop_type: "Rice",
-    status: "completed",
-  },
-  {
-    id: "SRV005",
-    farmer_name: "Sagor Bornik",
-    farmer_id: "F005",
-    plot_id: "PLT015",
-    survey_date: "2025-11-05",
-    location: "Rajbari, Bangladesh",
-    crop_type: "Wheat",
-    status: "in-progress",
-  },
-];
+export type SurveyPestAttack = {
+  survey_pest_attack_details_id: number;
+  survey_master_id: number;
+  pest_attack_type_id: number;
+  remarks?: string | null;
+};
+
+export type SurveyWeatherEvent = {
+  survey_weather_event_details_id: number;
+  survey_master_id: number;
+  weather_event_type_id: number;
+  remarks?: string | null;
+};
+
+export type SurveyDiseaseAttack = {
+  survey_disease_attack_details_id: number;
+  survey_master_id: number;
+  disease_attack_type_id: number;
+  remarks?: string | null;
+};
+
+export type SurveySeedVariety = {
+  survey_varieties_of_seeds_details_id: number;
+  survey_master_id: number;
+  survey_varieties_of_seeds: string;
+  remarks?: string | null;
+};
+
+export type Survey = {
+  remarks?: string | null;
+  farmer_id: number;
+  farmer_name: string;
+  mobile_number?: string;
+  survey_master_id?: number;
+  survey_date: string;
+  plot_id?: string;
+  location?: string;
+  crop_type?: string;
+  avg_prod_last_year?: number;
+  avg_prod_current_year?: number;
+  status?: "pending" | "completed" | "in-progress";
+  survey_yield_loss_details?: SurveyYieldLoss[];
+  survey_pest_attack_details?: SurveyPestAttack[];
+  survey_weather_event_details?: SurveyWeatherEvent[];
+  survey_disease_attack_details?: SurveyDiseaseAttack[];
+  survey_varieties_of_seeds_details?: SurveySeedVariety[];
+};
 
 type SurveyTableProps = {
   data?: Survey[];
   filteredData?: Survey[];
   setFilteredData?: React.Dispatch<React.SetStateAction<Survey[]>>;
+  loading?: boolean;
 };
 
-export function SurveyTable({ data, filteredData, setFilteredData }: SurveyTableProps) {
-  const [surveys, setSurveys] = useState<Survey[]>(data ?? initialSurveys);
-  const [filteredSurveys, setFilteredSurveys] = useState<Survey[]>(filteredData ?? (data ?? initialSurveys));
-  const [loading, setLoading] = useState(false);
+export function SurveyTable({
+  data,
+  filteredData,
+  setFilteredData,
+  loading = false,
+}: SurveyTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(5);
+  const [surveyView, setSurveyView] = useState(false);
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
 
-  // prefer externally provided filteredData if present
-  const externalFiltered = filteredData ?? (filteredSurveys.length > 0 ? filteredSurveys : undefined);
-  const dataToPaginate = externalFiltered && externalFiltered.length > 0 ? externalFiltered : surveys;
+  const dataToPaginate =
+    filteredData && filteredData.length > 0 ? filteredData : data ?? [];
 
   const totalPages =
     pageSize === "All"
@@ -114,6 +99,13 @@ export function SurveyTable({ data, filteredData, setFilteredData }: SurveyTable
           (currentPage - 1) * (pageSize as number),
           currentPage * (pageSize as number)
         );
+
+  const handleSurveyiew = (data: any) => {
+    setSurveyView(true);
+    setSelectedSurvey(data);
+  };
+
+  console.log(data);
 
   return (
     <Card className="border border-gray-200 py-6">
@@ -131,81 +123,99 @@ export function SurveyTable({ data, filteredData, setFilteredData }: SurveyTable
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Survey ID
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Farmer Name
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Plot ID
+                  Mobile
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Location
+                  Survey Date
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Crop Type
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[150px]">
+                  Avg Last Year
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[180px]">
+                  Avg Current Year
+                </th>
+                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Status
+                </th> */}
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
+                  Action
                 </th>
               </tr>
             </thead>
             <tbody>
               {loading || paginatedSurveys.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center">
+                  <td colSpan={7} className="py-6 text-center">
                     <Loading />
                   </td>
                 </tr>
               ) : (
-                <>
-                  {paginatedSurveys.map((survey, idx) => (
-                    <tr
-                      key={survey.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                    >
-                      <td className="py-4 px-4 font-medium text-gray-900">
-                        {survey.id}
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="font-medium text-gray-900 text-sm">
-                          {survey.farmer_name}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-sm text-gray-600">{survey.plot_id}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-900">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          {survey.location}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-sm text-gray-600">{survey.crop_type}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge
-                          className={
-                            survey.status === "completed"
-                              ? "bg-green-100 text-green-800"
-                              : survey.status === "in-progress"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }
+                paginatedSurveys.map((survey, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <td className="py-4 px-4">
+                      <div className="font-medium text-gray-900 text-sm">
+                        {survey.farmer_name === " "
+                          ? "N/A"
+                          : survey.farmer_name}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-600">
+                        {survey.mobile_number}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-600">
+                        {survey.survey_date}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-600">
+                        {survey.avg_prod_last_year ?? "-"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="text-sm text-gray-600">
+                        {survey.avg_prod_current_year ?? "-"}
+                      </span>
+                    </td>
+                    {/* <td className="py-4 px-4">
+                      <Badge
+                        className={
+                          survey.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : survey.status === "in-progress"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }
+                      >
+                        {survey.status ?? "pending"}
+                      </Badge>
+                    </td> */}
+                    <td>
+                      <div className="flex items-center justify-center py-4 px-4">
+                        <Button
+                          variant={"outline"}
+                          onClick={() => handleSurveyiew(survey)}
                         >
-                          {survey.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </>
+                          <Eye />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
           {totalPages > 1 && (
-            <div className="">
+            <div>
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -220,6 +230,16 @@ export function SurveyTable({ data, filteredData, setFilteredData }: SurveyTable
           )}
         </div>
       </CardContent>
+
+      {surveyView && (
+        <GenericModal
+          closeModal={() => setSurveyView(false)}
+          title={"Survey Details"}
+          widthValue="w-full lg:w-[50%]"
+        >
+          <SurveyView survey={selectedSurvey} />
+        </GenericModal>
+      )}
     </Card>
   );
 }

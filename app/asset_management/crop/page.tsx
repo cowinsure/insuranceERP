@@ -10,6 +10,7 @@ import Loading from "@/components/utils/Loading";
 import { SearchFilter } from "@/components/utils/SearchFilter";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
+import { log } from "console";
 import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
@@ -64,6 +65,8 @@ const CropsPage = () => {
       if (response.status === "success") {
         setCrops(response.data);
         setFilteredCrops(response.data);
+     console.log(response.data);
+     
       }
     } catch (error: any) {
       const message =
@@ -124,9 +127,13 @@ const CropsPage = () => {
   };
 
   // Stage handler function
-  const getStageAccess = (stageId?: number): StageAccess => {
-    return stageRules[stageId ?? 1] || stageRules[1];
+  const getStageAccess = (stageId?: number | string): StageAccess => {
+    const id = Number(stageId) || 1; // convert string to number, fallback to 1
+    return stageRules[id] || stageRules[1];
   };
+
+
+
   /************************************************************************/
 
   return (
@@ -216,7 +223,9 @@ const CropsPage = () => {
               ) : (
                 <>
                   {filteredCrops.map((crop, idx) => {
-                    const seed = crop.crop_asset_seed_details?.[0];
+                    
+                    
+                    // const seed = crop.crop_asset_seed_details?.[0];
                     const { stage1Enabled, stage2Enabled } = getStageAccess(
                       crop.current_stage_id
                     );
@@ -229,7 +238,7 @@ const CropsPage = () => {
                         <td className="py-4 px-4 text-gray-600">{idx + 1}</td>
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
-                            {seed?.crop_name || "N/A"}
+                            {crop?.crop_name || "N/A"}
                           </div>
                         </td>
                         <td className="py-4 px-4">
@@ -244,7 +253,7 @@ const CropsPage = () => {
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex justify-center items-center gap-2 text-sm text-gray-900 capitalize w-[150px] mx-auto truncate">
-                            {seed?.land_name || "N/A"}
+                            {crop?.land_name || "N/A"}
                           </div>
                         </td>
                         {/* Stage one */}

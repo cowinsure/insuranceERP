@@ -1,5 +1,7 @@
 // ✅ Root object
 export interface CropGetData {
+  crop_name: string;
+  land_name: string;
   season: string;
   crop_id: number;
   land_id: number;

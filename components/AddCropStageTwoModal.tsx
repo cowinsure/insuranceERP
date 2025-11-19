@@ -291,11 +291,13 @@ const AddCropStageTwoModal = ({
       };
 
       console.log("Final PUT Payload:", payload);
-      await put("/cms/crop-info-service/", payload, {
+      const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: selectedCrop?.crop_id },
       });
-      toast.success("Stage Two data saved successfully!");
-      onSuccess?.();
+      if (res.status === "success") {
+        toast.success("Stage Two data saved successfully!");
+        onSuccess?.();
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to save Stage Two data.");
@@ -351,9 +353,7 @@ const AddCropStageTwoModal = ({
         />
       </div>
 
-      <div className="overflow-y-auto bg-white">
-        {renderStep()}
-      </div>
+      <div className="overflow-y-auto bg-white">{renderStep()}</div>
 
       <div
         className={`flex mt-4 ${
@@ -386,7 +386,7 @@ const AddCropStageTwoModal = ({
         )}
       </div>
 
-      <Toaster richColors />
+      {/* <Toaster richColors /> */}
     </div>
   );
 };

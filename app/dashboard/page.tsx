@@ -12,8 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {  useLocalization } from "../../core/context/LocalizationContext";
 
 export default function Page() {
+    const { t } = useLocalization();
+
   return (
     // <SidebarProvider>
     //   <AppSidebar />

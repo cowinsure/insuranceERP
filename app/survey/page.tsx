@@ -245,7 +245,7 @@ export default function SurveyPage() {
 
       case 1:
         return (
-          <div className="max-w-4xl mx-auto p-4">
+          <div className="max-w-4xl mx-auto">
             <SurveyPreview data={surveyPreview || surveyData} />
           </div>
         );
@@ -256,14 +256,14 @@ export default function SurveyPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+      <div className="grid grid-cols-3 lg:flex items-center justify-between">
+        <div className="col-span-2">
+          <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
             Survey Management
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-sm md:text-md">
             Manage and conduct land surveys for insurance assessment
           </p>
         </div>
@@ -277,7 +277,7 @@ export default function SurveyPage() {
       </div>
 
       {/* Search + Table */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <SurveySearch data={surveys} setFilteredData={setFilteredSurveys} />
         <SurveyTable
           data={surveys}
@@ -298,7 +298,7 @@ export default function SurveyPage() {
               />
             </div>
 
-            <div className="overflow-y-auto h-[550px] bg-white rounded-b-xl p-5 rounded-lg">
+            <div className="overflow-y-auto h-[550px] bg-white rounded-lg">
               {renderStep()}
             </div>
 

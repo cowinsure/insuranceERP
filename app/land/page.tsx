@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
-import { Bell, Search, Plus, Sparkles, Badge, MapPin,Eye } from "lucide-react";
+import { Bell, Search, Plus, Sparkles, Badge, MapPin, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GenericModal from "@/components/ui/GenericModal";
@@ -97,7 +97,7 @@ export default function CropPage() {
   const [plotCoordsTargetId, setPlotCoordsTargetId] = useState<string | null>(
     null
   );
-  
+
   const [landData, setLandData] = useState<LandData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlot, setSelectedPlot] = useState<any | null>(null);
@@ -137,73 +137,71 @@ export default function CropPage() {
     // This function needs to be adapted to the new data structure
   };
 
-interface LandCoordinate {
-  land_id: number;
-  latitude: number;
-  longitude: number;
-  land_name: string;
-  created_at: string;
-  created_by: number;
-  farmer_name: string;
-  modified_at: string | null;
-  modified_by: number | null;
-  sequence_no: number | null;
-  mobile_number: string;
-  coordinate_type: "plot" | "inner_area" | string; // allow extra types if needed
-  land_coordinate_point_id: number;
-}
+  interface LandCoordinate {
+    land_id: number;
+    latitude: number;
+    longitude: number;
+    land_name: string;
+    created_at: string;
+    created_by: number;
+    farmer_name: string;
+    modified_at: string | null;
+    modified_by: number | null;
+    sequence_no: number | null;
+    mobile_number: string;
+    coordinate_type: "plot" | "inner_area" | string; // allow extra types if needed
+    land_coordinate_point_id: number;
+  }
 
-interface GroupedCoordinates {
-  [key: string]: LandCoordinate[];
-}
+  interface GroupedCoordinates {
+    [key: string]: LandCoordinate[];
+  }
 
+  function groupByCoordinateType(data: LandCoordinate[]): GroupedCoordinates {
+    return data.reduce((result, item) => {
+      const type = item.coordinate_type;
+      if (!result[type]) {
+        result[type] = [];
+      }
+      result[type].push(item);
+      return result;
+    }, {} as GroupedCoordinates);
+  }
+  type LandPoint = {
+    land_id: number;
+    latitude: number;
+    land_name: string;
+    longitude: number;
+    created_at: string;
+    created_by: number;
+    point_type: string;
+    farmer_name: string;
+    modified_at: string | null;
+    modified_by: number | null;
+    mobile_number: string;
+    distance_from_base: number | null;
+    land_reference_point_id: number;
+  };
 
-function groupByCoordinateType(data: LandCoordinate[]): GroupedCoordinates {
-  return data.reduce((result, item) => {
-    const type = item.coordinate_type;
-    if (!result[type]) {
-      result[type] = [];
-    }
-    result[type].push(item);
-    return result;
-  }, {} as GroupedCoordinates);
-}
-type LandPoint = {
-  land_id: number;
-  latitude: number;
-  land_name: string;
-  longitude: number;
-  created_at: string;
-  created_by: number;
-  point_type: string;
-  farmer_name: string;
-  modified_at: string | null;
-  modified_by: number | null;
-  mobile_number: string;
-  distance_from_base: number | null;
-  land_reference_point_id: number;
-};
-
-function groupByPointType(points: LandPoint[]) {
-  return points.reduce((acc, point) => {
-    if (!acc[point.point_type]) {
-      acc[point.point_type] = [];
-    }
-    acc[point.point_type].push(point);
-    return acc;
-  }, {} as Record<string, LandPoint[]>);
-}
+  function groupByPointType(points: LandPoint[]) {
+    return points.reduce((acc, point) => {
+      if (!acc[point.point_type]) {
+        acc[point.point_type] = [];
+      }
+      acc[point.point_type].push(point);
+      return acc;
+    }, {} as Record<string, LandPoint[]>);
+  }
 
   const handleViewDetails = (plot: any) => {
     // Map API land payload to the Plot shape used by the details dialog
     //(plot);
-   const groupedData= groupByCoordinateType(plot.land_coordinate_point);
-   //(groupedData);
+    const groupedData = groupByCoordinateType(plot.land_coordinate_point);
+    //(groupedData);
 
+    const grouped_ref = groupByPointType(plot.land_reference_point);
+    //(grouped_ref);
 
-   const grouped_ref = groupByPointType(plot.land_reference_point);
-//(grouped_ref);
-   
     const mapped = {
       id: plot.land_id?.toString() ?? Date.now().toString(),
       plotName: plot.land_name,
@@ -212,16 +210,17 @@ function groupByPointType(points: LandPoint[]) {
       coordinates: groupedData?.plot || [],
       landArea: groupedData?.land_area || [],
       imageUrl: plot.image,
-      createdAt: plot.land_coordinate_point?.[0]?.created_at || new Date().toISOString(),
+      createdAt:
+        plot.land_coordinate_point?.[0]?.created_at || new Date().toISOString(),
       status: "active",
       landCoordinates: groupedData?.land_area || [],
-      plotCoordinates: groupedData?.plot|| [],
-      innerCoordinates:groupedData?.inner_area || [],
+      plotCoordinates: groupedData?.plot || [],
+      innerCoordinates: groupedData?.inner_area || [],
       swMark: grouped_ref?.sw_mark?.[0] ?? null,
       nCorner: grouped_ref?.n_corner?.[0] ?? null,
-      eCorner:grouped_ref?.e_corner?.[0] ?? null,
-      nMark : grouped_ref?.n_mark?.[0] ?? null,
-      eMark : grouped_ref?.e_mark?.[0] ?? null,
+      eCorner: grouped_ref?.e_corner?.[0] ?? null,
+      nMark: grouped_ref?.n_mark?.[0] ?? null,
+      eMark: grouped_ref?.e_mark?.[0] ?? null,
       nMarkDist: plot?.land_measurement_info?.[0]?.n_mark_dist ?? null,
       eMarkDist: plot?.land_measurement_info?.[0]?.e_mark_dist ?? null,
       ecornerDist: plot?.land_measurement_info?.[0]?.e_corner_dist ?? null,
@@ -230,15 +229,15 @@ function groupByPointType(points: LandPoint[]) {
       mobileNumber: plot?.mobile_number,
       farmerId: plot.farmer_id,
       farmerName: plot.farmer_name,
-      suitability: plot.land_suitability_details?.map((d: any) => d.land_suitability_name) || [],
+      suitability:
+        plot.land_suitability_details?.map(
+          (d: any) => d.land_suitability_name
+        ) || [],
       length: plot?.land_measurement_info?.[0]?.se_ne ?? null,
       width: plot?.land_measurement_info?.[0]?.ne_nw ?? null,
       farmer_name: plot.farmer_name,
       mobile_number: plot.mobile_number,
-    }
-
-
-
+    };
 
     setSelectedPlot(mapped);
     setIsDetailsDialogOpen(true);
@@ -268,7 +267,7 @@ function groupByPointType(points: LandPoint[]) {
            {t('sub_title')}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex justify-end">
           <Button
             className="bg-blue-500 hover:bg-blue-600 text-white"
             onClick={() => setIsCreateDialogOpen(true)}
@@ -279,10 +278,10 @@ function groupByPointType(points: LandPoint[]) {
         </div>
       </div>
 
-      <div className="animate__animated animate__fadeIn flex flex-col gap-7">
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Search</h2>
+      <div className="animate__animated animate__fadeIn flex flex-col">
+        <Card className="mb-4">
+          <CardContent className="py-6 px-5">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Search</h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -333,7 +332,7 @@ function groupByPointType(points: LandPoint[]) {
             ) : (
               <>
                 {/* Mobile: card list */}
-                <div className="space-y-4 md:hidden">
+                <div className="space-y-4 lg:hidden">
                   {filteredPlots.map((plot) => (
                     <div
                       key={plot.land_id}
@@ -341,7 +340,10 @@ function groupByPointType(points: LandPoint[]) {
                     >
                       <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
                         <img
-                          src={'https://dev-backend.insurecow.com/'+plot.image || '/placeholder.svg'}
+                          src={
+                            "https://dev-backend.insurecow.com/" + plot.image ||
+                            "/placeholder.svg"
+                          }
                           alt={plot.land_name}
                           className="w-auto object-fit"
                         />
@@ -352,11 +354,12 @@ function groupByPointType(points: LandPoint[]) {
                             <div className="font-medium text-gray-900">{plot.land_name}</div>
                             <div className="text-sm text-gray-600">{t('owner')}: {plot.farmer_name}</div>
                           </div>
-                          <div className="text-sm text-gray-500">{new Date(plot.land_coordinate_point[0]?.created_at).toLocaleDateString()}</div>
                         </div>
 
                         <div className="mt-2 flex items-center justify-between">
-                          <div className="text-sm text-gray-600">{plot.mobile_number}</div>
+                          <div className="text-sm text-gray-600">
+                            {plot.mobile_number}
+                          </div>
                           <div className="flex flex-col items-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
                                 <Eye className="w-4 h-4" />
@@ -364,24 +367,28 @@ function groupByPointType(points: LandPoint[]) {
                             {/* <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => {
-                                // setPlotCoordsTargetId(plot.id)
-                                // setIsPlotCoordsDialogOpen(true)
-                              }}
+                              onClick={() => handleViewDetails(plot)}
                             >
-                              <MapPin  />
-                              Plot
-                            </Button> */}
+                              <Eye />
+                            </Button>
                           </div>
                         </div>
 
-                        {plot.land_suitability_details && plot.land_suitability_details.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {plot.land_suitability_details.slice(0, 3).map((s) => (
-                              <span key={s.land_suitable_details_id} className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">{s.land_suitability_name}</span>
-                            ))}
-                          </div>
-                        )}
+                        {plot.land_suitability_details &&
+                          plot.land_suitability_details.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {plot.land_suitability_details
+                                .slice(0, 3)
+                                .map((s) => (
+                                  <span
+                                    key={s.land_suitable_details_id}
+                                    className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded"
+                                  >
+                                    {s.land_suitability_name}
+                                  </span>
+                                ))}
+                            </div>
+                          )}
                       </div>
                     </div>
                   ))}
@@ -489,8 +496,8 @@ function groupByPointType(points: LandPoint[]) {
               <span className="font-bold text-gray-800">
                 Premium subscription
               </span>
-              . Enjoy exclusive features, faster performance, and tools
-              designed to help you get the most out of your usage.
+              . Enjoy exclusive features, faster performance, and tools designed
+              to help you get the most out of your usage.
             </p>
           </div>
         </GenericModal>
@@ -503,7 +510,7 @@ function groupByPointType(points: LandPoint[]) {
       />
 
       <PlotCoordinatesDialog
-      landData={landData}
+        landData={landData}
         open={isPlotCoordsDialogOpen}
         onOpenChange={setIsPlotCoordsDialogOpen}
         onSave={handleSaveCoordinatesPlot}

@@ -463,13 +463,13 @@ export default function AddCropDetailsModal({
       };
 
       console.log("Submitting payload:", payload);
-      await put("/cms/crop-info-service/", payload, {
+      const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });
-
-      // localStorage.setItem(`stageOneCompleted_${cropId}`, "true");
-      toast.success("Crop data submitted successfully!");
-      onClose();
+      if (res.status === "success") {
+        toast.success("Crop data submitted successfully!");
+        onClose();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to submit crop data");

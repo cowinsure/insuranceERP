@@ -494,7 +494,7 @@ const CropsPage = () => {
             selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
           }`}
           height={true}
-          widthValue="sm:w-[35%] lg:min-w-[60%] lg:max-w-[70%]"
+          widthValue="sm:w-[35%] md:min-w-[90%] lg:min-w-[60%] lg:max-w-[70%]"
         >
           <CropStageModalTabs data={selectedCrop} />
         </GenericModal>

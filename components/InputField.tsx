@@ -19,6 +19,7 @@ interface InputFieldProps {
   max?: string;
   readOnly?: boolean;
   onFocus?: () => void;
+  className?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -34,6 +35,7 @@ const InputField: React.FC<InputFieldProps> = ({
   maxLength,
   readOnly = false,
   error,
+  className,
   onFocus,
 }) => {
   return (
@@ -65,7 +67,8 @@ const InputField: React.FC<InputFieldProps> = ({
             "hover:bg-blue-50 hover:border-blue-300",
             type === "date" &&
               "appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0",
-            error ? "border-red-600" : "border-gray-300"
+            error ? "border-red-600" : "border-gray-300",
+            `${className}`
           )}
         />
       </div>

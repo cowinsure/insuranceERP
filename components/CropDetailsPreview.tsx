@@ -134,12 +134,12 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
                   s.seed_variety_name || seedVarieties[s.seed_variety_id]
                 )}
                 {renderRow("Seed Company Type", s.seed_company_type_name)}
-                <div className="flex justify-between border-b border-gray-100 p-2 text-sm">
+                <div className="grid grid-cols-2 border-b border-gray-100 p-2 text-sm">
                   <span className="font-medium text-gray-600">
                     Type of Seed Used
                   </span>
                   <span
-                    className="text-gray-800 font-semibold truncate max-w-xs"
+                    className="text-gray-800 font-semibold  max-w-xs"
                     title={s.seed_type_name}
                   >
                     {s.seed_type_name || "N/A"}
@@ -262,7 +262,7 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         </h3>
 
         {data.pestDetails?.length ? (
-          <div className="mb-3">
+          <div className="mb-3  rounded-xl bg-white shadow-sm p-3">
             <h4 className="font-semibold text-gray-700">Pests:</h4>
             <ul className="list-disc list-inside text-gray-600">
               {data.pestDetails.map((p: any, idx: number) => (
@@ -275,9 +275,9 @@ export default function CropDetailsPreview({ data }: CropDetailsPreviewProps) {
         )}
 
         {data.diseaseDetails?.length ? (
-          <div>
+          <div className=" rounded-xl bg-white shadow-sm p-3">
             <h4 className="font-semibold text-gray-700">Diseases:</h4>
-            <ul className="list-disc list-inside text-gray-600">
+            <ul className="list-disc list-inside text-gray-600 ">
               {data.diseaseDetails.map((d: any, idx: number) => (
                 <li key={idx}>{d.name}</li>
               ))}

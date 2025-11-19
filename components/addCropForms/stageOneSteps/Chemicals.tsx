@@ -261,10 +261,10 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
             isRemoving ? "animate__fadeOut" : "animate__fadeIn"
           }`}
         >
-          <div className="w-6 h-6 border rounded-sm mt-1 flex items-center justify-center text-sm">
+          <div className="w-6 h-6 border rounded-sm mt-1 flex items-center justify-center text-sm shrink-0">
             {index + 1}
           </div>
-          <div className="flex items-center justify-between w-full gap-2">
+          <div className="flex items-center w-full gap-2">
             <InputField
               id={`${type}-name-${index}`}
               name="chemical_name"
@@ -283,6 +283,7 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
                 handleChange(index, type, "qty", Number(e.target.value))
               }
               placeholder="Quantity"
+              className="w-[50px] md:w-full"
             />
             <button
               type="button"

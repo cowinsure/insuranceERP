@@ -188,7 +188,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <h2 className="text-lg font-semibold mb-3 text-green-800">
           Observations
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <DisplayField
             label="Seed Variety Observation"
             value={seedVarietyName}
@@ -207,7 +207,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             label="Remarks"
             value={crop?.reason_for_is_manageable_harvest}
           />
-          <div className="col-span-2">
+          <div className="lg:col-span-2">
             <ArrayDisplay
               title="Good Practices"
               items={goodPracticeNames.map((name: string) => ({ name }))}

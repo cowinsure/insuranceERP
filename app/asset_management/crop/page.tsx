@@ -176,6 +176,23 @@ const CropsPage = () => {
 
       {/* Table */}
       <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
+              Registered Crops
+            </CardTitle>
+            <p className="text-sm text-gray-600">{crops.length} crops found</p>
+          </div>
+
+          <div className="flex">
+            <Button
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={() => setIsModal(true)}
+            >
+              <Plus className="w-4 h-4" />
+              Add Crop
+            </Button>
+          </div>
         <div className="mb-5">
           <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
             {t('registered_crops')}

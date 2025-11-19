@@ -10,6 +10,9 @@ import { AuthProvider } from "@/core/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { LocalizationProvider } from "@/core/context/LocalizationContext";
 import LocalizationToggle from "@/components/utils/LocalizationToggle";
+import { User } from "lucide-react";
+import TopNav from "@/components/TopNav";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Insurance ERP",
@@ -31,28 +34,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head></head>
       <body
         className={`${urbanist.className} bg-gradient-to-br from-sky-50 via-blue-200 to-blue-50 relative`}
       >
         <LocalizationProvider>
-        <AuthProvider>
-        <div className="flex min-h-screen">
-          <aside className="hidden lg:block">
-            <DesktopSideBar />
-          </aside>
-          <LocalizationToggle />
-          <main className="flex-1">{children}</main>
-
-          {/* Mobile nav at bottom */}
-          <div className="block lg:hidden">
-            <MobileNav />
-          </div>
-        </div>
-        <Toaster />
-
-      </AuthProvider>
-      </LocalizationProvider>
+          <AuthProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+            <Toaster />
+          </AuthProvider>
+        </LocalizationProvider>
       </body>
     </html>
   );

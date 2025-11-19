@@ -39,7 +39,7 @@ export const LocalizationProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useLocalization = () => {
+export function useLocalization() {
   const context = useContext(LocalizationContext);
   if (!context) throw new Error("useLocalization must be used within LocalizationProvider");
   return context;

@@ -281,11 +281,11 @@ export default function CropPage() {
       <div className="animate__animated animate__fadeIn flex flex-col">
         <Card className="mb-4">
           <CardContent className="py-6 px-5">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Search</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">{t('search')}</h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search by land name or farmer name..."
+                placeholder={t('search_placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -307,7 +307,7 @@ export default function CropPage() {
 
             {loading ? (
               <div className="text-center py-12">
-                <p>Loading...</p>
+                <p>{t('loading')}</p>
               </div>
             ) : filteredPlots.length === 0 ? (
               <div className="text-center py-12">
@@ -319,8 +319,8 @@ export default function CropPage() {
                 </h3>
                 <p className="text-gray-500 mb-4">
                   {searchTerm
-                    ? "Try adjusting your search terms"
-                    : "Create your first land entry to get started"}
+                    ? t('try_adjusting_search')
+                    : t('create_first_land_entry')}
                 </p>
                 {!searchTerm && (
                   <Button onClick={() => setIsCreateDialogOpen(true)}>
@@ -370,7 +370,7 @@ export default function CropPage() {
                               onClick={() => handleViewDetails(plot)}
                             >
                               <Eye />
-                            </Button>
+                            </Button>*/}
                           </div>
                         </div>
 
@@ -492,12 +492,7 @@ export default function CropPage() {
               {t('upgrade_to_premium')}
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Unlock the full power of the app with a{" "}
-              <span className="font-bold text-gray-800">
-                Premium subscription
-              </span>
-              . Enjoy exclusive features, faster performance, and tools designed
-              to help you get the most out of your usage.
+              {t('premium_description')}
             </p>
           </div>
         </GenericModal>

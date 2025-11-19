@@ -1,3 +1,4 @@
+"use client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { DashboardStats } from "@/components/dashboard-stats";
 import { ClaimsChart } from "@/components/claims-chart";
@@ -64,11 +65,9 @@ export default function Page() {
     // </SidebarProvider>
     <div className="flex-1 space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t("dashboard")}</h1>
         <p className="text-gray-600">
-          {
-            "Welcome back! Here's what's happening with your insurance operations."
-          }
+          {t("welcome_back_message")}
         </p>
       </div>
 

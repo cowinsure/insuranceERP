@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Eye, Mail, Phone, MapPin, User } from "lucide-react";
+import { Eye, Mail, Phone, MapPin, User, Sparkles, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import GenericModal from "./ui/GenericModal";
 import useApi from "@/hooks/use_api";
@@ -30,8 +30,11 @@ export function FarmersTable() {
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
   const [filteredFarmers, setFilteredFarmers] = useState<FarmerProfile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isView, setView] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { get } = useApi();
+  const onOpen = () => setIsOpen(true);
 
   // =============================
   // Pagination functions
@@ -74,6 +77,10 @@ export function FarmersTable() {
     fetchData();
   }, []);
 
+  const handleView = () => {
+    setView(true);
+  };
+
   return (
     <>
       <div className="mb-4">
@@ -87,12 +94,26 @@ export function FarmersTable() {
 
       <Card className="border border-gray-200 py-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900 pt-0">
-            Registered Farmers
-          </CardTitle>
-          <p className="text-sm text-gray-600">
-            {dataToPaginate.length} farmers found
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-semibold text-gray-900 pt-0">
+                Registered Farmers
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                {dataToPaginate.length} farmers found
+              </p>
+            </div>
+
+            <div className="">
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+                onClick={onOpen}
+              >
+                <Plus className="w-4 h-4" />
+                Add Farmer
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {/* MOBILE/TABLET CARD VIEW ---- */}
@@ -176,6 +197,9 @@ export function FarmersTable() {
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                     Policies
                   </th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -233,6 +257,11 @@ export function FarmersTable() {
                             {farmer.policies}
                           </span>
                         </td>
+                        <td className="py-4 px-4">
+                          <Button variant={"outline"} onClick={handleView}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </>
@@ -257,6 +286,32 @@ export function FarmersTable() {
           </div>
         </CardContent>
       </Card>
+
+      {isView && (
+        <GenericModal closeModal={() => setView(false)}>
+          <div className="w-full mx-auto text-center p-6 space-y-5">
+            {/* Icon */}
+            <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 shadow-lg">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold text-gray-900">
+              Upgrade to Premium
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Unlock the full power of the app with a{" "}
+              <span className="font-bold text-gray-800">
+                Premium subscription
+              </span>
+              . Enjoy exclusive features, faster performance, and tools designed
+              to help you get the most out of your usage.
+            </p>
+          </div>
+        </GenericModal>
+      )}
     </>
   );
 }

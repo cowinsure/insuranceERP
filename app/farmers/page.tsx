@@ -305,7 +305,7 @@ export default function FarmersPage() {
             Manage farmer registrations and view their insurance portfolios
           </p>
         </div>
-        <div className="flex justify-end">
+        {/* <div className="flex justify-end">
           <Button
             className="bg-blue-500 hover:bg-blue-600 text-white"
             onClick={onOpen}
@@ -313,7 +313,7 @@ export default function FarmersPage() {
             <Plus className="w-4 h-4" />
             Add Farmer
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div className="animate__animated animate__fadeIn">

@@ -40,7 +40,7 @@ const mainMenuItems = [
   },
   {
     title: "Asset Management",
-    url: "/asset_management",
+    url: null,
     icon: BsClipboardCheck,
     activeIcon: BsClipboardCheckFill,
     children: [
@@ -68,7 +68,7 @@ const mainMenuItems = [
     icon: MdOutlineLandscape,
     activeIcon: MdOutlineLandscape,
   },
-    {
+  {
     title: "Surveys",
     url: "/survey",
     icon: RiSurveyLine,
@@ -135,7 +135,7 @@ const DesktopSideBar = () => {
     >
       <div className="bg-white rounded-r-lg p-4 h-full overflow-hidden transition-all duration-300 flex flex-col relative">
         {/* Toggle Button */}
-        <div className="flex justify-end mb-4 group">
+        <div className="flex justify-end mb- group">
           <button
             onClick={() => setPinned((prev) => !prev)}
             className={`text-xs px-2 py-1 rounded hover:bg-gray-300 transition cursor-pointer ${
@@ -167,7 +167,7 @@ const DesktopSideBar = () => {
 
               return (
                 <div key={item.url} className="relative group/item">
-                  <Link href={item.url}>
+                  <Link href={item.url || ""}>
                     <div
                       className={`flex items-center justify-between w-full py-2.5 px-2 rounded-md cursor-pointer transition-all duration-200 ${
                         isActive
@@ -237,7 +237,7 @@ const DesktopSideBar = () => {
           </nav>
 
           {/* Logout Button */}
-          <div className="group relative">
+          {/* <div className="group relative">
             <button
               onClick={handleLogout}
               className={`flex items-center justify-center gap-2 w-full cursor-pointer ${
@@ -253,7 +253,7 @@ const DesktopSideBar = () => {
                 Logout
               </span>
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

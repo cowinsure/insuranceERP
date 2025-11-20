@@ -358,14 +358,14 @@ export default function PhotoCaptureModal({
   const renderContent = () => (
     <div className="w-full">
       {cameraMode ? (
-        <div className="w-full">
-          <div className="relative bg-black" style={{ minHeight: "300px" }}>
+        <div className="w-full flex flex-col">
+          <div className="relative bg-black flex-shrink-0" style={{ height: "300px" }}>
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full h-auto"
+              className="w-full h-full object-cover"
               style={{
                 transform: facingMode === "user" ? "scaleX(-1)" : "none",
               }}

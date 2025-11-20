@@ -327,5 +327,9 @@
   "failed_to_save_stage_two_data": "Failed to save Stage Two data.",
   "prev": "Prev",
   "save": "Save",
-  "next": "Next"
+  "next": "Next",
+  "attachments": "Attachments",
+  "add_photo": "Add Photo",
+  "capture_or_upload_photo": "Capture or Upload Photo",
+  "no_photos_added_yet": "No photos added yet."
 }

@@ -11,6 +11,7 @@ import Weather from "./addCropForms/stageTwoSteps/Weather";
 import StageTwoPreview from "./StageTwoPreview";
 import useApi from "@/hooks/use_api";
 import StageTwoData from "./viewCropModal/StageTwoData";
+import AttachmentStepOne from "./addCropForms/stageOneSteps/AttachmentStepOne";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
@@ -62,10 +63,17 @@ interface WeatherData {
   date_to: string | "";
 }
 
+interface AttachmentItem {
+  attachment_details_id: number;
+  attachment_path: string;
+  remarks: string;
+}
+
 interface StageTwoData {
   harvest: HarvestData;
   pestsDisease: PestsDiseaseData;
   weather: WeatherData[];
+  attachments: AttachmentItem[];
 }
 
 const AddCropStageTwoModal = ({
@@ -77,6 +85,7 @@ const AddCropStageTwoModal = ({
     "Observation",
     "Pests & Disease",
     "Weather",
+    "Attachments",
     "Preview",
   ];
   const [currentStep, setCurrentStep] = useState(0);
@@ -106,6 +115,7 @@ const AddCropStageTwoModal = ({
       reason_for_is_manageable_harvest: "",
     },
     weather: [],
+    attachments: [],
   });
 
   // ---------------- Prefill Stage 2 data with stage_id validation ----------------
@@ -153,6 +163,7 @@ const AddCropStageTwoModal = ({
             ?.reason_for_is_manageable_harvest || "",
       },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
+      attachments: selectedCrop.crop_asset_attachment_details || [],
     }));
   }, [selectedCrop]);
 
@@ -299,6 +310,9 @@ const AddCropStageTwoModal = ({
         crop_asset_pest_attack_details: mergedPests,
         crop_asset_disease_attack_details: mergedDiseases,
         crop_asset_weather_effect_history: mergedWeather,
+        crop_asset_attachment_details: Array.isArray(stageTwoData.attachments)
+          ? stageTwoData.attachments
+          : [],
       };
 
       console.log("Final PUT Payload:", payload);
@@ -369,6 +383,14 @@ const AddCropStageTwoModal = ({
         );
 
       case 4:
+        return (
+          <AttachmentStepOne
+            data={stageTwoData.attachments}
+            onChange={(d) => setStageTwoData({ ...stageTwoData, attachments: d })}
+          />
+        );
+
+      case 5:
         return <StageTwoPreview data={stageTwoData} />;
       default:
         return null;

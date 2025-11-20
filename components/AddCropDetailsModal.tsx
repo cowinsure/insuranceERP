@@ -14,6 +14,7 @@ import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
 import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
 import CropDetailsPreview from "./CropDetailsPreview";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import AttachmentStepOne from "./addCropForms/stageOneSteps/AttachmentStepOne";
 
 // Define ChemicalItem for consistency
 interface ChemicalItem {
@@ -38,6 +39,12 @@ interface WeatherData {
   date_to?: string;
 }
 
+interface AttachmentItem {
+  attachment_details_id: number;
+  attachment_path: string; // base64
+  remarks: string;
+}
+
 interface AddCropData {
   seed: any[];
   cultivation: any;
@@ -49,6 +56,7 @@ interface AddCropData {
     fertilizers: ChemicalItem[];
     pesticides: ChemicalItem[];
   };
+  attachments: AttachmentItem[];
   // 🆕 Optional preview-only fields
   pestDetails?: { id: number; name: string }[];
   diseaseDetails?: { id: number; name: string }[];
@@ -126,7 +134,7 @@ export default function AddCropDetailsModal({
                 date_to: w.date_to,
               })) || [];
 
-              console.log(weatherEffects);
+          console.log(weatherEffects);
 
           // ------------------------------
           // SET NORMALIZED DATA
@@ -164,6 +172,7 @@ export default function AddCropDetailsModal({
                   (c: any) => c.chemical_type_id === 2
                 ) || [],
             },
+            attachments: d.crop_asset_attachment_details || [],
           });
         } else {
           console.warn("⚠️ No existing data found for crop:", cropId);
@@ -183,6 +192,7 @@ export default function AddCropDetailsModal({
     t('weather'),
     t('pest_disease'),
     t('chemicals'),
+    t('attachments'),
     t('preview'),
   ];
 
@@ -204,6 +214,7 @@ export default function AddCropDetailsModal({
     pests: [],
     diseases: [],
     chemicals: { fertilizers: [], pesticides: [] },
+    attachments: [],
     pestDetails: [],
     diseaseDetails: [],
   });
@@ -324,13 +335,13 @@ export default function AddCropDetailsModal({
         // Keep seeds as-is (no filtering applied here)
         crop_asset_seed_details: Array.isArray(cropData.seed)
           ? cropData.seed.map((s: any) => ({
-              seed_id: s.seed_id || 0,
-              seed_common_name: s.seed_common_name,
-              seed_variety_id: s.seed_variety_id,
-              seed_company_name: s.seed_company_name,
-              seed_company_type_id: s.seed_company_type_id,
-              seed_type_id: s.seed_type_id,
-            }))
+            seed_id: s.seed_id || 0,
+            seed_common_name: s.seed_common_name,
+            seed_variety_id: s.seed_variety_id,
+            seed_company_name: s.seed_company_name,
+            seed_company_type_id: s.seed_company_type_id,
+            seed_type_id: s.seed_type_id,
+          }))
           : [],
 
         // Keep irrigation/cultivation object structure (preserve fields)
@@ -368,128 +379,133 @@ export default function AddCropDetailsModal({
           cropData.weather?.weather_effects
         )
           ? cropData.weather.weather_effects
-              .filter((w: any) => {
-                if (!w) return false;
-                const id = w.weather_effect_type_id ?? w.id ?? null;
-                const name = (
-                  w.name ??
-                  w.weather_effect_type_name ??
-                  ""
-                ).toString();
-                if (!id) return false; // exclude 0 / null / undefined
-                if (name.trim().toLowerCase() === "not provided") return false;
-                return true;
-              })
-              .map((w: any) => ({
-                date_from: cropData.weather?.date_from || null,
-                date_to: cropData.weather?.date_to || null,
-                land_weather_effect_history_id: 0,
-                weather_effect_type_id: w.weather_effect_type_id ?? w.id,
-                remarks: cropData.weather?.remarks || w.remarks || "",
-                is_active: true,
-              }))
+            .filter((w: any) => {
+              if (!w) return false;
+              const id = w.weather_effect_type_id ?? w.id ?? null;
+              const name = (
+                w.name ??
+                w.weather_effect_type_name ??
+                ""
+              ).toString();
+              if (!id) return false; // exclude 0 / null / undefined
+              if (name.trim().toLowerCase() === "not provided") return false;
+              return true;
+            })
+            .map((w: any) => ({
+              date_from: cropData.weather?.date_from || null,
+              date_to: cropData.weather?.date_to || null,
+              land_weather_effect_history_id: 0,
+              weather_effect_type_id: w.weather_effect_type_id ?? w.id,
+              remarks: cropData.weather?.remarks || w.remarks || "",
+              is_active: true,
+            }))
           : [],
 
         // PESTS: filter out falsy/0 ids (preserve original field names)
         crop_asset_pest_attack_details: Array.isArray(cropData.pests)
           ? cropData.pests
-              .filter((idOrObj: any) => {
-                if (idOrObj == null) return false;
-                // if pest stored as object with id or name, handle both shapes
-                if (typeof idOrObj === "object") {
-                  const id = idOrObj.pest_attack_type_id ?? idOrObj.id ?? null;
-                  const name = (idOrObj.name ?? "").toString();
-                  if (!id) return false;
-                  if (name.trim().toLowerCase() === "not provided")
-                    return false;
-                  return true;
-                }
-                // if stored as id (number/string)
-                return Boolean(idOrObj) && Number(idOrObj) !== 0;
-              })
-              .map((idOrObj: any) => {
-                const id =
-                  typeof idOrObj === "object"
-                    ? idOrObj.pest_attack_type_id ?? idOrObj.id
-                    : idOrObj;
-                const date =
-                  typeof idOrObj === "object"
-                    ? idOrObj.attack_date ?? idOrObj.date ?? null
-                    : null;
-                const remarks =
-                  typeof idOrObj === "object" ? idOrObj.remarks ?? "" : "";
-                return {
-                  crop_pest_attack_id: 0,
-                  pest_attack_type_id: id,
-                  attack_date: date,
-                  remarks: remarks,
-                };
-              })
+            .filter((idOrObj: any) => {
+              if (idOrObj == null) return false;
+              // if pest stored as object with id or name, handle both shapes
+              if (typeof idOrObj === "object") {
+                const id = idOrObj.pest_attack_type_id ?? idOrObj.id ?? null;
+                const name = (idOrObj.name ?? "").toString();
+                if (!id) return false;
+                if (name.trim().toLowerCase() === "not provided")
+                  return false;
+                return true;
+              }
+              // if stored as id (number/string)
+              return Boolean(idOrObj) && Number(idOrObj) !== 0;
+            })
+            .map((idOrObj: any) => {
+              const id =
+                typeof idOrObj === "object"
+                  ? idOrObj.pest_attack_type_id ?? idOrObj.id
+                  : idOrObj;
+              const date =
+                typeof idOrObj === "object"
+                  ? idOrObj.attack_date ?? idOrObj.date ?? null
+                  : null;
+              const remarks =
+                typeof idOrObj === "object" ? idOrObj.remarks ?? "" : "";
+              return {
+                crop_pest_attack_id: 0,
+                pest_attack_type_id: id,
+                attack_date: date,
+                remarks: remarks,
+              };
+            })
           : [],
 
         // DISEASES: same treatment as pests
         crop_asset_disease_attack_details: Array.isArray(cropData.diseases)
           ? cropData.diseases
-              .filter((idOrObj: any) => {
-                if (idOrObj == null) return false;
-                if (typeof idOrObj === "object") {
-                  const id =
-                    idOrObj.disease_attack_type_id ?? idOrObj.id ?? null;
-                  const name = (idOrObj.name ?? "").toString();
-                  if (!id) return false;
-                  if (name.trim().toLowerCase() === "not provided")
-                    return false;
-                  return true;
-                }
-                return Boolean(idOrObj) && Number(idOrObj) !== 0;
-              })
-              .map((idOrObj: any) => {
+            .filter((idOrObj: any) => {
+              if (idOrObj == null) return false;
+              if (typeof idOrObj === "object") {
                 const id =
-                  typeof idOrObj === "object"
-                    ? idOrObj.disease_attack_type_id ?? idOrObj.id
-                    : idOrObj;
-                const date =
-                  typeof idOrObj === "object"
-                    ? idOrObj.attack_date ?? idOrObj.date ?? null
-                    : null;
-                const remarks =
-                  typeof idOrObj === "object" ? idOrObj.remarks ?? "" : "";
-                return {
-                  crop_disease_attack_id: 0,
-                  disease_attack_type_id: id,
-                  attack_date: date,
-                  remarks: remarks,
-                };
-              })
+                  idOrObj.disease_attack_type_id ?? idOrObj.id ?? null;
+                const name = (idOrObj.name ?? "").toString();
+                if (!id) return false;
+                if (name.trim().toLowerCase() === "not provided")
+                  return false;
+                return true;
+              }
+              return Boolean(idOrObj) && Number(idOrObj) !== 0;
+            })
+            .map((idOrObj: any) => {
+              const id =
+                typeof idOrObj === "object"
+                  ? idOrObj.disease_attack_type_id ?? idOrObj.id
+                  : idOrObj;
+              const date =
+                typeof idOrObj === "object"
+                  ? idOrObj.attack_date ?? idOrObj.date ?? null
+                  : null;
+              const remarks =
+                typeof idOrObj === "object" ? idOrObj.remarks ?? "" : "";
+              return {
+                crop_disease_attack_id: 0,
+                disease_attack_type_id: id,
+                attack_date: date,
+                remarks: remarks,
+              };
+            })
           : [],
 
         // CHEMICALS: map fertilizers & pesticides; remove entries missing a chemical_name or with falsy qty when appropriate
         crop_asset_chemical_usage_details: [
           ...(Array.isArray(cropData.chemicals?.fertilizers)
             ? cropData.chemicals.fertilizers
-                .filter((c: any) => c && (c.chemical_name || c.chemical_id))
-                .map((c: any) => ({
-                  chemical_usage_id: 0,
-                  chemical_type_id: 1,
-                  chemical_name: c.chemical_name,
-                  qty: c.qty,
-                  qty_unit: c.qty_unit,
-                  remarks: c.remarks,
-                }))
+              .filter((c: any) => c && (c.chemical_name || c.chemical_id))
+              .map((c: any) => ({
+                chemical_usage_id: 0,
+                chemical_type_id: 1,
+                chemical_name: c.chemical_name,
+                qty: c.qty,
+                qty_unit: c.qty_unit,
+                remarks: c.remarks,
+              }))
             : []),
           ...(Array.isArray(cropData.chemicals?.pesticides)
             ? cropData.chemicals.pesticides
-                .filter((c: any) => c && (c.chemical_name || c.chemical_id))
-                .map((c: any) => ({
-                  chemical_usage_id: 0,
-                  chemical_type_id: 2,
-                  chemical_name: c.chemical_name,
-                  qty: c.qty,
-                  qty_unit: c.qty_unit,
-                  remarks: c.remarks,
-                }))
+              .filter((c: any) => c && (c.chemical_name || c.chemical_id))
+              .map((c: any) => ({
+                chemical_usage_id: 0,
+                chemical_type_id: 2,
+                chemical_name: c.chemical_name,
+                qty: c.qty,
+                qty_unit: c.qty_unit,
+                remarks: c.remarks,
+              }))
             : []),
         ],
+
+        // ATTACHMENTS
+        crop_asset_attachment_details: Array.isArray(cropData.attachments)
+          ? cropData.attachments
+          : [],
       };
 
       console.log("Submitting payload:", payload);
@@ -564,8 +580,16 @@ export default function AddCropDetailsModal({
             onChange={(d) => setCropData({ ...cropData, chemicals: d })}
           />
         );
-
       case 6:
+        return (
+          <AttachmentStepOne
+            data={cropData.attachments}
+            onChange={(d) => setCropData({ ...cropData, attachments: d })}
+          />
+        );
+
+
+      case 7:
         return <CropDetailsPreview data={cropData} />;
       default:
         return null;
@@ -587,9 +611,8 @@ export default function AddCropDetailsModal({
       </div>
 
       <div
-        className={`flex mt-4 ${
-          currentStep === 0 ? "justify-end" : "justify-between"
-        }`}
+        className={`flex mt-4 ${currentStep === 0 ? "justify-end" : "justify-between"
+          }`}
       >
         {currentStep !== 0 && (
           <button

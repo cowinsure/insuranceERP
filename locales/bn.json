@@ -325,5 +325,9 @@
   "stage_two_data_saved_successfully": "স্টেজ টু ডেটা সফলভাবে সংরক্ষিত হয়েছে!",
   "failed_to_save_stage_two_data": "স্টেজ টু ডেটা সংরক্ষণ করতে ব্যর্থ।",
   "prev": "পূর্ববর্তী",
-  "save": "সংরক্ষণ করুন"
+  "save": "সংরক্ষণ করুন",
+  "attachments": "সংযুক্তি",
+  "add_photo": "ছবি যোগ করুন",
+  "capture_or_upload_photo": "ছবি ক্যাপচার বা আপলোড করুন",
+  "no_photos_added_yet": "এখনও কোন ছবি যোগ করা হয়নি।"
 }

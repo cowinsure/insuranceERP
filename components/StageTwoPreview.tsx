@@ -5,6 +5,7 @@ import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface StageTwoPreviewProps {
   data: any;
+  attachments?: any[];
 }
 
 const truncate = (text: string, limit = 60) => {
@@ -39,7 +40,7 @@ const renderList = (label: string, items: any[]) => (
   </div>
 );
 
-export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
+export default function StageTwoPreview({ data, attachments }: StageTwoPreviewProps) {
   const { t } = useLocalization();
   if (!data) return <p className="text-gray-400 italic">{t('no_data_available')}</p>;
 
@@ -235,6 +236,34 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
           <p className="text-gray-400 italic">{t('no_weather_effects_recorded')}</p>
         )}
       </section>
+
+      {/* 📎 Attachments */}
+      {attachments && attachments.length > 0 && (
+        <section className="bg-gray-50 rounded-xl shadow-sm border p-5">
+          <h3 className="text-lg font-semibold text-blue-700 border-b pb-2 mb-3">
+            {t('attachments')}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {attachments.map((attachment, index) => (
+              <div
+                key={index}
+                className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
+              >
+                <img
+                  src={attachment.attachment_path}
+                  alt={`Attachment ${index + 1}`}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-2 bg-gray-50 border-t">
+                  <p className="text-xs text-gray-600">
+                    {attachment.remarks || "No remarks"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <p className="text-center text-sm text-gray-500 mt-4">
         {t('please_review_all_information_carefully_before_submitting')}

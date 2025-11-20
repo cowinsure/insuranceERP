@@ -416,7 +416,14 @@ const AddCropStageTwoModal = ({
         );
 
       case 5:
-        return <StageTwoPreview data={stageTwoData} />;
+        return (
+          <StageTwoPreview 
+            data={stageTwoData}
+            attachments={stageTwoData.attachments.filter(
+              (att: any) => att.attachment_path.startsWith("data:")
+            )}
+          />
+        );
       default:
         return null;
     }

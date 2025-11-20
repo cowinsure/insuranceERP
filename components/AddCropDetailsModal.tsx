@@ -593,7 +593,14 @@ export default function AddCropDetailsModal({
 
 
       case 7:
-        return <CropDetailsPreview data={cropData} />;
+        return (
+          <CropDetailsPreview 
+            data={cropData}
+            attachments={cropData.attachments.filter(
+              (att: any) => att.attachment_path.startsWith("data:")
+            )}
+          />
+        );
       default:
         return null;
     }

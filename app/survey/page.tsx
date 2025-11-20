@@ -268,12 +268,12 @@ export default function SurveyPage() {
           </p>
         </div>
 
-        <Button
+        {/* <Button
           className="bg-blue-500 hover:bg-blue-600 text-white"
           onClick={onOpen}
         >
           <Plus className="w-4 h-4" /> New Survey
-        </Button>
+        </Button> */}
       </div>
 
       {/* Search + Table */}

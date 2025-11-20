@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import InputField from "@/components/InputField";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
-import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface WeatherProps {
   data: {
@@ -29,7 +28,6 @@ interface WeatherOption {
 
 const Weather = ({ data, onChange }: WeatherProps) => {
   const { get, loading } = useApi();
-  const { t } = useLocalization();
   const [weatherOptions, setWeatherOptions] = useState<WeatherOption[]>([]);
 
   // selected checkboxes ids
@@ -96,14 +94,14 @@ const Weather = ({ data, onChange }: WeatherProps) => {
   return (
     <form className="p-3 max-h-[60vh] overflow-auto space-y-5">
       <h2 className="text-xl font-semibold mb-5 underline text-center">
-        {t('weather_details')}
+        Weather Details
       </h2>
 
       {/* Adverse Weather Effects */}
       <div className="space-y-3 bg-gray-50 p-3 border rounded-lg">
         <h3 className="font-semibold">
-          {t('adverse_weather_type')}{" "}
-          <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+          Adverse Weather Type{" "}
+          <span className="text-sm text-gray-400">(Multiple Selection)</span>
         </h3>
         {loading ? (
           <Loading />
@@ -135,10 +133,10 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
       {/* Period of Adverse Weather */}
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{t('period_of_adverse_weather')}</h3>
+        <h3 className="text-lg font-semibold">Period of Adverse Weather</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <InputField
-            label={t('from')}
+            label="From"
             id="date_from"
             name="date_from"
             type="date"
@@ -146,7 +144,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             onChange={handleChange}
           />
           <InputField
-            label={t('to')}
+            label="To"
             id="date_to"
             name="date_to"
             type="date"
@@ -158,13 +156,13 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
       {/* General Remarks */}
       <InputField
-        label={t('general_remarks')}
+        label="Remarks"
         id="remarks"
         name="remarks"
         type="text"
-        placeholder={t('add_remarks_if_any')}
-        value={data?.remarks || ""}
-        onChange={(e) => onChange({ ...data, remarks: e.target.value })}
+        placeholder="Add remarks if any"
+        value={data.remarks || ""}
+        onChange={handleChange}
       />
     </form>
   );

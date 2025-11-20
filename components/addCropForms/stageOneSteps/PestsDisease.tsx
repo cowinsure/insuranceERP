@@ -116,10 +116,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
     );
   };
-
-  //(pestOptions);
-  //("Data from parent", data);
-  //(selectedPests);
+console.log(data);
   return (
     <div className="p-3">
       <h2 className="text-xl font-semibold mb-5 underline text-center">

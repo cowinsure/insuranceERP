@@ -212,14 +212,15 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
           {t('weather_effects')}
         </h3>
 
-        {data.weather?.weather_effects_full?.length ? (
+        {data.weather?.length ? (
           <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
             {renderRow(t('period_from'), data.weather.date_from)}
             {renderRow(t('period_to'), data.weather.date_to)}
             {renderRow(t('general_remarks'), data.weather.remarks)}
 
+            {/* List of Weather Effects */}
             <div className="mt-2 space-y-2">
-              {data.weather.weather_effects_full.map((w: any, i: number) => (
+              {data.weather.map((w: any, i: number) => (
                 <div
                   key={i}
                   className="border rounded-lg bg-gray-50 p-2 shadow-sm"

@@ -55,11 +55,12 @@ interface PestsDiseaseData {
 }
 
 interface WeatherData {
+  land_weather_effect_history_id: number;
   weather_effect_type_id: number;
   weather_effect_type_name: string;
   remarks: string;
-  date_from: string | null;
-  date_to: string | null;
+  date_from: string | "";
+  date_to: string | "";
 }
 
 interface StageTwoData {
@@ -109,29 +110,30 @@ const AddCropStageTwoModal = ({
     weather: [],
   });
 
-  // ---------------- Prefill Stage 2 data with stage_name validation ----------------
+  // ---------------- Prefill Stage 2 data with stage_id validation ----------------
   useEffect(() => {
     if (!selectedCrop) return;
 
     const stage2Pests = (selectedCrop.crop_asset_pest_attack_details || [])
-      .filter((p: any) => p.stage_name === "Harvest & Observation")
+      .filter((p: any) => p.stage_id === 3)
       .map((p: any) => p.pest_attack_type_id);
 
     const stage2Diseases = (
       selectedCrop.crop_asset_disease_attack_details || []
     )
-      .filter((d: any) => d.stage_name === "Harvest & Observation")
+      .filter((d: any) => d.stage_id === 3)
       .map((d: any) => d.disease_attack_type_id);
 
     const stage2Weather = (selectedCrop.crop_asset_weather_effect_history || [])
-      .filter((w: any) => w.stage_name === "Harvest & Observation")
+      .filter((w: any) => w.stage_id === 3)
       .map((w: any) => ({
         weather_effect_type_id: w.weather_effect_type_id,
         weather_effect_type_name: w.weather_effect_type_name,
         remarks: w.remarks || "",
-        date_from: w.date_from || null,
-        date_to: w.date_to || null,
+        date_from: w.date_from,
+        date_to: w.date_to,
       }));
+    console.log(stage2Weather);
 
     setStageTwoData((prev) => ({
       harvest: {
@@ -195,26 +197,19 @@ const AddCropStageTwoModal = ({
   };
 
   // ---------------- Correct Stage 2 weather mapping for PUT request ----------------
-  const mapWeather = (weatherData: any) => {
-    if (!weatherData) return [];
+  // Maps weather data for PUT request
+  const mapWeather = (weatherData: WeatherData[]) => {
+    if (!Array.isArray(weatherData)) return [];
 
-    const effects = weatherData.weather_effects_full || weatherData;
-
-    return effects
-      .filter(
-        (w: any) =>
-          w?.weather_effect_type_id &&
-          (!w?.land_weather_effect_history_id ||
-            w.land_weather_effect_history_id === 0)
-      )
-      .map((w: any) => ({
-        land_weather_effect_history_id: 0,
-        weather_effect_type_id: w.weather_effect_type_id,
-        remarks: w.remarks || "",
-        is_active: true,
-        date_from: w.date_from || null,
-        date_to: w.date_to || null,
-      }));
+    return weatherData.map((w) => ({
+      land_weather_effect_history_id: w.land_weather_effect_history_id || 0,
+      weather_effect_type_id: w.weather_effect_type_id,
+      weather_effect_type_name: w.weather_effect_type_name,
+      remarks: w.remarks || "",
+      date_from: w.date_from || null,
+      date_to: w.date_to || null,
+      is_active: true,
+    }));
   };
 
   // -------------------------------------------------------------------------------
@@ -231,6 +226,7 @@ const AddCropStageTwoModal = ({
   };
 
   const handlePrev = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  // console.log(selectedCrop);
 
   const handleSubmit = async () => {
     try {
@@ -252,7 +248,8 @@ const AddCropStageTwoModal = ({
 
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
-
+      console.log(weather);
+      // console.log("Selected crop stage 2", selectedCrop);
       const mergedPests = [
         ...(selectedCrop.crop_asset_pest_attack_details || []),
         ...pests,
@@ -262,12 +259,26 @@ const AddCropStageTwoModal = ({
         ...diseases,
       ];
       const mergedWeather = [
-        ...(selectedCrop.crop_asset_weather_effect_history || []),
-        ...weather,
+        // Keep previous records that are NOT stage 3
+        ...(selectedCrop.crop_asset_weather_effect_history || []).filter(
+          (w: any) => w.stage_id !== 3
+        ),
+        // Add the current stage 3 weather data (from mapWeather)
+        ...weather.map((w) => ({ ...w, stage_id: 3 })), // ensure stage_id is 3
       ];
 
       const payload = {
-        ...selectedCrop,
+        // ...selectedCrop,
+
+        crop_type_id: selectedCrop.crop_type_id,
+        variety: selectedCrop.variety,
+        season: selectedCrop.season,
+        planting_date: selectedCrop.planting_date,
+        harvest_date: selectedCrop.harvest_date,
+        estimated_yield: 3.5,
+        by_user_id: 2,
+        crop_id: selectedCrop.crop_id,
+        land_id: selectedCrop.land_id,
         stage_id: 3,
         crop_harvest_info: {
           harvest_date: stageTwoData.harvest.harvest_date || null,
@@ -332,10 +343,33 @@ const AddCropStageTwoModal = ({
       case 3:
         return (
           <Weather
-            data={stageTwoData.weather}
-            onChange={(val) => handleChange("weather", val)}
+            data={{
+              date_from: stageTwoData.weather?.[0]?.date_from || "",
+              date_to: stageTwoData.weather?.[0]?.date_to || "",
+              remarks: stageTwoData.weather?.[0]?.remarks || "",
+              weather_effects: stageTwoData.weather.map((w) => ({
+                weather_effect_type_id: w.weather_effect_type_id,
+                weather_effect_type_name: w.weather_effect_type_name,
+                remarks: w.remarks || "",
+                is_active: true, // default true
+              })),
+            }}
+            onChange={(updatedData) =>
+              setStageTwoData((prev) => ({
+                ...prev,
+                weather: updatedData.weather_effects.map((w: any, i: any) => ({
+                  ...prev.weather[i],
+                  weather_effect_type_id: w.weather_effect_type_id,
+                  weather_effect_type_name: w.weather_effect_type_name,
+                  remarks: w.remarks,
+                  date_from: updatedData.date_from,
+                  date_to: updatedData.date_to,
+                })),
+              }))
+            }
           />
         );
+
       case 4:
         return <StageTwoPreview data={stageTwoData} />;
       default:

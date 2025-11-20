@@ -78,53 +78,81 @@ export default function AddCropDetailsModal({
   useEffect(() => {
     const fetchExistingCropData = async () => {
       if (!cropId) return;
-      //("Got crop data for crop ID:", cropId);
+
       try {
         const res = await get(`/cms/crop-info-service/?crop_id=${cropId}`);
         if (res.status === "success" && res.data) {
           const d = res.data[0];
-          //(d);
 
-          // 🧩 Normalize data into same shape used by your state
+          // -----------------------------
+          // 🌾 FILTER PESTS (stage_id = 2)
+          // -----------------------------
+          const stage2Pests =
+            d.crop_asset_pest_attack_details
+              ?.filter((p: any) => p.stage_id === 2)
+              .map((p: any) => ({
+                id: Number(p.pest_attack_type_id),
+                name: p.pest_attack_observations_type_name || "",
+              })) || [];
+
+          // Only IDs
+          const stage2PestIds = stage2Pests.map((p: any) => p.id);
+
+          // ------------------------------
+          // 🌿 FILTER DISEASES (stage_id=2)
+          // ------------------------------
+          const stage2Diseases =
+            d.crop_asset_disease_attack_details
+              ?.filter((dd: any) => dd.stage_id === 2)
+              .map((dd: any) => ({
+                id: Number(dd.disease_attack_type_id),
+                name: dd.disease_attack_observations_type_name || "",
+              })) || [];
+
+          const stage2DiseaseIds = stage2Diseases.map((d: any) => d.id);
+
+          // ------------------------------
+          // WEATHER (unchanged)
+          // ------------------------------
+          const weatherEffects =
+            d.crop_asset_weather_effect_history
+              ?.filter((w: any) => w.stage_id === 2)
+              .map((w: any) => ({
+                weather_effect_type_id: w.weather_effect_type_id,
+                weather_effect_type_name: w.weather_effect_type_name,
+                remarks: w.remarks || "",
+                is_active: true,
+                date_from: w.date_from,
+                date_to: w.date_to,
+              })) || [];
+
+              console.log(weatherEffects);
+
+          // ------------------------------
+          // SET NORMALIZED DATA
+          // ------------------------------
           setCropData({
             seed: d.crop_asset_seed_details || [],
+
             cultivation: d.crop_asset_irrigation_cultivation_details?.[0] || {},
+
             history: d.crop_asset_previous_season_history_details?.[0] || {},
+
             weather: {
               remarks: d.crop_asset_weather_effect_history?.[0]?.remarks || "",
-              weather_effects:
-                d.crop_asset_weather_effect_history?.map((w: any) => ({
-                  weather_effect_type_id: w.weather_effect_type_id,
-                  weather_effect_type_name: w.weather_effect_type_name,
-                  remarks: w.remarks || "",
-                  is_active: true,
-                })) || [],
+              weather_effects: weatherEffects,
               date_from:
                 d.crop_asset_weather_effect_history?.[0]?.date_from || "",
               date_to: d.crop_asset_weather_effect_history?.[0]?.date_to || "",
             },
-            pests:
-              d.crop_asset_pest_attack_details?.map((p: any) =>
-                Number(p.pest_attack_type_id)
-              ) || [],
 
-            // ✅ store details for preview
-            pestDetails:
-              d.crop_asset_pest_attack_details?.map((p: any) => ({
-                id: Number(p.pest_attack_type_id),
-                name: p.pest_attack_observations_type_name || "",
-              })) || [],
+            // 🐛 pests filtered by stage 2
+            pests: stage2PestIds,
+            pestDetails: stage2Pests,
 
-            diseases:
-              d.crop_asset_disease_attack_details?.map((d: any) =>
-                Number(d.disease_attack_type_id)
-              ) || [],
-
-            diseaseDetails:
-              d.crop_asset_disease_attack_details?.map((d: any) => ({
-                id: Number(d.disease_attack_type_id),
-                name: d.disease_attack_observations_type_name || "",
-              })) || [],
+            // 🦠 diseases filtered by stage 2
+            diseases: stage2DiseaseIds,
+            diseaseDetails: stage2Diseases,
 
             chemicals: {
               fertilizers:
@@ -465,6 +493,7 @@ export default function AddCropDetailsModal({
       };
 
       console.log("Submitting payload:", payload);
+      console.log(JSON.stringify(payload));
       const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });

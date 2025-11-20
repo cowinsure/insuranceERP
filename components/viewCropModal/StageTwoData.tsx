@@ -9,8 +9,6 @@ interface StageTwoDataProps {
   cropData?: any;
 }
 
-/* ---------- Labels for display ---------- */
-
 /* ---------- Component ---------- */
 const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
   const { get } = useApi();
@@ -57,14 +55,17 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
     { id: number; label: string }[]
   >([]);
 
-  // Call the type api
+  /* ---------- Stage filter for stage_id = 3 ---------- */
+  const filterStage3 = (arr: any[]) =>
+    Array.isArray(arr) ? arr.filter((i) => i?.stage_id === 3) : [];
+
+  /* ---------- Fetch dropdown options ---------- */
   useEffect(() => {
     getHarvestSeedVarietyOptions();
     getHarvestTimingOptions();
     getGoodPracticesOptions();
   }, []);
 
-  // Get harvest seed variety options
   const getHarvestSeedVarietyOptions = async () => {
     try {
       const res = await get(
@@ -74,11 +75,12 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         }
       );
       if (res.status === "success" && Array.isArray(res.data)) {
-        const formatted = res.data.map((item: any) => ({
-          value: item.harvest_seed_variety_observation_id,
-          label: item.harvest_seed_variety_observation_type_name,
-        }));
-        setHarvestSeedVarietyOptions(formatted);
+        setHarvestSeedVarietyOptions(
+          res.data.map((item: any) => ({
+            value: item.harvest_seed_variety_observation_id,
+            label: item.harvest_seed_variety_observation_type_name,
+          }))
+        );
       }
     } catch (error) {
       console.error(error);
@@ -94,11 +96,12 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         }
       );
       if (res.status === "success" && Array.isArray(res.data)) {
-        const formatted = res.data.map((item: any) => ({
-          id: item.good_agricultural_practices_type_id,
-          label: item.good_agricultural_practices_type_name,
-        }));
-        setGoodPracticesList(formatted);
+        setGoodPracticesList(
+          res.data.map((item: any) => ({
+            id: item.good_agricultural_practices_type_id,
+            label: item.good_agricultural_practices_type_name,
+          }))
+        );
       }
     } catch (error) {
       console.error(error);
@@ -111,17 +114,19 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         params: { page_size: 50, start_record: 1 },
       });
       if (res.status === "success" && Array.isArray(res.data)) {
-        const formatted = res.data.map((item: any) => ({
-          value: item.harvesting_timing_id,
-          label: item.harvesting_timing_name,
-        }));
-        setHarvestTimingOptions(formatted);
+        setHarvestTimingOptions(
+          res.data.map((item: any) => ({
+            value: item.harvesting_timing_id,
+            label: item.harvesting_timing_name,
+          }))
+        );
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  /* ---------- No data case ---------- */
   if (!cropData) {
     return (
       <div className="text-gray-500 italic">
@@ -129,25 +134,25 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       </div>
     );
   }
-  const crop = cropData.crop_harvest_info[0];
 
-  // Get the seed variety name using id
+  const crop = cropData.crop_harvest_info?.[0];
+
+  /* ---------- Derived values ---------- */
   const seedVarietyName = crop?.harvest_seed_variety_observation_id
     ? harvestSeedVarietyOptions?.find(
-        (option) => option?.value === crop?.harvest_seed_variety_observation_id
+        (opt) => opt.value === crop?.harvest_seed_variety_observation_id
       )?.label
     : "";
 
-  // Get the harvest timing names
   const harvestingTimingName = crop?.harvesting_timing_id
     ? harvestTimingOptions?.find(
-        (option) => option?.value === crop?.harvesting_timing_id
+        (opt) => opt.value === crop?.harvesting_timing_id
       )?.label
     : "";
 
-  // Get the good practices
   const goodPracticeNames =
-    crop?.crop_harvest_details && crop?.crop_harvest_details.length > 0
+    Array.isArray(crop?.crop_harvest_details) &&
+    crop?.crop_harvest_details.length > 0
       ? crop?.crop_harvest_details
           .map((detail: any) => {
             const match = goodPracticesList?.find(
@@ -155,11 +160,13 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             );
             return match ? match.label : null;
           })
-          .filter(Boolean) // remove nulls
+          .filter(Boolean)
       : [];
 
-  console.log("View crop for stage 2", cropData);
-  console.log(goodPracticesList);
+  const stage3Weather = filterStage3(
+    cropData.crop_asset_weather_effect_history || []
+  );
+
   /* ---------- Render ---------- */
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">
@@ -170,11 +177,11 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           <DisplayField label={t('harvest_date')} value={crop?.harvest_date} />
           <DisplayField
             label={t('total_production')}
-            value={`${
-              crop?.total_production_kg === undefined
-                ? ""
-                : `${crop?.total_production_kg} kg`
-            }`}
+            value={
+              crop?.total_production_kg !== undefined
+                ? `${crop.total_production_kg} kg`
+                : ""
+            }
           />
           <DisplayField
             label={t('moisture_content')}
@@ -192,6 +199,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <h2 className="text-lg font-semibold mb-3 text-green-800">
           {t('observations')}
         </h2>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <DisplayField
             label={t('seed_variety_observation')}
@@ -211,6 +219,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             label={t('remarks')}
             value={crop?.reason_for_is_manageable_harvest}
           />
+
           <div className="lg:col-span-2">
             <ArrayDisplay
               title={t('good_practices')}
@@ -225,18 +234,30 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <h2 className="text-lg font-semibold mb-3 text-green-800">
           {t('pest_disease_attacks')}
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* ✅ Stage-filtered Pest */}
           <ArrayDisplay
             title={t('pest_attacks')}
-            items={Object.entries(cropData.pestAttack || {})
-              .filter(([_, v]) => v)
-              .map(([key]) => ({ name: pestLabels[key] || key }))}
+            items={filterStage3(
+              cropData.crop_asset_pest_attack_details || []
+            ).map((p: any) => ({
+              name: p?.pest_attack_observations_type_name || null,
+              remarks: p?.remarks,
+              date: p?.attack_date || p?.created_at,
+            }))}
           />
+
+          {/* ✅ Stage-filtered Disease */}
           <ArrayDisplay
-            title={t('disease_attacks')}
-            items={Object.entries(cropData.diseaseAttack || {})
-              .filter(([_, v]) => v)
-              .map(([key]) => ({ name: diseaseLabels[key] || key }))}
+           title={t('disease_attacks')}
+            items={filterStage3(
+              cropData.crop_asset_disease_attack_details || []
+            ).map((d: any) => ({
+              name: d?.disease_attack_observations_type_name || "Not Provided",
+              remarks: d?.remarks,
+              date: d?.attack_date || d?.created_at,
+            }))}
           />
         </div>
       </section>
@@ -246,15 +267,28 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <h2 className="text-lg font-semibold mb-3 text-green-800">
           {t('adverse_weather_effects')}
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* ✅ Stage-filtered Weather */}
           <ArrayDisplay
-            title={t('weather_effects')}
-            items={Object.entries(cropData.adverseWeatherEffects || {})
-              .filter(([_, v]) => v)
-              .map(([key]) => ({ name: weatherLabels[key] || key }))}
+            title="Weather Effects"
+            items={filterStage3(
+              cropData.crop_asset_weather_effect_history || []
+            ).map((w: any) => ({
+              name: w?.weather_effect_type_name || "",
+              remarks: w?.remarks,
+              date: w?.created_at || w?.modified_at,
+            }))}
           />
-          <DisplayField label={t('period_from')} value={cropData.periodFrom} />
-          <DisplayField label={t('period_to')} value={cropData.periodTo} />
+
+          <DisplayField
+            label="Period From"
+            value={stage3Weather[0]?.date_from || "Not provided"}
+          />
+          <DisplayField
+            label="Period To"
+            value={stage3Weather[0]?.date_to || "Not provided"}
+          />
         </div>
       </section>
     </div>

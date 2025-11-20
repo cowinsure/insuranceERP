@@ -291,6 +291,45 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           />
         </div>
       </section>
+
+      {/* 📸 Attachments */}
+      {Array.isArray(cropData.crop_asset_attachment_details) &&
+        cropData.crop_asset_attachment_details.length > 0 && (
+          <section className="border rounded-lg p-3">
+            <h2 className="text-lg font-semibold mb-3 text-green-800">
+              {t('attachments')}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {filterStage3(cropData.crop_asset_attachment_details).map(
+                (attachment: any, index: number) => (
+                  <div
+                    key={index}
+                    className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
+                  >
+                    <img
+                      src={
+                        attachment?.attachment_path.startsWith("data:")
+                          ? attachment?.attachment_path
+                          : `https://dev-backend.insurecow.com/${attachment?.attachment_path}`
+                      }
+                      alt={`Attachment ${index + 1}`}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-2 bg-gray-50 border-t">
+                      <p className="text-xs text-gray-600">
+                        {attachment?.remarks || "No remarks"}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+            {filterStage3(cropData.crop_asset_attachment_details).length ===
+              0 && (
+              <p className="text-gray-400 text-sm italic">{t('no_data')}</p>
+            )}
+          </section>
+        )}
     </div>
   );
 };

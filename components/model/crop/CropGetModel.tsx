@@ -25,6 +25,7 @@ export interface CropGetData {
   crop_asset_weather_effect_history: CropAssetWeatherEffectHistory[];
   crop_asset_irrigation_cultivation_details: CropAssetIrrigationCultivationDetails[];
   crop_asset_previous_season_history_details: CropAssetPreviousSeasonHistoryDetails[];
+  crop_asset_attachment_details: CropAssetAttachmentDetails[];
 }
 
 // 🌾 Harvest Info (NEW)
@@ -199,4 +200,23 @@ export interface CropAssetPreviousSeasonHistoryDetails {
   last_year_crop_type_name: string;
   reason_for_changing_seed: string;
   previous_season_history_id: number;
+}
+
+// 📸 Attachment details
+export interface CropAssetAttachmentDetails {
+  crop_id: number;
+  remarks: string;
+  stage_id: number;
+  crop_name: string;
+  land_name: string;
+  created_at: string;
+  created_by: number;
+  stage_name: string;
+  farmer_name: string;
+  modified_at: string | null;
+  modified_by: number | null;
+  mobile_number: string;
+  attachment_path: string;
+  stage_history_id: number;
+  attachment_details_id: number;
 }

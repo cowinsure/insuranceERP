@@ -33,6 +33,10 @@ const CropsPage = () => {
   const [isStageTwoModal, setIsStageTwoModal] = React.useState(false);
   const [isCropView, setIsCropView] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
+  const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
+  const [pendingModal, setPendingModal] = useState<
+    "stage1" | "stage2" | "view" | null
+  >(null);
   const [crops, setCrops] = useState<CropGetData[]>([]);
   const [filteredCrops, setFilteredCrops] = useState(crops);
   const [stageOnePayloads, setStageOnePayloads] = useState<Record<number, any>>(
@@ -79,33 +83,82 @@ const CropsPage = () => {
       setIsLoading(false);
     }
   };
+
+  // GET single crop by id and set to state
+  const fetchSingleCrop = async (cropId: number) => {
+    if (!cropId) return null;
+    setIsLoading(true);
+    try {
+      const response = await get("/cms/crop-info-service", {
+        params: {
+          page_size: 10,
+          start_record: 1,
+          crop_id: cropId,
+        },
+      });
+
+      if (response.status === "success") {
+        // API returns an array of results; pick the first item if present
+        const payload = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+        if (payload) {
+          setSelectedCrop(payload);
+          return payload;
+        }
+      }
+      return null;
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || error.message || "Failed to fetch crop.";
+      toast.error(message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch single crop whenever selectedCropId changes
+  useEffect(() => {
+    if (!selectedCropId) return;
+
+    let mounted = true;
+
+    (async () => {
+      const payload = await fetchSingleCrop(selectedCropId);
+      if (!mounted) return;
+      if (payload && pendingModal) {
+        // open the modal that was requested
+        if (pendingModal === "stage1") setIsStageOneModal(true);
+        if (pendingModal === "stage2") setIsStageTwoModal(true);
+        if (pendingModal === "view") setIsCropView(true);
+        setPendingModal(null);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedCropId, pendingModal]);
   /************************************************************************/
 
   /************************* Handler Functions *************************/
   const handleAddCropDetails = (cropId: number) => {
     if (!cropId) return;
-    const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
-    if (!selectedCrop) return;
-    setSelectedCrop(selectedCrop);
-    setIsStageOneModal(true);
+    setSelectedCropId(cropId);
+    setPendingModal("stage1");
   };
 
   const handleRevisitData = (cropId: number) => {
     if (!cropId) return;
-    const selectedCrop = crops.find((crop) => crop.crop_id === cropId);
-    if (!selectedCrop) return;
-    setSelectedCrop(selectedCrop);
-    setIsStageTwoModal(true);
+    setSelectedCropId(cropId);
+    setPendingModal("stage2");
   };
 
   const handleView = (cropId: number) => {
     if (!cropId) return;
-    const viewCrop = crops.find((crop) => crop.crop_id === cropId);
-    if (!viewCrop) return;
-
-    setSelectedCrop(viewCrop);
-    setIsCropView(true);
-    //("View Crop", viewCrop);
+    setSelectedCropId(cropId);
+    setPendingModal("view");
   };
   /************************************************************************/
 

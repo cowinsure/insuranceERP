@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface SearchFilterProps {
   placeholder: string;
@@ -17,6 +18,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   setFilteredData,
   searchKeys,
 }) => {
+  const { t } = useLocalization();
   const [query, setQuery] = useState("");
   const [noResults, setNoResults] = useState(false);
   const [resultCount, setResultCount] = useState<number>(data.length);
@@ -60,7 +62,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
   return (
     <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg">
-      <h1 className="font-bold text-gray-800 text-xl">Search</h1>
+      <h1 className="font-bold text-gray-800 text-xl">{t('search')}</h1>
       <div className="relative w-full ">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
         {query && (
@@ -86,11 +88,11 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
         <>
           {noResults ? (
             <p className="text-sm text-red-500 animate-fadeIn">
-              No results found
+              {t('no_results_found')}
             </p>
           ) : (
             <p className="text-sm text-gray-500 animate-fadeIn">
-              {resultCount} result{resultCount !== 1 && "s"} found
+              {resultCount} {t(resultCount === 1 ? 'result_found' : 'results_found')}
             </p>
           )}
         </>

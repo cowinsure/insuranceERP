@@ -403,7 +403,7 @@ const CropsPage = () => {
                       }`}
                       onClick={() => {
                         if (!stage1Enabled) {
-                          toast.error("Stage 1 cannot be edited at this stage");
+                          toast.error(t('stage_1_cannot_edit'));
                         } else {
                           handleAddCropDetails(crop.crop_id);
                         }
@@ -422,7 +422,7 @@ const CropsPage = () => {
                       }`}
                       onClick={() => {
                         if (!stage2Enabled) {
-                          toast.error("Complete Stage 1 first");
+                          toast.error(t('complete_stage_1_first'));
                         } else {
                           handleRevisitData(crop.crop_id);
                         }

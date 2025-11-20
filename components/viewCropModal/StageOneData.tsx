@@ -1,66 +1,68 @@
 "use client";
 import React from "react";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface StageOneDataProps {
   data: Record<string, any>;
 }
 
 const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
+  const { t } = useLocalization();
   const safeArray = (arr: any[]) => (Array.isArray(arr) ? arr : []);
   //(data);
 
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto ">
       {/* 🌱 Seed Information */}
-      <Section title="Seed Information">
+      <Section title={t('seed_information')}>
         <Grid>
           <InputField
-            label="Seed Name"
+            label={t('seed_name')}
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_common_name}
           />
           <InputField
-            label="Variety"
+            label={t('variety')}
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_variety}
           />
           <InputField
-            label="Seed Company"
+            label={t('seed_company')}
             value={
               safeArray(data.crop_asset_seed_details)[0]?.seed_company_name
             }
           />
           <InputField
-            label="Seed Type"
+            label={t('seed_type')}
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_type_name}
           />
         </Grid>
       </Section>
 
       {/* 💧 Irrigation & Cultivation */}
-      <Section title="Irrigation & Cultivation">
+      <Section title={t('irrigation_cultivation')}>
         <Grid>
           <InputField
-            label="Irrigation Facility"
+            label={t('irrigation_facility')}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.irrigation_facility
             }
           />
           <InputField
-            label="Irrigation Source"
+            label={t('irrigation_source')}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.irrigation_source
             }
           />
           <InputField
-            label="Cultivation System"
+            label={t('cultivation_system')}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_cultivation_system_name
             }
           />
           <InputField
-            label="Land Suitability"
+            label={t('land_suitability')}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_land_suitability_name
@@ -70,31 +72,31 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🌾 Crop History */}
-      <Section title="Crop History">
+      <Section title={t('crop_history')}>
         <Grid>
           <InputField
-            label="Immediate Previous Crop"
+            label={t('immediate_previous_crop')}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.immediate_previous_crop
             }
           />
           <InputField
-            label="Harvest Date"
+            label={t('harvest_date')}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.harvest_date
             }
           />
           <InputField
-            label="Last Year's Crop"
+            label={t('last_years_crop')}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.last_year_crop_type_name
             }
           />
           <InputField
-            label="Last Year Production"
+            label={t('last_year_production')}
             value={safeArray(
               data.crop_asset_previous_season_history_details
             )[0]?.last_year_production?.toString()}
@@ -107,14 +109,14 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             }
           /> */}
           <InputField
-            label="Seed Used Last Year"
+            label={t('seed_used_last_year')}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.seed_used_last_year
             }
           />
           <InputField
-            label="Reason For Changing Seed"
+            label={t('reason_for_changing_seed')}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.reason_for_changing_seed
@@ -124,9 +126,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🌦️ Weather Effects */}
-      <Section title="Weather Effects">
+      <Section title={t('weather_effects')}>
         <ArrayDisplay
-          title="Weather Events"
+          title={t('weather_events')}
           items={safeArray(data.crop_asset_weather_effect_history).map(
             (w: any) => ({
               name: w?.weather_effect_type_name || "",
@@ -138,10 +140,10 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🐛 Pest & Disease Attacks */}
-      <Section title="Pest & Disease Attacks">
+      <Section title={t('pest_disease_attacks')}>
         <Grid>
           <ArrayDisplay
-            title="Pest Attacks"
+            title={t('pest_attacks')}
             items={safeArray(data.crop_asset_pest_attack_details).map(
               (p: any) => ({
                 name: p?.pest_attack_observations_type_name || null,
@@ -151,7 +153,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             )}
           />
           <ArrayDisplay
-            title="Disease Attacks"
+            title={t('disease_attacks')}
             items={safeArray(data.crop_asset_disease_attack_details).map(
               (d: any) => ({
                 name:
@@ -165,9 +167,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🧪 Chemicals Used */}
-      <Section title="Fertilizers & Pesticides">
+      <Section title={t('fertilizers_pesticides')}>
         <ArrayDisplay
-          title="Chemicals"
+          title={t('chemicals')}
           items={safeArray(data.crop_asset_chemical_usage_details).map(
             (c: any) => ({
               name: c?.chemical_name || "Not Provided",
@@ -204,18 +206,21 @@ const Grid = ({ children }: { children: React.ReactNode }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
 );
 
-const InputField = ({ label, value }: { label: string; value: any }) => (
-  <div className="flex flex-col">
-    <span className="text-sm text-gray-500">{label}</span>
-    <div className="border border-gray-200 rounded-md p-2 bg-gray-50">
-      {value && value !== "null" ? (
-        value
-      ) : (
-        <span className="text-gray-400 italic">Not provided</span>
-      )}
+const InputField = ({ label, value }: { label: string; value: any }) => {
+  const { t } = useLocalization();
+  return (
+    <div className="flex flex-col">
+      <span className="text-sm text-gray-500">{label}</span>
+      <div className="border border-gray-200 rounded-md p-2 bg-gray-50">
+        {value && value !== "null" ? (
+          value
+        ) : (
+          <span className="text-gray-400 italic">{t('not_provided')}</span>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ArrayDisplay = ({
   title,
@@ -224,6 +229,7 @@ const ArrayDisplay = ({
   title: string;
   items: { name: string; quantity?: string; remarks?: string; date?: string }[];
 }) => {
+  const { t } = useLocalization();
   const hasData = Array.isArray(items) && items.some((i) => i && i.name);
   //(hasData);
   //(items);
@@ -232,7 +238,7 @@ const ArrayDisplay = ({
     <div>
       <h3 className="font-semibold mb-2 text-gray-600">{title}</h3>
       {!hasData ? (
-        <p className="text-gray-400 text-sm italic">No data</p>
+        <p className="text-gray-400 text-sm italic">{t('no_data')}</p>
       ) : (
         <ul className="space-y-1">
           {items.map((item, i) => (

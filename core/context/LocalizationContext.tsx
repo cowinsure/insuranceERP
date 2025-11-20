@@ -8,7 +8,7 @@ import bn from "../../locales/bn.json";
 type Locale = "en" | "bn";
 
 type Translations = typeof en; // { welcome: string; login: string; ... }
-type TranslationKey = keyof Translations; // "welcome" | "login" | "logout" | ...
+type TranslationKey = string; // Allow any string for dynamic keys
 
 interface LocalizationContextProps {
   locale: Locale;

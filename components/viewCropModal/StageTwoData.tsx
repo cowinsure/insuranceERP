@@ -2,6 +2,7 @@
 
 import useApi from "@/hooks/use_api";
 import React, { useEffect, useState } from "react";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 /* ---------- Props ---------- */
 interface StageTwoDataProps {
@@ -9,39 +10,42 @@ interface StageTwoDataProps {
 }
 
 /* ---------- Labels for display ---------- */
-const pestLabels: Record<string, string> = {
-  stemBorer: "Stem Borer",
-  leafFolder: "Leaf Folder",
-  brownPlanthopper: "Brown Planthopper",
-  greenLeafhopper: "Green Leafhopper",
-  stinkBug: "Stink Bug",
-  others: "Others",
-  none: "None",
-};
-
-const diseaseLabels: Record<string, string> = {
-  leafBlast: "Leaf Blast",
-  bacterialLeafBlight: "Bacterial Leaf Blight",
-  sheathBlight: "Sheath Blight",
-  bakanae: "Bakanae",
-  brownSpot: "Brown Spot",
-  leafScald: "Leaf Scald",
-  hispa: "Hispa",
-  tungro: "Tungro",
-  none: "None",
-};
-
-const weatherLabels: Record<string, string> = {
-  flood: "Flood",
-  drought: "Drought",
-  excessRainfall: "Excess Rainfall",
-  storms: "Storms",
-  hailstorm: "Hailstorm",
-};
 
 /* ---------- Component ---------- */
 const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
   const { get } = useApi();
+  const { t } = useLocalization();
+
+  /* ---------- Labels for display ---------- */
+  const pestLabels: Record<string, string> = {
+    stemBorer: t('stem_borer'),
+    leafFolder: t('leaf_folder'),
+    brownPlanthopper: t('brown_planthopper'),
+    greenLeafhopper: t('green_leafhopper'),
+    stinkBug: t('stink_bug'),
+    others: t('others'),
+    none: t('none'),
+  };
+
+  const diseaseLabels: Record<string, string> = {
+    leafBlast: t('leaf_blast'),
+    bacterialLeafBlight: t('bacterial_leaf_blight'),
+    sheathBlight: t('sheath_blight'),
+    bakanae: t('bakanae'),
+    brownSpot: t('brown_spot'),
+    leafScald: t('leaf_scald'),
+    hispa: t('hispa'),
+    tungro: t('tungro'),
+    none: t('none'),
+  };
+
+  const weatherLabels: Record<string, string> = {
+    flood: t('flood'),
+    drought: t('drought'),
+    excessRainfall: t('excess_rainfall'),
+    storms: t('storms'),
+    hailstorm: t('hailstorm'),
+  };
 
   const [harvestSeedVarietyOptions, setHarvestSeedVarietyOptions] = useState<
     { value: string; label: string }[]
@@ -121,7 +125,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
   if (!cropData) {
     return (
       <div className="text-gray-500 italic">
-        No Stage Two cropData available for this crop.
+        {t('no_stage_two_data')}
       </div>
     );
   }
@@ -161,11 +165,11 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
     <div className="space-y-6 text-gray-700 overflow-y-auto">
       {/* 🌾 Harvest */}
       <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">Harvest</h2>
+        <h2 className="text-lg font-semibold mb-3 text-green-800">{t('harvest')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DisplayField label="Harvest Date" value={crop?.harvest_date} />
+          <DisplayField label={t('harvest_date')} value={crop?.harvest_date} />
           <DisplayField
-            label="Total Production"
+            label={t('total_production')}
             value={`${
               crop?.total_production_kg === undefined
                 ? ""
@@ -173,7 +177,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             }`}
           />
           <DisplayField
-            label="Moisture Content"
+            label={t('moisture_content')}
             value={`${
               crop?.moisture_content_percentage === undefined
                 ? ""
@@ -186,30 +190,30 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       {/* 🌱 Observations */}
       <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Observations
+          {t('observations')}
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <DisplayField
-            label="Seed Variety Observation"
+            label={t('seed_variety_observation')}
             value={seedVarietyName}
           />
           <DisplayField
-            label="Harvesting Timing"
+            label={t('harvesting_timing')}
             value={harvestingTimingName}
           />
           <DisplayField
-            label="Manageable"
+            label={t('manageable')}
             value={
-              crop?.is_manageable_harvest === true ? "It was manageable" : "No"
+              crop?.is_manageable_harvest === true ? t('it_was_manageable') : t('no')
             }
           />
           <DisplayField
-            label="Remarks"
+            label={t('remarks')}
             value={crop?.reason_for_is_manageable_harvest}
           />
           <div className="lg:col-span-2">
             <ArrayDisplay
-              title="Good Practices"
+              title={t('good_practices')}
               items={goodPracticeNames.map((name: string) => ({ name }))}
             />
           </div>
@@ -219,17 +223,17 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       {/* 🐛 Pest & Disease */}
       <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Pest & Disease Attacks
+          {t('pest_disease_attacks')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ArrayDisplay
-            title="Pest Attacks"
+            title={t('pest_attacks')}
             items={Object.entries(cropData.pestAttack || {})
               .filter(([_, v]) => v)
               .map(([key]) => ({ name: pestLabels[key] || key }))}
           />
           <ArrayDisplay
-            title="Disease Attacks"
+            title={t('disease_attacks')}
             items={Object.entries(cropData.diseaseAttack || {})
               .filter(([_, v]) => v)
               .map(([key]) => ({ name: diseaseLabels[key] || key }))}
@@ -240,17 +244,17 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       {/* 🌤 Weather */}
       <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">
-          Adverse Weather Effects
+          {t('adverse_weather_effects')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ArrayDisplay
-            title="Weather Effects"
+            title={t('weather_effects')}
             items={Object.entries(cropData.adverseWeatherEffects || {})
               .filter(([_, v]) => v)
               .map(([key]) => ({ name: weatherLabels[key] || key }))}
           />
-          <DisplayField label="Period From" value={cropData.periodFrom} />
-          <DisplayField label="Period To" value={cropData.periodTo} />
+          <DisplayField label={t('period_from')} value={cropData.periodFrom} />
+          <DisplayField label={t('period_to')} value={cropData.periodTo} />
         </div>
       </section>
     </div>
@@ -277,24 +281,27 @@ const ArrayDisplay = ({
 }: {
   title: string;
   items: { name: string }[];
-}) => (
-  <div>
-    <h3 className="font-semibold mb-2 text-gray-600">{title}</h3>
-    {items && items.length > 0 ? (
-      <ul className="space-y-1">
-        {items.map((item, i) => (
-          <li
-            key={i}
-            className="text-sm bg-blue-50 border border-gray-200 p-2 rounded"
-          >
-            {item.name}
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p className="text-gray-400 text-sm italic">Not Provided</p>
-    )}
-  </div>
-);
+}) => {
+  const { t } = useLocalization();
+  return (
+    <div>
+      <h3 className="font-semibold mb-2 text-gray-600">{title}</h3>
+      {items && items.length > 0 ? (
+        <ul className="space-y-1">
+          {items.map((item, i) => (
+            <li
+              key={i}
+              className="text-sm bg-blue-50 border border-gray-200 p-2 rounded"
+            >
+              {item.name}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-400 text-sm italic">{t('not_provided')}</p>
+      )}
+    </div>
+  );
+};
 
 export default StageTwoData;

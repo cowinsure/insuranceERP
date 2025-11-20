@@ -9,6 +9,7 @@ import useApi from "@/hooks/use_api";
 import { toast } from "sonner";
 import { CropAssetSeedDetails } from "../model/crop/CropGetModel";
 import { IoMdKeypad } from "react-icons/io";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface CropStageModalTabsProps {
   data: any;
@@ -27,6 +28,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
   // stageTwoData,
 }) => {
   const { get } = useApi();
+  const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState("stage1");
   const [landInfo, setLandInfo] = useState<LandData | null>(null);
 
@@ -70,7 +72,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
         const message =
           error?.response?.data?.message ||
           error.message ||
-          "Failed to fetch land info.";
+          t('failed_to_fetch_land_info');
         toast.error(message);
       }
     };
@@ -87,7 +89,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
       <div className="bg-white min-h-[25vh] overflow-y-auto mb-7 p-2">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
-          Crop Details
+          {t('crop_details')}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -97,7 +99,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <GiPlantRoots className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">Crop</p>
+              <p className="text-sm text-gray-500">{t('crop')}</p>
               <p className="font-medium text-gray-800">
                 {data.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
               </p>
@@ -110,7 +112,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <PiPlantDuotone className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">Variety</p>
+              <p className="text-sm text-gray-500">{t('variety')}</p>
               <p className="font-medium text-gray-800">
                 {data.crop_asset_seed_details?.[0]?.seed_variety ||
                   data.variety ||
@@ -125,7 +127,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <PiCalendar className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">Plantation Date</p>
+              <p className="text-sm text-gray-500">{t('plantation_date')}</p>
               <p className="font-medium text-gray-800">
                 {data.planting_date || "N/A"}
               </p>
@@ -138,7 +140,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <LandPlot className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">Land</p>
+              <p className="text-sm text-gray-500">{t('land')}</p>
               <p className="font-medium text-gray-800">
                 {landInfo?.land_name || "N/A"}
               </p>
@@ -151,7 +153,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <User className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">Farmer Name</p>
+              <p className="text-sm text-gray-500">{t('farmer_name')}</p>
               <p className="font-medium text-gray-800">
                 {landInfo?.farmer_name || "N/A"}
               </p>
@@ -164,7 +166,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <IoMdKeypad className="text-2xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">Farmer Mobile</p>
+              <p className="text-sm text-gray-500">{t('farmer_mobile')}</p>
               <p className="font-medium text-gray-800">
                 {landInfo?.mobile_number || "N/A"}
               </p>
@@ -190,7 +192,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               {tab === "stage1" && <GiPlantRoots className="text-xl" />}
               {tab === "stage2" && <PiPlantDuotone className="text-xl" />}
               <span>
-                {tab === "stage1" ? "Stage 1 Details" : "Stage 2 Details"}
+                {tab === "stage1" ? t('stage_1_details') : t('stage_2_details')}
               </span>
             </button>
           ))}

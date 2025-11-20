@@ -50,6 +50,8 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
       console.error("Error converting file to base64:", error);
     }
   };
+  console.log(" attachments" +attachments[0]?.attachment_path);
+  
 
   const handleRemoveAttachment = (index: number) => {
     const updatedAttachments = attachments.filter((_, i) => i !== index);
@@ -67,9 +69,11 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
       {attachments.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
           {attachments.map((attachment, index) => (
+            
+            
             <div key={index} className="relative border rounded-lg overflow-hidden">
               <img
-                src={attachment.attachment_path}
+                src={"https://dev-backend.insurecow.com/"+ attachment?.attachment_path}
                 alt={`Attachment ${index + 1}`}
                 className="w-full h-32 object-cover"
               />

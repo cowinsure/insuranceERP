@@ -252,7 +252,7 @@ const PlotDetailsDialog = ({
             <Zoom>
               <img
                 src={
-                  "https://dev-backend.insurecow.com/" + plot.imageUrl ||
+                 `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL} + ${plot.imageUrl}` ||
                   "/placeholder.svg"
                 }
                 alt={plot.plotName}

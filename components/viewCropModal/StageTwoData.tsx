@@ -310,7 +310,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
                       src={
                         attachment?.attachment_path.startsWith("data:")
                           ? attachment?.attachment_path
-                          : `https://dev-backend.insurecow.com/${attachment?.attachment_path}`
+                          : `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL }${attachment?.attachment_path}`
                       }
                       alt={`Attachment ${index + 1}`}
                       className="w-full h-48 object-cover"

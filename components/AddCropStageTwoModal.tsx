@@ -65,6 +65,7 @@ interface WeatherData {
 
 interface AttachmentItem {
   attachment_details_id: number;
+  stage_id: number | null;
   attachment_path: string;
   remarks: string;
 }
@@ -408,6 +409,7 @@ const AddCropStageTwoModal = ({
       case 4:
         return (
           <AttachmentStepOne
+          stageId={3}
             data={stageTwoData.attachments}
             onChange={(d) => setStageTwoData({ ...stageTwoData, attachments: d })}
           />

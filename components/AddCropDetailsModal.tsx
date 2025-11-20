@@ -41,6 +41,8 @@ interface WeatherData {
 
 interface AttachmentItem {
   attachment_details_id: number;
+
+  stage_id: number | null;
   attachment_path: string; // base64
   remarks: string;
 }
@@ -583,6 +585,7 @@ export default function AddCropDetailsModal({
       case 6:
         return (
           <AttachmentStepOne
+            stageId = {2}
             data={cropData.attachments}
             onChange={(d) => setCropData({ ...cropData, attachments: d })}
           />

@@ -210,14 +210,18 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
           Weather Effects
         </h3>
 
-        {data.weather?.weather_effects_full?.length ? (
+        {data.weather?.length ? (
           <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
-            {renderRow("Period From", data.weather.date_from)}
-            {renderRow("Period To", data.weather.date_to)}
-            {renderRow("General Remarks", data.weather.remarks)}
+            {/* Master Date & Remarks */}
+            <div className="border rounded-lg bg-gray-50 p-3 shadow-sm">
+              {renderRow("Period From", data.weather[0]?.date_from)}
+              {renderRow("Period To", data.weather[0]?.date_to)}
+              {renderRow("General Remarks", data.weather[0]?.remarks || "")}
+            </div>
 
+            {/* List of Weather Effects */}
             <div className="mt-2 space-y-2">
-              {data.weather.weather_effects_full.map((w: any, i: number) => (
+              {data.weather.map((w: any, i: number) => (
                 <div
                   key={i}
                   className="border rounded-lg bg-gray-50 p-2 shadow-sm"
@@ -229,7 +233,7 @@ export default function StageTwoPreview({ data }: StageTwoPreviewProps) {
             </div>
           </div>
         ) : (
-          <p className="text-gray-400 italic">No weather effects recorded</p>
+          <p>No weather data available</p>
         )}
       </section>
 

@@ -7,10 +7,13 @@ interface StageOneDataProps {
 
 const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
   const safeArray = (arr: any[]) => (Array.isArray(arr) ? arr : []);
-  //(data);
+
+  // 🔥 Filter array items by their own stage_id
+  const filterByItemStage = (arr: any[], stageId: number) =>
+    safeArray(arr).filter((item) => item?.stage_id === stageId);
 
   return (
-    <div className="space-y-6 text-gray-700 overflow-y-auto ">
+    <div className="space-y-6 text-gray-700 overflow-y-auto">
       {/* 🌱 Seed Information */}
       <Section title="Seed Information">
         <Grid>
@@ -99,13 +102,6 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               data.crop_asset_previous_season_history_details
             )[0]?.last_year_production?.toString()}
           />
-          {/* <InputField
-            label="Sowing Date"
-            value={
-              safeArray(data.crop_asset_previous_season_history_details)[0]
-                ?.sowing_date
-            }
-          /> */}
           <InputField
             label="Seed Used Last Year"
             value={
@@ -127,13 +123,28 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       <Section title="Weather Effects">
         <ArrayDisplay
           title="Weather Events"
-          items={safeArray(data.crop_asset_weather_effect_history).map(
-            (w: any) => ({
-              name: w?.weather_effect_type_name || "",
-              remarks: w?.remarks,
-              date: w?.created_at || w?.modified_at,
-            })
-          )}
+          items={filterByItemStage(
+            data.crop_asset_weather_effect_history,
+            2 // filter for stage 2 only
+          ).map((w: any) => ({
+            name: w?.weather_effect_type_name || "",
+            remarks: w?.remarks,
+            date: w?.created_at || w?.modified_at,
+          }))}
+        />
+        <InputField
+          label="Date from"
+          value={filterByItemStage(
+            data.crop_asset_weather_effect_history,
+            2
+          ).map((d) => d.date_from)}
+        />
+        <InputField
+          label="Date from"
+          value={filterByItemStage(
+            data.crop_asset_weather_effect_history,
+            2
+          ).map((d) => d.date_to)}
         />
       </Section>
 
@@ -142,24 +153,26 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
         <Grid>
           <ArrayDisplay
             title="Pest Attacks"
-            items={safeArray(data.crop_asset_pest_attack_details).map(
-              (p: any) => ({
-                name: p?.pest_attack_observations_type_name || null,
-                remarks: p?.remarks,
-                date: p?.attack_date || p?.created_at,
-              })
-            )}
+            items={filterByItemStage(
+              data.crop_asset_pest_attack_details,
+              2
+            ).map((p: any) => ({
+              name: p?.pest_attack_observations_type_name || null,
+              remarks: p?.remarks,
+              date: p?.attack_date || p?.created_at,
+            }))}
           />
+
           <ArrayDisplay
             title="Disease Attacks"
-            items={safeArray(data.crop_asset_disease_attack_details).map(
-              (d: any) => ({
-                name:
-                  d?.disease_attack_observations_type_name || "Not Provided",
-                remarks: d?.remarks,
-                date: d?.attack_date || d?.created_at,
-              })
-            )}
+            items={filterByItemStage(
+              data.crop_asset_disease_attack_details,
+              2
+            ).map((d: any) => ({
+              name: d?.disease_attack_observations_type_name || "Not Provided",
+              remarks: d?.remarks,
+              date: d?.attack_date || d?.created_at,
+            }))}
           />
         </Grid>
       </Section>
@@ -225,8 +238,6 @@ const ArrayDisplay = ({
   items: { name: string; quantity?: string; remarks?: string; date?: string }[];
 }) => {
   const hasData = Array.isArray(items) && items.some((i) => i && i.name);
-  //(hasData);
-  //(items);
 
   return (
     <div>
@@ -252,7 +263,8 @@ const ArrayDisplay = ({
                   </div>
                 )}
               </div>
-              {item.remarks && (
+
+              {item.remarks && item.remarks !== "" && (
                 <div className="text-xs text-gray-500 italic mt-1">
                   Remarks: {item.remarks}
                 </div>

@@ -5,6 +5,7 @@ import DropdownField from "../DropDownField";
 import { toast, Toaster } from "sonner";
 import useApi from "@/hooks/use_api";
 import { CropRegisterData } from "../model/crop/CropRegisterModel";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 const defaultDate = new Date().toISOString();
 
@@ -113,6 +114,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   onSuccess,
 }) => {
   const { get, post } = useApi();
+  const { t } = useLocalization();
   const [formData, setFormData] = useState<CropRegisterData>({
     ...defaultCropData,
   });
@@ -190,7 +192,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         (land) => land.land_id === parsedValue
       );
       if (selectedLand) {
-        setFarmerName(selectedLand.farmer_name || "Farmer name not found");
+        setFarmerName(selectedLand.farmer_name || t('farmer_name_not_found'));
         setMobileNumber(selectedLand.mobile_number || "N/A");
       } else {
         setFarmerName("");
@@ -216,7 +218,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
       });
 
       if (response.status === "success") {
-        toast.success("Crop registered successfully!");
+        toast.success(t('crop_registered_successfully'));
         setFormData({ ...defaultCropData });
         setFarmerName("");
         setMobileNumber("");
@@ -224,10 +226,10 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         onSuccess();
         closeModal?.();
       } else {
-        toast.error(response.message || "Failed to register crop");
+        toast.error(response.message || t('failed_to_register_crop'));
       }
     } catch (error) {
-      toast.error("Error submitting crop data");
+      toast.error(t('error_submitting_crop_data'));
     }
   };
 
@@ -237,7 +239,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         {/* ✅ Crop Name */}
         <DropdownField
           id="crop_type_id"
-          label="Select Crop"
+          label={t('select_crop')}
           name="crop_type_id"
           value={formData.crop_type_id || ""}
           onChange={handleDropdownChange}
@@ -251,7 +253,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         {/* ✅ Planting Date */}
         <InputField
           id="planting_date"
-          label="Planting Date"
+          label={t('planting_date')}
           name="planting_date"
           type="date"
           value={formData.planting_date}
@@ -262,7 +264,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         {/* ✅ Select Land */}
         <DropdownField
           id="land_name"
-          label="Select Land"
+          label={t('select_land')}
           name="land_name"
           value={formData.land_id || ""}
           onChange={handleDropdownChange}
@@ -276,32 +278,32 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         {/* ✅ Farmer Name (auto-filled, read-only) */}
         <InputField
           id="farmer_name"
-          label="Farmer Name"
+          label={t('farmer_name')}
           name="farmer_name"
           type="text"
           value={farmerName}
           onChange={() => {}}
           readOnly={true}
-          placeholder="Name will be auto-filled"
+          placeholder={t('name_will_be_auto_filled')}
         />
 
         {/* ✅ Mobile Number (auto-filled, read-only) */}
         <InputField
           id="mobile_number"
-          label="Mobile Number"
+          label={t('mobile_number')}
           name="mobile_number"
           type="text"
           value={mobileNumber}
           onChange={() => {}}
           readOnly={true}
-          placeholder="Number will be auto-filled"
+          placeholder={t('number_will_be_auto_filled')}
         />
 
         <button
           type="submit"
           className="bg-[#003846] cursor-pointer text-white px-4 py-2 rounded hover:opacity-90 w-full"
         >
-          Submit
+          {t('submit')}
         </button>
       </form>
     </div>

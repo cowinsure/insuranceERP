@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import InputField from "@/components/InputField";
 import { X } from "lucide-react";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 
 interface HarvestProps {
@@ -11,6 +12,7 @@ interface HarvestProps {
 }
 
 const Harvest = ({ data, onChange }: HarvestProps) => {
+  const { t } = useLocalization();
   const [harvestDate, setHarvestDate] = useState("");
   const [productionValues, setProductionValues] = useState<number[]>([]);
   const [moistureValues, setMoistureValues] = useState<number[]>([]);
@@ -128,14 +130,14 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
   return (
     <div className="space-y-5 bg-white rounded-lg p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        Harvest Details
+        {t('harvest_details')}
       </h2>
 
       {/* Harvest Date */}
       <InputField
         id="harvestDate"
         name="harvestDate"
-        label="Harvest Date"
+        label={t('harvest_date')}
         type="date"
         value={harvestDate}
         onChange={(e) => handleDateChange(e.target.value)}
@@ -144,14 +146,14 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
       {/* Total Production */}
       <div>
         <label className="font-semibold text-sm text-gray-500">
-          Total Production (kg) <span className="text-gray-400">(Max : 3)</span>
+          {t('total_production_kg')} <span className="text-gray-400">{t('max_3')}</span>
         </label>
         <div className="flex gap-2 mt-1">
           <input
             type="text"
             inputMode="decimal"
             className="border border-gray-300 rounded-md p-2 flex-1"
-            placeholder="e.g. 42.8"
+            placeholder={t('eg_42_8')}
             value={productionInput}
             onChange={(e) => setProductionInput(e.target.value)}
           />
@@ -165,7 +167,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
                 : "cursor-pointer"
             } bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50`}
           >
-            Add
+            {t('add')}
           </button>
         </div>
 
@@ -194,7 +196,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
 
         {/* Show total production */}
         <p className=" text-blue-400 mt-2 font-semibold">
-          Average weight:{" "}
+          {t('average_weight')}{" "}
           <span className="font-semibold">
             {getTotalProduction(productionValues)} kg
           </span>
@@ -204,14 +206,14 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
       {/* Moisture Content */}
       <div>
         <label className="font-semibold text-sm text-gray-500">
-          Moisture Content (%) <span className="text-gray-400">(Max : 3)</span>
+          {t('moisture_content_percent')} <span className="text-gray-400">{t('max_3')}</span>
         </label>
         <div className="flex gap-2 mt-1">
           <input
             type="text"
             inputMode="decimal"
             className="border border-gray-300 rounded-md p-2 flex-1"
-            placeholder="e.g. 16.7"
+            placeholder={t('eg_16_7')}
             value={moistureInput}
             onChange={(e) => setMoistureInput(e.target.value)}
           />
@@ -225,7 +227,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
                 : "cursor-pointer"
             } bg-[#003846] text-white px-4 py-2 rounded-md hover:bg-[#005464] disabled:opacity-50`}
           >
-            Add
+            {t('add')}
           </button>
         </div>
 
@@ -254,7 +256,7 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
 
         {/* Show average moisture */}
         <p className="text-blue-400 mt-2 font-semibold">
-          Average:{" "}
+          {t('average')}{" "}
           <span className="font-semibold">
             {getAverageMoisture(moistureValues).toFixed(1)}%
           </span>

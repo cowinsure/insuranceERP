@@ -13,6 +13,7 @@ import Weather from "./addCropForms/stageOneSteps/Weather";
 import PestsDisease from "./addCropForms/stageOneSteps/PestsDisease";
 import Chemicals from "./addCropForms/stageOneSteps/Chemicals";
 import CropDetailsPreview from "./CropDetailsPreview";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 // Define ChemicalItem for consistency
 interface ChemicalItem {
@@ -71,6 +72,7 @@ export default function AddCropDetailsModal({
   onClose,
 }: AddCropDetailsModalProps) {
   const { get, put } = useApi();
+  const { t } = useLocalization();
 
   // This function fetchs and puts data on the forms for selected crop
   useEffect(() => {
@@ -147,13 +149,13 @@ export default function AddCropDetailsModal({
   }, [cropId]);
 
   const steps = [
-    "Seed",
-    "Cultivation",
-    "History",
-    "Weather",
-    "Pest & Disease",
-    "Chemicals",
-    "Preview",
+    t('seed'),
+    t('cultivation'),
+    t('history'),
+    t('weather'),
+    t('pest_disease'),
+    t('chemicals'),
+    t('preview'),
   ];
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -467,12 +469,12 @@ export default function AddCropDetailsModal({
         params: { crop_id: cropId },
       });
       if (res.status === "success") {
-        toast.success("Crop data submitted successfully!");
+        toast.success(t('crop_data_submitted_successfully'));
         onClose();
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to submit crop data");
+      toast.error(t('failed_to_submit_crop_data'));
     } finally {
       setIsLoading(false);
       setCurrentStep(0);
@@ -565,7 +567,7 @@ export default function AddCropDetailsModal({
             onClick={handlePrev}
             className="cursor-pointer px-4 py-2 border border-blue-700 text-blue-700 rounded-lg hover:bg-blue-100 flex items-center gap-1"
           >
-            <IoIosArrowBack /> Prev
+            <IoIosArrowBack /> {t('prev')}
           </button>
         )}
 
@@ -575,14 +577,14 @@ export default function AddCropDetailsModal({
             disabled={isLoading}
             className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
-            <FaCircleCheck /> {isLoading ? "Submitting..." : "Submit"}
+            <FaCircleCheck /> {isLoading ? t('submitting') : t('submit')}
           </button>
         ) : (
           <button
             onClick={handleNext}
             className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
-            Next <IoIosArrowForward />
+            {t('next')} <IoIosArrowForward />
           </button>
         )}
       </div>

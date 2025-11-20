@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import InputField from "./InputField";
 import DropdownField from "./DropDownField";
 import useApi from "@/hooks/use_api";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface SeedDetailsProps {
   selectedCropId: number;
@@ -13,6 +14,7 @@ interface SeedDetailsProps {
 
 const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
   const { get } = useApi();
+  const { t } = useLocalization();
 
   const [seedVarietyOptions, setSeedVarietyOptions] = useState<
     { value: number; label: string }[]
@@ -22,9 +24,9 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
   >([]);
 
   const seedCompanyTypeOptions = [
-    { value: 1, label: "Government" },
-    { value: 2, label: "Private" },
-    { value: 3, label: "Local Market / Own Stock" },
+    { value: 1, label: t('government') },
+    { value: 2, label: t('private') },
+    { value: 3, label: t('local_market_own_stock') },
   ];
 
   // ✅ Initialize first seed row if empty (run once only)
@@ -141,24 +143,24 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
   return (
     <div className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        Seed Details
+        {t('seed_details')}
       </h2>
 
       <div className="space-y-5">
         {/* Common Name of Seed */}
         <InputField
           id="seed_common_name"
-          label="Common Name of Seed"
+          label={t('common_name_of_seed')}
           type="text"
           name="seed_common_name"
           value={data[0]?.seed_common_name || ""}
           onChange={(e) => handleChange(0, "seed_common_name", e.target.value)}
-          placeholder="Enter common name"
+          placeholder={t('enter_common_name')}
         />
 
         {/* Variety of Seed */}
         <DropdownField
-          label="Variety of Seed"
+          label={t('variety_of_seed')}
           id="seed_variety_id"
           name="seed_variety_id"
           value={data[0]?.seed_variety_id || 0}
@@ -171,17 +173,17 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         {/* Seed Company Name */}
         <InputField
           id="seed_company_name"
-          label="Name of the Seed Company"
+          label={t('name_of_the_seed_company')}
           type="text"
           name="seed_company_name"
           value={data[0]?.seed_company_name || ""}
           onChange={(e) => handleChange(0, "seed_company_name", e.target.value)}
-          placeholder="Ex: Local Open Market or Own Stock Conserved"
+          placeholder={t('ex_local_open_market')}
         />
 
         {/* Seed Company Type */}
         <DropdownField
-          label="Seed Company Type"
+          label={t('seed_company_type')}
           id="seed_company_type_id"
           name="seed_company_type_id"
           value={data[0]?.seed_company_type_id || 0}
@@ -193,7 +195,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
 
         {/* Seed Type */}
         <DropdownField
-          label="Type of the Seed Used"
+          label={t('type_of_the_seed_used')}
           id="seed_type_id"
           name="seed_type_id"
           value={data[0]?.seed_type_id || 0}

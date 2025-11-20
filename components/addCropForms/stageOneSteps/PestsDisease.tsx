@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface PestsDiseaseProps {
   data: { pestIds?: number[]; diseaseIds?: number[] };
@@ -16,6 +17,7 @@ interface PestsDiseaseProps {
 
 const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
   const { get, loading } = useApi();
+  const { t } = useLocalization();
 
   const [pestOptions, setPestOptions] = useState<
     { id: number; name: string }[]
@@ -121,15 +123,15 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
   return (
     <div className="p-3">
       <h2 className="text-xl font-semibold mb-5 underline text-center">
-        Pest & Disease Observations
+        {t('pest_disease_observations')}
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            Pest Attack Observations{" "}
-            <span className="text-sm text-gray-400">(Multiple Selection)</span>
+            {t('pest_attack_observations')}{" "}
+            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
           </h3>
 
           {loading ? (
@@ -163,8 +165,8 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
         {/* Disease Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            Disease Attack Observations{" "}
-            <span className="text-sm text-gray-400">(Multiple Selection)</span>
+            {t('disease_attack_observations')}{" "}
+            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
           </h3>
 
           {loading ? (

@@ -6,8 +6,6 @@ export interface CropGetData {
   crop_id: number;
   land_id: number;
   variety: string;
-  crop_name: string;
-  land_name: string;
   created_at: string;
   updated_at: string;
   stage_name: string;

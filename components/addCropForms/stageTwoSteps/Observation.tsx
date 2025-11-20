@@ -5,6 +5,7 @@ import DropdownField from "@/components/DropDownField";
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface ObservationProps {
   data: {
@@ -27,6 +28,7 @@ interface PracticeItem {
 
 const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   const { get } = useApi();
+  const { t } = useLocalization();
 
   const [goodPracticesList, setGoodPracticesList] = useState<PracticeItem[]>(
     []
@@ -144,13 +146,13 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   return (
     <div className="bg-white rounded-xl space-y-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        Harvesting Observations
+        {t('harvesting_observations')}
       </h2>
 
       <DropdownField
         id="seedVarietyObservation"
         name="seedVarietyObservation"
-        label="Seed Variety Observation"
+        label={t('seed_variety_observation')}
         value={data.harvest_seed_variety_observation_id || ""}
         onChange={(e) => handleVarietyChange(Number(e.target.value))}
         options={harvestSeedVarietyOptions}
@@ -158,8 +160,8 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
 
       <div className="bg-gray-50 p-4 border rounded-lg space-y-2 mt-4">
         <h3 className="font-semibold">
-          Good Agricultural Practices{" "}
-          <span className="text-sm text-gray-400">(Multiple Selection)</span>
+          {t('good_agricultural_practices')}{" "}
+          <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
         </h3>
         {goodPracticesList.length === 0 ? (
           <Loading />
@@ -198,7 +200,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
       <DropdownField
         id="harvestTiming"
         name="harvestTiming"
-        label="Harvesting Timing"
+        label={t('harvesting_timing')}
         value={data.harvesting_timing_id || ""}
         onChange={(e) => handleTimingChange(Number(e.target.value))}
         options={harvestTimingOptions}

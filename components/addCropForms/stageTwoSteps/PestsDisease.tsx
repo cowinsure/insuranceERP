@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface PestsDiseaseProps {
   data: {
@@ -23,6 +24,7 @@ interface PestsDiseaseProps {
 
 const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   const { get, loading } = useApi();
+  const { t } = useLocalization();
 
   const [pestOptions, setPestOptions] = useState<
     { id: number; name: string }[]
@@ -163,22 +165,22 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-5 underline text-center">
-        Pest & Disease Observations
+        {t('pest_disease_observations')}
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            Pest Attack Observations{" "}
-            <span className="text-sm text-gray-400">(Multiple Selection)</span>
+            {t('pest_attack_observations')}{" "}
+            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
           </h3>
 
           {loading ? (
             <Loading />
           ) : pestOptions.length === 0 ? (
             <p className="text-gray-400 text-sm italic">
-              No pest options available.
+              {t('no_pest_options_available')}
             </p>
           ) : (
             pestOptions.map((pest) => (
@@ -204,15 +206,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
         {/* Disease Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            Disease Attack Observations{" "}
-            <span className="text-sm text-gray-400">(Multiple Selection)</span>
+            {t('disease_attack_observations')}{" "}
+            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
           </h3>
 
           {loading ? (
             <Loading />
           ) : diseaseOptions.length === 0 ? (
             <p className="text-gray-400 text-sm italic">
-              No disease options available.
+              {t('no_disease_options_available')}
             </p>
           ) : (
             diseaseOptions.map((disease) => (
@@ -240,7 +242,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
         {/* Manageable Harvest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-3">
-          <h3 className="font-semibold">Was the pest & disease manageable?</h3>
+          <h3 className="font-semibold">{t('was_the_pest_disease_manageable')}</h3>
           <div className="flex gap-6">
             {["Yes", "No"].map((val) => (
               <label
@@ -263,12 +265,12 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
           {manageable === "No" && (
             <div className="mt-2">
               <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
-                Remarks / Comments
+                {t('remarks_comments')}
               </label>
               <textarea
                 value={remarks}
                 onChange={(e) => handleRemarksChange(e.target.value)}
-                placeholder="Please provide remarks or comments"
+                placeholder={t('please_provide_remarks_or_comments')}
                 className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none min-h-[80px] font-medium"
               />
             </div>

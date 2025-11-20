@@ -11,6 +11,7 @@ import Weather from "./addCropForms/stageTwoSteps/Weather";
 import StageTwoPreview from "./StageTwoPreview";
 import useApi from "@/hooks/use_api";
 import StageTwoData from "./viewCropModal/StageTwoData";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
@@ -71,12 +72,13 @@ const AddCropStageTwoModal = ({
   selectedCrop,
   onSuccess,
 }: AddCropStageTwoModalProps) => {
+  const { t } = useLocalization();
   const steps = [
-    "Harvest",
-    "Observation",
-    "Pests & Disease",
-    "Weather",
-    "Preview",
+    t('harvest'),
+    t('observation'),
+    t('pests_disease'),
+    t('weather'),
+    t('preview'),
   ];
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -295,12 +297,12 @@ const AddCropStageTwoModal = ({
         params: { crop_id: selectedCrop?.crop_id },
       });
       if (res.status === "success") {
-        toast.success("Stage Two data saved successfully!");
+        toast.success(t('stage_two_data_saved_successfully'));
         onSuccess?.();
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save Stage Two data.");
+      toast.error(t('failed_to_save_stage_two_data'));
     }
   };
 
@@ -365,7 +367,7 @@ const AddCropStageTwoModal = ({
             onClick={handlePrev}
             className="cursor-pointer px-4 py-2 border border-blue-700 text-blue-700 rounded-lg hover:bg-blue-100 flex items-center gap-1"
           >
-            <IoIosArrowBack /> Prev
+            <IoIosArrowBack /> {t('prev')}
           </button>
         )}
 
@@ -374,14 +376,14 @@ const AddCropStageTwoModal = ({
             onClick={handleSubmit}
             className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
-            <FaCircleCheck /> Save
+            <FaCircleCheck /> {t('save')}
           </button>
         ) : (
           <button
             onClick={handleNext}
             className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
-            Next <IoIosArrowForward />
+            {t('next')} <IoIosArrowForward />
           </button>
         )}
       </div>

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { CropType } from "../RegisterCrop";
 import useApi from "@/hooks/use_api";
 import { toast } from "sonner";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface HistoryProps {
   data: any;
@@ -14,6 +15,7 @@ interface HistoryProps {
 
 const History = ({ data, onChange }: HistoryProps) => {
   const { get } = useApi();
+  const { t } = useLocalization();
   const [cropType, setCropType] = useState<CropType[]>([]);
 
   useEffect(() => {
@@ -76,13 +78,13 @@ const History = ({ data, onChange }: HistoryProps) => {
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        History
+        {t('history')}
       </h2>
 
       <div className="space-y-5 max-h-[400px] overflow-auto">
         <InputField
-          placeholder="Ex - Boro Rice"
-          label="Immediate Previous Crop"
+          placeholder={t('ex_boro_rice')}
+          label={t('immediate_previous_crop')}
           id="immediatePreviousCrop"
           name="immediate_previous_crop"
           value={data.immediate_previous_crop || ""}
@@ -91,7 +93,7 @@ const History = ({ data, onChange }: HistoryProps) => {
 
         {/* ✅ FIXED: value should use ID, not name */}
         <DropdownField
-          label="Last Year's Crop"
+          label={t('last_years_crop')}
           id="lastYearsCrop"
           name="last_year_crop_type_id"
           value={data.last_year_crop_type_id || ""}
@@ -105,8 +107,8 @@ const History = ({ data, onChange }: HistoryProps) => {
 
         <InputField
           type="number"
-          placeholder="Enter the number of production"
-          label="Last Year Production (mound/33 decimal)"
+          placeholder={t('enter_the_number_of_production')}
+          label={t('last_year_production_mound')}
           id="lastYearProduction"
           name="last_year_production"
           value={data.last_year_production ?? ""}
@@ -123,7 +125,7 @@ const History = ({ data, onChange }: HistoryProps) => {
             onChange={handleChange}
           /> */}
           <InputField
-            label="Harvest Date"
+            label={t('harvest_date')}
             id="harvestDate"
             name="harvest_date"
             type="date"
@@ -134,18 +136,18 @@ const History = ({ data, onChange }: HistoryProps) => {
 
         <div className="grid md:grid-cols-2 gap-5">
           <InputField
-            label="Seed Used Last Year"
+            label={t('seed_used_last_year')}
             id="seedUsedLastYear"
             name="seed_used_last_year"
-            placeholder="e.g., BRRI dhan49"
+            placeholder={t('eg_brri_dhan49')}
             value={data.seed_used_last_year || ""}
             onChange={handleChange}
           />
           <InputField
-            label="Reason for Changing Seed (if any)"
+            label={t('reason_for_changing_seed_if_any')}
             id="reasonForChangingSeed"
             name="reason_for_changing_seed"
-            placeholder="e.g., Low yield, disease issues"
+            placeholder={t('eg_low_yield')}
             value={data.reason_for_changing_seed || ""}
             onChange={handleChange}
           />

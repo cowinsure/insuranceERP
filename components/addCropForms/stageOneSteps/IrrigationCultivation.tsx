@@ -3,6 +3,7 @@
 import DropdownField from "@/components/DropDownField";
 import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface IrrigationCultivationProps {
   data: any;
@@ -14,6 +15,7 @@ const IrrigationCultivation = ({
   onChange,
 }: IrrigationCultivationProps) => {
   const { get } = useApi();
+  const { t } = useLocalization();
 
   const [irrigationFacilityOptions, setIrrigationFacilityOptions] = useState<
     { value: number; label: string }[]
@@ -25,9 +27,9 @@ const IrrigationCultivation = ({
     { value: number; label: string }[]
   >([]);
   const [irrigationSourceOptions] = useState([
-    { value: 1, label: "Mostly Natural Water Supply" },
-    { value: 2, label: "Canal" },
-    { value: 3, label: "Well" },
+    { value: 1, label: t('mostly_natural_water_supply') },
+    { value: 2, label: t('canal') },
+    { value: 3, label: t('well') },
   ]);
 
   // Fetch irrigation facility
@@ -136,11 +138,11 @@ const IrrigationCultivation = ({
   return (
     <form className="p-3">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        Cultivation Details
+        {t('cultivation_details')}
       </h2>
       <div className="space-y-5">
         <DropdownField
-          label="Irrigation Facility"
+          label={t('irrigation_facility')}
           id="irrigationFacility"
           name="irrigation_facility_id"
           value={data.irrigation_facility_id || ""}
@@ -148,7 +150,7 @@ const IrrigationCultivation = ({
           options={irrigationFacilityOptions}
         />
         <DropdownField
-          label="Irrigation Source"
+          label={t('irrigation_source')}
           id="irrigationSource"
           name="irrigation_source_id"
           value={data.irrigation_source_id || ""}
@@ -156,7 +158,7 @@ const IrrigationCultivation = ({
           options={irrigationSourceOptions}
         />
         <DropdownField
-          label="Cultivation System"
+          label={t('cultivation_system')}
           id="cultivationSystem"
           name="cultivation_system_id"
           value={data.cultivation_system_id || ""}
@@ -164,7 +166,7 @@ const IrrigationCultivation = ({
           options={cultivationSystemOptions}
         />
         <DropdownField
-          label="Land Suitability for Commercial"
+          label={t('land_suitability_for_commercial')}
           id="landSuitability"
           name="land_suitability_id"
           value={data.land_suitability_id || ""}

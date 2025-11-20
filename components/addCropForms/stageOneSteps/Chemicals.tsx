@@ -170,6 +170,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import InputField from "@/components/InputField";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface ChemicalItem {
   chemical_usage_id?: number;
@@ -192,6 +193,7 @@ interface ChemicalsProps {
 }
 
 const Chemicals = ({ data, onChange }: ChemicalsProps) => {
+  const { t } = useLocalization();
   // Initialize state once
   const [fertilizers, setFertilizers] = useState<ChemicalItem[]>(
     () => data.fertilizers || []
@@ -272,7 +274,7 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
               onChange={(e) =>
                 handleChange(index, type, "chemical_name", e.target.value)
               }
-              placeholder={`Enter ${type} name`}
+              placeholder={type === "fertilizer" ? t('enter_fertilizer_name') : t('enter_pesticide_name')}
             />
             <InputField
               id={`${type}-qty-${index}`}
@@ -282,7 +284,7 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
               onChange={(e) =>
                 handleChange(index, type, "qty", Number(e.target.value))
               }
-              placeholder="Quantity"
+              placeholder={t('quantity')}
               className="w-[50px] md:w-full"
             />
             <button
@@ -301,26 +303,26 @@ const Chemicals = ({ data, onChange }: ChemicalsProps) => {
   return (
     <div className="p-3 max-h-[60vh] overflow-auto space-y-5">
       <div className="space-y-5 mb-3 bg-gray-50 p-3 border rounded-lg">
-        <h2 className="text-lg font-medium mb-5">Fertilizers</h2>
+        <h2 className="text-lg font-medium mb-5">{t('fertilizers')}</h2>
         {renderFields("fertilizer")}
         <button
           type="button"
           onClick={() => addField("fertilizer")}
           className="px-4 py-2 mt-2 bg-gray-200 cursor-pointer rounded-md hover:bg-gray-300"
         >
-          + Add Fertilizer
+          {t('add_fertilizer')}
         </button>
       </div>
 
       <div className="space-y-5 bg-gray-50 p-3 border rounded-lg">
-        <h2 className="text-lg font-medium mb-5">Pesticides & Fungicides</h2>
+        <h2 className="text-lg font-medium mb-5">{t('pesticides_fungicides')}</h2>
         {renderFields("pesticide")}
         <button
           type="button"
           onClick={() => addField("pesticide")}
           className="px-4 py-2 mt-2 bg-gray-200 cursor-pointer rounded-md hover:bg-gray-300"
         >
-          + Add Pesticide
+          {t('add_pesticide')}
         </button>
       </div>
     </div>

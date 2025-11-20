@@ -96,9 +96,6 @@ export default function PhotoCaptureModal({
     if (onPhotoCapture) {
       onPhotoCapture(file);
     }
-
-    // Clear captured photo data after processing
-    resetPhoto();
   };
 
   // Reset photo and go back to upload state
@@ -256,12 +253,6 @@ export default function PhotoCaptureModal({
               onPhotoCapture(file);
             }
         
-            // Clear captured photo data after processing
-            resetPhoto();
-        
-            // Close the modal
-            setOpen(false);
-
             // Stop camera stream
             if (streamRef.current) {
               streamRef.current.getTracks().forEach((track) => track.stop());
@@ -269,6 +260,12 @@ export default function PhotoCaptureModal({
 
             setCameraMode(false);
             setIsTakingPhoto(false);
+        
+            // Close the modal immediately after capture
+            setTimeout(() => {
+              setOpen(false);
+              resetPhoto();
+            }, 100);
           }
         },
         "image/jpeg",
@@ -318,6 +315,15 @@ export default function PhotoCaptureModal({
       setSelectedFile(null);
       setFacingMode("environment");
       clearCanvas(); // Add canvas clearing
+    } else {
+      // Reset states when opening to show fresh upload area
+      resetPhoto();
+      setCameraMode(false);
+      setCameraReady(false);
+      setIsTakingPhoto(false);
+      setDragActive(false);
+      setSelectedFile(null);
+      setFacingMode("environment");
     }
   };
 
@@ -376,62 +382,73 @@ export default function PhotoCaptureModal({
           </div>
 
           {/* Camera controls */}
-          <div className="flex flex-col mt-4 gap-2">
+          <div className="flex flex-col gap-3 mt-4">
             <button
               onClick={takePhoto}
-              className="flex items-center justify-center"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
               disabled={!cameraReady || isTakingPhoto}
             >
               {isTakingPhoto ? (
-                "Processing..."
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  Processing...
+                </>
               ) : (
                 <>
-                  <Camera className="h-4 w-4 mr-2" />
+                  <Camera className="h-5 w-5" />
                   Take Photo
                 </>
               )}
             </button>
 
-            <button
-              onClick={switchCamera}
-              className="flex items-center justify-center"
-              disabled={isTakingPhoto}
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Switch Camera
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={switchCamera}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                disabled={isTakingPhoto}
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span className="hidden sm:inline">Switch</span>
+              </button>
 
-            <button
-              onClick={cancelCamera}
-              className="flex items-center justify-center"
-              disabled={isTakingPhoto}
-            >
-              Cancel
-            </button>
+              <button
+                onClick={cancelCamera}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                disabled={isTakingPhoto}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       ) : capturedPhoto ? (
-        <div className="w-full">
-          <div className="relative border rounded-md overflow-hidden">
+        <div className="w-full flex flex-col">
+          <div className="relative border rounded-md overflow-hidden max-h-80">
             <img
               src={capturedPhoto || "/placeholder.svg"}
-              className="w-full h-auto"
+              className="w-full h-auto object-contain"
               alt="Captured"
             />
           </div>
 
-          {/* Retry button */}
-          <button
-            onClick={resetPhoto}
-            className="w-full mt-4 flex items-center justify-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </button>
+          {/* Retry and Done buttons */}
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={resetPhoto}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="hidden sm:inline">Retry</span>
+              <span className="sm:hidden">Back</span>
+            </button>
 
-          <button onClick={() => setOpen(false)} className="w-full mt-2">
-            Done
-          </button>
+            <button
+              onClick={() => setOpen(false)}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors"
+            >
+              Done
+            </button>
+          </div>
         </div>
       ) : (
         <div
@@ -452,20 +469,21 @@ export default function PhotoCaptureModal({
               Or use one of the options below
             </p>
 
-            <div className="flex flex-wrap gap-2 mt-2 justify-center">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-4 justify-center w-full">
               <button
                 onClick={() =>
                   document.getElementById("file-upload-modal")?.click()
                 }
-                className="border px-2 py-1 rounded-md cursor-pointer hover:bg-gray-200"
+                className="flex-1 sm:flex-none border-2 border-primary text-primary hover:bg-primary/5 px-4 py-2 rounded-lg cursor-pointer font-medium transition-colors"
               >
                 Select Image
               </button>
               <button
-                className="flex items-center border px-2 py-1 rounded-md cursor-pointer hover:bg-gray-200"
+                className="flex-1 sm:flex-none bg-primary text-white hover:bg-primary/90 flex items-center justify-center px-4 py-2 rounded-lg cursor-pointer font-medium transition-colors gap-2"
                 onClick={openCamera}
               >
-                <Camera className="h-4 w-4 mr-2" /> Use Camera
+                <Camera className="h-4 w-4" />
+                <span>Use Camera</span>
               </button>
               <input
                 id="file-upload-modal"

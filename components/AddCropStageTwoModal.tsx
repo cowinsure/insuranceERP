@@ -117,6 +117,7 @@ const AddCropStageTwoModal = ({
     weather: [],
     attachments: [],
   });
+  const [pestDiseaseTouched, setPestDiseaseTouched] = useState(false);
 
   // ---------------- Prefill Stage 2 data with stage_id validation ----------------
   useEffect(() => {
@@ -259,14 +260,24 @@ const AddCropStageTwoModal = ({
       const weather = mapWeather(stageTwoData.weather);
       console.log(weather);
       // console.log("Selected crop stage 2", selectedCrop);
-      const mergedPests = [
-        ...(selectedCrop.crop_asset_pest_attack_details || []),
-        ...pests,
-      ];
-      const mergedDiseases = [
-        ...(selectedCrop.crop_asset_disease_attack_details || []),
-        ...diseases,
-      ];
+      // const mergedPests = pestDiseaseTouched
+      //   ? [
+      //       ...(selectedCrop.crop_asset_pest_attack_details || []).filter(
+      //         (p: any) => p.stage_id !== 3
+      //       ),
+      //       ...pests.map((p) => ({ ...p, stage_id: 3 })),
+      //     ]
+      //   : selectedCrop.crop_asset_pest_attack_details || [];
+
+      // const mergedDiseases = pestDiseaseTouched
+      //   ? [
+      //       ...(selectedCrop.crop_asset_disease_attack_details || []).filter(
+      //         (d: any) => d.stage_id !== 3
+      //       ),
+      //       ...diseases.map((d) => ({ ...d, stage_id: 3 })),
+      //     ]
+      //   : selectedCrop.crop_asset_disease_attack_details || [];
+
       const mergedWeather = [
         // Keep previous records that are NOT stage 3
         ...(selectedCrop.crop_asset_weather_effect_history || []).filter(
@@ -307,8 +318,14 @@ const AddCropStageTwoModal = ({
           crop_harvest_moisture_content_details:
             stageTwoData.harvest.crop_harvest_moisture_content_details,
         },
-        crop_asset_pest_attack_details: mergedPests,
-        crop_asset_disease_attack_details: mergedDiseases,
+        crop_asset_pest_attack_details: pests.map((p) => ({
+          ...p,
+          stage_id: 3,
+        })),
+        crop_asset_disease_attack_details: diseases.map((d) => ({
+          ...d,
+          stage_id: 3,
+        })),
         crop_asset_weather_effect_history: mergedWeather,
         crop_asset_attachment_details: Array.isArray(stageTwoData.attachments)
           ? stageTwoData.attachments
@@ -349,7 +366,13 @@ const AddCropStageTwoModal = ({
         return (
           <PestsDisease
             data={stageTwoData.pestsDisease}
-            onChange={(val) => handleChange("pestsDisease", val)}
+            onChange={(updated) => {
+              setStageTwoData((prev) => ({
+                ...prev,
+                pestsDisease: updated,
+              }));
+              setPestDiseaseTouched(true); // mark as edited
+            }}
           />
         );
       case 3:

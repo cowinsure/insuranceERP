@@ -1,6 +1,17 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
+import {
+  User,
+  Phone,
+  CalendarDays,
+  Sprout,
+  Bug,
+  CloudRain,
+  Activity,
+  Leaf,
+} from "lucide-react";
 
 interface SurveyViewProps {
   survey: any;
@@ -14,32 +25,44 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
     const d = new Date(date);
     return isNaN(d.getTime()) ? "N/A" : d.toLocaleDateString();
   };
-  console.log("Survey VIew", survey);
 
   return (
-    <div className="w-full space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="w-full space-y-6"
+    >
       {/* Basic Info */}
-      <Section title="Basic Information">
-        <InfoRow label="Farmer Name" value={survey.farmer_name} />
-        <InfoRow label="Mobile Number" value={survey.mobile_number} />
-        <InfoRow label="Survey Date" value={formatDate(survey.survey_date)} />
-        <InfoRow label="Created At" value={formatDate(survey.created_at)} />
+      <Section title="Basic Information" icon={<User className="w-5 h-5" />}>
+        <InfoRow icon={<User size={16} />} label="Farmer Name" value={survey.farmer_name} />
+        <InfoRow icon={<Phone size={16} />} label="Mobile Number" value={survey.mobile_number} />
+        <InfoRow
+          icon={<CalendarDays size={16} />}
+          label="Survey Date"
+          value={formatDate(survey.survey_date)}
+        />
+        <InfoRow
+          icon={<CalendarDays size={16} />}
+          label="Created At"
+          value={formatDate(survey.created_at)}
+        />
       </Section>
 
       {/* Production Details */}
-      <Section title="Production">
+      <Section title="Production" icon={<Sprout className="w-5 h-5" />}>
         <InfoRow
           label="Last Year's Avg Production"
-          value={survey.avg_prod_last_year}
+          value={survey.avg_prod_last_year + " kg"}
         />
         <InfoRow
           label="Current Year's Avg Production"
-          value={survey.avg_prod_current_year}
+          value={survey.avg_prod_current_year + " kg"}
         />
       </Section>
 
       {/* Yield Loss Types */}
-      <Section title="Yield Loss Types">
+      <Section title="Yield Loss Types" icon={<Activity className="w-5 h-5" />}>
         {survey.key_reasons_yield_losses?.length ? (
           survey.key_reasons_yield_losses.map((item: any, i: number) => (
             <ListItem key={i} text={item} />
@@ -50,7 +73,7 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
       </Section>
 
       {/* Pest Attacks */}
-      <Section title="Pest Attacks">
+      <Section title="Pest Attacks" icon={<Bug className="w-5 h-5" />}>
         {survey.pests?.length ? (
           survey.pests.map((item: any, i: number) => (
             <ListItem key={i} text={`${item}`} />
@@ -61,7 +84,7 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
       </Section>
 
       {/* Weather Events */}
-      <Section title="Weather Events">
+      <Section title="Weather Events" icon={<CloudRain className="w-5 h-5" />}>
         {survey.weather_effects?.length ? (
           survey.weather_effects.map((item: any, i: number) => (
             <ListItem key={i} text={`${item}`} />
@@ -72,7 +95,7 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
       </Section>
 
       {/* Disease Attacks */}
-      <Section title="Disease Attacks">
+      <Section title="Disease Attacks" icon={<Activity className="w-5 h-5" />}>
         {survey.diseases?.length ? (
           survey.diseases.map((item: any, i: number) => (
             <ListItem key={i} text={`${item}`} />
@@ -83,7 +106,7 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
       </Section>
 
       {/* Seed Varieties */}
-      <Section title="Seed Varieties Used">
+      <Section title="Seed Varieties Used" icon={<Leaf className="w-5 h-5" />}>
         {survey.top_three_varieties?.length ? (
           survey.top_three_varieties.map((item: any, i: number) => (
             <ListItem key={i} text={item} />
@@ -92,7 +115,7 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
           <Empty />
         )}
       </Section>
-    </div>
+    </motion.div>
   );
 };
 
@@ -102,30 +125,52 @@ export default SurveyView;
 
 const Section = ({
   title,
+  icon,
   children,
 }: {
   title: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) => (
-  <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-    <h3 className="font-bold text-gray-800 text-xl">{title}</h3>
+  <motion.div
+    // whileHover={{ scale: 1.01 }}
+    className="bg-gray-50 rounded-2xl border p-5 space-y-4"
+  >
+    <div className="flex items-center gap-3 border-b pb-3">
+      <div className="p-2 rounded-xl bg-blue-50 text-blue-600">{icon}</div>
+      <h3 className="font-semibold text-gray-800 text-lg">{title}</h3>
+    </div>
     {children}
-  </div>
+  </motion.div>
 );
 
-const InfoRow = ({ label, value }: { label: string; value: any }) => (
-  <div className="flex justify-between text-sm py-1">
-    <span className="font-medium text-gray-600">{label}</span>
-    <span className="text-gray-900">{value ?? "N/A"}</span>
+const InfoRow = ({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: any;
+  icon?: React.ReactNode;
+}) => (
+  <div className="flex items-center justify-between text-sm py-2">
+    <div className="flex items-center gap-2 text-gray-600">
+      {icon && <span className="text-blue-500">{icon}</span>}
+      <span className="font-medium">{label}</span>
+    </div>
+    <span className="text-gray-900 font-semibold">{value ?? "N/A"}</span>
   </div>
 );
 
 const ListItem = ({ text }: { text: string }) => (
-  <div className="text-gray-800 text-sm pl-2 border-l-2 border-gray-300">
-    • {text}
+  <div className="flex items-start gap-2 text-gray-700 text-sm bg-gray-50 rounded-lg px-3 py-2">
+    <span className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
+    <span>{text}</span>
   </div>
 );
 
 const Empty = () => (
-  <div className="text-gray-500 text-sm italic">No data available</div>
+  <div className="text-gray-400 text-sm italic bg-gray-50 rounded-lg p-3">
+    No data available
+  </div>
 );

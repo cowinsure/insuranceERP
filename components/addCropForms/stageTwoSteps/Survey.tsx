@@ -364,15 +364,11 @@ const Survey = ({ data, onChange }: SurveyProps) => {
     onChange([survey, preview]);
   }, [survey, weatherOptions, pestOptions, diseaseOptions, yieldLossOptions]);
 
-  /** ##################################################################
-   *  UI BELOW — EXACTLY YOUR UI BUT NOW FULLY WIRED TO BACKEND PAYLOAD
-   * ##################################################################
-   */
   console.log(survey);
   return (
-    <div className="space-y-6 bg-white rounded-lg">
+    <div className="space-y-6 bg-white rounded-lg w-[90%] mx-auto">
       <h2 className="text-xl font-semibold text-center underline">
-        Survey Information
+        Add details for survey
       </h2>
 
       {/* Farmer Selector */}

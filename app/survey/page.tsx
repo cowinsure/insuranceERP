@@ -288,7 +288,11 @@ export default function SurveyPage() {
 
       {/* Modal */}
       {isOpen && (
-        <GenericModal closeModal={onClose} title={"Add New Survey"}>
+        <GenericModal
+          closeModal={onClose}
+          title={"Add New Survey"}
+          widthValue="sm:w-[35%] md:min-w-[90%] lg:min-w-[60%] lg:max-w-[70%]"
+        >
           <div>
             <div className="bg-white rounded-xl mb-4">
               <Stepper

@@ -34,6 +34,8 @@ const CropsPage = () => {
   const [isCropView, setIsCropView] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
+  const [isViewLoading, setIsViewLoading] = useState(false);
+
   const [pendingModal, setPendingModal] = useState<
     "stage1" | "stage2" | "view" | null
   >(null);
@@ -87,7 +89,7 @@ const CropsPage = () => {
   // GET single crop by id and set to state
   const fetchSingleCrop = async (cropId: number) => {
     if (!cropId) return null;
-    setIsLoading(true);
+    setIsViewLoading(true);
     try {
       const response = await get("/cms/crop-info-service", {
         params: {
@@ -110,11 +112,13 @@ const CropsPage = () => {
       return null;
     } catch (error: any) {
       const message =
-        error?.response?.data?.message || error.message || "Failed to fetch crop.";
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to fetch crop.";
       toast.error(message);
       return null;
     } finally {
-      setIsLoading(false);
+      setIsViewLoading(false);
     }
   };
 
@@ -195,16 +199,14 @@ const CropsPage = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="hidden lg:inline-block text-xl lg:text-3xl font-bold text-gray-900">
-              {t('asset_management')}
+              {t("asset_management")}
             </h1>
             <IoIosArrowForward size={30} className="hidden lg:inline-block" />
             <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
-              {t('crop_registration')}
+              {t("crop_registration")}
             </h1>
           </div>
-          <p className="text-gray-500 mt-1">
-            {t('register_crop_details')}
-          </p>
+          <p className="text-gray-500 mt-1">{t("register_crop_details")}</p>
         </div>
         {/* <div className="flex">
           <Button
@@ -218,7 +220,7 @@ const CropsPage = () => {
       </div>
       {/* Body */}
       <SearchFilter
-        placeholder={t('search_farmer_mobile')}
+        placeholder={t("search_farmer_mobile")}
         data={crops}
         setFilteredData={setFilteredCrops}
         searchKeys={[
@@ -231,19 +233,21 @@ const CropsPage = () => {
       <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5 flex items-center justify-between">
           <div>
-           <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
-            {t('registered_crops')}
-          </CardTitle>
-            <p className="text-sm text-gray-600">{crops.length} {t('crops_found')}</p>
+            <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
+              {t("registered_crops")}
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              {crops.length} {t("crops_found")}
+            </p>
           </div>
-        
+
           <div className="flex">
             <Button
               className="bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => setIsModal(true)}
             >
               <Plus className="w-4 h-4" />
-              {t('add_crop')}
+              {t("add_crop")}
             </Button>
           </div>
         </div>
@@ -258,28 +262,28 @@ const CropsPage = () => {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('sl')}
+                  {t("sl")}
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('crop_name')}
+                  {t("crop_name")}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('current_stage')}
+                  {t("current_stage")}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('planting_date')}
+                  {t("planting_date")}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('land_name')}
+                  {t("land_name")}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('stage_1')}
+                  {t("stage_1")}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('stage_2')}
+                  {t("stage_2")}
                 </th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  {t('view_crop')}
+                  {t("view_crop")}
                 </th>
               </tr>
             </thead>
@@ -335,14 +339,12 @@ const CropsPage = () => {
                             }`}
                             onClick={() => {
                               if (!stage1Enabled) {
-                                toast.error(
-                                  t('stage_1_cannot_edit')
-                                );
+                                toast.error(t("stage_1_cannot_edit"));
                               } else {
                                 handleAddCropDetails(crop.crop_id);
                               }
                             }}
-                            title={t('add_planting_details')}
+                            title={t("add_planting_details")}
                           >
                             <FilePlus />
                           </Button>
@@ -358,12 +360,12 @@ const CropsPage = () => {
                             }`}
                             onClick={() => {
                               if (!stage2Enabled) {
-                                toast.error(t('complete_stage_1_first'));
+                                toast.error(t("complete_stage_1_first"));
                               } else {
                                 handleRevisitData(crop.crop_id);
                               }
                             }}
-                            title={t('add_revisit_data')}
+                            title={t("add_revisit_data")}
                           >
                             <ClipboardCheck />
                           </Button>
@@ -411,7 +413,7 @@ const CropsPage = () => {
                         {crop.crop_name || "N/A"}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        {t('stage_label')}{" "}
+                        {t("stage_label")}{" "}
                         <span className="font-medium text-gray-700">
                           {crop.stage_name || "N/A"}
                         </span>
@@ -430,14 +432,18 @@ const CropsPage = () => {
                   {/* Details */}
                   <div className="grid grid-cols-2 gap-3 mt-4">
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">{t('planting_date')}</p>
+                      <p className="text-[11px] text-gray-500">
+                        {t("planting_date")}
+                      </p>
                       <p className="text-sm font-medium">
                         {crop.planting_date || "N/A"}
                       </p>
                     </div>
 
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">{t('land_name')}</p>
+                      <p className="text-[11px] text-gray-500">
+                        {t("land_name")}
+                      </p>
                       <p className="text-sm font-medium capitalize truncate">
                         {crop.land_name || "N/A"}
                       </p>
@@ -456,13 +462,13 @@ const CropsPage = () => {
                       }`}
                       onClick={() => {
                         if (!stage1Enabled) {
-                          toast.error(t('stage_1_cannot_edit'));
+                          toast.error(t("stage_1_cannot_edit"));
                         } else {
                           handleAddCropDetails(crop.crop_id);
                         }
                       }}
                     >
-                      <FilePlus className="w-4 h-4 mr-2" /> {t('stage_1')}
+                      <FilePlus className="w-4 h-4 mr-2" /> {t("stage_1")}
                     </Button>
 
                     {/* Stage 2 */}
@@ -475,13 +481,13 @@ const CropsPage = () => {
                       }`}
                       onClick={() => {
                         if (!stage2Enabled) {
-                          toast.error(t('complete_stage_1_first'));
+                          toast.error(t("complete_stage_1_first"));
                         } else {
                           handleRevisitData(crop.crop_id);
                         }
                       }}
                     >
-                      <ClipboardCheck className="w-4 h-4 mr-2" /> {t('stage_2')}
+                      <ClipboardCheck className="w-4 h-4 mr-2" /> {t("stage_2")}
                     </Button>
                   </div>
                 </div>
@@ -494,7 +500,7 @@ const CropsPage = () => {
       {/* Register Crop Modal */}
       {isModal && (
         <GenericModal
-          title={t('register_crop')}
+          title={t("register_crop")}
           closeModal={() => setIsModal(false)}
           widthValue={"w-full max-w-xl"}
         >
@@ -512,7 +518,7 @@ const CropsPage = () => {
             <span className="flex flex-col">
               {
                 <div className="flex gap-1">
-                  <span>{t('add_details_for')}</span>
+                  <span>{t("add_details_for")}</span>
                   <span className="font-extrabold">
                     {" "}
                     {selectedCrop?.crop_asset_seed_details?.[0]?.crop_name ||
@@ -521,7 +527,7 @@ const CropsPage = () => {
                 </div>
               }
               <small className="font-medium text-gray-500 tracking-wide">
-                {t('variety')}{" "}
+                {t("variety")}{" "}
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
               </small>
@@ -539,11 +545,11 @@ const CropsPage = () => {
         <GenericModal
           title={
             <h1 className="flex flex-col">
-              {`${t('revisit_data_for')} ${
+              {`${t("revisit_data_for")} ${
                 selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
               } `}
               <small className="font-medium text-gray-500">
-                {t('variety')}{" "}
+                {t("variety")}{" "}
                 {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
                   selectedCrop?.variety}
               </small>
@@ -563,7 +569,7 @@ const CropsPage = () => {
       {isCropView && (
         <GenericModal
           closeModal={() => setIsCropView(false)}
-          title={`${t('viewing_details_of')} ${
+          title={`${t("viewing_details_of")} ${
             selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
           }`}
           height={true}

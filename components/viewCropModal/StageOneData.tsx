@@ -17,55 +17,55 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">
       {/* 🌱 Seed Information */}
-      <Section title={t('seed_information')}>
+      <Section title={t("seed_information")}>
         <Grid>
           <InputField
-            label={t('seed_name')}
+            label={t("seed_name")}
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_common_name}
           />
           <InputField
-            label={t('variety')}
+            label={t("variety")}
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_variety}
           />
           <InputField
-            label={t('seed_company')}
+            label={t("seed_company")}
             value={
               safeArray(data.crop_asset_seed_details)[0]?.seed_company_name
             }
           />
           <InputField
-            label={t('seed_type')}
+            label={t("seed_type")}
             value={safeArray(data.crop_asset_seed_details)[0]?.seed_type_name}
           />
         </Grid>
       </Section>
 
       {/* 💧 Irrigation & Cultivation */}
-      <Section title={t('irrigation_cultivation')}>
+      <Section title={t("irrigation_cultivation")}>
         <Grid>
           <InputField
-            label={t('irrigation_facility')}
+            label={t("irrigation_facility")}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.irrigation_facility
             }
           />
           <InputField
-            label={t('irrigation_source')}
+            label={t("irrigation_source")}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.irrigation_source
             }
           />
           <InputField
-            label={t('cultivation_system')}
+            label={t("cultivation_system")}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_cultivation_system_name
             }
           />
           <InputField
-            label={t('land_suitability')}
+            label={t("land_suitability")}
             value={
               safeArray(data.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_land_suitability_name
@@ -75,44 +75,44 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🌾 Crop History */}
-      <Section title={t('crop_history')}>
+      <Section title={t("crop_history")}>
         <Grid>
           <InputField
-            label={t('immediate_previous_crop')}
+            label={t("immediate_previous_crop")}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.immediate_previous_crop
             }
           />
           <InputField
-            label={t('harvest_date')}
+            label={t("harvest_date")}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.harvest_date
             }
           />
           <InputField
-            label={t('last_years_crop')}
+            label={t("last_years_crop")}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.last_year_crop_type_name
             }
           />
           <InputField
-            label={t('last_year_production')}
+            label={t("last_year_production")}
             value={safeArray(
               data.crop_asset_previous_season_history_details
             )[0]?.last_year_production?.toString()}
           />
           <InputField
-            label={t('seed_used_last_year')}
+            label={t("seed_used_last_year")}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.seed_used_last_year
             }
           />
           <InputField
-            label={t('reason_for_changing_seed')}
+            label={t("reason_for_changing_seed")}
             value={
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.reason_for_changing_seed
@@ -122,9 +122,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🌦️ Weather Effects */}
-      <Section title={t('weather_effects')}>
+      <Section title={t("weather_effects")}>
         <ArrayDisplay
-           title={t('weather_events')}
+          title={t("weather_events")}
           items={filterByItemStage(
             data.crop_asset_weather_effect_history,
             2 // filter for stage 2 only
@@ -151,10 +151,10 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🐛 Pest & Disease Attacks */}
-      <Section title={t('pest_disease_attacks')}>
+      <Section title={t("pest_disease_attacks")}>
         <Grid>
           <ArrayDisplay
-           title={t('pest_attacks')}
+            title={t("pest_attacks")}
             items={filterByItemStage(
               data.crop_asset_pest_attack_details,
               2
@@ -166,7 +166,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           />
 
           <ArrayDisplay
-            title={t('disease_attacks')}
+            title={t("disease_attacks")}
             items={filterByItemStage(
               data.crop_asset_disease_attack_details,
               2
@@ -180,9 +180,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       </Section>
 
       {/* 🧪 Chemicals Used */}
-      <Section title={t('fertilizers_pesticides')}>
+      <Section title={t("fertilizers_pesticides")}>
         <ArrayDisplay
-          title={t('chemicals')}
+          title={t("chemicals")}
           items={safeArray(data.crop_asset_chemical_usage_details).map(
             (c: any) => ({
               name: c?.chemical_name || "Not Provided",
@@ -199,36 +199,40 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
 
       {/* 📸 Attachments */}
       {safeArray(data.crop_asset_attachment_details).length > 0 && (
-        <Section title={t('attachments')}>
+        <Section title={t("attachments")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {filterByItemStage(data.crop_asset_attachment_details, 2).map(
-              (attachment: any, index: number) => (
-                <div
-                  key={index}
-                  className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
-                >
-                  <img
-                    src={
-                      attachment?.attachment_path.startsWith("data:")
-                        ? attachment?.attachment_path
-                        : `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment?.attachment_path}`
-                    }
-                    alt={`Attachment ${index + 1}`}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-2 bg-gray-50 border-t">
-                    <p className="text-xs text-gray-600">
-                      {attachment?.remarks || "No remarks"}
-                    </p>
+              (attachment: any, index: number) => {
+                const imageSrc = attachment?.attachment_path.startsWith("data:")
+                  ? attachment?.attachment_path
+                  : `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment?.attachment_path}`;
+
+                return (
+                  <div
+                    key={index}
+                    className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
+                  >
+                    <img
+                      src={imageSrc}
+                      alt={`Attachment ${index + 1}`}
+                      className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition"
+                      onClick={() => window.open(imageSrc, "_blank")}
+                      title="View Image"
+                    />
+
+                    <div className="p-2 bg-gray-50 border-t">
+                      <p className="text-xs text-gray-600">
+                        {attachment?.remarks || "No remarks"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )
+                );
+              }
             )}
           </div>
+
           {filterByItemStage(data.crop_asset_attachment_details, 2).length ===
-            0 && (
-            <p className="text-gray-400 text-sm italic">{t('no_data')}</p>
-          )}
+            0 && <p className="text-gray-400 text-sm italic">{t("no_data")}</p>}
         </Section>
       )}
     </div>
@@ -263,7 +267,7 @@ const InputField = ({ label, value }: { label: string; value: any }) => {
         {value && value !== "null" ? (
           value
         ) : (
-          <span className="text-gray-400 italic">{t('not_provided')}</span>
+          <span className="text-gray-400 italic">{t("not_provided")}</span>
         )}
       </div>
     </div>
@@ -284,7 +288,7 @@ const ArrayDisplay = ({
     <div>
       <h3 className="font-semibold mb-2 text-gray-600">{title}</h3>
       {!hasData ? (
-        <p className="text-gray-400 text-sm italic">{t('no_data')}</p>
+        <p className="text-gray-400 text-sm italic">{t("no_data")}</p>
       ) : (
         <ul className="space-y-1">
           {items.map((item, i) => (

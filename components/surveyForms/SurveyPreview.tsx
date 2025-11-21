@@ -13,20 +13,20 @@ export default function SurveyPreview({ data }: PreviewProps) {
   const preview = Array.isArray(data) ? data[1] : data;
 
   return (
-    <Card className="border rounded-2xl shadow-sm py-5">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-gray-800">
+    <Card className="border rounded-3xl shadow-md py-2 bg-gradient-to-br from-white to-slate-200 gap-3">
+      <CardHeader className="">
+        <CardTitle className="text-2xl font-semibold text-gray-800 tracking-tight">
           Survey Data Preview
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-6 text-sm text-gray-700">
+      <CardContent className="space-y-5 text-sm text-gray-700">
         {/* Basic Info */}
-        <section>
-          <h3 className="font-semibold text-gray-900 mb-2">
+        <section className="bg-white rounded-2xl p-4 shadow-sm border">
+          <h3 className="font-semibold text-gray-900 mb-3 tracking-wide">
             Basic Information
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <PreviewField label="Farmer ID" value={preview.farmer_id} />
             {/* <PreviewField label="Survey Date" value={preview.survey_date} /> */}
             <PreviewField
@@ -40,87 +40,105 @@ export default function SurveyPreview({ data }: PreviewProps) {
           </div>
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Varieties */}
-        <section>
-          <h3 className="font-semibold text-gray-900 mb-2">
+        <section className="bg-white rounded-2xl p-4 shadow-sm border">
+          <h3 className="font-semibold text-gray-900 mb-3 tracking-wide">
             Varieties of Seeds
           </h3>
           {preview.variety_labels?.length ? (
-            <ul className="list-disc ml-5 space-y-1">
+            <ul className="list-disc ml-6 space-y-2 text-gray-700">
               {preview.variety_labels.map((label: string, i: number) => (
-                <li key={i}>{label}</li>
+                <li key={i} className="leading-relaxed">
+                  {label}
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500">No varieties selected.</p>
+            <p className="text-gray-400 italic">No varieties selected.</p>
           )}
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Yield Loss */}
-        <section>
-          <h3 className="font-semibold text-gray-900 mb-2">
+        <section className="bg-white rounded-2xl p-4 shadow-sm border">
+          <h3 className="font-semibold text-gray-900 mb-3 tracking-wide">
             Yield Loss Reasons
           </h3>
           {preview.yield_loss_labels?.length ? (
-            <ul className="list-disc ml-5 space-y-1">
+            <ul className="list-disc ml-6 space-y-2 text-gray-700">
               {preview.yield_loss_labels.map((label: string, i: number) => (
-                <li key={i}>{label}</li>
+                <li key={i} className="leading-relaxed">
+                  {label}
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500">No yield loss reasons provided.</p>
+            <p className="text-gray-400 italic">
+              No yield loss reasons provided.
+            </p>
           )}
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Weather Events */}
-        <section>
-          <h3 className="font-semibold text-gray-900 mb-2">Weather Events</h3>
+        <section className="bg-white rounded-2xl p-4 shadow-sm border">
+          <h3 className="font-semibold text-gray-900 mb-3 tracking-wide">
+            Weather Events
+          </h3>
           {preview.weather_event_labels?.length ? (
-            <ul className="list-disc ml-5 space-y-1">
+            <ul className="list-disc ml-6 space-y-2 text-gray-700">
               {preview.weather_event_labels.map((label: string, i: number) => (
-                <li key={i}>{label}</li>
+                <li key={i} className="leading-relaxed">
+                  {label}
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500">No weather impacts reported.</p>
+            <p className="text-gray-400 italic">No weather impacts reported.</p>
           )}
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Pest Attacks */}
-        <section>
-          <h3 className="font-semibold text-gray-900 mb-2">Pest Attacks</h3>
+        <section className="bg-white rounded-2xl p-4 shadow-sm border">
+          <h3 className="font-semibold text-gray-900 mb-3 tracking-wide">
+            Pest Attacks
+          </h3>
           {preview.pest_attack_labels?.length ? (
-            <ul className="list-disc ml-5 space-y-1">
+            <ul className="list-disc ml-6 space-y-2 text-gray-700">
               {preview.pest_attack_labels.map((label: string, i: number) => (
-                <li key={i}>{label}</li>
+                <li key={i} className="leading-relaxed">
+                  {label}
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500">No pest attacks recorded.</p>
+            <p className="text-gray-400 italic">No pest attacks recorded.</p>
           )}
         </section>
 
-        <Separator />
+        <Separator className="opacity-50" />
 
         {/* Disease Attacks */}
-        <section>
-          <h3 className="font-semibold text-gray-900 mb-2">Disease Attacks</h3>
+        <section className="bg-white rounded-2xl p-4 shadow-sm border">
+          <h3 className="font-semibold text-gray-900 mb-3 tracking-wide">
+            Disease Attacks
+          </h3>
           {preview.disease_attack_labels?.length ? (
-            <ul className="list-disc ml-5 space-y-1">
+            <ul className="list-disc ml-6 space-y-2 text-gray-700">
               {preview.disease_attack_labels.map((label: string, i: number) => (
-                <li key={i}>{label}</li>
+                <li key={i} className="leading-relaxed">
+                  {label}
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500">No disease attacks recorded.</p>
+            <p className="text-gray-400 italic">No disease attacks recorded.</p>
           )}
         </section>
       </CardContent>
@@ -130,9 +148,11 @@ export default function SurveyPreview({ data }: PreviewProps) {
 
 function PreviewField({ label, value }: { label: string; value: any }) {
   return (
-    <div className="flex flex-col">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-medium text-gray-900">
+    <div className="flex flex-col p-3 rounded-xl bg-gray-50 border shadow-sm">
+      <span className="text-xs uppercase tracking-wide text-gray-500">
+        {label}
+      </span>
+      <span className="font-semibold text-gray-900 text-base">
         {value !== undefined && value !== "" ? value : "-"}
       </span>
     </div>

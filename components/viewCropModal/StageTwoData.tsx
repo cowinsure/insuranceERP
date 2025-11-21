@@ -16,33 +16,33 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
   /* ---------- Labels for display ---------- */
   const pestLabels: Record<string, string> = {
-    stemBorer: t('stem_borer'),
-    leafFolder: t('leaf_folder'),
-    brownPlanthopper: t('brown_planthopper'),
-    greenLeafhopper: t('green_leafhopper'),
-    stinkBug: t('stink_bug'),
-    others: t('others'),
-    none: t('none'),
+    stemBorer: t("stem_borer"),
+    leafFolder: t("leaf_folder"),
+    brownPlanthopper: t("brown_planthopper"),
+    greenLeafhopper: t("green_leafhopper"),
+    stinkBug: t("stink_bug"),
+    others: t("others"),
+    none: t("none"),
   };
 
   const diseaseLabels: Record<string, string> = {
-    leafBlast: t('leaf_blast'),
-    bacterialLeafBlight: t('bacterial_leaf_blight'),
-    sheathBlight: t('sheath_blight'),
-    bakanae: t('bakanae'),
-    brownSpot: t('brown_spot'),
-    leafScald: t('leaf_scald'),
-    hispa: t('hispa'),
-    tungro: t('tungro'),
-    none: t('none'),
+    leafBlast: t("leaf_blast"),
+    bacterialLeafBlight: t("bacterial_leaf_blight"),
+    sheathBlight: t("sheath_blight"),
+    bakanae: t("bakanae"),
+    brownSpot: t("brown_spot"),
+    leafScald: t("leaf_scald"),
+    hispa: t("hispa"),
+    tungro: t("tungro"),
+    none: t("none"),
   };
 
   const weatherLabels: Record<string, string> = {
-    flood: t('flood'),
-    drought: t('drought'),
-    excessRainfall: t('excess_rainfall'),
-    storms: t('storms'),
-    hailstorm: t('hailstorm'),
+    flood: t("flood"),
+    drought: t("drought"),
+    excessRainfall: t("excess_rainfall"),
+    storms: t("storms"),
+    hailstorm: t("hailstorm"),
   };
 
   const [harvestSeedVarietyOptions, setHarvestSeedVarietyOptions] = useState<
@@ -128,11 +128,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
   /* ---------- No data case ---------- */
   if (!cropData) {
-    return (
-      <div className="text-gray-500 italic">
-        {t('no_stage_two_data')}
-      </div>
-    );
+    return <div className="text-gray-500 italic">{t("no_stage_two_data")}</div>;
   }
 
   const crop = cropData.crop_harvest_info?.[0];
@@ -172,11 +168,13 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
     <div className="space-y-6 text-gray-700 overflow-y-auto">
       {/* 🌾 Harvest */}
       <section className="border rounded-lg p-3">
-        <h2 className="text-lg font-semibold mb-3 text-green-800">{t('harvest')}</h2>
+        <h2 className="text-lg font-semibold mb-3 text-green-800">
+          {t("harvest")}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DisplayField label={t('harvest_date')} value={crop?.harvest_date} />
+          <DisplayField label={t("harvest_date")} value={crop?.harvest_date} />
           <DisplayField
-            label={t('total_production')}
+            label={t("total_production")}
             value={
               crop?.total_production_kg !== undefined
                 ? `${crop.total_production_kg} kg`
@@ -184,7 +182,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             }
           />
           <DisplayField
-            label={t('moisture_content')}
+            label={t("moisture_content")}
             value={`${
               crop?.moisture_content_percentage === undefined
                 ? ""
@@ -197,32 +195,34 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       {/* 🌱 Observations */}
       <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">
-          {t('observations')}
+          {t("observations")}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <DisplayField
-            label={t('seed_variety_observation')}
+            label={t("seed_variety_observation")}
             value={seedVarietyName}
           />
           <DisplayField
-            label={t('harvesting_timing')}
+            label={t("harvesting_timing")}
             value={harvestingTimingName}
           />
           <DisplayField
-            label={t('manageable')}
+            label={t("manageable")}
             value={
-              crop?.is_manageable_harvest === true ? t('it_was_manageable') : t('no')
+              crop?.is_manageable_harvest === true
+                ? t("it_was_manageable")
+                : t("no")
             }
           />
           <DisplayField
-            label={t('remarks')}
+            label={t("remarks")}
             value={crop?.reason_for_is_manageable_harvest}
           />
 
           <div className="lg:col-span-2">
             <ArrayDisplay
-              title={t('good_practices')}
+              title={t("good_practices")}
               items={goodPracticeNames.map((name: string) => ({ name }))}
             />
           </div>
@@ -232,13 +232,13 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       {/* 🐛 Pest & Disease */}
       <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">
-          {t('pest_disease_attacks')}
+          {t("pest_disease_attacks")}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* ✅ Stage-filtered Pest */}
           <ArrayDisplay
-            title={t('pest_attacks')}
+            title={t("pest_attacks")}
             items={filterStage3(
               cropData.crop_asset_pest_attack_details || []
             ).map((p: any) => ({
@@ -250,7 +250,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
           {/* ✅ Stage-filtered Disease */}
           <ArrayDisplay
-           title={t('disease_attacks')}
+            title={t("disease_attacks")}
             items={filterStage3(
               cropData.crop_asset_disease_attack_details || []
             ).map((d: any) => ({
@@ -265,7 +265,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       {/* 🌤 Weather */}
       <section className="border rounded-lg p-3">
         <h2 className="text-lg font-semibold mb-3 text-green-800">
-          {t('adverse_weather_effects')}
+          {t("adverse_weather_effects")}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -297,36 +297,44 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         cropData.crop_asset_attachment_details.length > 0 && (
           <section className="border rounded-lg p-3">
             <h2 className="text-lg font-semibold mb-3 text-green-800">
-              {t('attachments')}
+              {t("attachments")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {filterStage3(cropData.crop_asset_attachment_details).map(
-                (attachment: any, index: number) => (
-                  <div
-                    key={index}
-                    className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
-                  >
-                    <img
-                      src={
-                        attachment?.attachment_path.startsWith("data:")
-                          ? attachment?.attachment_path
-                          : `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL }${attachment?.attachment_path}`
-                      }
-                      alt={`Attachment ${index + 1}`}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-2 bg-gray-50 border-t">
-                      <p className="text-xs text-gray-600">
-                        {attachment?.remarks || "No remarks"}
-                      </p>
+                (attachment: any, index: number) => {
+                  const imageSrc = attachment?.attachment_path.startsWith(
+                    "data:"
+                  )
+                    ? attachment?.attachment_path
+                    : `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment?.attachment_path}`;
+
+                  return (
+                    <div
+                      key={index}
+                      className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
+                    >
+                      <img
+                        src={imageSrc}
+                        alt={`Attachment ${index + 1}`}
+                        className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition"
+                        onClick={() => window.open(imageSrc, "_blank")}
+                        title="View Image"
+                      />
+
+                      <div className="p-2 bg-gray-50 border-t">
+                        <p className="text-xs text-gray-600">
+                          {attachment?.remarks || "No remarks"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )
+                  );
+                }
               )}
             </div>
+
             {filterStage3(cropData.crop_asset_attachment_details).length ===
               0 && (
-              <p className="text-gray-400 text-sm italic">{t('no_data')}</p>
+              <p className="text-gray-400 text-sm italic">{t("no_data")}</p>
             )}
           </section>
         )}
@@ -371,7 +379,7 @@ const ArrayDisplay = ({
           ))}
         </ul>
       ) : (
-        <p className="text-gray-400 text-sm italic">{t('not_provided')}</p>
+        <p className="text-gray-400 text-sm italic">{t("not_provided")}</p>
       )}
     </div>
   );

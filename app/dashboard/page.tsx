@@ -4,19 +4,10 @@ import { DashboardStats } from "@/components/dashboard-stats";
 import { ClaimsChart } from "@/components/claims-chart";
 // import { QuickStats } from "@/components/quick-stats"
 // import { ClaimsTable } from "@/components/claims-table"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
-import { Bell, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {  useLocalization } from "../../core/context/LocalizationContext";
+import { useLocalization } from "../../core/context/LocalizationContext";
 
 export default function Page() {
-    const { t } = useLocalization();
+  const { t } = useLocalization();
 
   return (
     // <SidebarProvider>
@@ -66,9 +57,7 @@ export default function Page() {
     <div className="flex-1 space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">{t("dashboard")}</h1>
-        <p className="text-gray-600">
-          {t("welcome_back_message")}
-        </p>
+        <p className="text-gray-600">{t("welcome_back_message")}</p>
       </div>
 
       <div className="animate__animated animate__fadeIn">

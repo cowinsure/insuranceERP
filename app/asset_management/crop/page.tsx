@@ -11,11 +11,12 @@ import { SearchFilter } from "@/components/utils/SearchFilter";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
 import { log } from "console";
-import { ClipboardCheck, Eye, FilePlus, Plus } from "lucide-react";
+import { ClipboardCheck, Eye, FilePlus, Plus, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import { useAuth } from "@/core/context/AuthContext";
 
 type StageAccess = {
   stage1Enabled: boolean;
@@ -25,6 +26,7 @@ type StageAccess = {
 const CropsPage = () => {
   const { get } = useApi();
   const { t } = useLocalization();
+  const { userId } = useAuth();
 
   /************************* Declare states here *************************/
   const [isLoading, setIsLoading] = useState(false);
@@ -40,10 +42,18 @@ const CropsPage = () => {
     "stage1" | "stage2" | "view" | null
   >(null);
   const [crops, setCrops] = useState<CropGetData[]>([]);
-  const [filteredCrops, setFilteredCrops] = useState(crops);
+  const [filteredCrops, setFilteredCrops] = useState<CropGetData[]>([]);
   const [stageOnePayloads, setStageOnePayloads] = useState<Record<number, any>>(
     {}
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  const totalPages =
+    pageSize === "All"
+      ? 1
+      : Math.ceil(filteredCrops.length / (pageSize as number));
 
   const stageRules: Record<number, StageAccess> = {
     1: { stage1Enabled: true, stage2Enabled: false },
@@ -54,9 +64,18 @@ const CropsPage = () => {
   /************************************************************************/
 
   /************************* GET Data Functions *************************/
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredCrops]);
+
+  useEffect(() => {
+    setFilteredCrops(crops);
+  }, [crops]);
+
   useEffect(() => {
     fetchCropData();
-  }, []);
+  }, [currentPage, pageSize]);
 
   // GET all crop data from API
   const fetchCropData = async () => {
@@ -64,16 +83,19 @@ const CropsPage = () => {
     try {
       const response = await get("/cms/crop-info-service", {
         params: {
-          page_size: 10,
-          start_record: 1,
           crop_id: -1,
+          page_size: pageSize === "All" ? 999999 : pageSize,
+          start_record:
+            pageSize === "All"
+              ? 1
+              : (currentPage - 1) * (pageSize as number) + 1,
         },
       });
 
       if (response.status === "success") {
         setCrops(response.data);
         setFilteredCrops(response.data);
-        console.log(response.data);
+        setTotalRecords(response.total_records || response.data.length);
       }
     } catch (error: any) {
       const message =
@@ -192,6 +214,16 @@ const CropsPage = () => {
 
   /************************************************************************/
 
+  const paginatedCrops =
+    pageSize === "All"
+      ? filteredCrops
+      : filteredCrops.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
+
+        console.log(crops);
+
   return (
     <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
       {/* Page header */}
@@ -224,9 +256,10 @@ const CropsPage = () => {
         data={crops}
         setFilteredData={setFilteredCrops}
         searchKeys={[
-          "crop_asset_seed_details.farmer_name",
-          "crop_asset_seed_details.mobile_number",
+          "farmer_name",
+          "mobile_number",
         ]}
+        
       />
 
       {/* Table */}
@@ -237,7 +270,7 @@ const CropsPage = () => {
               {t("registered_crops")}
             </CardTitle>
             <p className="text-sm text-gray-600">
-              {crops.length} {t("crops_found")}
+              {totalRecords} {t("crops_found")}
             </p>
           </div>
 
@@ -296,7 +329,7 @@ const CropsPage = () => {
                 </tr>
               ) : (
                 <>
-                  {filteredCrops.map((crop, idx) => {
+                  {paginatedCrops.map((crop, idx) => {
                     // const seed = crop.crop_asset_seed_details?.[0];
                     const { stage1Enabled, stage2Enabled } = getStageAccess(
                       crop.current_stage_id
@@ -307,7 +340,13 @@ const CropsPage = () => {
                         className="border-b border-gray-100 hover:bg-gray-50  animate__animated animate__fadeIn"
                         style={{ animationDelay: `${idx * 100}ms` }}
                       >
-                        <td className="py-4 px-4 text-gray-600">{idx + 1}</td>
+                        <td className="py-4 px-4 text-gray-600">
+                          {(currentPage - 1) *
+                            (pageSize === "All" ? 0 : pageSize) +
+                            idx +
+                            1}
+                        </td>
+
                         <td className="py-4 px-4">
                           <div className="font-medium text-gray-900">
                             {crop?.crop_name || "N/A"}
@@ -388,6 +427,49 @@ const CropsPage = () => {
               )}
             </tbody>
           </table>
+          {/* Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Rows per page:</span>
+              <select
+                className="border rounded px-2 py-1"
+                value={pageSize}
+                onChange={(e) => {
+                  const value =
+                    e.target.value === "All" ? "All" : Number(e.target.value);
+                  setPageSize(value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={6}>6</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value="All">All</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                Prev
+              </Button>
+
+              <span className="text-sm text-gray-700">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* MOBILE / TABLET VIEW — CARDS */}
@@ -395,7 +477,7 @@ const CropsPage = () => {
           {isLoading ? (
             <Loading />
           ) : (
-            filteredCrops.map((crop, idx) => {
+            paginatedCrops.map((crop, idx) => {
               const { stage1Enabled, stage2Enabled } = getStageAccess(
                 crop.current_stage_id
               );
@@ -512,58 +594,107 @@ const CropsPage = () => {
       )}
 
       {/* Stage One Modal */}
-      {isStageOneModal && (
-        <GenericModal
-          title={
-            <span className="flex flex-col">
-              {
+      {isStageOneModal &&
+        (userId === "Farmer" ? (
+          <GenericModal
+            title={
+              <span className="flex flex-col">
                 <div className="flex gap-1">
                   <span>{t("add_details_for")}</span>
                   <span className="font-extrabold">
-                    {" "}
                     {selectedCrop?.crop_asset_seed_details?.[0]?.crop_name ||
                       "Crop"}
                   </span>
                 </div>
-              }
-              <small className="font-medium text-gray-500 tracking-wide">
-                {t("variety")}{" "}
-                {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
-                  selectedCrop?.variety}
-              </small>
-            </span>
-          }
-          closeModal={() => setIsStageOneModal(false)}
-          widthValue={"w-full min-w-sm md:max-w-3xl"}
-        >
-          <AddCropDetailsModal crop={selectedCrop!} onClose={runOnClose} />
-        </GenericModal>
-      )}
+                <small className="font-medium text-gray-500 tracking-wide">
+                  {t("variety")}{" "}
+                  {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
+                    selectedCrop?.variety}
+                </small>
+              </span>
+            }
+            closeModal={() => setIsStageOneModal(false)}
+            widthValue={"w-full min-w-sm md:max-w-3xl"}
+          >
+            <AddCropDetailsModal crop={selectedCrop!} onClose={runOnClose} />
+          </GenericModal>
+        ) : (
+          <GenericModal closeModal={() => setIsStageOneModal(false)}>
+            <div className="w-full mx-auto text-center p-6 space-y-5">
+              {/* Icon */}
+              <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 shadow-lg">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+
+              {/* Title */}
+              <h2 className="text-2xl font-bold text-gray-900">
+                Upgrade to Premium
+              </h2>
+
+              {/* Description */}
+              <p className="text-gray-600 text-lg leading-relaxed">
+                Unlock the full power of the app with a{" "}
+                <span className="font-bold text-gray-800">
+                  Premium subscription
+                </span>
+                . Enjoy exclusive features, faster performance, and tools
+                designed to help you get the most out of your usage.
+              </p>
+            </div>
+          </GenericModal>
+        ))}
 
       {/* Stage Two Modal */}
-      {isStageTwoModal && (
-        <GenericModal
-          title={
-            <h1 className="flex flex-col">
-              {`${t("revisit_data_for")} ${
-                selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
-              } `}
-              <small className="font-medium text-gray-500">
-                {t("variety")}{" "}
-                {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
-                  selectedCrop?.variety}
-              </small>
-            </h1>
-          }
-          closeModal={() => setIsStageTwoModal(false)}
-          widthValue={"w-full min-w-sm md:max-w-3xl"}
-        >
-          <AddCropStageTwoModal
-            selectedCrop={selectedCrop!}
-            onSuccess={runFunctionOnSuccessStageTwo}
-          />
-        </GenericModal>
-      )}
+      {isStageTwoModal &&
+        (userId === "Farmer" ? (
+          <GenericModal
+            title={
+              <h1 className="flex flex-col">
+                {`${t("revisit_data_for")} ${
+                  selectedCrop?.crop_asset_seed_details?.[0]?.crop_name ||
+                  "Crop"
+                } `}
+                <small className="font-medium text-gray-500">
+                  {t("variety")}{" "}
+                  {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
+                    selectedCrop?.variety}
+                </small>
+              </h1>
+            }
+            closeModal={() => setIsStageTwoModal(false)}
+            widthValue={"w-full min-w-sm md:max-w-3xl"}
+          >
+            <AddCropStageTwoModal
+              selectedCrop={selectedCrop!}
+              onSuccess={runFunctionOnSuccessStageTwo}
+            />
+          </GenericModal>
+        ) : (
+          <>
+            {isStageTwoModal && (
+              <GenericModal closeModal={() => setIsStageTwoModal(false)}>
+                <div className="w-full mx-auto text-center p-6 space-y-5">
+                  <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 shadow-lg">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Upgrade to Premium
+                  </h2>
+
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Unlock the full power of the app with a{" "}
+                    <span className="font-bold text-gray-800">
+                      Premium subscription
+                    </span>
+                    . Enjoy exclusive features, faster performance, and tools
+                    designed to help you get the most out of your usage.
+                  </p>
+                </div>
+              </GenericModal>
+            )}
+          </>
+        ))}
 
       {/* Crop View Modal */}
       {isCropView && (

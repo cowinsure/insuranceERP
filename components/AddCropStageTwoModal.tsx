@@ -12,6 +12,8 @@ import StageTwoPreview from "./StageTwoPreview";
 import useApi from "@/hooks/use_api";
 import StageTwoData from "./viewCropModal/StageTwoData";
 import AttachmentStepOne from "./addCropForms/stageOneSteps/AttachmentStepOne";
+import { Loading } from "./ui/loading";
+import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface AddCropStageTwoModalProps {
   selectedCrop: any;
@@ -92,6 +94,7 @@ const AddCropStageTwoModal = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const { put } = useApi();
+  const { t } = useLocalization();
 
   const defaultHarvest: HarvestData = {
     harvest_date: "",
@@ -119,6 +122,7 @@ const AddCropStageTwoModal = ({
     attachments: [],
   });
   const [pestDiseaseTouched, setPestDiseaseTouched] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // ---------------- Prefill Stage 2 data with stage_id validation ----------------
   useEffect(() => {
@@ -240,6 +244,7 @@ const AddCropStageTwoModal = ({
   // console.log(selectedCrop);
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       if (!selectedCrop) return;
 
@@ -260,24 +265,6 @@ const AddCropStageTwoModal = ({
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
       console.log(weather);
-      // console.log("Selected crop stage 2", selectedCrop);
-      // const mergedPests = pestDiseaseTouched
-      //   ? [
-      //       ...(selectedCrop.crop_asset_pest_attack_details || []).filter(
-      //         (p: any) => p.stage_id !== 3
-      //       ),
-      //       ...pests.map((p) => ({ ...p, stage_id: 3 })),
-      //     ]
-      //   : selectedCrop.crop_asset_pest_attack_details || [];
-
-      // const mergedDiseases = pestDiseaseTouched
-      //   ? [
-      //       ...(selectedCrop.crop_asset_disease_attack_details || []).filter(
-      //         (d: any) => d.stage_id !== 3
-      //       ),
-      //       ...diseases.map((d) => ({ ...d, stage_id: 3 })),
-      //     ]
-      //   : selectedCrop.crop_asset_disease_attack_details || [];
 
       const mergedWeather = [
         // Keep previous records that are NOT stage 3
@@ -344,6 +331,8 @@ const AddCropStageTwoModal = ({
     } catch (error) {
       console.error(error);
       toast.error("Failed to save Stage Two data.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -409,18 +398,20 @@ const AddCropStageTwoModal = ({
       case 4:
         return (
           <AttachmentStepOne
-          stageId={3}
+            stageId={3}
             data={stageTwoData.attachments}
-            onChange={(d) => setStageTwoData({ ...stageTwoData, attachments: d })}
+            onChange={(d) =>
+              setStageTwoData({ ...stageTwoData, attachments: d })
+            }
           />
         );
 
       case 5:
         return (
-          <StageTwoPreview 
+          <StageTwoPreview
             data={stageTwoData}
-            attachments={stageTwoData.attachments.filter(
-              (att: any) => att.attachment_path.startsWith("data:")
+            attachments={stageTwoData.attachments.filter((att: any) =>
+              att.attachment_path.startsWith("data:")
             )}
           />
         );
@@ -462,7 +453,7 @@ const AddCropStageTwoModal = ({
             onClick={handleSubmit}
             className="cursor-pointer px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 flex items-center gap-1"
           >
-            <FaCircleCheck /> Save
+            <FaCircleCheck /> {isLoading ? t("submitting") : t("submit")}
           </button>
         ) : (
           <button
@@ -473,8 +464,20 @@ const AddCropStageTwoModal = ({
           </button>
         )}
       </div>
-
-      {/* <Toaster richColors /> */}
+      {/* FULL SCREEN LOADING OVERLAY */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-black to-transparent">
+          <div className="bg-white rounded-2xl px-8 py-6 flex flex-col items-center shadow-2xl animate-fadeIn">
+            <Loading />
+            <p className="mt-4 text-gray-700 font-medium text-base">
+              Submitting crop data...
+            </p>
+            <span className="text-sm text-gray-500 mt-1">
+              This may take a few moments. Please don’t close this window.
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

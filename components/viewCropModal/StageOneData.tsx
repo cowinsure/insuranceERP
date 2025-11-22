@@ -123,38 +123,42 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
 
       {/* 🌦️ Weather Effects */}
       <Section title={t("weather_effects")}>
-        <ArrayDisplay
-          title={t("weather_events")}
-          items={filterByItemStage(
-            data.crop_asset_weather_effect_history,
-            2 // filter for stage 2 only
-          ).map((w: any) => ({
-            name: w?.weather_effect_type_name || "",
-            remarks: w?.remarks,
-            date: w?.created_at || w?.modified_at,
-          }))}
-        />
-        <InputField
-          label="Date from"
-          value={filterByItemStage(
-            data.crop_asset_weather_effect_history,
-            2
-          ).map((d) => d.date_from)}
-        />
-        <InputField
-          label="Date from"
-          value={filterByItemStage(
-            data.crop_asset_weather_effect_history,
-            2
-          ).map((d) => d.date_to)}
-        />
+        <div>
+          <div className="grid md:grid-cols-2 gap-4 mb-3">
+            <InputField
+              label="Date from"
+              value={filterByItemStage(
+                data.crop_asset_weather_effect_history,
+                2
+              ).map((d) => d.date_from)}
+            />
+            <InputField
+              label="Date from"
+              value={filterByItemStage(
+                data.crop_asset_weather_effect_history,
+                2
+              ).map((d) => d.date_to)}
+            />
+          </div>
+          <ArrayDisplay
+            title={t("weather_events")}
+            items={filterByItemStage(
+              data.crop_asset_weather_effect_history,
+              2 // filter for stage 2 only
+            ).map((w: any) => ({
+              name: w?.weather_effect_type_name || "",
+              remarks: w?.remarks,
+              date: w?.created_at || w?.modified_at,
+            }))}
+          />
+        </div>
       </Section>
 
       {/* 🐛 Pest & Disease Attacks */}
       <Section title={t("pest_disease_attacks")}>
         <Grid>
           <ArrayDisplay
-            title={t("pest_attacks")}
+            title={t("Pests")}
             items={filterByItemStage(
               data.crop_asset_pest_attack_details,
               2
@@ -166,7 +170,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           />
 
           <ArrayDisplay
-            title={t("disease_attacks")}
+            title={t("Diseases")}
             items={filterByItemStage(
               data.crop_asset_disease_attack_details,
               2

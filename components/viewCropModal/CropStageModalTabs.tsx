@@ -13,24 +13,11 @@ import { useLocalization } from "@/core/context/LocalizationContext";
 
 interface CropStageModalTabsProps {
   data: any;
-  // stageTwoData?: any;
 }
 
-// ✅ Define interface for Land (based on your API fields)
-interface LandData {
-  land_id: number;
-  land_name: string;
-  [key: string]: any; // Keep open for other land fields if needed
-}
-
-const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
-  data,
-  // stageTwoData,
-}) => {
-  const { get } = useApi();
+const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({ data }) => {
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState("stage1");
-  const [landInfo, setLandInfo] = useState<LandData | null>(null);
 
   // ✅ Tabs setup (kept exactly as before)
   const tabs = ["stage1", "stage2"];
@@ -52,36 +39,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
     }
   };
 
-  // ✅ Fetch land info using the land_id from crop data
-  useEffect(() => {
-    const fetchLandData = async () => {
-      if (!data?.land_id) return; // no land id, no call
-
-      try {
-        const response = await get("/lams/land-info-service", {
-          params: { start_record: 1, page_size: 10 },
-        });
-
-        if (response.status === "success" && Array.isArray(response.data)) {
-          const matchedLand = response.data.find(
-            (land: LandData) => land.land_id === data.land_id
-          );
-          setLandInfo(matchedLand || null);
-        }
-      } catch (error: any) {
-        const message =
-          error?.response?.data?.message ||
-          error.message ||
-          t('failed_to_fetch_land_info');
-        toast.error(message);
-      }
-    };
-
-    fetchLandData();
-  }, [data?.land_id]);
-
   console.log("Crop Data:", data);
-  //("Fetched Land Info:", landInfo);
 
   return (
     <div className="text-gray-800 relative">
@@ -89,7 +47,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
       <div className="bg-white min-h-[25vh] overflow-y-auto mb-7 p-2">
         <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
           <GiPlantRoots className="text-2xl text-green-700" />
-          {t('crop_details')}
+          {t("crop_details")}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -99,7 +57,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <GiPlantRoots className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">{t('crop')}</p>
+              <p className="text-sm text-gray-500">{t("crop")}</p>
               <p className="font-medium text-gray-800">
                 {data.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
               </p>
@@ -112,7 +70,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <PiPlantDuotone className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">{t('variety')}</p>
+              <p className="text-sm text-gray-500">{t("variety")}</p>
               <p className="font-medium text-gray-800">
                 {data.crop_asset_seed_details?.[0]?.seed_variety ||
                   data.variety ||
@@ -127,7 +85,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <PiCalendar className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">{t('plantation_date')}</p>
+              <p className="text-sm text-gray-500">{t("plantation_date")}</p>
               <p className="font-medium text-gray-800">
                 {data.planting_date || "N/A"}
               </p>
@@ -140,9 +98,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <LandPlot className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">{t('land')}</p>
+              <p className="text-sm text-gray-500">{t("land")}</p>
               <p className="font-medium text-gray-800">
-                {landInfo?.land_name || "N/A"}
+                {data?.land_name || "N/A"}
               </p>
             </div>
           </div>
@@ -153,9 +111,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <User className="text-3xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">{t('farmer_name')}</p>
+              <p className="text-sm text-gray-500">{t("farmer_name")}</p>
               <p className="font-medium text-gray-800">
-                {landInfo?.farmer_name || "N/A"}
+                {data?.farmer_name || "N/A"}
               </p>
             </div>
           </div>
@@ -166,9 +124,9 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               <IoMdKeypad className="text-2xl" />
             </span>
             <div>
-              <p className="text-sm text-gray-500">{t('farmer_mobile')}</p>
+              <p className="text-sm text-gray-500">{t("farmer_mobile")}</p>
               <p className="font-medium text-gray-800">
-                {landInfo?.mobile_number || "N/A"}
+                {data?.mobile_number || "N/A"}
               </p>
             </div>
           </div>
@@ -192,7 +150,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({
               {tab === "stage1" && <GiPlantRoots className="text-xl" />}
               {tab === "stage2" && <PiPlantDuotone className="text-xl" />}
               <span>
-                {tab === "stage1" ? t('stage_1_details') : t('stage_2_details')}
+                {tab === "stage1" ? t("stage_1_details") : t("stage_2_details")}
               </span>
             </button>
           ))}

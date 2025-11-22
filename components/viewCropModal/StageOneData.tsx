@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import { formatDate } from "./StageTwoData";
 
 interface StageOneDataProps {
   data: Record<string, any>;
@@ -101,10 +102,10 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           />
           <InputField
             label={t("harvest_date")}
-            value={
+            value={formatDate(
               safeArray(data.crop_asset_previous_season_history_details)[0]
                 ?.harvest_date
-            }
+            )}
           />
           <InputField
             label={t("last_years_crop")}
@@ -142,19 +143,24 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           <div className="grid md:grid-cols-2 gap-4 mb-3">
             <InputField
               label="Date from"
-              value={filterByItemStage(
-                data.crop_asset_weather_effect_history,
-                2
-              ).map((d) => d.date_from)}
+              value={formatDate(
+                filterByItemStage(
+                  data.crop_asset_weather_effect_history,
+                  2
+                )[0]?.date_from?.slice(0, 10)
+              )}
             />
             <InputField
-              label="Date from"
-              value={filterByItemStage(
-                data.crop_asset_weather_effect_history,
-                2
-              ).map((d) => d.date_to)}
+              label="Date to"
+              value={formatDate(
+                filterByItemStage(
+                  data.crop_asset_weather_effect_history,
+                  2
+                )[0]?.date_to?.slice(0, 10)
+              )}
             />
           </div>
+
           <ArrayDisplay
             title={t("weather_events")}
             items={uniqueByIdAndName(

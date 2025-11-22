@@ -9,6 +9,35 @@ interface StageTwoDataProps {
   cropData?: any;
 }
 
+export const formatDate = (date: string | null | undefined) => {
+  if (!date) return "";
+
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+
+  const day = String(d.getDate()).padStart(2, "0");
+
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
 /* ---------- Component ---------- */
 const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
   const { get } = useApi();
@@ -183,7 +212,10 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           {t("harvest")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DisplayField label={t("harvest_date")} value={crop?.harvest_date} />
+          <DisplayField
+            label={t("harvest_date")}
+            value={formatDate(crop?.harvest_date)}
+          />
           <DisplayField
             label={t("total_production")}
             value={
@@ -300,11 +332,11 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
           <DisplayField
             label="Period From"
-            value={stage3Weather[0]?.date_from || "Not provided"}
+            value={formatDate(stage3Weather[0]?.date_from) || "Not provided"}
           />
           <DisplayField
             label="Period To"
-            value={stage3Weather[0]?.date_to || "Not provided"}
+            value={formatDate(stage3Weather[0]?.date_to) || "Not provided"}
           />
         </div>
       </section>

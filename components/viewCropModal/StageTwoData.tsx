@@ -163,6 +163,17 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
     cropData.crop_asset_weather_effect_history || []
   );
 
+  const uniqueByIdAndName = (arr: any[], idKey: string, nameKey: string) => {
+    const map = new Map();
+
+    arr.forEach((item) => {
+      const key = `${item?.[idKey]}_${item?.[nameKey]}`;
+      if (!map.has(key)) map.set(key, item);
+    });
+
+    return Array.from(map.values());
+  };
+
   /* ---------- Render ---------- */
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">
@@ -238,11 +249,13 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* ✅ Stage-filtered Pest */}
           <ArrayDisplay
-            title={t("pest_attacks")}
-            items={filterStage3(
-              cropData.crop_asset_pest_attack_details || []
+            title={t("Pests")}
+            items={uniqueByIdAndName(
+              filterStage3(cropData.crop_asset_pest_attack_details || []),
+              "pest_attack_type_id",
+              "pest_attack_observations_type_name"
             ).map((p: any) => ({
-              name: p?.pest_attack_observations_type_name || null,
+              name: p.pest_attack_observations_type_name,
               remarks: p?.remarks,
               date: p?.attack_date || p?.created_at,
             }))}
@@ -250,11 +263,13 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
           {/* ✅ Stage-filtered Disease */}
           <ArrayDisplay
-            title={t("disease_attacks")}
-            items={filterStage3(
-              cropData.crop_asset_disease_attack_details || []
+            title={t("Diseases")}
+            items={uniqueByIdAndName(
+              filterStage3(cropData.crop_asset_disease_attack_details || []),
+              "disease_attack_type_id",
+              "disease_attack_observations_type_name"
             ).map((d: any) => ({
-              name: d?.disease_attack_observations_type_name || "Not Provided",
+              name: d.disease_attack_observations_type_name,
               remarks: d?.remarks,
               date: d?.attack_date || d?.created_at,
             }))}
@@ -272,10 +287,12 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           {/* ✅ Stage-filtered Weather */}
           <ArrayDisplay
             title="Weather Effects"
-            items={filterStage3(
-              cropData.crop_asset_weather_effect_history || []
+            items={uniqueByIdAndName(
+              filterStage3(cropData.crop_asset_weather_effect_history || []),
+              "weather_effect_type_id",
+              "weather_effect_type_name"
             ).map((w: any) => ({
-              name: w?.weather_effect_type_name || "",
+              name: w.weather_effect_type_name,
               remarks: w?.remarks,
               date: w?.created_at || w?.modified_at,
             }))}

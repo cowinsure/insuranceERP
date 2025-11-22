@@ -14,6 +14,21 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
   const filterByItemStage = (arr: any[], stageId: number) =>
     safeArray(arr).filter((item) => item?.stage_id === stageId);
 
+  const uniqueByIdAndName = (arr: any[], idKey: string, nameKey: string) => {
+    const map = new Map();
+
+    arr.forEach((item) => {
+      const key = `${item?.[idKey]}_${item?.[nameKey]}`;
+      if (!map.has(key)) {
+        map.set(key, item);
+      }
+    });
+
+    return Array.from(map.values());
+  };
+
+  console.log("Stage one data", data);
+
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">
       {/* 🌱 Seed Information */}
@@ -142,13 +157,12 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           </div>
           <ArrayDisplay
             title={t("weather_events")}
-            items={filterByItemStage(
-              data.crop_asset_weather_effect_history,
-              2 // filter for stage 2 only
-            ).map((w: any) => ({
-              name: w?.weather_effect_type_name || "",
-              remarks: w?.remarks,
-              date: w?.created_at || w?.modified_at,
+            items={uniqueByIdAndName(
+              filterByItemStage(data.crop_asset_weather_effect_history, 2),
+              "weather_effect_type_id",
+              "weather_effect_type_name"
+            ).map((item) => ({
+              name: item.weather_effect_type_name,
             }))}
           />
         </div>
@@ -159,25 +173,23 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
         <Grid>
           <ArrayDisplay
             title={t("Pests")}
-            items={filterByItemStage(
-              data.crop_asset_pest_attack_details,
-              2
-            ).map((p: any) => ({
-              name: p?.pest_attack_observations_type_name || null,
-              remarks: p?.remarks,
-              date: p?.attack_date || p?.created_at,
+            items={uniqueByIdAndName(
+              filterByItemStage(data.crop_asset_pest_attack_details, 2),
+              "pest_attack_type_id",
+              "pest_attack_observations_type_name"
+            ).map((item) => ({
+              name: item.pest_attack_observations_type_name,
             }))}
           />
 
           <ArrayDisplay
             title={t("Diseases")}
-            items={filterByItemStage(
-              data.crop_asset_disease_attack_details,
-              2
-            ).map((d: any) => ({
-              name: d?.disease_attack_observations_type_name || "Not Provided",
-              remarks: d?.remarks,
-              date: d?.attack_date || d?.created_at,
+            items={uniqueByIdAndName(
+              filterByItemStage(data.crop_asset_disease_attack_details, 2),
+              "disease_attack_type_id",
+              "disease_attack_observations_type_name"
+            ).map((item) => ({
+              name: item.disease_attack_observations_type_name,
             }))}
           />
         </Grid>

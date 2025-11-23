@@ -110,6 +110,7 @@ const useApi = () => {
     ): Promise<T> => {
       setLoading(true);
       setError(null);
+
       try {
         const isFormData =
           typeof FormData !== "undefined" && data instanceof FormData;
@@ -124,10 +125,17 @@ const useApi = () => {
           headers,
         });
 
-        return transform ? transform(response.data) : response.data;
+        const resData = transform ? transform(response.data) : response.data;
+
+        // 🔴 THIS IS THE FIX
+        if (resData?.status === "failed") {
+          throw new Error(resData.message || "API returned status: failed");
+        }
+
+        return resData;
       } catch (err: any) {
         setError(err);
-        throw err;
+        throw err; // will now get caught in the calling function
       } finally {
         setLoading(false);
       }

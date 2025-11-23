@@ -147,7 +147,7 @@ const AddCropStageTwoModal = ({
         date_from: w.date_from,
         date_to: w.date_to,
       }));
-    console.log(stage2Weather);
+    // console.log(stage2Weather);
 
     setStageTwoData((prev) => ({
       harvest: {
@@ -264,7 +264,7 @@ const AddCropStageTwoModal = ({
 
       const { pests, diseases } = mapPestsDisease(stageTwoData.pestsDisease);
       const weather = mapWeather(stageTwoData.weather);
-      console.log(weather);
+      // console.log(weather);
 
       const mergedWeather = [
         // Keep previous records that are NOT stage 3
@@ -328,9 +328,20 @@ const AddCropStageTwoModal = ({
         toast.success("Stage Two data saved successfully!");
         onSuccess?.();
       }
-    } catch (error) {
+
+      // if (res.status === "failed") {
+      //   toast.error(res.message || "An error occurred while saving data.");
+      // }
+    } catch (error: any) {
       console.error(error);
-      toast.error("Failed to save Stage Two data.");
+
+      const msg = error?.message ?? "";
+
+      if (msg.includes("harvest_date")) {
+        toast.error("Harvest date is required. Please select a valid date.");
+      } else {
+        toast.error(msg || "Failed to save Stage Two data.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -420,7 +431,7 @@ const AddCropStageTwoModal = ({
     }
   };
 
-  console.log("Stage two data received from childrens", stageTwoData);
+  // console.log("Stage two data received from childrens", stageTwoData);
 
   return (
     <div>

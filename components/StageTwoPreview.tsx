@@ -151,7 +151,7 @@ export default function StageTwoPreview({ data, attachments }: StageTwoPreviewPr
 
           {/* Good Agricultural Practices */}
           {data.harvest?.crop_harvest_details?.length > 0 ? (
-            <div className="border rounded-lg p-3 bg-gray-50">
+            <div className="rounded-lg p-3">
               <span className="font-medium text-gray-600">
                 {t('good_agricultural_practices')}
               </span>

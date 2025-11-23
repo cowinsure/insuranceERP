@@ -247,7 +247,7 @@ export default function AddCropDetailsModal({
         // Keep seeds as-is (no filtering applied here)
         crop_asset_seed_details: Array.isArray(cropData.seed)
           ? cropData.seed.map((s: any) => ({
-              seed_id: s.seed_id || 0,
+              seed_id: s.seed_id ?? null,
               seed_common_name: s.seed_common_name,
               seed_variety_id: s.seed_variety_id,
               seed_company_name: s.seed_company_name,
@@ -426,7 +426,7 @@ export default function AddCropDetailsModal({
         params: { crop_id: cropId },
       });
       if (res.status === "success") {
-        toast.success(t("crop_data_submitted_successfully"));
+        toast.success(t("Crop data submitted successfully!"));
         onClose();
       }
     } catch (err) {

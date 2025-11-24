@@ -169,9 +169,9 @@ const DesktopSideBar = () => {
           {/* Navigation */}
           <nav className="flex flex-col gap-3 relative">
             {mainMenuItems.map((item) => {
-              if (item.title === "Reports" && userId !== "Insurance Company") {
-                return null;
-              }
+              // if (item.title === "Reports" && userId !== "Insurance Company") {
+              //   return null;
+              // }
 
               const isActive =
                 pathname === item.url ||

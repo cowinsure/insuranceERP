@@ -26,7 +26,7 @@ import { toast } from "sonner";
 // ================= TYPES =================
 
 export interface CropRow {
-  id?: number | string;
+  id: number;
   farmer_name: string;
   phone: string;
   kg?: number | null;
@@ -34,6 +34,7 @@ export interface CropRow {
   district_name?: string | null;
   stage?: string | null;
   date?: string | null;
+  cropId: number;
 }
 
 interface ColumnDef {
@@ -87,8 +88,8 @@ const defaultColumns: ColumnDef[] = [
   { key: "sl", label: "SL", width: "w-auto" },
   { key: "farmer_name", label: "Farmer Name", width: "w-auto" },
   { key: "phone", label: "Phone", width: "w-auto" },
-  { key: "kg", label: "KG", width: "w-auto", align: "right" },
-  { key: "moisture", label: "Moisture (%)", width: "w-auto", align: "right" },
+  { key: "kg", label: "KG", width: "w-auto", align: "center" },
+  { key: "moisture", label: "Moisture (%)", width: "w-auto", align: "center" },
   { key: "district_name", label: "District", width: "w-auto" },
   { key: "action", label: "Action", width: "w-auto" },
 ];
@@ -256,6 +257,7 @@ export default function CropReportingDashboard({
       const json = await res.json();
       if (json.status === "success") {
         const list = json.data.list;
+        console.log(list);
         const apiSummary = json.data.summary;
         const mappedRows = list.map((item: any) => ({
           id: item.harvest_info_id,
@@ -266,7 +268,9 @@ export default function CropReportingDashboard({
           district_name: item.zilla,
           stage: item.stage_name,
           date: item.harvest_date,
+          cropId: item.crop_id,
         }));
+        // console.log(res);
         setRows(mappedRows);
         setTotal(apiSummary.total_harvests);
         setSummary(apiSummary);
@@ -279,6 +283,7 @@ export default function CropReportingDashboard({
       setLoading(false);
     }
   };
+  console.log(rows);
 
   // GET single crop by id and set to state for view modal
   const fetchSingleCrop = async (cropId: number) => {
@@ -348,6 +353,7 @@ export default function CropReportingDashboard({
   );
 
   const handleView = (cropId: number) => {
+    console.log(cropId);
     if (!cropId) return;
     setSelectedCropId(cropId);
     setIsCropView(true);
@@ -489,20 +495,22 @@ export default function CropReportingDashboard({
                           {(page - 1) * pageSize + idx + 1}
                         </td>
                         <td className="px-3 py-3 text-sm">{r.farmer_name}</td>
-                        <td className="px-3 py-3 text-sm">{r.phone}</td>
-                        <td className="px-3 py-3 text-sm text-right">
+                        <td className="px-3 py-3 text-sm text-center">
+                          {r.phone}
+                        </td>
+                        <td className="px-3 py-3 text-sm text-center">
                           {r.kg ?? "-"}
                         </td>
-                        <td className="px-3 py-3 text-sm text-right">
+                        <td className="px-3 py-3 text-sm text-center">
                           {r.moisture ?? "-"}
                         </td>
-                        <td className="px-3 py-3 text-sm">
+                        <td className="px-3 py-3 text-sm text-center">
                           {r.district_name ?? "-"}
                         </td>
                         <td className="px-3 py-3 text-sm">
                           <Button
                             variant={"outline"}
-                            onClick={() => handleView(123)} //pass the actual crop id here
+                            onClick={() => handleView(Number(r.cropId))}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>

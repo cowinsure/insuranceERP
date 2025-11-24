@@ -143,8 +143,12 @@ export default function CropReportingDashboard({
   const [minMoisture, setMinMoisture] = useState<string>("");
   const [maxMoisture, setMaxMoisture] = useState<string>("");
   const [stage, setStage] = useState<string>("");
-  const [dateFrom, setDateFrom] = useState<string>(new Date().toISOString().split("T")[0]);
-  const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [dateFrom, setDateFrom] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [dateTo, setDateTo] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [selectedQuick, setSelectedQuick] = useState<string | null>(null);
 
   const [page, setPage] = useState<number>(1);

@@ -138,18 +138,13 @@ export default function CropReportingDashboard({
   const { get } = useApi();
 
   // ---------------- Filters ----------------
-  const [district, setDistrict] = useState<string>("");
   const [minKg, setMinKg] = useState<string>("");
   const [maxKg, setMaxKg] = useState<string>("");
   const [minMoisture, setMinMoisture] = useState<string>("");
   const [maxMoisture, setMaxMoisture] = useState<string>("");
   const [stage, setStage] = useState<string>("");
-  const [dateFrom, setDateFrom] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
-  const [dateTo, setDateTo] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [dateFrom, setDateFrom] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split("T")[0]);
   const [selectedQuick, setSelectedQuick] = useState<string | null>(null);
 
   const [page, setPage] = useState<number>(1);
@@ -159,7 +154,7 @@ export default function CropReportingDashboard({
 
   const [rows, setRows] = useState<CropRow[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const [districtOptions, setDistrictOptions] = useState<string[]>([]);
+  const [summary, setSummary] = useState<any>(null);
   const [isCropView, setIsCropView] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
@@ -225,42 +220,50 @@ export default function CropReportingDashboard({
     setLoading(true);
     setError(null);
     try {
-      const payload = {
-        filters: {
-          district: district || null,
-          kg: {
-            gte: minKg ? Number(minKg) : null,
-            lte: maxKg ? Number(maxKg) : null,
-          },
-          moisture: {
-            gte: minMoisture ? Number(minMoisture) : null,
-            lte: maxMoisture ? Number(maxMoisture) : null,
-          },
-          stage: stage || null,
-          date_from: formatDateISO(dateFrom),
-          date_to: formatDateISO(dateTo),
-        },
-        page,
-        page_size: pageSize,
-        sort: sortBy
-          ? `${sortBy.dir === "desc" ? "-" : ""}${sortBy.key}`
-          : null,
-      };
+      const url = new URL(apiEndpoint, process.env.NEXT_PUBLIC_API_BASE_URL);
+      url.searchParams.set('page_size', pageSize.toString());
+      url.searchParams.set('start_record', ((page - 1) * pageSize + 1).toString());
+      if (minKg) url.searchParams.set('min_weight', minKg);
+      if (maxKg) url.searchParams.set('max_weight', maxKg);
+      if (minMoisture) url.searchParams.set('min_moisture', minMoisture);
+      if (maxMoisture) url.searchParams.set('max_moisture', maxMoisture);
+      if (dateFrom) url.searchParams.set('date_from', dateFrom);
+      if (dateTo) url.searchParams.set('date_to', dateTo);
+      if (stage === 'harvesting') url.searchParams.set('stage_id', '3');
 
-      const res = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      console.log(url);
+      
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
       });
 
       if (!res.ok) throw new Error(`Server responded ${res.status}`);
 
-      const json: ApiResponse = await res.json();
-      const data = json.data || json.results || [];
-      setRows(data);
-      setTotal(json.total ?? json.count ?? data.length);
-
-      if (json.meta?.districts) setDistrictOptions(json.meta.districts);
+      const json = await res.json();
+      if (json.status === 'success') {
+        const list = json.data.list;
+        const apiSummary = json.data.summary;
+        const mappedRows = list.map((item: any) => ({
+          id: item.harvest_info_id,
+          farmer_name: item.originator.split(' (')[0],
+          phone: item.originator.match(/\(([^)]+)\)/)?.[1] || '',
+          kg: item.total_production_kg,
+          moisture: item.moisture_content_percentage,
+          district_name: item.zilla,
+          stage: item.stage_name,
+          date: item.harvest_date
+        }));
+        setRows(mappedRows);
+        setTotal(apiSummary.total_harvests);
+        setSummary(apiSummary);
+      } else {
+        setError(json.message || 'Failed to fetch');
+      }
     } catch (err: any) {
       setError(err?.message || "Failed to fetch");
     } finally {
@@ -305,19 +308,13 @@ export default function CropReportingDashboard({
   };
 
   const stats = useMemo(() => {
-    const totalCrops = total || 0;
-    const totalHarvesting = rows.filter((r) =>
-      r.stage?.toLowerCase().includes("harvest")
-    ).length;
-    const totalPlotted = rows.length;
-    const avgYield = rows.length
-      ? rows.reduce((s, r) => s + (Number(r.kg) || 0), 0) / rows.length
-      : 0;
-    const avgMoisture = rows.length
-      ? rows.reduce((s, r) => s + (Number(r.moisture) || 0), 0) / rows.length
-      : 0;
+    const totalCrops = summary?.total_harvests || 0;
+    const totalHarvesting = summary?.total_harvests || 0;
+    const totalPlotted = summary?.total_crops_plotted || 0;
+    const avgYield = summary?.avg_production_kg || 0;
+    const avgMoisture = summary?.avg_moisture_percent || 0;
     return { totalCrops, totalHarvesting, totalPlotted, avgYield, avgMoisture };
-  }, [rows, total]);
+  }, [summary]);
 
   const handleSort = (key: string) => {
     if (sortBy && sortBy.key === key)
@@ -545,25 +542,6 @@ export default function CropReportingDashboard({
             </CardTitle>
 
             <div className="grid grid-cols-1 gap-4 mb-4">
-              {/* District */}
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">
-                  District
-                </label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
-                >
-                  <option value="">All</option>
-                  {districtOptions.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* KG */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -748,7 +726,6 @@ export default function CropReportingDashboard({
                 <button
                   className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-sm"
                   onClick={() => {
-                    setDistrict("");
                     setMinKg("");
                     setMaxKg("");
                     setMinMoisture("");

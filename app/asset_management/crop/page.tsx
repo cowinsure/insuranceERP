@@ -574,7 +574,7 @@ const CropsPage = () => {
           )}
         </div>
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4 lg:hidden">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Rows per page:</span>
             <select

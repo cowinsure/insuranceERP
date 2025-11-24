@@ -201,7 +201,7 @@ export function CreatePlotDialog({
     function generateRandomNumber(maxNumber: number): number {
       if (maxNumber <= 0) return 0;
 
-      const range = Math.floor(maxNumber * 0.5); // 50% of the limit
+      const range = Math.floor(maxNumber * 0.3); // 50% of the limit
       return Math.floor(Math.random() * range) + 1; // between 1 and range
     }
     // create random number and asignt it to random length field
@@ -214,7 +214,7 @@ export function CreatePlotDialog({
     function generateRandomNumber(maxNumber: number): number {
       if (maxNumber <= 0) return 0;
 
-      const range = Math.floor(maxNumber * 0.5); // 50% of the limit
+      const range = Math.floor(maxNumber * 0.3); // 50% of the limit
       return Math.floor(Math.random() * range) + 1; // between 1 and range
     }
     // create random number and asignt it to random length field

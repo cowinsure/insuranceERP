@@ -2,7 +2,17 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { MotionConfig, motion } from "framer-motion";
-import { FaUsers, FaSeedling, FaLeaf, FaWeight, FaTint } from "react-icons/fa";
+import {
+  FaUsers,
+  FaSeedling,
+  FaLeaf,
+  FaWeight,
+  FaTint,
+  FaFileAlt,
+} from "react-icons/fa";
+import { FaDownload } from "react-icons/fa6";
+import { TbReportSearch } from "react-icons/tb";
+import { CardTitle } from "@/components/ui/card";
 
 // ================= TYPES =================
 
@@ -65,12 +75,13 @@ interface SortArrowProps {
 // =================================================
 
 const defaultColumns: ColumnDef[] = [
-  { key: "sl", label: "SL", width: "w-12" },
-  { key: "farmer_name", label: "Farmer Name", width: "w-56" },
-  { key: "phone", label: "Phone", width: "w-40" },
-  { key: "kg", label: "KG", width: "w-32", align: "right" },
-  { key: "moisture", label: "Moisture (%)", width: "w-32", align: "right" },
-  { key: "district_name", label: "District", width: "w-48" },
+  { key: "sl", label: "SL", width: "w-auto" },
+  { key: "farmer_name", label: "Farmer Name", width: "w-auto" },
+  { key: "phone", label: "Phone", width: "w-auto" },
+  { key: "kg", label: "KG", width: "w-auto", align: "right" },
+  { key: "moisture", label: "Moisture (%)", width: "w-auto", align: "right" },
+  { key: "district_name", label: "District", width: "w-auto" },
+  { key: "action", label: "Action", width: "w-auto" },
 ];
 
 function formatDateISO(date: string | null): string | null {
@@ -268,271 +279,301 @@ export default function CropReportingDashboard({
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-white p-4 rounded-2xl shadow-inner"
-        >
-          {/* Filters + Apply/Reset Buttons */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Data Table */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="lg:col-span-3 bg-white p-4 rounded-2xl shadow-inner flex flex-col"
+          >
+            {/* Export CSV */}
+            <div className="flex justify-between items-center mb-5">
+              <div>
+                <CardTitle className="text-lg font-semibold text-gray-700 pt-0 flex items-center gap-2">
+                  <TbReportSearch size={25} /> Harvest Report
+                </CardTitle>
+              </div>
               <button
-                className="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700 shadow-sm"
-                onClick={() => {
-                  setPage(1);
-                  fetchData(); // apply filters manually
-                }}
-              >
-                Apply Filters
-              </button>
-
-              <button
-                className="px-3 py-2 rounded-md bg-gray-100 text-sm hover:bg-gray-200"
-                onClick={() => {
-                  setDistrict("");
-                  setMinKg("");
-                  setMaxKg("");
-                  setMinMoisture("");
-                  setMaxMoisture("");
-                  setStage("");
-                  setDateFrom("");
-                  setDateTo("");
-                  setPage(1);
-                }}
-              >
-                Reset
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                className="px-3 py-2 rounded-md bg-white border text-sm hover:bg-gray-50"
+                className="px-4 py-2 rounded-md text-gray-500 cursor-pointer bg-gray-50 hover:bg-gray-50 transition flex items-center gap-2 text-sm font-medium"
                 onClick={() => downloadCSV(visibleCsvRows, exportFileName)}
               >
+                <FaDownload />
                 Export CSV
               </button>
             </div>
-          </div>
-
-          {/* Filters panel */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
-            <div className="col-span-1 md:col-span-1">
-              <label className="block text-xs text-gray-500 mb-1">
-                District
-              </label>
-              <select
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="">All</option>
-                {districtOptions.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+            {/* Table */}
+            <div className="overflow-x-auto flex-1">
+              <table className="min-w-full table-auto bg-white h-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-600 border-b">
+                    {columns.map((col) => (
+                      <th
+                        key={col.key}
+                        className={`px-3 py-3 ${col.width || "w-auto"}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="flex items-center gap-2"
+                            onClick={() => handleSort(col.key)}
+                          >
+                            <span>{col.label}</span>
+                            <SortArrow
+                              active={sortBy?.key === col.key}
+                              dir={sortBy?.dir}
+                            />
+                          </button>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="">
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="p-6 text-center text-sm text-gray-500"
+                      >
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="p-6 text-center text-sm text-red-500"
+                      >
+                        {error}
+                      </td>
+                    </tr>
+                  ) : rows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="p-6 text-center text-sm text-gray-500"
+                      >
+                        No records found
+                      </td>
+                    </tr>
+                  ) : (
+                    rows.map((r, idx) => (
+                      <motion.tr
+                        key={r.id || idx}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28 }}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="px-3 py-3 text-sm">
+                          {(page - 1) * pageSize + idx + 1}
+                        </td>
+                        <td className="px-3 py-3 text-sm">{r.farmer_name}</td>
+                        <td className="px-3 py-3 text-sm">{r.phone}</td>
+                        <td className="px-3 py-3 text-sm text-right">
+                          {r.kg ?? "-"}
+                        </td>
+                        <td className="px-3 py-3 text-sm text-right">
+                          {r.moisture ?? "-"}
+                        </td>
+                        <td className="px-3 py-3 text-sm">
+                          {r.district_name ?? "-"}
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
 
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-2">
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-600">
+                Showing {(page - 1) * pageSize + 1} -{" "}
+                {Math.min(page * pageSize, total)} of {total}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="px-3 py-1 rounded-md border"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </button>
+                <div className="px-3 py-1 border rounded">{page}</div>
+                <button
+                  className="px-3 py-1 rounded-md border"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page * pageSize >= total}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Filters Panel */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white p-6 rounded-2xl shadow-md"
+          >
+            <CardTitle className="text-lg font-semibold text-gray-900 pt-0 mb-4">
+              Filters
+            </CardTitle>
+
+            <div className="grid grid-cols-1 gap-4 mb-4">
+              {/* District */}
               <div>
                 <label className="block text-xs text-gray-500 mb-1">
-                  KG (min)
+                  District
                 </label>
-                <input
-                  value={minKg}
-                  onChange={(e) => setMinKg(e.target.value)}
-                  placeholder="0"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  KG (max)
-                </label>
-                <input
-                  value={maxKg}
-                  onChange={(e) => setMaxKg(e.target.value)}
-                  placeholder="1000"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Moisture (min %)
-                </label>
-                <input
-                  value={minMoisture}
-                  onChange={(e) => setMinMoisture(e.target.value)}
-                  placeholder="0"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Moisture (max %)
-                </label>
-                <input
-                  value={maxMoisture}
-                  onChange={(e) => setMaxMoisture(e.target.value)}
-                  placeholder="30"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-1 md:col-span-1">
-              <label className="block text-xs text-gray-500 mb-1">Stage</label>
-              <select
-                value={stage}
-                onChange={(e) => setStage(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="">All</option>
-                <option value="initialization">Crop Initialization</option>
-                <option value="planting">Planting & Cultivation</option>
-                <option value="harvesting">Harvesting</option>
-              </select>
-            </div>
-
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">From</label>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">To</label>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto bg-white">
-              <thead>
-                <tr className="text-left text-sm text-gray-600 border-b">
-                  {columns.map((col) => (
-                    <th
-                      key={col.key}
-                      className={`px-3 py-3 ${col.width || "w-auto"}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="flex items-center gap-2"
-                          onClick={() => handleSort(col.key)}
-                        >
-                          <span>{col.label}</span>
-                          <SortArrow
-                            active={sortBy?.key === col.key}
-                            dir={sortBy?.dir}
-                          />
-                        </button>
-                      </div>
-                    </th>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                >
+                  <option value="">All</option>
+                  {districtOptions.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="p-6 text-center text-sm text-gray-500"
-                    >
-                      Loading...
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="p-6 text-center text-sm text-red-500"
-                    >
-                      {error}
-                    </td>
-                  </tr>
-                ) : rows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="p-6 text-center text-sm text-gray-500"
-                    >
-                      No records found
-                    </td>
-                  </tr>
-                ) : (
-                  rows.map((r, idx) => (
-                    <motion.tr
-                      key={r.id || idx}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.28 }}
-                      className="border-b hover:bg-gray-50"
-                    >
-                      <td className="px-3 py-3 text-sm">
-                        {(page - 1) * pageSize + idx + 1}
-                      </td>
-                      <td className="px-3 py-3 text-sm">{r.farmer_name}</td>
-                      <td className="px-3 py-3 text-sm">{r.phone}</td>
-                      <td className="px-3 py-3 text-sm text-right">
-                        {r.kg ?? "-"}
-                      </td>
-                      <td className="px-3 py-3 text-sm text-right">
-                        {r.moisture ?? "-"}
-                      </td>
-                      <td className="px-3 py-3 text-sm">
-                        {r.district_name ?? "-"}
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                </select>
+              </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="text-sm text-gray-600">
-              Showing {(page - 1) * pageSize + 1} -{" "}
-              {Math.min(page * pageSize, total)} of {total}
+              {/* KG */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    KG (min)
+                  </label>
+                  <input
+                    value={minKg}
+                    onChange={(e) => setMinKg(e.target.value)}
+                    placeholder="0"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    KG (max)
+                  </label>
+                  <input
+                    value={maxKg}
+                    onChange={(e) => setMaxKg(e.target.value)}
+                    placeholder="1000"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
+
+              {/* Moisture */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Moisture (min %)
+                  </label>
+                  <input
+                    value={minMoisture}
+                    onChange={(e) => setMinMoisture(e.target.value)}
+                    placeholder="0"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Moisture (max %)
+                  </label>
+                  <input
+                    value={maxMoisture}
+                    onChange={(e) => setMaxMoisture(e.target.value)}
+                    placeholder="30"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
+
+              {/* Stage */}
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Stage
+                </label>
+                <select
+                  value={stage}
+                  onChange={(e) => setStage(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                >
+                  <option value="">All</option>
+                  <option value="initialization">Crop Initialization</option>
+                  <option value="planting">Planting & Cultivation</option>
+                  <option value="harvesting">Harvesting</option>
+                </select>
+              </div>
+
+              {/* Date */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    From
+                  </label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">To</label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="px-3 py-1 rounded-md border"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                Prev
-              </button>
-              <div className="px-3 py-1 border rounded">{page}</div>
-              <button
-                className="px-3 py-1 rounded-md border"
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page * pageSize >= total}
-              >
-                Next
-              </button>
+
+            {/* Action Buttons */}
+            <div className="w-full mt-7">
+              <div className="flex gap-2 justify-between">
+                {/* Reset Button */}
+                <button
+                  className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-sm"
+                  onClick={() => {
+                    setDistrict("");
+                    setMinKg("");
+                    setMaxKg("");
+                    setMinMoisture("");
+                    setMaxMoisture("");
+                    setStage("");
+                    setDateFrom("");
+                    setDateTo("");
+                    setPage(1);
+                  }}
+                >
+                  Reset
+                </button>
+
+                {/* Apply Button */}
+                <button
+                  className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 shadow-md transition text-sm"
+                  onClick={() => {
+                    setPage(1);
+                    fetchData();
+                  }}
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </MotionConfig>
   );
@@ -562,7 +603,7 @@ function StatCard({ label, value, type }: StatCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative bg-gradient-to-br from-white/80 to-gray-100 p-5 rounded-2xl shadow-lg flex flex-col hover:scale-105 transition-transform duration-300"
+      className="relative bg-gradient-to-br from-white/80 to-gray-100 p-5 rounded-2xl shadow-lg flex flex-col transition-transform duration-300"
     >
       <div className="absolute top-4 left-4">{getIcon()}</div>
       <div className="ml-10 text-xs text-gray-500 uppercase tracking-wide">

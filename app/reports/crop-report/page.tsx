@@ -2,7 +2,7 @@
 import CropReportingDashboard, {
   CropRow,
 } from "@/components/Crop/Report/CropReport";
-import { fakeCrops } from "@/components/fakeCrops";
+
 import { useLocalization } from "@/core/context/LocalizationContext";
 import React from "react";
 

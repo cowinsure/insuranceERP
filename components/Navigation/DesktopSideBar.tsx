@@ -130,7 +130,7 @@ const DesktopSideBar = () => {
   const pathname = usePathname();
   const [pinned, setPinned] = useState(false);
   const isLogin = pathname === "/login";
-  const { logout } = useAuth();
+  const { logout, userId } = useAuth();
 
   const sidebarBase =
     "group sticky top-5 h-[95vh] z-40 transition-all duration-300 ease-in-out drop-shadow-xl";
@@ -169,6 +169,10 @@ const DesktopSideBar = () => {
           {/* Navigation */}
           <nav className="flex flex-col gap-3 relative">
             {mainMenuItems.map((item) => {
+              if (item.title === "Reports" && userId !== "Insurance Company") {
+                return null;
+              }
+
               const isActive =
                 pathname === item.url ||
                 (item.children &&

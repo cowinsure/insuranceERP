@@ -59,7 +59,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({ data }) => {
             <div>
               <p className="text-sm text-gray-500">{t("crop")}</p>
               <p className="font-medium text-gray-800">
-                {data.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
+                {data?.crop_asset_seed_details?.[0]?.crop_name || "N/A"}
               </p>
             </div>
           </div>
@@ -72,8 +72,8 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({ data }) => {
             <div>
               <p className="text-sm text-gray-500">{t("variety")}</p>
               <p className="font-medium text-gray-800">
-                {data.crop_asset_seed_details?.[0]?.seed_variety ||
-                  data.variety ||
+                {data?.crop_asset_seed_details?.[0]?.seed_variety ||
+                  data?.variety ||
                   "N/A"}
               </p>
             </div>
@@ -87,7 +87,7 @@ const CropStageModalTabs: React.FC<CropStageModalTabsProps> = ({ data }) => {
             <div>
               <p className="text-sm text-gray-500">{t("plantation_date")}</p>
               <p className="font-medium text-gray-800">
-                {data.planting_date || "N/A"}
+                {data?.planting_date || "N/A"}
               </p>
             </div>
           </div>

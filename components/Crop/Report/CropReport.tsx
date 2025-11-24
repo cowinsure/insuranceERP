@@ -16,6 +16,12 @@ import { TbReportSearch } from "react-icons/tb";
 import { CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import GenericModal from "@/components/ui/GenericModal";
+import { useLocalization } from "@/core/context/LocalizationContext";
+import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
+import { CropGetData } from "@/components/model/crop/CropGetModel";
+import useApi from "@/hooks/use_api";
+import { toast } from "sonner";
 
 // ================= TYPES =================
 
@@ -128,6 +134,9 @@ export default function CropReportingDashboard({
   columns = defaultColumns,
   exportFileName = "crop-report.csv",
 }: CropReportingDashboardProps) {
+  const { t } = useLocalization();
+  const { get } = useApi();
+
   // ---------------- Filters ----------------
   const [district, setDistrict] = useState<string>("");
   const [minKg, setMinKg] = useState<string>("");
@@ -135,8 +144,12 @@ export default function CropReportingDashboard({
   const [minMoisture, setMinMoisture] = useState<string>("");
   const [maxMoisture, setMaxMoisture] = useState<string>("");
   const [stage, setStage] = useState<string>("");
-  const [dateFrom, setDateFrom] = useState<string>(new Date().toISOString().split("T")[0]);
-  const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [dateFrom, setDateFrom] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [dateTo, setDateTo] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [selectedQuick, setSelectedQuick] = useState<string | null>(null);
 
   const [page, setPage] = useState<number>(1);
@@ -147,11 +160,20 @@ export default function CropReportingDashboard({
   const [rows, setRows] = useState<CropRow[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
+  const [isCropView, setIsCropView] = useState(false);
+  const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
+  const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
 
   // Initial data fetch on mount
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (selectedCropId !== null) {
+      fetchSingleCrop(selectedCropId);
+    }
+  }, [selectedCropId]);
 
   // Helper functions for quick date selections
   const getPrevious7Days = () => {
@@ -246,6 +268,42 @@ export default function CropReportingDashboard({
     }
   };
 
+  // GET single crop by id and set to state for view modal
+  const fetchSingleCrop = async (cropId: number) => {
+    if (!cropId) return null;
+    // setIsViewLoading(true);
+    try {
+      const response = await get("/cms/crop-info-service", {
+        params: {
+          page_size: 10,
+          start_record: 1,
+          crop_id: cropId,
+        },
+      });
+
+      if (response.status === "success") {
+        // API returns an array of results; pick the first item if present
+        const payload = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+        if (payload) {
+          setSelectedCrop(payload);
+          return payload;
+        }
+      }
+      return null;
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to fetch crop.";
+      toast.error(message);
+      return null;
+    } finally {
+      // setIsViewLoading(false);
+    }
+  };
+
   const stats = useMemo(() => {
     const totalCrops = total || 0;
     const totalHarvesting = rows.filter((r) =>
@@ -282,6 +340,12 @@ export default function CropReportingDashboard({
       })),
     [rows, page, pageSize]
   );
+
+  const handleView = (cropId: number) => {
+    if (!cropId) return;
+    setSelectedCropId(cropId);
+    setIsCropView(true);
+  };
 
   return (
     <MotionConfig transition={{ duration: 0.35 }}>
@@ -430,8 +494,11 @@ export default function CropReportingDashboard({
                           {r.district_name ?? "-"}
                         </td>
                         <td className="px-3 py-3 text-sm">
-                          <Button>
-                            <Eye />
+                          <Button
+                            variant={"outline"}
+                            onClick={() => handleView(123)} //pass the actual crop id here
+                          >
+                            <Eye className="w-4 h-4" />
                           </Button>
                         </td>
                       </motion.tr>
@@ -608,15 +675,15 @@ export default function CropReportingDashboard({
                 <div className="flex flex-wrap gap-2">
                   <button
                     className={`px-3 py-1 rounded-md transition text-xs ${
-                      selectedQuick === 'previous7days'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      selectedQuick === "previous7days"
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                     onClick={() => {
                       const d = getPrevious7Days();
                       setDateFrom(d.from);
                       setDateTo(d.to);
-                      setSelectedQuick('previous7days');
+                      setSelectedQuick("previous7days");
                       setPage(1);
                     }}
                   >
@@ -624,15 +691,15 @@ export default function CropReportingDashboard({
                   </button>
                   <button
                     className={`px-3 py-1 rounded-md transition text-xs ${
-                      selectedQuick === 'currentMonth'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      selectedQuick === "currentMonth"
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                     onClick={() => {
                       const d = getCurrentMonth();
                       setDateFrom(d.from);
                       setDateTo(d.to);
-                      setSelectedQuick('currentMonth');
+                      setSelectedQuick("currentMonth");
                       setPage(1);
                     }}
                   >
@@ -640,15 +707,15 @@ export default function CropReportingDashboard({
                   </button>
                   <button
                     className={`px-3 py-1 rounded-md transition text-xs ${
-                      selectedQuick === 'lastMonth'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      selectedQuick === "lastMonth"
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                     onClick={() => {
                       const d = getLastMonth();
                       setDateFrom(d.from);
                       setDateTo(d.to);
-                      setSelectedQuick('lastMonth');
+                      setSelectedQuick("lastMonth");
                       setPage(1);
                     }}
                   >
@@ -656,15 +723,15 @@ export default function CropReportingDashboard({
                   </button>
                   <button
                     className={`px-3 py-1 rounded-md transition text-xs ${
-                      selectedQuick === 'lastYear'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      selectedQuick === "lastYear"
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                     onClick={() => {
                       const d = getLastYear();
                       setDateFrom(d.from);
                       setDateTo(d.to);
-                      setSelectedQuick('lastYear');
+                      setSelectedQuick("lastYear");
                       setPage(1);
                     }}
                   >
@@ -710,6 +777,20 @@ export default function CropReportingDashboard({
           </motion.div>
         </div>
       </div>
+
+      {/* Crop View Modal */}
+      {isCropView && (
+        <GenericModal
+          closeModal={() => setIsCropView(false)}
+          title={`${t("viewing_details_of")} ${
+            selectedCrop?.crop_asset_seed_details?.[0]?.crop_name || "Crop"
+          }`}
+          height={true}
+          widthValue="sm:w-[35%] md:min-w-[90%] lg:min-w-[60%] lg:max-w-[70%]"
+        >
+          <CropStageModalTabs data={selectedCrop} />
+        </GenericModal>
+      )}
     </MotionConfig>
   );
 }

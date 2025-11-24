@@ -29,6 +29,7 @@ import { BsClipboardCheck, BsClipboardCheckFill } from "react-icons/bs";
 import { IoIosArrowForward } from "react-icons/io";
 import { GiCow } from "react-icons/gi";
 import { RiSurveyLine } from "react-icons/ri";
+import { TbReportAnalytics } from "react-icons/tb";
 
 // Menu configuration with children
 const mainMenuItems = [
@@ -53,6 +54,19 @@ const mainMenuItems = [
         title: "Livestock",
         url: "/asset_management/livestock",
         icon: <GiCow size={22} />,
+      },
+    ],
+  },
+  {
+    title: "Reports",
+    url: null,
+    icon: TbReportAnalytics,
+    activeIcon: TbReportAnalytics,
+    children: [
+      {
+        title: "Crop",
+        url: "/reports/crop-report",
+        icon: <PiFlowerTulipFill size={20} />,
       },
     ],
   },

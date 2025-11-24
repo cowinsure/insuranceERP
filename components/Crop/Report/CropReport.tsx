@@ -1,7 +1,18 @@
-"use client"
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { MotionConfig, motion } from "framer-motion";
+import {
+  FaUsers,
+  FaSeedling,
+  FaLeaf,
+  FaWeight,
+  FaTint,
+  FaFileAlt,
+} from "react-icons/fa";
+import { FaDownload } from "react-icons/fa6";
+import { TbReportSearch } from "react-icons/tb";
+import { CardTitle } from "@/components/ui/card";
 
 // ================= TYPES =================
 
@@ -48,6 +59,12 @@ interface CropReportingDashboardProps {
 interface StatCardProps {
   label: string;
   value: string | number;
+  type?:
+    | "totalCrops"
+    | "totalHarvesting"
+    | "totalPlotted"
+    | "avgYield"
+    | "avgMoisture";
 }
 
 interface SortArrowProps {
@@ -58,12 +75,13 @@ interface SortArrowProps {
 // =================================================
 
 const defaultColumns: ColumnDef[] = [
-  { key: "sl", label: "SL", width: "w-12" },
-  { key: "farmer_name", label: "Farmer Name", width: "w-56" },
-  { key: "phone", label: "Phone", width: "w-40" },
-  { key: "kg", label: "KG", width: "w-32", align: "right" },
-  { key: "moisture", label: "Moisture (%)", width: "w-32", align: "right" },
-  { key: "district_name", label: "District", width: "w-48" },
+  { key: "sl", label: "SL", width: "w-auto" },
+  { key: "farmer_name", label: "Farmer Name", width: "w-auto" },
+  { key: "phone", label: "Phone", width: "w-auto" },
+  { key: "kg", label: "KG", width: "w-auto", align: "right" },
+  { key: "moisture", label: "Moisture (%)", width: "w-auto", align: "right" },
+  { key: "district_name", label: "District", width: "w-auto" },
+  { key: "action", label: "Action", width: "w-auto" },
 ];
 
 function formatDateISO(date: string | null): string | null {
@@ -90,14 +108,15 @@ function downloadCSV(rows: Record<string, any>[], filename = "report.csv") {
   URL.revokeObjectURL(url);
 }
 
-function useDebounced<T>(value: T, delay = 350): T {
-  const [v, setV] = useState<T>(value);
-  useEffect(() => {
-    const t = setTimeout(() => setV(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return v;
-}
+// Debounce kept but commented
+// function useDebounced<T>(value: T, delay = 350): T {
+//   const [v, setV] = useState<T>(value);
+//   useEffect(() => {
+//     const t = setTimeout(() => setV(value), delay);
+//     return () => clearTimeout(t);
+//   }, [value, delay]);
+//   return v;
+// }
 
 export default function CropReportingDashboard({
   apiEndpoint,
@@ -105,6 +124,7 @@ export default function CropReportingDashboard({
   columns = defaultColumns,
   exportFileName = "crop-report.csv",
 }: CropReportingDashboardProps) {
+  // ---------------- Filters ----------------
   const [district, setDistrict] = useState<string>("");
   const [minKg, setMinKg] = useState<string>("");
   const [maxKg, setMaxKg] = useState<string>("");
@@ -113,7 +133,6 @@ export default function CropReportingDashboard({
   const [stage, setStage] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
 
   const [page, setPage] = useState<number>(1);
   const [sortBy, setSortBy] = useState<SortState | null>(null);
@@ -124,89 +143,57 @@ export default function CropReportingDashboard({
   const [total, setTotal] = useState<number>(0);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
 
-  const debouncedFilters = useDebounced(
-    {
-      district,
-      minKg,
-      maxKg,
-      minMoisture,
-      maxMoisture,
-      stage,
-      dateFrom,
-      dateTo,
-      search,
-      page,
-      sortBy,
-    },
-    300
-  );
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!apiEndpoint) {
-        setError("Missing apiEndpoint prop");
-        return;
-      }
-      setLoading(true);
-      setError(null);
-      try {
-        const payload = {
-          filters: {
-            district: debouncedFilters.district || null,
-            kg: {
-              gte: debouncedFilters.minKg
-                ? Number(debouncedFilters.minKg)
-                : null,
-              lte: debouncedFilters.maxKg
-                ? Number(debouncedFilters.maxKg)
-                : null,
-            },
-            moisture: {
-              gte: debouncedFilters.minMoisture
-                ? Number(debouncedFilters.minMoisture)
-                : null,
-              lte: debouncedFilters.maxMoisture
-                ? Number(debouncedFilters.maxMoisture)
-                : null,
-            },
-            stage: debouncedFilters.stage || null,
-            date_from: formatDateISO(debouncedFilters.dateFrom),
-            date_to: formatDateISO(debouncedFilters.dateTo),
-            search: debouncedFilters.search || null,
+  // ---------------- Fetch Function ----------------
+  const fetchData = async () => {
+    if (!apiEndpoint) {
+      setError("Missing apiEndpoint prop");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const payload = {
+        filters: {
+          district: district || null,
+          kg: {
+            gte: minKg ? Number(minKg) : null,
+            lte: maxKg ? Number(maxKg) : null,
           },
-          page: debouncedFilters.page || 1,
-          page_size: pageSize,
-          sort: debouncedFilters.sortBy
-            ? `${debouncedFilters.sortBy.dir === "desc" ? "-" : ""}${
-                debouncedFilters.sortBy.key
-              }`
-            : null,
-        };
+          moisture: {
+            gte: minMoisture ? Number(minMoisture) : null,
+            lte: maxMoisture ? Number(maxMoisture) : null,
+          },
+          stage: stage || null,
+          date_from: formatDateISO(dateFrom),
+          date_to: formatDateISO(dateTo),
+        },
+        page,
+        page_size: pageSize,
+        sort: sortBy
+          ? `${sortBy.dir === "desc" ? "-" : ""}${sortBy.key}`
+          : null,
+      };
 
-        const res = await fetch(apiEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+      const res = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
 
-        const json: ApiResponse = await res.json();
+      const json: ApiResponse = await res.json();
+      const data = json.data || json.results || [];
+      setRows(data);
+      setTotal(json.total ?? json.count ?? data.length);
 
-        const data = json.data || json.results || [];
-        setRows(data);
-        setTotal(json.total ?? json.count ?? data.length);
-
-        if (json.meta?.districts) setDistrictOptions(json.meta.districts);
-      } catch (err: any) {
-        setError(err?.message || "Failed to fetch");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [debouncedFilters, apiEndpoint, pageSize]);
+      if (json.meta?.districts) setDistrictOptions(json.meta.districts);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stats = useMemo(() => {
     const totalCrops = total || 0;
@@ -247,7 +234,8 @@ export default function CropReportingDashboard({
 
   return (
     <MotionConfig transition={{ duration: 0.35 }}>
-      <div className="p-6 bg-gray-50 rounded-2xl shadow-sm">
+      <div>
+        {/* Quick stats */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -255,9 +243,21 @@ export default function CropReportingDashboard({
         >
           {/* Stats */}
           <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-5 gap-4">
-            <StatCard label="Total Crops" value={stats.totalCrops} />
-            <StatCard label="Total Harvesting" value={stats.totalHarvesting} />
-            <StatCard label="Total Plotted" value={stats.totalPlotted} />
+            <StatCard
+              label="Total Crops"
+              value={stats.totalCrops}
+              type="totalCrops"
+            />
+            <StatCard
+              label="Total Harvesting"
+              value={stats.totalHarvesting}
+              type="totalHarvesting"
+            />
+            <StatCard
+              label="Total Plotted"
+              value={stats.totalPlotted}
+              type="totalPlotted"
+            />
             <StatCard
               label="Avg Yield (kg)"
               value={
@@ -265,6 +265,7 @@ export default function CropReportingDashboard({
                   ? stats.avgYield.toFixed(2)
                   : "0.00"
               }
+              type="avgYield"
             />
             <StatCard
               label="Avg Moisture (%)"
@@ -273,308 +274,342 @@ export default function CropReportingDashboard({
                   ? stats.avgMoisture.toFixed(2)
                   : "0.00"
               }
+              type="avgMoisture"
             />
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-white p-4 rounded-2xl shadow-inner"
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <input
-                placeholder="Search farmer or phone..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="px-3 py-2 border rounded-md w-full md:w-80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              />
-
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Data Table */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="lg:col-span-3 bg-white p-4 rounded-2xl shadow-inner flex flex-col"
+          >
+            {/* Export CSV */}
+            <div className="flex justify-between items-center mb-5">
+              <div>
+                <CardTitle className="text-lg font-semibold text-gray-700 pt-0 flex items-center gap-2">
+                  <TbReportSearch size={25} /> Harvest Report
+                </CardTitle>
+              </div>
               <button
-                className="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700 shadow-sm"
-                onClick={() => {
-                  setPage(1);
-                }}
-              >
-                Apply
-              </button>
-
-              <button
-                className="px-3 py-2 rounded-md bg-gray-100 text-sm hover:bg-gray-200"
-                onClick={() => {
-                  // reset
-                  setDistrict("");
-                  setMinKg("");
-                  setMaxKg("");
-                  setMinMoisture("");
-                  setMaxMoisture("");
-                  setStage("");
-                  setDateFrom("");
-                  setDateTo("");
-                  setSearch("");
-                  setPage(1);
-                }}
-              >
-                Reset
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                className="px-3 py-2 rounded-md bg-white border text-sm hover:bg-gray-50"
+                className="px-4 py-2 rounded-md text-gray-500 cursor-pointer bg-gray-50 hover:bg-gray-50 transition flex items-center gap-2 text-sm font-medium"
                 onClick={() => downloadCSV(visibleCsvRows, exportFileName)}
               >
+                <FaDownload />
                 Export CSV
               </button>
             </div>
-          </div>
-
-          {/* Filters panel */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
-            <div className="col-span-1 md:col-span-1">
-              <label className="block text-xs text-gray-500 mb-1">
-                District
-              </label>
-              <select
-                value={district}
-                onChange={(e) => {
-                  setDistrict(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="">All</option>
-                {districtOptions.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+            {/* Table */}
+            <div className="overflow-x-auto flex-1">
+              <table className="min-w-full table-auto bg-white h-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-600 border-b">
+                    {columns.map((col) => (
+                      <th
+                        key={col.key}
+                        className={`px-3 py-3 ${col.width || "w-auto"}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="flex items-center gap-2"
+                            onClick={() => handleSort(col.key)}
+                          >
+                            <span>{col.label}</span>
+                            <SortArrow
+                              active={sortBy?.key === col.key}
+                              dir={sortBy?.dir}
+                            />
+                          </button>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="">
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="p-6 text-center text-sm text-gray-500"
+                      >
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="p-6 text-center text-sm text-red-500"
+                      >
+                        {error}
+                      </td>
+                    </tr>
+                  ) : rows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="p-6 text-center text-sm text-gray-500"
+                      >
+                        No records found
+                      </td>
+                    </tr>
+                  ) : (
+                    rows.map((r, idx) => (
+                      <motion.tr
+                        key={r.id || idx}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28 }}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="px-3 py-3 text-sm">
+                          {(page - 1) * pageSize + idx + 1}
+                        </td>
+                        <td className="px-3 py-3 text-sm">{r.farmer_name}</td>
+                        <td className="px-3 py-3 text-sm">{r.phone}</td>
+                        <td className="px-3 py-3 text-sm text-right">
+                          {r.kg ?? "-"}
+                        </td>
+                        <td className="px-3 py-3 text-sm text-right">
+                          {r.moisture ?? "-"}
+                        </td>
+                        <td className="px-3 py-3 text-sm">
+                          {r.district_name ?? "-"}
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
 
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-2">
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-600">
+                Showing {(page - 1) * pageSize + 1} -{" "}
+                {Math.min(page * pageSize, total)} of {total}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="px-3 py-1 rounded-md border"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </button>
+                <div className="px-3 py-1 border rounded">{page}</div>
+                <button
+                  className="px-3 py-1 rounded-md border"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page * pageSize >= total}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Filters Panel */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white p-6 rounded-2xl shadow-md"
+          >
+            <CardTitle className="text-lg font-semibold text-gray-900 pt-0 mb-4">
+              Filters
+            </CardTitle>
+
+            <div className="grid grid-cols-1 gap-4 mb-4">
+              {/* District */}
               <div>
                 <label className="block text-xs text-gray-500 mb-1">
-                  KG (min)
+                  District
                 </label>
-                <input
-                  value={minKg}
-                  onChange={(e) => setMinKg(e.target.value)}
-                  placeholder="0"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  KG (max)
-                </label>
-                <input
-                  value={maxKg}
-                  onChange={(e) => setMaxKg(e.target.value)}
-                  placeholder="1000"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Moisture (min %)
-                </label>
-                <input
-                  value={minMoisture}
-                  onChange={(e) => setMinMoisture(e.target.value)}
-                  placeholder="0"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Moisture (max %)
-                </label>
-                <input
-                  value={maxMoisture}
-                  onChange={(e) => setMaxMoisture(e.target.value)}
-                  placeholder="30"
-                  type="number"
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-1 md:col-span-1">
-              <label className="block text-xs text-gray-500 mb-1">Stage</label>
-              <select
-                value={stage}
-                onChange={(e) => {
-                  setStage(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="">All</option>
-                <option value="initialization">Crop Initialization</option>
-                <option value="planting">Planting & Cultivation</option>
-                <option value="harvesting">Harvesting</option>
-              </select>
-            </div>
-
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">From</label>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => {
-                    setDateFrom(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">To</label>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => {
-                    setDateTo(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full px-3 py-2 border rounded-md text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto bg-white">
-              <thead>
-                <tr className="text-left text-sm text-gray-600 border-b">
-                  {columns.map((col) => (
-                    <th
-                      key={col.key}
-                      className={`px-3 py-3 ${col.width || "w-auto"}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="flex items-center gap-2"
-                          onClick={() => handleSort(col.key)}
-                        >
-                          <span>{col.label}</span>
-                          <SortArrow
-                            active={sortBy?.key === col.key}
-                            dir={sortBy?.dir}
-                          />
-                        </button>
-                      </div>
-                    </th>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                >
+                  <option value="">All</option>
+                  {districtOptions.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="p-6 text-center text-sm text-gray-500"
-                    >
-                      Loading...
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="p-6 text-center text-sm text-red-500"
-                    >
-                      {error}
-                    </td>
-                  </tr>
-                ) : rows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="p-6 text-center text-sm text-gray-500"
-                    >
-                      No records found
-                    </td>
-                  </tr>
-                ) : (
-                  rows.map((r, idx) => (
-                    <motion.tr
-                      key={r.id || idx}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.28 }}
-                      className="border-b hover:bg-gray-50"
-                    >
-                      <td className="px-3 py-3 text-sm">
-                        {(page - 1) * pageSize + idx + 1}
-                      </td>
-                      <td className="px-3 py-3 text-sm">{r.farmer_name}</td>
-                      <td className="px-3 py-3 text-sm">{r.phone}</td>
-                      <td className="px-3 py-3 text-sm text-right">
-                        {r.kg ?? "-"}
-                      </td>
-                      <td className="px-3 py-3 text-sm text-right">
-                        {r.moisture ?? "-"}
-                      </td>
-                      <td className="px-3 py-3 text-sm">
-                        {r.district_name ?? "-"}
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                </select>
+              </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="text-sm text-gray-600">
-              Showing {(page - 1) * pageSize + 1} -{" "}
-              {Math.min(page * pageSize, total)} of {total}
+              {/* KG */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    KG (min)
+                  </label>
+                  <input
+                    value={minKg}
+                    onChange={(e) => setMinKg(e.target.value)}
+                    placeholder="0"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    KG (max)
+                  </label>
+                  <input
+                    value={maxKg}
+                    onChange={(e) => setMaxKg(e.target.value)}
+                    placeholder="1000"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
+
+              {/* Moisture */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Moisture (min %)
+                  </label>
+                  <input
+                    value={minMoisture}
+                    onChange={(e) => setMinMoisture(e.target.value)}
+                    placeholder="0"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Moisture (max %)
+                  </label>
+                  <input
+                    value={maxMoisture}
+                    onChange={(e) => setMaxMoisture(e.target.value)}
+                    placeholder="30"
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
+
+              {/* Stage */}
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Stage
+                </label>
+                <select
+                  value={stage}
+                  onChange={(e) => setStage(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                >
+                  <option value="">All</option>
+                  <option value="initialization">Crop Initialization</option>
+                  <option value="planting">Planting & Cultivation</option>
+                  <option value="harvesting">Harvesting</option>
+                </select>
+              </div>
+
+              {/* Date */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    From
+                  </label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">To</label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="px-3 py-1 rounded-md border"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                Prev
-              </button>
-              <div className="px-3 py-1 border rounded">{page}</div>
-              <button
-                className="px-3 py-1 rounded-md border"
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page * pageSize >= total}
-              >
-                Next
-              </button>
+
+            {/* Action Buttons */}
+            <div className="w-full mt-7">
+              <div className="flex gap-2 justify-between">
+                {/* Reset Button */}
+                <button
+                  className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-sm"
+                  onClick={() => {
+                    setDistrict("");
+                    setMinKg("");
+                    setMaxKg("");
+                    setMinMoisture("");
+                    setMaxMoisture("");
+                    setStage("");
+                    setDateFrom("");
+                    setDateTo("");
+                    setPage(1);
+                  }}
+                >
+                  Reset
+                </button>
+
+                {/* Apply Button */}
+                <button
+                  className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 shadow-md transition text-sm"
+                  onClick={() => {
+                    setPage(1);
+                    fetchData();
+                  }}
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </MotionConfig>
   );
 }
 
-function StatCard({ label, value }: StatCardProps) {
+function StatCard({ label, value, type }: StatCardProps) {
+  const iconSize = 20;
+
+  const getIcon = () => {
+    switch (type) {
+      case "totalCrops":
+        return <FaUsers size={iconSize} className="text-indigo-500" />;
+      case "totalHarvesting":
+        return <FaLeaf size={iconSize} className="text-green-500" />;
+      case "totalPlotted":
+        return <FaSeedling size={iconSize} className="text-yellow-500" />;
+      case "avgYield":
+        return <FaWeight size={iconSize} className="text-amber-500" />;
+      case "avgMoisture":
+        return <FaTint size={iconSize} className="text-blue-500" />;
+      default:
+        return <FaUsers size={iconSize} className="text-gray-400" />;
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-4 rounded-xl shadow-sm flex flex-col"
+      className="relative bg-gradient-to-br from-white/80 to-gray-100 p-5 rounded-2xl shadow-lg flex flex-col transition-transform duration-300"
     >
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="text-xl font-semibold mt-1">{value}</div>
+      <div className="absolute top-4 left-4">{getIcon()}</div>
+      <div className="ml-10 text-xs text-gray-500 uppercase tracking-wide">
+        {label}
+      </div>
+      <div className="text-2xl font-bold mt-2">{value}</div>
     </motion.div>
   );
 }

@@ -225,48 +225,53 @@ export default function CropReportingDashboard({
     setError(null);
     try {
       const url = new URL(apiEndpoint, process.env.NEXT_PUBLIC_API_BASE_URL);
-      url.searchParams.set('page_size', pageSize.toString());
-      url.searchParams.set('start_record', ((page - 1) * pageSize + 1).toString());
-      if (minKg) url.searchParams.set('min_weight', minKg);
-      if (maxKg) url.searchParams.set('max_weight', maxKg);
-      if (minMoisture) url.searchParams.set('min_moisture', minMoisture);
-      if (maxMoisture) url.searchParams.set('max_moisture', maxMoisture);
-      if (dateFrom) url.searchParams.set('date_from', dateFrom);
-      if (dateTo) url.searchParams.set('date_to', dateTo);
-      if (stage === 'harvesting') url.searchParams.set('stage_id', '3');
+      url.searchParams.set("page_size", pageSize.toString());
+      url.searchParams.set(
+        "start_record",
+        ((page - 1) * pageSize + 1).toString()
+      );
+      if (minKg) url.searchParams.set("min_weight", minKg);
+      if (maxKg) url.searchParams.set("max_weight", maxKg);
+      if (minMoisture) url.searchParams.set("min_moisture", minMoisture);
+      if (maxMoisture) url.searchParams.set("max_moisture", maxMoisture);
+      if (dateFrom) url.searchParams.set("date_from", dateFrom);
+      if (dateTo) url.searchParams.set("date_to", dateTo);
+      if (stage === "harvesting") url.searchParams.set("stage_id", "3");
 
       console.log(url);
-      
 
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
       const res = await fetch(url.toString(), {
-        method: 'GET',
+        method: "GET",
         headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
 
       if (!res.ok) throw new Error(`Server responded ${res.status}`);
 
       const json = await res.json();
-      if (json.status === 'success') {
+      if (json.status === "success") {
         const list = json.data.list;
         const apiSummary = json.data.summary;
         const mappedRows = list.map((item: any) => ({
           id: item.harvest_info_id,
-          farmer_name: item.originator.split(' (')[0],
-          phone: item.originator.match(/\(([^)]+)\)/)?.[1] || '',
+          farmer_name: item.originator.split(" (")[0],
+          phone: item.originator.match(/\(([^)]+)\)/)?.[1] || "",
           kg: item.total_production_kg,
           moisture: item.moisture_content_percentage,
           district_name: item.zilla,
           stage: item.stage_name,
-          date: item.harvest_date
+          date: item.harvest_date,
         }));
         setRows(mappedRows);
         setTotal(apiSummary.total_harvests);
         setSummary(apiSummary);
       } else {
-        setError(json.message || 'Failed to fetch');
+        setError(json.message || "Failed to fetch");
       }
     } catch (err: any) {
       setError(err?.message || "Failed to fetch");

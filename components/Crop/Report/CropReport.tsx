@@ -10,9 +10,12 @@ import {
   FaTint,
   FaFileAlt,
 } from "react-icons/fa";
+import { MdOutlineFilterAlt } from "react-icons/md";
 import { FaDownload } from "react-icons/fa6";
 import { TbReportSearch } from "react-icons/tb";
 import { CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 // ================= TYPES =================
 
@@ -99,6 +102,7 @@ function downloadCSV(rows: Record<string, any>[], filename = "report.csv") {
       keys.map((k) => `"${String(r[k] ?? "").replace(/"/g, '""')}"`).join(",")
     )
   );
+
   const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -131,8 +135,9 @@ export default function CropReportingDashboard({
   const [minMoisture, setMinMoisture] = useState<string>("");
   const [maxMoisture, setMaxMoisture] = useState<string>("");
   const [stage, setStage] = useState<string>("");
-  const [dateFrom, setDateFrom] = useState<string>("");
-  const [dateTo, setDateTo] = useState<string>("");
+  const [dateFrom, setDateFrom] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [selectedQuick, setSelectedQuick] = useState<string | null>(null);
 
   const [page, setPage] = useState<number>(1);
   const [sortBy, setSortBy] = useState<SortState | null>(null);
@@ -142,6 +147,52 @@ export default function CropReportingDashboard({
   const [rows, setRows] = useState<CropRow[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
+
+  // Initial data fetch on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Helper functions for quick date selections
+  const getPrevious7Days = () => {
+    const today = new Date();
+    const from = new Date(today);
+    from.setDate(today.getDate() - 7);
+    return {
+      from: from.toISOString().split("T")[0],
+      to: today.toISOString().split("T")[0],
+    };
+  };
+
+  const getCurrentMonth = () => {
+    const today = new Date();
+    const from = new Date(today.getFullYear(), today.getMonth(), 1);
+    const to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return {
+      from: from.toISOString().split("T")[0],
+      to: to.toISOString().split("T")[0],
+    };
+  };
+
+  const getLastMonth = () => {
+    const today = new Date();
+    const from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const to = new Date(today.getFullYear(), today.getMonth(), 0);
+    return {
+      from: from.toISOString().split("T")[0],
+      to: to.toISOString().split("T")[0],
+    };
+  };
+
+  const getLastYear = () => {
+    const today = new Date();
+    const from = new Date(today.getFullYear() - 1, 0, 1);
+    const to = new Date(today.getFullYear() - 1, 11, 31);
+    return {
+      from: from.toISOString().split("T")[0],
+      to: to.toISOString().split("T")[0],
+    };
+  };
 
   // ---------------- Fetch Function ----------------
   const fetchData = async () => {
@@ -378,6 +429,11 @@ export default function CropReportingDashboard({
                         <td className="px-3 py-3 text-sm">
                           {r.district_name ?? "-"}
                         </td>
+                        <td className="px-3 py-3 text-sm">
+                          <Button>
+                            <Eye />
+                          </Button>
+                        </td>
                       </motion.tr>
                     ))
                   )}
@@ -415,16 +471,16 @@ export default function CropReportingDashboard({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white p-6 rounded-2xl shadow-md"
+            className="bg-white p-6 rounded-2xl shadow-inner"
           >
-            <CardTitle className="text-lg font-semibold text-gray-900 pt-0 mb-4">
-              Filters
+            <CardTitle className="text-lg font-semibold text-gray-700 pt-0 flex items-center gap-1 mb-5">
+              <MdOutlineFilterAlt size={25} /> Filters
             </CardTitle>
 
             <div className="grid grid-cols-1 gap-4 mb-4">
               {/* District */}
               <div>
-                <label className="block text-xs text-gray-500 mb-1">
+                <label className="block text-sm text-gray-500 mb-1">
                   District
                 </label>
                 <select
@@ -444,7 +500,7 @@ export default function CropReportingDashboard({
               {/* KG */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-sm text-gray-500 mb-1">
                     KG (min)
                   </label>
                   <input
@@ -456,7 +512,7 @@ export default function CropReportingDashboard({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-sm text-gray-500 mb-1">
                     KG (max)
                   </label>
                   <input
@@ -472,7 +528,7 @@ export default function CropReportingDashboard({
               {/* Moisture */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-sm text-gray-500 mb-1">
                     Moisture (min %)
                   </label>
                   <input
@@ -484,7 +540,7 @@ export default function CropReportingDashboard({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-sm text-gray-500 mb-1">
                     Moisture (max %)
                   </label>
                   <input
@@ -499,7 +555,7 @@ export default function CropReportingDashboard({
 
               {/* Stage */}
               <div>
-                <label className="block text-xs text-gray-500 mb-1">
+                <label className="block text-sm text-gray-500 mb-1">
                   Stage
                 </label>
                 <select
@@ -507,7 +563,7 @@ export default function CropReportingDashboard({
                   onChange={(e) => setStage(e.target.value)}
                   className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
                 >
-                  <option value="">All</option>
+                  <option value="">Select</option>
                   <option value="initialization">Crop Initialization</option>
                   <option value="planting">Planting & Cultivation</option>
                   <option value="harvesting">Harvesting</option>
@@ -517,24 +573,103 @@ export default function CropReportingDashboard({
               {/* Date */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-sm text-gray-500 mb-1">
                     From
                   </label>
                   <input
                     type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
+                    value={dateFrom || new Date().toISOString().split("T")[0]}
+                    onChange={(e) => {
+                      setDateFrom(e.target.value);
+                      setSelectedQuick(null);
+                    }}
                     className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">To</label>
+                  <label className="block text-sm text-gray-500 mb-1">To</label>
                   <input
                     type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
+                    value={dateTo || new Date().toISOString().split("T")[0]}
+                    onChange={(e) => {
+                      setDateTo(e.target.value);
+                      setSelectedQuick(null);
+                    }}
                     className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
                   />
+                </div>
+              </div>
+
+              {/* Quick Date Selections */}
+              <div className="">
+                <label className="block text-sm text-gray-500 mb-1">
+                  Show crop for
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className={`px-3 py-1 rounded-md transition text-xs ${
+                      selectedQuick === 'previous7days'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    onClick={() => {
+                      const d = getPrevious7Days();
+                      setDateFrom(d.from);
+                      setDateTo(d.to);
+                      setSelectedQuick('previous7days');
+                      setPage(1);
+                    }}
+                  >
+                    Previous 7 days
+                  </button>
+                  <button
+                    className={`px-3 py-1 rounded-md transition text-xs ${
+                      selectedQuick === 'currentMonth'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    onClick={() => {
+                      const d = getCurrentMonth();
+                      setDateFrom(d.from);
+                      setDateTo(d.to);
+                      setSelectedQuick('currentMonth');
+                      setPage(1);
+                    }}
+                  >
+                    Current month
+                  </button>
+                  <button
+                    className={`px-3 py-1 rounded-md transition text-xs ${
+                      selectedQuick === 'lastMonth'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    onClick={() => {
+                      const d = getLastMonth();
+                      setDateFrom(d.from);
+                      setDateTo(d.to);
+                      setSelectedQuick('lastMonth');
+                      setPage(1);
+                    }}
+                  >
+                    Last month
+                  </button>
+                  <button
+                    className={`px-3 py-1 rounded-md transition text-xs ${
+                      selectedQuick === 'lastYear'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    onClick={() => {
+                      const d = getLastYear();
+                      setDateFrom(d.from);
+                      setDateTo(d.to);
+                      setSelectedQuick('lastYear');
+                      setPage(1);
+                    }}
+                  >
+                    Last year
+                  </button>
                 </div>
               </div>
             </div>

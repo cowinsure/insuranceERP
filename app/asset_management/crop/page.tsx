@@ -222,7 +222,7 @@ const CropsPage = () => {
           currentPage * (pageSize as number)
         );
 
-        console.log(crops);
+  console.log(crops);
 
   return (
     <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
@@ -255,11 +255,7 @@ const CropsPage = () => {
         placeholder={t("search_farmer_mobile")}
         data={crops}
         setFilteredData={setFilteredCrops}
-        searchKeys={[
-          "farmer_name",
-          "mobile_number",
-        ]}
-        
+        searchKeys={["farmer_name", "mobile_number"]}
       />
 
       {/* Table */}
@@ -576,6 +572,49 @@ const CropsPage = () => {
               );
             })
           )}
+        </div>
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Rows per page:</span>
+            <select
+              className="border rounded px-2 py-1"
+              value={pageSize}
+              onChange={(e) => {
+                const value =
+                  e.target.value === "All" ? "All" : Number(e.target.value);
+                setPageSize(value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value={6}>6</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value="All">All</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Prev
+            </Button>
+
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
 

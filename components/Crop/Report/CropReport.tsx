@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { MotionConfig, motion } from "framer-motion";
+import { FaUsers, FaSeedling, FaLeaf, FaWeight, FaTint } from "react-icons/fa";
 
 // ================= TYPES =================
 
@@ -48,6 +49,12 @@ interface CropReportingDashboardProps {
 interface StatCardProps {
   label: string;
   value: string | number;
+  type?:
+    | "totalCrops"
+    | "totalHarvesting"
+    | "totalPlotted"
+    | "avgYield"
+    | "avgMoisture";
 }
 
 interface SortArrowProps {
@@ -90,14 +97,15 @@ function downloadCSV(rows: Record<string, any>[], filename = "report.csv") {
   URL.revokeObjectURL(url);
 }
 
-function useDebounced<T>(value: T, delay = 350): T {
-  const [v, setV] = useState<T>(value);
-  useEffect(() => {
-    const t = setTimeout(() => setV(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return v;
-}
+// Debounce kept but commented
+// function useDebounced<T>(value: T, delay = 350): T {
+//   const [v, setV] = useState<T>(value);
+//   useEffect(() => {
+//     const t = setTimeout(() => setV(value), delay);
+//     return () => clearTimeout(t);
+//   }, [value, delay]);
+//   return v;
+// }
 
 export default function CropReportingDashboard({
   apiEndpoint,
@@ -105,6 +113,7 @@ export default function CropReportingDashboard({
   columns = defaultColumns,
   exportFileName = "crop-report.csv",
 }: CropReportingDashboardProps) {
+  // ---------------- Filters ----------------
   const [district, setDistrict] = useState<string>("");
   const [minKg, setMinKg] = useState<string>("");
   const [maxKg, setMaxKg] = useState<string>("");
@@ -113,7 +122,6 @@ export default function CropReportingDashboard({
   const [stage, setStage] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
 
   const [page, setPage] = useState<number>(1);
   const [sortBy, setSortBy] = useState<SortState | null>(null);
@@ -124,89 +132,57 @@ export default function CropReportingDashboard({
   const [total, setTotal] = useState<number>(0);
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
 
-  const debouncedFilters = useDebounced(
-    {
-      district,
-      minKg,
-      maxKg,
-      minMoisture,
-      maxMoisture,
-      stage,
-      dateFrom,
-      dateTo,
-      search,
-      page,
-      sortBy,
-    },
-    300
-  );
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!apiEndpoint) {
-        setError("Missing apiEndpoint prop");
-        return;
-      }
-      setLoading(true);
-      setError(null);
-      try {
-        const payload = {
-          filters: {
-            district: debouncedFilters.district || null,
-            kg: {
-              gte: debouncedFilters.minKg
-                ? Number(debouncedFilters.minKg)
-                : null,
-              lte: debouncedFilters.maxKg
-                ? Number(debouncedFilters.maxKg)
-                : null,
-            },
-            moisture: {
-              gte: debouncedFilters.minMoisture
-                ? Number(debouncedFilters.minMoisture)
-                : null,
-              lte: debouncedFilters.maxMoisture
-                ? Number(debouncedFilters.maxMoisture)
-                : null,
-            },
-            stage: debouncedFilters.stage || null,
-            date_from: formatDateISO(debouncedFilters.dateFrom),
-            date_to: formatDateISO(debouncedFilters.dateTo),
-            search: debouncedFilters.search || null,
+  // ---------------- Fetch Function ----------------
+  const fetchData = async () => {
+    if (!apiEndpoint) {
+      setError("Missing apiEndpoint prop");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const payload = {
+        filters: {
+          district: district || null,
+          kg: {
+            gte: minKg ? Number(minKg) : null,
+            lte: maxKg ? Number(maxKg) : null,
           },
-          page: debouncedFilters.page || 1,
-          page_size: pageSize,
-          sort: debouncedFilters.sortBy
-            ? `${debouncedFilters.sortBy.dir === "desc" ? "-" : ""}${
-                debouncedFilters.sortBy.key
-              }`
-            : null,
-        };
+          moisture: {
+            gte: minMoisture ? Number(minMoisture) : null,
+            lte: maxMoisture ? Number(maxMoisture) : null,
+          },
+          stage: stage || null,
+          date_from: formatDateISO(dateFrom),
+          date_to: formatDateISO(dateTo),
+        },
+        page,
+        page_size: pageSize,
+        sort: sortBy
+          ? `${sortBy.dir === "desc" ? "-" : ""}${sortBy.key}`
+          : null,
+      };
 
-        const res = await fetch(apiEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+      const res = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
 
-        const json: ApiResponse = await res.json();
+      const json: ApiResponse = await res.json();
+      const data = json.data || json.results || [];
+      setRows(data);
+      setTotal(json.total ?? json.count ?? data.length);
 
-        const data = json.data || json.results || [];
-        setRows(data);
-        setTotal(json.total ?? json.count ?? data.length);
-
-        if (json.meta?.districts) setDistrictOptions(json.meta.districts);
-      } catch (err: any) {
-        setError(err?.message || "Failed to fetch");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [debouncedFilters, apiEndpoint, pageSize]);
+      if (json.meta?.districts) setDistrictOptions(json.meta.districts);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stats = useMemo(() => {
     const totalCrops = total || 0;
@@ -247,7 +223,8 @@ export default function CropReportingDashboard({
 
   return (
     <MotionConfig transition={{ duration: 0.35 }}>
-      <div className="p-6 bg-gray-50 rounded-2xl shadow-sm">
+      <div>
+        {/* Quick stats */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -255,9 +232,21 @@ export default function CropReportingDashboard({
         >
           {/* Stats */}
           <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-5 gap-4">
-            <StatCard label="Total Crops" value={stats.totalCrops} />
-            <StatCard label="Total Harvesting" value={stats.totalHarvesting} />
-            <StatCard label="Total Plotted" value={stats.totalPlotted} />
+            <StatCard
+              label="Total Crops"
+              value={stats.totalCrops}
+              type="totalCrops"
+            />
+            <StatCard
+              label="Total Harvesting"
+              value={stats.totalHarvesting}
+              type="totalHarvesting"
+            />
+            <StatCard
+              label="Total Plotted"
+              value={stats.totalPlotted}
+              type="totalPlotted"
+            />
             <StatCard
               label="Avg Yield (kg)"
               value={
@@ -265,6 +254,7 @@ export default function CropReportingDashboard({
                   ? stats.avgYield.toFixed(2)
                   : "0.00"
               }
+              type="avgYield"
             />
             <StatCard
               label="Avg Moisture (%)"
@@ -273,6 +263,7 @@ export default function CropReportingDashboard({
                   ? stats.avgMoisture.toFixed(2)
                   : "0.00"
               }
+              type="avgMoisture"
             />
           </div>
         </motion.div>
@@ -282,28 +273,22 @@ export default function CropReportingDashboard({
           animate={{ opacity: 1 }}
           className="bg-white p-4 rounded-2xl shadow-inner"
         >
+          {/* Filters + Apply/Reset Buttons */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <input
-                placeholder="Search farmer or phone..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="px-3 py-2 border rounded-md w-full md:w-80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              />
-
               <button
                 className="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700 shadow-sm"
                 onClick={() => {
                   setPage(1);
+                  fetchData(); // apply filters manually
                 }}
               >
-                Apply
+                Apply Filters
               </button>
 
               <button
                 className="px-3 py-2 rounded-md bg-gray-100 text-sm hover:bg-gray-200"
                 onClick={() => {
-                  // reset
                   setDistrict("");
                   setMinKg("");
                   setMaxKg("");
@@ -312,7 +297,6 @@ export default function CropReportingDashboard({
                   setStage("");
                   setDateFrom("");
                   setDateTo("");
-                  setSearch("");
                   setPage(1);
                 }}
               >
@@ -338,10 +322,7 @@ export default function CropReportingDashboard({
               </label>
               <select
                 value={district}
-                onChange={(e) => {
-                  setDistrict(e.target.value);
-                  setPage(1);
-                }}
+                onChange={(e) => setDistrict(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md text-sm"
               >
                 <option value="">All</option>
@@ -411,10 +392,7 @@ export default function CropReportingDashboard({
               <label className="block text-xs text-gray-500 mb-1">Stage</label>
               <select
                 value={stage}
-                onChange={(e) => {
-                  setStage(e.target.value);
-                  setPage(1);
-                }}
+                onChange={(e) => setStage(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md text-sm"
               >
                 <option value="">All</option>
@@ -430,10 +408,7 @@ export default function CropReportingDashboard({
                 <input
                   type="date"
                   value={dateFrom}
-                  onChange={(e) => {
-                    setDateFrom(e.target.value);
-                    setPage(1);
-                  }}
+                  onChange={(e) => setDateFrom(e.target.value)}
                   className="w-full px-3 py-2 border rounded-md text-sm"
                 />
               </div>
@@ -442,10 +417,7 @@ export default function CropReportingDashboard({
                 <input
                   type="date"
                   value={dateTo}
-                  onChange={(e) => {
-                    setDateTo(e.target.value);
-                    setPage(1);
-                  }}
+                  onChange={(e) => setDateTo(e.target.value)}
                   className="w-full px-3 py-2 border rounded-md text-sm"
                 />
               </div>
@@ -566,15 +538,37 @@ export default function CropReportingDashboard({
   );
 }
 
-function StatCard({ label, value }: StatCardProps) {
+function StatCard({ label, value, type }: StatCardProps) {
+  const iconSize = 20;
+
+  const getIcon = () => {
+    switch (type) {
+      case "totalCrops":
+        return <FaUsers size={iconSize} className="text-indigo-500" />;
+      case "totalHarvesting":
+        return <FaLeaf size={iconSize} className="text-green-500" />;
+      case "totalPlotted":
+        return <FaSeedling size={iconSize} className="text-yellow-500" />;
+      case "avgYield":
+        return <FaWeight size={iconSize} className="text-amber-500" />;
+      case "avgMoisture":
+        return <FaTint size={iconSize} className="text-blue-500" />;
+      default:
+        return <FaUsers size={iconSize} className="text-gray-400" />;
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-4 rounded-xl shadow-sm flex flex-col"
+      className="relative bg-gradient-to-br from-white/80 to-gray-100 p-5 rounded-2xl shadow-lg flex flex-col hover:scale-105 transition-transform duration-300"
     >
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="text-xl font-semibold mt-1">{value}</div>
+      <div className="absolute top-4 left-4">{getIcon()}</div>
+      <div className="ml-10 text-xs text-gray-500 uppercase tracking-wide">
+        {label}
+      </div>
+      <div className="text-2xl font-bold mt-2">{value}</div>
     </motion.div>
   );
 }

@@ -202,7 +202,7 @@ export default function CropReportingDashboard({
     setLoading(true);
     setError(null);
     try {
-      const url = new URL(apiEndpoint);
+      const url = new URL(apiEndpoint, process.env.NEXT_PUBLIC_API_BASE_URL);
       url.searchParams.set('page_size', pageSize.toString());
       url.searchParams.set('start_record', ((page - 1) * pageSize + 1).toString());
       if (minKg) url.searchParams.set('min_weight', minKg);

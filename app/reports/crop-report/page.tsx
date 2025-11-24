@@ -17,7 +17,7 @@ const page = () => {
           {t("See all your reports and export from one place")}
         </p>
       </div>
-      <CropReportingDashboard apiEndpoint="https://dev-backend.insurecow.com/api/cms/crop-harvest-info-service/" pageSize={5} />
+      <CropReportingDashboard apiEndpoint="cms/crop-harvest-info-service/" pageSize={5} />
     </div>
   );
 };

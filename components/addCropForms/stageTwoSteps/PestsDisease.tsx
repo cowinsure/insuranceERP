@@ -165,22 +165,24 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-5 underline text-center">
-        {t('pest_disease_observations')}
+        {t("pest_disease_observations")}
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            {t('pest_attack_observations')}{" "}
-            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+            {t("pest_attack_observations")}{" "}
+            <span className="text-sm text-gray-400">
+              {t("multiple_selection")}
+            </span>
           </h3>
 
           {loading ? (
             <Loading />
           ) : pestOptions.length === 0 ? (
             <p className="text-gray-400 text-sm italic">
-              {t('no_pest_options_available')}
+              {t("no_pest_options_available")}
             </p>
           ) : (
             pestOptions.map((pest) => (
@@ -206,15 +208,17 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
         {/* Disease Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            {t('disease_attack_observations')}{" "}
-            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+            {t("disease_attack_observations")}{" "}
+            <span className="text-sm text-gray-400">
+              {t("multiple_selection")}
+            </span>
           </h3>
 
           {loading ? (
             <Loading />
           ) : diseaseOptions.length === 0 ? (
             <p className="text-gray-400 text-sm italic">
-              {t('no_disease_options_available')}
+              {t("no_disease_options_available")}
             </p>
           ) : (
             diseaseOptions.map((disease) => (
@@ -242,7 +246,9 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
 
         {/* Manageable Harvest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-3">
-          <h3 className="font-semibold">{t('was_the_pest_disease_manageable')}</h3>
+          <h3 className="font-semibold">
+            {t("was_the_pest_disease_manageable")}
+          </h3>
           <div className="flex gap-6">
             {["Yes", "No"].map((val) => (
               <label
@@ -265,12 +271,12 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
           {manageable === "No" && (
             <div className="mt-2">
               <label className="mb-2 text-sm font-bold text-gray-400 tracking-wide">
-                {t('remarks_comments')}
+                {t("remarks_comments")}
               </label>
               <textarea
                 value={remarks}
                 onChange={(e) => handleRemarksChange(e.target.value)}
-                placeholder={t('please_provide_remarks_or_comments')}
+                placeholder={t("please_provide_remarks_or_comments")}
                 className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none min-h-[80px] font-medium"
               />
             </div>

@@ -424,12 +424,12 @@ export default function CropReportingDashboard({
           className="grid md:grid-cols-3 gap-4 mb-6"
         >
           {/* Stats */}
-          <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-5 gap-4">
-            <StatCard
+          <div className="md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* <StatCard
               label="Total Crops"
               value={stats.totalCrops}
               type="totalCrops"
-            />
+            /> */}
             <StatCard
               label="Total Harvesting"
               value={stats.totalHarvesting}
@@ -486,7 +486,7 @@ export default function CropReportingDashboard({
             </div>
             {/* Table */}
             <div className="overflow-x-auto min-h-[400px]">
-              <table className="min-w-full table-auto bg-white h-full">
+              <table className="min-w-full table-auto bg-white ">
                 <thead>
                   <tr className="text-left text-sm text-gray-600 border-b">
                     {columns.map((col) => (
@@ -579,7 +579,8 @@ export default function CropReportingDashboard({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4">
+            {summary?.total_harvests   && summary?.total_harvests >= 10 && (
+              <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-gray-600">
                 Showing {(page - 1) * pageSize + 1} -{" "}
                 {summary?.total_harvests} 
@@ -602,6 +603,8 @@ export default function CropReportingDashboard({
                 </button>
               </div>
             </div>
+            )}
+            
           </motion.div>
 
           {/* Filters Panel */}
@@ -620,18 +623,19 @@ export default function CropReportingDashboard({
                 <label className="block text-sm text-gray-500 mb-1">
                   District
                 </label>
-                <select
+                <input
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
+                  list="district-list"
+                  placeholder="Search district"
                   className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
-                >
-                  <option value="">All</option>
+                />
+                <datalist id="district-list">
+                  <option value="" />
                   {districts.map((d: any) => (
-                    <option key={d.id} value={d.district_name}>
-                      {d.district_name}
-                    </option>
+                    <option key={d.id} value={d.district_name} />
                   ))}
-                </select>
+                </datalist>
               </div>
               {/* KG */}
               <div className="grid grid-cols-2 gap-2">

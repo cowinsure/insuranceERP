@@ -57,19 +57,7 @@ const mainMenuItems = [
       },
     ],
   },
-  {
-    title: "Reports",
-    url: null,
-    icon: TbReportAnalytics,
-    activeIcon: TbReportAnalytics,
-    children: [
-      {
-        title: "Crop",
-        url: "/reports/crop-report",
-        icon: <PiFlowerTulipFill size={20} />,
-      },
-    ],
-  },
+ 
   {
     title: "Farmers",
     url: "/farmers",
@@ -117,6 +105,19 @@ const mainMenuItems = [
     url: "/user_management",
     icon: MdOutlineManageAccounts,
     activeIcon: MdManageAccounts,
+  },
+   {
+    title: "Reports",
+    url: null,
+    icon: TbReportAnalytics,
+    activeIcon: TbReportAnalytics,
+    children: [
+      {
+        title: "Crop",
+        url: "/reports/crop-report",
+        icon: <PiFlowerTulipFill size={20} />,
+      },
+    ],
   },
   {
     title: "Settings",

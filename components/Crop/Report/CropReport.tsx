@@ -139,6 +139,7 @@ export default function CropReportingDashboard({
   const { get } = useApi();
 
   // ---------------- Filters ----------------
+  const [district, setDistrict] = useState<string>("");
   const [minKg, setMinKg] = useState<string>("");
   const [maxKg, setMaxKg] = useState<string>("");
   const [minMoisture, setMinMoisture] = useState<string>("");
@@ -162,15 +163,40 @@ export default function CropReportingDashboard({
   const [rows, setRows] = useState<CropRow[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [summary, setSummary] = useState<any>(null);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [isCropView, setIsCropView] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
 
+  const fetchDistricts = async () => {
+    try {
+      const response = await get("/coms/geography-service", {
+        params: {
+          page_size: 10,
+          start_record: 1,
+          division_id: -1,
+          district_id: -1,
+          ps_id: -1,
+          village_or_area_id: -1
+        }
+      });
+      if (response.status === 'success') {
+        console.log(response.data);
+        
+        setDistricts(response.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch districts', error);
+    }
+  };
+
   // Initial data fetch on mount
   useEffect(() => {
     fetchData();
+    fetchDistricts();
   }, []);
-  
+
   // Fetch data when page changes
   useEffect(() => {
     fetchData();
@@ -235,7 +261,7 @@ export default function CropReportingDashboard({
       url.searchParams.set("page_size", pageSize.toString());
       url.searchParams.set(
         "start_record",
-        ((page - 1) * pageSize + 1).toString()
+        ((page - 1) + 1).toString()
       );
       if (minKg) url.searchParams.set("min_weight", minKg);
       if (maxKg) url.searchParams.set("max_weight", maxKg);
@@ -243,6 +269,7 @@ export default function CropReportingDashboard({
       if (maxMoisture) url.searchParams.set("max_moisture", maxMoisture);
       if (dateFrom) url.searchParams.set("date_from", dateFrom);
       if (dateTo) url.searchParams.set("date_to", dateTo);
+      if (district) url.searchParams.set("district", district);
       if (stage === "harvesting") url.searchParams.set("stage_id", "3");
 
       console.log(url);
@@ -267,8 +294,8 @@ export default function CropReportingDashboard({
         const apiSummary = json.data.summary;
         const mappedRows = list.map((item: any) => ({
           id: item.harvest_info_id,
-          farmer_name: item.originator.split(" (")[0],
-          phone: item.originator.match(/\(([^)]+)\)/)?.[1] || "",
+          farmer_name:item.farmer_name,
+          phone: item.mobile_number,
           kg: item.total_production_kg,
           moisture: item.moisture_content_percentage,
           district_name: item.zilla,
@@ -278,8 +305,9 @@ export default function CropReportingDashboard({
         }));
         // console.log(res);
         setRows(mappedRows);
-        setTotal(apiSummary.total_harvests);
+        setTotal(list.length);
         setSummary(apiSummary);
+        setHasMore(list.length === pageSize);
       } else {
         setError(json.message || "Failed to fetch");
       }
@@ -448,15 +476,16 @@ export default function CropReportingDashboard({
                 </CardTitle>
               </div>
               <button
-                className="px-4 py-2 rounded-md text-gray-500 cursor-pointer bg-gray-50 hover:bg-gray-50 transition flex items-center gap-2 text-sm font-medium"
+                className="flex px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 shadow-md transition text-sm"
+
                 onClick={() => downloadCSV(visibleCsvRows, exportFileName)}
               >
                 <FaDownload />
-                Export CSV
+                <span className="ml-2">Export CSV</span>
               </button>
             </div>
             {/* Table */}
-            <div className="overflow-x-auto flex-1">
+            <div className="overflow-x-auto min-h-[400px]">
               <table className="min-w-full table-auto bg-white h-full">
                 <thead>
                   <tr className="text-left text-sm text-gray-600 border-b">
@@ -553,7 +582,7 @@ export default function CropReportingDashboard({
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-gray-600">
                 Showing {(page - 1) * pageSize + 1} -{" "}
-                {Math.min(page * pageSize, total)} of {total}
+                {summary?.total_harvests} 
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -567,7 +596,7 @@ export default function CropReportingDashboard({
                 <button
                   className="px-3 py-1 rounded-md border"
                   onClick={() => setPage((p) => p + 1)}
-                  disabled={page * pageSize >= total}
+                  disabled={!hasMore}
                 >
                   Next
                 </button>
@@ -586,6 +615,24 @@ export default function CropReportingDashboard({
             </CardTitle>
 
             <div className="grid grid-cols-1 gap-4 mb-4">
+              {/* District */}
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">
+                  District
+                </label>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                >
+                  <option value="">All</option>
+                  {districts.map((d: any) => (
+                    <option key={d.id} value={d.district_name}>
+                      {d.district_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {/* KG */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -653,8 +700,8 @@ export default function CropReportingDashboard({
                   className="w-full px-3 py-2 border rounded-md text-sm hover:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-300"
                 >
                   <option value="">Select</option>
-                  <option value="initialization">Crop Initialization</option>
-                  <option value="planting">Planting & Cultivation</option>
+                  {/* <option value="initialization">Crop Initialization</option>
+                  <option value="planting">Planting & Cultivation</option> */}
                   <option value="harvesting">Harvesting</option>
                 </select>
               </div>
@@ -774,6 +821,7 @@ export default function CropReportingDashboard({
                 <button
                   className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-sm"
                   onClick={() => {
+                    setDistrict("");
                     setMinKg("");
                     setMaxKg("");
                     setMinMoisture("");

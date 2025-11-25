@@ -143,14 +143,16 @@ export default function CropReportingDashboard({
   const [maxKg, setMaxKg] = useState<string>("");
   const [minMoisture, setMinMoisture] = useState<string>("");
   const [maxMoisture, setMaxMoisture] = useState<string>("");
-  const [stage, setStage] = useState<string>("");
+  const [stage, setStage] = useState<string>("harvesting");
+  const today = new Date();
+  const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const [dateFrom, setDateFrom] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    firstOfMonth.toISOString().split("T")[0]
   );
   const [dateTo, setDateTo] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    today.toISOString().split("T")[0]
   );
-  const [selectedQuick, setSelectedQuick] = useState<string | null>(null);
+  const [selectedQuick, setSelectedQuick] = useState<string | null>("currentMonth");
 
   const [page, setPage] = useState<number>(1);
   const [sortBy, setSortBy] = useState<SortState | null>(null);
@@ -168,6 +170,11 @@ export default function CropReportingDashboard({
   useEffect(() => {
     fetchData();
   }, []);
+  
+  // Fetch data when page changes
+  useEffect(() => {
+    fetchData();
+  }, [page]);
 
   useEffect(() => {
     if (selectedCropId !== null) {
@@ -189,10 +196,9 @@ export default function CropReportingDashboard({
   const getCurrentMonth = () => {
     const today = new Date();
     const from = new Date(today.getFullYear(), today.getMonth(), 1);
-    const to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     return {
       from: from.toISOString().split("T")[0],
-      to: to.toISOString().split("T")[0],
+      to: today.toISOString().split("T")[0],
     };
   };
 
@@ -283,7 +289,25 @@ export default function CropReportingDashboard({
       setLoading(false);
     }
   };
-  console.log(rows);
+
+  const sortedRows = useMemo(() => {
+    if (!sortBy) return rows;
+    return [...rows].sort((a, b) => {
+      const key = sortBy.key as keyof CropRow;
+      let aVal = a[key];
+      let bVal = b[key];
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return sortBy.dir === 'asc' ? -1 : 1;
+      if (bVal == null) return sortBy.dir === 'asc' ? 1 : -1;
+      const aStr = String(aVal);
+      const bStr = String(bVal);
+      if (sortBy.dir === 'asc') {
+        return aStr.localeCompare(bStr);
+      } else {
+        return bStr.localeCompare(aStr);
+      }
+    });
+  }, [rows, sortBy]);
 
   // GET single crop by id and set to state for view modal
   const fetchSingleCrop = async (cropId: number) => {
@@ -339,7 +363,7 @@ export default function CropReportingDashboard({
 
   const visibleCsvRows = useMemo(
     () =>
-      rows.map((r, idx) => ({
+      sortedRows.map((r, idx) => ({
         sl: (page - 1) * pageSize + idx + 1,
         farmer_name: r.farmer_name,
         phone: r.phone,
@@ -349,7 +373,7 @@ export default function CropReportingDashboard({
         stage: r.stage,
         date: r.date,
       })),
-    [rows, page, pageSize]
+    [sortedRows, page, pageSize]
   );
 
   const handleView = (cropId: number) => {
@@ -359,9 +383,12 @@ export default function CropReportingDashboard({
     setIsCropView(true);
   };
 
+  console.log(page);
+  console.log(total);
+
   return (
     <MotionConfig transition={{ duration: 0.35 }}>
-      <div>
+      <div className="pb-20 lg:pb-0">
         {/* Quick stats */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -369,7 +396,7 @@ export default function CropReportingDashboard({
           className="grid md:grid-cols-3 gap-4 mb-6"
         >
           {/* Stats */}
-          <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-5 gap-4">
             <StatCard
               label="Total Crops"
               value={stats.totalCrops}
@@ -438,12 +465,12 @@ export default function CropReportingDashboard({
                         key={col.key}
                         className={`px-3 py-3 ${col.width || "w-auto"}`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             className="flex items-center gap-2"
                             onClick={() => handleSort(col.key)}
                           >
-                            <span>{col.label}</span>
+                            <span className="">{col.label}</span>
                             <SortArrow
                               active={sortBy?.key === col.key}
                               dir={sortBy?.dir}
@@ -483,7 +510,7 @@ export default function CropReportingDashboard({
                       </td>
                     </tr>
                   ) : (
-                    rows.map((r, idx) => (
+                    sortedRows.map((r, idx) => (
                       <motion.tr
                         key={r.id || idx}
                         initial={{ opacity: 0, y: 6 }}
@@ -491,10 +518,10 @@ export default function CropReportingDashboard({
                         transition={{ duration: 0.28 }}
                         className="border-b hover:bg-gray-50"
                       >
-                        <td className="px-3 py-3 text-sm">
+                        <td className="px-3 py-3 text-sm text-center">
                           {(page - 1) * pageSize + idx + 1}
                         </td>
-                        <td className="px-3 py-3 text-sm">{r.farmer_name}</td>
+                        <td className="px-3 py-3 text-sm text-center">{r.farmer_name}</td>
                         <td className="px-3 py-3 text-sm text-center">
                           {r.phone}
                         </td>
@@ -507,7 +534,7 @@ export default function CropReportingDashboard({
                         <td className="px-3 py-3 text-sm text-center">
                           {r.district_name ?? "-"}
                         </td>
-                        <td className="px-3 py-3 text-sm">
+                        <td className="px-3 py-3 text-sm flex items-center justify-center">
                           <Button
                             variant={"outline"}
                             onClick={() => handleView(Number(r.cropId))}
@@ -680,6 +707,7 @@ export default function CropReportingDashboard({
                       setDateTo(d.to);
                       setSelectedQuick("previous7days");
                       setPage(1);
+                      fetchData();
                     }}
                   >
                     Previous 7 days
@@ -696,6 +724,7 @@ export default function CropReportingDashboard({
                       setDateTo(d.to);
                       setSelectedQuick("currentMonth");
                       setPage(1);
+                      fetchData();
                     }}
                   >
                     Current month
@@ -712,6 +741,7 @@ export default function CropReportingDashboard({
                       setDateTo(d.to);
                       setSelectedQuick("lastMonth");
                       setPage(1);
+                      fetchData();
                     }}
                   >
                     Last month
@@ -728,6 +758,7 @@ export default function CropReportingDashboard({
                       setDateTo(d.to);
                       setSelectedQuick("lastYear");
                       setPage(1);
+                      fetchData();
                     }}
                   >
                     Last year
@@ -748,9 +779,11 @@ export default function CropReportingDashboard({
                     setMinMoisture("");
                     setMaxMoisture("");
                     setStage("");
-                    setDateFrom("");
-                    setDateTo("");
+                    setDateFrom(new Date().toISOString().split("T")[0]);
+                    setDateTo(new Date().toISOString().split("T")[0]);
+                    setSelectedQuick(null);
                     setPage(1);
+                    fetchData();
                   }}
                 >
                   Reset

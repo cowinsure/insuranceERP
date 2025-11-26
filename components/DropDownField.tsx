@@ -11,6 +11,7 @@ interface DropdownFieldProps {
   disabled?: boolean;
   options: { value: string | number; label: string }[]; // Array of options, each with a value and label
   error?: string;
+  placeholder?: string;
 }
 
 // function renderStyledText(text: string) {
@@ -37,6 +38,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   disabled = false,
   options,
   error,
+  placeholder = "Select",
 }) => {
   return (
     <div className="relative">
@@ -61,7 +63,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
             error ? "border-red-600" : "border-gray-300"
           )}
         >
-          <option value="">Select</option>
+          <option value="">{placeholder}</option>
           {options.map((option, idx) => (
             <option
               key={idx}

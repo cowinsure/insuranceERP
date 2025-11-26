@@ -119,6 +119,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
     ...defaultCropData,
   });
   const [loading, setLoading] = useState(false);
+  const [landLoading, setLandLoading] = useState(true);
   const [landData, setLandData] = useState<LandData[]>([]);
   const [cropType, setCropType] = useState<CropType[]>([]);
   const [cropName, setCropName] = useState("New Crop");
@@ -134,13 +135,16 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
 
   // GET requests for dropdowns
   const getLandData = async () => {
+    setLandLoading(true);
     try {
       const response = await get("/lams/land-info-service", {
         params: { start_record: 1, page_size: 10 },
       });
       if (response.status === "success") setLandData(response.data);
+      setLandLoading(false);
     } catch (error) {
       toast.error(`${error}`);
+      setLandLoading(false);
     }
   };
 
@@ -273,7 +277,9 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
           value={formData.land_id || ""}
           onChange={handleDropdownChange}
           required
-          options={landData.map((land) => ({
+          disabled={landLoading}
+          placeholder={landLoading ? "Loading..." : "Select"}
+          options={landLoading ? [] : landData.map((land) => ({
             value: land.land_id,
             label: land.land_name,
           }))}

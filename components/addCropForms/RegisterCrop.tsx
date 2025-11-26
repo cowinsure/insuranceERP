@@ -118,6 +118,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   const [formData, setFormData] = useState<CropRegisterData>({
     ...defaultCropData,
   });
+  const [loading, setLoading] = useState(false);
   const [landData, setLandData] = useState<LandData[]>([]);
   const [cropType, setCropType] = useState<CropType[]>([]);
   const [cropName, setCropName] = useState("New Crop");
@@ -204,6 +205,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setLoading(true);
     // ✅ Ensure no empty date fields
     const payload = {
       ...formData,
@@ -218,6 +220,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
       });
 
       if (response.status === "success") {
+        setLoading(false);
         toast.success(t('crop_registered_successfully'));
         setFormData({ ...defaultCropData });
         setFarmerName("");
@@ -229,6 +232,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         toast.error(response.message || t('failed_to_register_crop'));
       }
     } catch (error) {
+      setLoading(false);
       toast.error(t('error_submitting_crop_data'));
     }
   };
@@ -302,6 +306,7 @@ const RegisterCrop: React.FC<RegisterCropProps> = ({
         <button
           type="submit"
           className="bg-[#003846] cursor-pointer text-white px-4 py-2 rounded hover:opacity-90 w-full"
+          disabled={loading}
         >
           {t('submit')}
         </button>

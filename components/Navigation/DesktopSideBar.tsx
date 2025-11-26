@@ -57,7 +57,7 @@ const mainMenuItems = [
       },
     ],
   },
- 
+
   {
     title: "Farmers",
     url: "/farmers",
@@ -106,7 +106,7 @@ const mainMenuItems = [
     icon: MdOutlineManageAccounts,
     activeIcon: MdManageAccounts,
   },
-   {
+  {
     title: "Reports",
     url: null,
     icon: TbReportAnalytics,
@@ -127,6 +127,21 @@ const mainMenuItems = [
   },
 ];
 
+
+const hiddenForInsurance = [
+  "Dashboard",
+  "Asset Management",
+  "Farmers",
+  "Lands",
+  "Surveys",
+  "Products",
+  "Claims",
+  "Applications",
+  "Notifications",
+  "User Management",
+  "Settings"
+];
+
 const DesktopSideBar = () => {
   const pathname = usePathname();
   const [pinned, setPinned] = useState(false);
@@ -144,18 +159,16 @@ const DesktopSideBar = () => {
 
   return (
     <div
-      className={`${sidebarBase} ${sidebarWidth} ${
-        isLogin && "hidden"
-      } transition-all duration-300`}
+      className={`${sidebarBase} ${sidebarWidth} ${isLogin && "hidden"
+        } transition-all duration-300`}
     >
       <div className="bg-white rounded-r-lg p-4 h-full overflow-hidden transition-all duration-300 flex flex-col relative">
         {/* Toggle Button */}
         <div className="flex justify-end mb- group">
           <button
             onClick={() => setPinned((prev) => !prev)}
-            className={`text-xs px-2 py-1 rounded hover:bg-gray-300 transition cursor-pointer ${
-              pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            }`}
+            className={`text-xs px-2 py-1 rounded hover:bg-gray-300 transition cursor-pointer ${pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              }`}
           >
             {pinned ? (
               <FaLock title="Pin menu" className="text-blue-500" />
@@ -170,8 +183,12 @@ const DesktopSideBar = () => {
           {/* Navigation */}
           <nav className="flex flex-col gap-3 relative">
             {mainMenuItems.map((item) => {
-              if (item.title === "Reports" && userId !== "Insurance Company") {
+              if (item.title === "Reports" && userId == "Farmer" ) {
                 return null;
+              }
+              if (userId === "Insurance Company") {
+                // Show ONLY Reports
+                if (item.title !== "Reports") return null;
               }
 
               const isActive =
@@ -188,24 +205,21 @@ const DesktopSideBar = () => {
                 <div key={item.url} className="relative group/item">
                   <Link href={item.url || ""}>
                     <div
-                      className={`flex items-center justify-between w-full py-2.5 px-2 rounded-md cursor-pointer transition-all duration-200 ${
-                        isActive
+                      className={`flex items-center justify-between w-full py-2.5 px-2 rounded-md cursor-pointer transition-all duration-200 ${isActive
                           ? "bg-blue-950 text-blue-300 drop-shadow-lg font-bold"
                           : "hover:bg-gray-100 text-gray-500 hover:text-blue-600 hover:scale-105 font-medium"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center">
                         <IconToRender
-                          className={`${iconSize} min-w-[25px] transition-colors ${
-                            isActive ? "text-blue-300" : "hover:text-blue-600"
-                          }`}
+                          className={`${iconSize} min-w-[25px] transition-colors ${isActive ? "text-blue-300" : "hover:text-blue-600"
+                            }`}
                         />
                         <span
-                          className={`ml-3 whitespace-nowrap transition-opacity duration-200 ${
-                            pinned
+                          className={`ml-3 whitespace-nowrap transition-opacity duration-200 ${pinned
                               ? "opacity-100"
                               : "opacity-0 group-hover:opacity-100"
-                          }`}
+                            }`}
                         >
                           {item.title}
                         </span>
@@ -214,11 +228,10 @@ const DesktopSideBar = () => {
                       {/* Arrow icon */}
                       {hasChildren && (
                         <span
-                          className={`transition-transform duration-300 ml-1 text-xs ${
-                            pinned
+                          className={`transition-transform duration-300 ml-1 text-xs ${pinned
                               ? "opacity-100"
                               : "opacity-0 group-hover:opacity-100"
-                          } group-hover/item:rotate-90`}
+                            } group-hover/item:rotate-90`}
                         >
                           <IoIosArrowForward size={20} />
                         </span>
@@ -236,11 +249,10 @@ const DesktopSideBar = () => {
                         return (
                           <Link key={child.url} href={child.url}>
                             <div
-                              className={`px-4 py-2 cursor-pointer whitespace-nowrap transition-colors duration-200 flex items-center gap-2 ${
-                                isChildActive
+                              className={`px-4 py-2 cursor-pointer whitespace-nowrap transition-colors duration-200 flex items-center gap-2 ${isChildActive
                                   ? "bg-blue-950 text-blue-200 font-bold"
                                   : "text-gray-500 hover:bg-blue-300 hover:text-white font-semibold"
-                              }`}
+                                }`}
                             >
                               {child.icon}
                               {child.title}

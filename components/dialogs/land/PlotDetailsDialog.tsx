@@ -150,6 +150,9 @@ const PlotDetailsDialog = ({
   const [showMyLocation, setShowMyLocation] = useState<boolean>(false);
   const [openInfoFor, setOpenInfoFor] = useState<string | null>(null);
 
+  console.log(plot);
+  
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -252,7 +255,7 @@ const PlotDetailsDialog = ({
             <Zoom>
               <img
                 src={
-                 `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL} + ${plot.imageUrl}` ||
+                 `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${plot.imageUrl}` ||
                   "/placeholder.svg"
                 }
                 alt={plot.plotName}

@@ -28,7 +28,7 @@ const TopNav = () => {
   if (isLogin) return null;
 
   return (
-    <nav className="absolute right-3 top-3 bg-white rounded-full shadow-[inset_0_2px_8px_rgba(0,0,0,0.15)]">
+    <nav className="absolute right-3 top-3 bg-white rounded-full shadow-[inset_0_2px_8px_rgba(0,0,0,0.15)] hidden lg:block">
       <div className="flex items-center gap-4 relative z-50 py-3 px-3">
         <LocalizationToggle />
 

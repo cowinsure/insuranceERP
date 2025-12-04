@@ -182,7 +182,7 @@ const MobileNav = () => {
             const isExpanded = openMenu === item.url;
 
             return (
-              <div key={item.url} className="border-b">
+              <div key={item.url} className="">
                 {hasChildren ? (
                   <button
                     onClick={() => handleToggle(item.url)}
@@ -242,7 +242,7 @@ const MobileNav = () => {
             );
           })}
 
-          <div className="flex flex-col justify-between h-[60%]">
+          <div className="flex flex-col justify-between">
             <div className="">
               {/* More Section */}
               <div className="border-b">
@@ -302,7 +302,7 @@ const MobileNav = () => {
               </div>
             </div>
 
-            <div>
+            <div className="mt-20">
               {/* Logout Button */}
               <div className="px-4 py-4 h-full">
                 <button

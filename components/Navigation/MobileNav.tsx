@@ -104,7 +104,7 @@ const MobileNav = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openMore, setOpenMore] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout,userId } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -170,6 +170,13 @@ const MobileNav = () => {
         <div className=" h-[90vh]">
           {/* Visible Items */}
           {visibleItems.map((item) => {
+              if (item.title === "Reports" && userId == "Farmer" ) {
+                return null;
+              }
+              if (userId === "Insurance Company") {
+                // Show ONLY Reports
+                if (item.title !== "Reports") return null;
+              }
             const isActive =
               pathname === item.url ||
               (item.children &&

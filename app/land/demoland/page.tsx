@@ -4412,7 +4412,7 @@ const DemoLandPage: React.FC = () => {
       <div style={{ display: 'flex', height: '100vh' }}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
-        //   center={center}
+          center={center}
           zoom={15}
         >
           {landData.map((land) => {

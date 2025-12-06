@@ -4445,7 +4445,7 @@ const DemoLandPage: React.FC = () => {
             );
           })}
         </GoogleMap>
-        <div style={{ width: '30%', padding: '20px', overflowY: 'auto', backgroundColor: '#f5f5f5' }}>
+        <div style={{ width: '30%', padding: '20px', overflowY: 'auto',  }}>
           {selectedLand ? (
             <Card className="w-full shadow-lg border-0 rounded-xl">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">

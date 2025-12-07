@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaMobile, FaUnlockAlt } from "react-icons/fa";
+import { FaMobile, FaUnlockAlt, FaSpinner } from "react-icons/fa";
 import { toast, Toaster } from "sonner";
 // import AOS from "aos";
 // import "aos/dist/aos.css";
@@ -33,6 +33,7 @@ const Login: React.FC<LoginProps> = ({
   const { post } = useApi();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -92,6 +93,7 @@ const Login: React.FC<LoginProps> = ({
   // New function with improved error handling
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setIsLoading(true);
     //("Function from error-fixing");
     // Reset errors
     setPhoneError(false);
@@ -125,6 +127,7 @@ const Login: React.FC<LoginProps> = ({
       await login(userId, phone, accessToken);
       toast.success("Login successful!");
       router.push(redirectUrl);
+      setIsLoading(false);
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
@@ -144,6 +147,7 @@ const Login: React.FC<LoginProps> = ({
       } else {
         toast.error("Unexpected error occurred. Please try again.");
       }
+      setIsLoading(false);
     }
   };
 
@@ -275,11 +279,12 @@ const Login: React.FC<LoginProps> = ({
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-semibold text-blue-300 bg-blue-800 hover:bg-blue-700 cursor-pointer"
+              disabled={isLoading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-semibold text-blue-300 bg-blue-800 hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               data-aos="fade-in"
               data-aos-delay="300"
             >
-              Login
+              {isLoading ? <FaSpinner className="animate-spin" /> : "Login"}
             </button>
           </form>
 

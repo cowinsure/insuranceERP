@@ -104,7 +104,7 @@ const MobileNav = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openMore, setOpenMore] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, userId } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -131,28 +131,32 @@ const MobileNav = () => {
     <>
       {/* Hamburger Button */}
       <button
-        className="lg:hidden fixed top-3 right-3 z-[100] bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-200/50 hover:bg-white/95 transition-all duration-200"
+        className={`lg:hidden fixed top-3 right-3 z-[100] ${
+          drawerOpen ? "bg-red-600" : "bg-blue-950"
+        } backdrop-blur-sm p-2 rounded-lg shadow-lg transition-all duration-200`}
         onClick={() => setDrawerOpen(!drawerOpen)}
       >
         {drawerOpen ? (
-          <X className="w-6 h-6 text-gray-700" />
+          <X className="w-6 h-6 text-white animate__animated animate__rotateIn animate__faster" />
         ) : (
-          <Menu className="w-6 h-6 text-gray-700" />
+          <Menu className="w-6 h-6 text-blue-200 animate__animated animate__zoomIn animate__faster" />
         )}
       </button>
 
       {/* Overlay */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90] transition-opacity duration-300"
-          onClick={handleCloseMenus}
-        />
-      )}
+      <div
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[90] transition-opacity duration-500 ${
+          drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={handleCloseMenus}
+      />
 
       {/* Drawer */}
       <nav
-        className={`fixed top-0 right-0 h-full w-72 bg-white/95 backdrop-blur-md shadow-2xl z-[99] transform transition-transform duration-500 ease-in-out ${
-          drawerOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-16 right-3 w-72 bg-white/95 backdrop-blur-md shadow-2xl z-[99] rounded-xl border border-gray-200/50 transform transition-all duration-500 ease-in-out overflow-auto ${
+          drawerOpen
+            ? "translate-x-0 max-h-[calc(100vh-4rem)] opacity-100"
+            : "-translate-x-[-100%] max-h-0 opacity-0"
         }`}
       >
         {/* Drawer Header */}
@@ -167,9 +171,16 @@ const MobileNav = () => {
         </div>
 
         {/* Drawer Content */}
-        <div className=" h-[90vh]">
+        <div className="h-auto">
           {/* Visible Items */}
           {visibleItems.map((item) => {
+            if (item.title === "Reports" && userId == "Farmer") {
+              return null;
+            }
+            if (userId === "Insurance Company") {
+              // Show ONLY Reports
+              if (item.title !== "Reports") return null;
+            }
             const isActive =
               pathname === item.url ||
               (item.children &&
@@ -302,7 +313,7 @@ const MobileNav = () => {
               </div>
             </div>
 
-            <div className="mt-20">
+            <div className="">
               {/* Logout Button */}
               <div className="px-4 py-4 h-full">
                 <button

@@ -131,7 +131,7 @@ function downloadCSV(rows: Record<string, any>[], filename = "report.csv") {
 
 export default function CropReportingDashboard({
   apiEndpoint,
-  pageSize = 25,
+  pageSize: initialPageSize = 25,
   columns = defaultColumns,
   exportFileName = "crop-report.csv",
 }: CropReportingDashboardProps) {
@@ -156,6 +156,7 @@ export default function CropReportingDashboard({
   const [selectedQuick, setSelectedQuick] = useState<string | null>("currentMonth");
 
   const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(initialPageSize);
   const [sortBy, setSortBy] = useState<SortState | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -197,10 +198,10 @@ export default function CropReportingDashboard({
     fetchDistricts();
   }, []);
 
-  // Fetch data when page changes
+  // Fetch data when page or pageSize changes
   useEffect(() => {
     fetchData();
-  }, [page]);
+  }, [page, pageSize]);
 
   useEffect(() => {
     if (selectedCropId !== null) {
@@ -258,7 +259,9 @@ export default function CropReportingDashboard({
     setError(null);
     try {
       const url = new URL(apiEndpoint, process.env.NEXT_PUBLIC_API_BASE_URL);
-      url.searchParams.set("page_size", pageSize.toString());
+      if (pageSize !== -1) {
+        url.searchParams.set("page_size", pageSize.toString());
+      }
       url.searchParams.set(
         "start_record",
         ((page - 1) + 1).toString()
@@ -307,7 +310,7 @@ export default function CropReportingDashboard({
         setRows(mappedRows);
         setTotal(list.length);
         setSummary(apiSummary);
-        setHasMore(list.length === pageSize);
+        setHasMore(pageSize === -1 ? false : list.length === pageSize);
       } else {
         setError(json.message || "Failed to fetch");
       }
@@ -579,30 +582,55 @@ export default function CropReportingDashboard({
             </div>
 
             {/* Pagination */}
-            {summary?.total_harvests   && summary?.total_harvests >= 10 && (
+            {summary?.total_harvests && summary?.total_harvests >= 10 && pageSize !== -1 && (
               <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-600">
-                Showing {(page - 1) * pageSize + 1} -{" "}
-                {summary?.total_harvests} 
+                <div className="text-sm text-gray-600">
+                  Showing {(page - 1) * pageSize + 1} -{" "}
+                  {Math.min(page * pageSize, summary?.total_harvests || 0)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="px-3 py-1 rounded-md border bg-indigo-600 text-white hover:bg-indigo-700"
+                    onClick={() => {
+                      setPageSize(-1);
+                      setPage(1);
+                    }}
+                  >
+                    View All
+                  </button>
+                  <button
+                    className="px-3 py-1 rounded-md border"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Prev
+                  </button>
+                  <div className="px-3 py-1 border rounded">{page}</div>
+                  <button
+                    className="px-3 py-1 rounded-md border"
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={!hasMore}
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+            )}
+            {pageSize === -1 && summary?.total_harvests && (
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-gray-600">
+                  Showing all {summary.total_harvests} records
+                </div>
                 <button
-                  className="px-3 py-1 rounded-md border"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
+                  className="px-3 py-1 rounded-md border bg-gray-600 text-white hover:bg-gray-700"
+                  onClick={() => {
+                    setPageSize(25);
+                    setPage(1);
+                  }}
                 >
-                  Prev
-                </button>
-                <div className="px-3 py-1 border rounded">{page}</div>
-                <button
-                  className="px-3 py-1 rounded-md border"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={!hasMore}
-                >
-                  Next
+                  Paginate
                 </button>
               </div>
-            </div>
             )}
             
           </motion.div>

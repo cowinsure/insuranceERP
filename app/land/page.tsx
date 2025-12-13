@@ -20,8 +20,7 @@ import PlotDetailsDialog from "@/components/dialogs/land/PlotDetailsDialog";
 import PlotCoordinatesDialog from "@/components/dialogs/land/PlotCoordinatesDialog";
 import useApi from "@/hooks/use_api";
 import { group } from "console";
-import {  useLocalization } from "../../core/context/LocalizationContext";
-
+import { useLocalization } from "../../core/context/LocalizationContext";
 
 interface LandData {
   image: string | null;
@@ -90,7 +89,7 @@ interface LandData {
 }
 
 export default function CropPage() {
-    const { t, setLocale, locale } = useLocalization();
+  const { t, setLocale, locale } = useLocalization();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isPlotCoordsDialogOpen, setIsPlotCoordsDialogOpen] = useState(false);
@@ -261,31 +260,22 @@ export default function CropPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            {t('land_management')}
+            {t("land_management")}
           </h1>
-          <p className="text-gray-600">
-           {t('sub_title')}
-          </p>
-        </div>
-        <div className="flex justify-end">
-          <Button
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            onClick={() => setIsCreateDialogOpen(true)}
-          >
-            <Plus className="w-4 h-4" />
-            {t('create_land')}
-          </Button>
+          <p className="text-gray-600">{t("sub_title")}</p>
         </div>
       </div>
 
       <div className="animate__animated animate__fadeIn flex flex-col">
         <Card className="mb-4">
           <CardContent className="py-6 px-5">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">{t('search')}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              {t("search")}
+            </h2>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder={t('search_placeholder')}
+                placeholder={t("search_placeholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -295,19 +285,30 @@ export default function CropPage() {
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="py-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-               {t('land_list')}
-              </h2>
-              <span className="text-sm text-gray-500">
-                {filteredPlots.length} {t('land_found')}
-              </span>
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  {t("land_list")}
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {filteredPlots.length} {t("land_found")}
+                </span>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  onClick={() => setIsCreateDialogOpen(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                  {t("create_land")}
+                </Button>
+              </div>
             </div>
 
             {loading ? (
               <div className="text-center py-12">
-                <p>{t('loading')}</p>
+                <p>{t("loading")}</p>
               </div>
             ) : filteredPlots.length === 0 ? (
               <div className="text-center py-12">
@@ -315,17 +316,17 @@ export default function CropPage() {
                   <MapPin className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {t('no_lands_found')}
+                  {t("no_lands_found")}
                 </h3>
                 <p className="text-gray-500 mb-4">
                   {searchTerm
-                    ? t('try_adjusting_search')
-                    : t('create_first_land_entry')}
+                    ? t("try_adjusting_search")
+                    : t("create_first_land_entry")}
                 </p>
                 {!searchTerm && (
                   <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
-                    {t('create_land')}
+                    {t("create_land")}
                   </Button>
                 )}
               </div>
@@ -351,8 +352,12 @@ export default function CropPage() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="font-medium text-gray-900">{plot.land_name}</div>
-                            <div className="text-sm text-gray-600">{t('owner')}: {plot.farmer_name}</div>
+                            <div className="font-medium text-gray-900">
+                              {plot.land_name}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {t("owner")}: {plot.farmer_name}
+                            </div>
                           </div>
                         </div>
 
@@ -361,8 +366,12 @@ export default function CropPage() {
                             {plot.mobile_number}
                           </div>
                           <div className="flex flex-col items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(plot)}>
-                                <Eye className="w-4 h-4" />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(plot)}
+                            >
+                              <Eye className="w-4 h-4" />
                             </Button>
                             {/* <Button
                               variant="outline"
@@ -395,71 +404,71 @@ export default function CropPage() {
                 </div>
 
                 <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        {t('land_name')}
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        {t('farmer_name')}
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        {t('contact_number')}
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        {t('area_acres')}
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        {t('ownership')}
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">
-                        {t('actions')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredPlots.map((plot) => (
-                      <tr
-                        key={plot.land_id}
-                        className="border-b border-gray-100 hover:bg-gray-50"
-                      >
-                        <td className="py-4 px-4">
-                          <div className="font-medium text-gray-900">
-                            {plot.land_name}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="text-sm text-gray-600">
-                            {plot.farmer_name}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="text-sm text-gray-600">
-                            {plot.mobile_number}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="text-sm text-gray-600">
-                            {plot.area_in_acre}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="text-sm text-gray-600">
-                            {plot.ownership_type}
-                          </div>
-                        </td>
-                       
-                        <td className="py-4 px-4 flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(plot)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          {t("land_name")}
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          {t("farmer_name")}
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          {t("contact_number")}
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          {t("area_acres")}
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          {t("ownership")}
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          {t("actions")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPlots.map((plot) => (
+                        <tr
+                          key={plot.land_id}
+                          className="border-b border-gray-100 hover:bg-gray-50"
+                        >
+                          <td className="py-4 px-4">
+                            <div className="font-medium text-gray-900">
+                              {plot.land_name}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">
+                              {plot.farmer_name}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">
+                              {plot.mobile_number}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">
+                              {plot.area_in_acre}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-600">
+                              {plot.ownership_type}
+                            </div>
+                          </td>
 
-                          {/* <Button
+                          <td className="py-4 px-4 flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(plot)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+
+                            {/* <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
@@ -470,14 +479,13 @@ export default function CropPage() {
                               <MapPin className="w-4 h-4 mr-2" />
                               Plot Entry
                             </Button> */}
-                        </td>
-                       
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-                </>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -489,10 +497,10 @@ export default function CropPage() {
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {t('upgrade_to_premium')}
+              {t("upgrade_to_premium")}
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              {t('premium_description')}
+              {t("premium_description")}
             </p>
           </div>
         </GenericModal>

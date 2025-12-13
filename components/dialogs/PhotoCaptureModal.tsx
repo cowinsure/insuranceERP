@@ -89,6 +89,12 @@ export default function PhotoCaptureModal({
 
   // Process the selected file
   const handleFile = (file: File) => {
+    const isHeic = file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic');
+    if (isHeic) {
+      const format = file.type.split('/')[1]?.toUpperCase() || file.name.split('.').pop()?.toUpperCase() || 'Unknown';
+      toast.error(`${format} format is not supported`);
+      return;
+    }
     setSelectedFile(file);
     const imageUrl = URL.createObjectURL(file);
     setCapturedPhoto(imageUrl);
@@ -495,7 +501,7 @@ export default function PhotoCaptureModal({
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            Supported formats: JPG, PNG, GIF, WebP
+            Supported formats: JPG, PNG, GIF, WebP (HEIC not supported)
           </p>
         </div>
       )}

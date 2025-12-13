@@ -1,10 +1,15 @@
 import React from "react";
 import "@/styles/loader.css";
 
-const Loading = () => {
+interface LoadingProps {
+  text?: string;
+}
+
+const Loading = ({ text }: LoadingProps) => {
   return (
-    <div className="flex justify-center items-center p-10">
+    <div className="flex flex-col justify-center items-center p-10">
       <span className="loader"></span>
+      <p>{text}</p>
     </div>
   );
 };

@@ -37,6 +37,7 @@ const CropsPage = () => {
   const [selectedCrop, setSelectedCrop] = useState<CropGetData>();
   const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
   const [isViewLoading, setIsViewLoading] = useState(false);
+  const [isFullScreenLoading, setIsFullScreenLoading] = useState(false);
 
   const [pendingModal, setPendingModal] = useState<
     "stage1" | "stage2" | "view" | null
@@ -159,6 +160,7 @@ const CropsPage = () => {
         if (pendingModal === "stage2") setIsStageTwoModal(true);
         if (pendingModal === "view") setIsCropView(true);
         setPendingModal(null);
+        setIsFullScreenLoading(false);
       }
     })();
 
@@ -171,18 +173,21 @@ const CropsPage = () => {
   /************************* Handler Functions *************************/
   const handleAddCropDetails = (cropId: number) => {
     if (!cropId) return;
+    setIsFullScreenLoading(true);
     setSelectedCropId(cropId);
     setPendingModal("stage1");
   };
 
   const handleRevisitData = (cropId: number) => {
     if (!cropId) return;
+    setIsFullScreenLoading(true);
     setSelectedCropId(cropId);
     setPendingModal("stage2");
   };
 
   const handleView = (cropId: number) => {
     if (!cropId) return;
+    setIsFullScreenLoading(true);
     setSelectedCropId(cropId);
     setPendingModal("view");
   };
@@ -747,6 +752,13 @@ const CropsPage = () => {
         >
           <CropStageModalTabs data={selectedCrop} />
         </GenericModal>
+      )}
+
+      {/* Full Screen Loader */}
+      {isFullScreenLoading && (
+        <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
+          <Loading text="Wait a moment"/>
+        </div>
       )}
 
       <Toaster richColors />

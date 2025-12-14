@@ -13,11 +13,12 @@ ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV
 
 # Copy appropriate .env file
-RUN if [ "$NODE_ENV" = "production" ]; then \
-      cp .env.production .env.local; \
-    else \
-      cp .env.development .env.local; \
-    fi
+# RUN if [ "$NODE_ENV" = "production" ]; then \
+#       cp .env.production .env.local; \
+#     else \
+#       cp .env.development .env.local; \
+#     fi
+RUN cp .env.development .env.local
 
 RUN npm run build
 

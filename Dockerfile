@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Pass build-time environment
-ARG ENVIRONMENT=production
+# ARG ENVIRONMENT=production
 ENV ENVIRONMENT=$ENVIRONMENT
 
 # Debug: show which env will be used

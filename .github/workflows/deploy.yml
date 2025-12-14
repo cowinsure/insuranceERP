@@ -35,9 +35,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-            echo "Building Docker image with ENV=$ENV and TAG=$TAG"
-            docker build -t insurecow/insurecow_warehouse_repo:$TAG \
-            --build-arg NODE_ENV=$ENV .
+          echo "Building Docker image with ENV=$ENV and TAG=$TAG"
+          docker build -t insurecow/insurecow_warehouse_repo:$TAG \
+          --build-arg NODE_ENV="${ENV}" .
 
       - name: Push Docker image
         run: |

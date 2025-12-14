@@ -50,6 +50,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            whoami
+            hostname
             cd /var/www/insuranceERP
             docker pull insurecow/insurecow_warehouse_repo:$TAG
             docker compose -f $COMPOSE_FILE up -d

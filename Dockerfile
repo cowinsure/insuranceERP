@@ -1,30 +1,28 @@
+# =========================
 # Stage 1: Build
+# =========================
 FROM node:20-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and install
+# Copy package.json and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy all source code
+# Copy all source files
 COPY . .
 
-# ARG for environment
-ARG NODE_ENV=production
-ENV NODE_ENV=$NODE_ENV
+# Pass build-time environment
+ARG ENVIRONMENT=production
+ENV ENVIRONMENT=$ENVIRONMENT
 
-# Debug: show NODE_ENV
+# Debug: show which env will be used
 RUN echo "========================"
-RUN echo "NODE_ENV is: $NODE_ENV"
-RUN echo "========================"
+RUN echo "ENVIRONMENT=$ENVIRONMENT"
 
-# Debug: list env files before copy
-RUN echo "Listing env files before copy:"
-RUN ls -l .env.*
-
-# Copy appropriate env file
-RUN if [ "$NODE_ENV" = "production" ]; then \
+# Copy appropriate env file to .env.local
+RUN if [ "$ENVIRONMENT" = "production" ]; then \
       echo "Using production env"; \
       cp .env.production .env.local; \
     else \
@@ -32,26 +30,29 @@ RUN if [ "$NODE_ENV" = "production" ]; then \
       cp .env.development .env.local; \
     fi
 
-# Debug: check if .env.local exists
-RUN echo "Checking .env.local after copy:"
-RUN ls -l .env.local
+# Debug: check .env.local
 RUN echo "Contents of .env.local:"
-RUN cat .env.local || echo "File is empty or not found"
+RUN cat .env.local || echo "File missing!"
 
-# Run build
+# Build Next.js (always a production build)
 RUN echo "Starting Next.js build..."
 RUN npm run build
-RUN echo "Build finished!"
 
+# =========================
 # Stage 2: Runner
+# =========================
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
+# Copy built files from builder
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 
+# Expose port
 EXPOSE 3000
+
+# Start the app
 CMD ["npm", "start"]

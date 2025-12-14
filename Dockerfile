@@ -1,31 +1,36 @@
-# 1️⃣ Build stage
+# Stage 1: Build
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package*.json ./
+RUN npm install
 
-# Copy the rest of the app
 COPY . .
 
-# Build Next.js app
+# Pass environment from GitHub Actions
+ARG NODE_ENV
+ENV NODE_ENV $NODE_ENV
+
+# Copy appropriate .env file
+RUN if [ "$NODE_ENV" = "production" ]; then \
+      cp .env.production .env.local; \
+    else \
+      cp .env.development .env.local; \
+    fi
+
 RUN npm run build
 
-# 2️⃣ Production stage
-FROM node:20-alpine
+# Stage 2: Production image
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy only necessary files from builder
-COPY --from=builder /app/package.json /app/package-lock.json* ./
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 
-# Expose port 3000
 EXPOSE 3000
 
-# Start Next.js app
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]

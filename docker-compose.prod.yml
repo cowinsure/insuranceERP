@@ -1,0 +1,9 @@
+services:
+  frontend-prod:
+    image: insurecow/insurecow_warehouse_repo:frontend-insuranceERP-prod
+    container_name: frontend-insuranceERP-prod
+    restart: always
+    ports:
+      - "3010:3000"
+    environment:
+      - NODE_ENV=production

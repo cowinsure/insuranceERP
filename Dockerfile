@@ -15,7 +15,7 @@ ENV NODE_ENV=$NODE_ENV
 RUN if [ "$NODE_ENV" = "production" ]; then \
       cp .env.production .env.local; \
     else \
-      cp .env.development .env.local; \
+      cp .env.production2 .env.local; \
     fi
 
 # Production build (always production)

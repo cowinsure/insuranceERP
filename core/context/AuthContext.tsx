@@ -12,12 +12,14 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+export type UserRole = "Farmer" | "Insurance Company";
+
 // Define the shape of the authentication state
 interface AuthState {
   phoneNumber: string | null;
-  userId: string | null;
+  userId: UserRole | null;
   accessToken: string | null;
-  login: (userId: string, phoneNumber: string, accessToken: string) => void;
+  login: (userId: UserRole, phoneNumber: string, accessToken: string) => void;
   logout: () => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
@@ -28,71 +30,74 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<UserRole | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
   // // Load auth data from localStorage (or cookies) on initial render
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    const storedPhoneNumber = localStorage.getItem("phoneNumber");
-    const storedAccessToken = localStorage.getItem("accessToken");
+    const hydrateAuth = () => {
+      try {
+        const storedUserId = localStorage.getItem("userId");
+        const storedPhoneNumber = localStorage.getItem("phoneNumber");
+        const storedAccessToken = localStorage.getItem("accessToken");
 
-    // console.log(
-    //   storedUserId,
-    //   storedPhoneNumber,
-    //   storedAccessToken,
-    //   "stored data"
-    // );
+        if (storedUserId && storedPhoneNumber && storedAccessToken) {
+          if (
+            storedUserId === "Farmer" ||
+            storedUserId === "Insurance Company"
+          ) {
+            setUserId(storedUserId as UserRole);
+            setPhoneNumber(storedPhoneNumber);
+            setAccessToken(storedAccessToken);
+          } else {
+            setUserId(null);
+          }
+        }
+      } catch (e) {
+        setUserId(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    if (storedUserId && storedPhoneNumber && storedAccessToken) {
-      setUserId(storedUserId);
-      setPhoneNumber(storedPhoneNumber);
-      setAccessToken(storedAccessToken);
-    }
+    hydrateAuth();
   }, []);
 
   // Function to log in the user
   const login = async (
-    userId: string,
+    userId: UserRole,
     phoneNumber: string,
     accessToken: string
   ) => {
     setIsLoading(true);
-    localStorage.setItem("userId", userId);
-    localStorage.setItem("phoneNumber", phoneNumber);
-    localStorage.setItem("accessToken", accessToken);
     try {
       const baseRequest = await createBaseRequest();
-      if (baseRequest.location) {
-        console.log(
-          baseRequest.location.latitude,
-          baseRequest.location.longitude
-        );
-      } else {
-        console.warn("baseRequest.location is null");
-      }
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("phoneNumber", phoneNumber);
+      localStorage.setItem("accessToken", accessToken);
 
-      // const finalPayload = {
-      //   ...baseRequest,
-      //   ...customPayload,
-      // };
+      setUserId(userId);
+      setPhoneNumber(phoneNumber);
+      setAccessToken(accessToken);
+      // if (baseRequest.location) {
+      //   console.log(
+      //     baseRequest.location.latitude,
+      //     baseRequest.location.longitude
+      //   );
+      // } else {
+      //   console.warn("baseRequest.location is null");
+      // }
     } catch (error) {
       console.error("Error during login:", error);
       toast.error(
         "Failed to make API call. Please enable location permissions and try again."
       );
+    } finally {
+      setIsLoading(false);
     }
-    setUserId(userId);
-    setPhoneNumber(phoneNumber);
-    setAccessToken(accessToken);
-
-    localStorage.setItem("userId", userId);
-    localStorage.setItem("phoneNumber", phoneNumber);
-    localStorage.setItem("accessToken", accessToken);
-    setIsLoading(false);
   };
 
   // Function to log out the user
@@ -107,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
 
     // alert("Log out successful")
-    router.push ("/login");
+    router.push("/login");
   };
 
   return (

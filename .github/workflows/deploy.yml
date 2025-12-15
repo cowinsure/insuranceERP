@@ -35,13 +35,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          echo "Building Docker image with ENV=$ENV and TAG=$TAG"
-          docker build -t insurecow/insurecow_warehouse_repo:$TAG \
+          echo "Building Docker image with ENV=$ENV and TAG=${{ env.TAG }}"
+          docker build -t insurecow/insurecow_warehouse_repo:${{ env.TAG }} \
           --build-arg NODE_ENV="${ENV}" .
 
       - name: Push Docker image
         run: |
-          docker push insurecow/insurecow_warehouse_repo:$TAG
+          docker push insurecow/insurecow_warehouse_repo:${{ env.TAG }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
@@ -53,5 +53,5 @@ jobs:
             whoami
             hostname
             cd /var/www/insuranceERP
-            docker pull insurecow/insurecow_warehouse_repo:$TAG
-            docker compose -f $COMPOSE_FILE up -d
+            docker pull insurecow/insurecow_warehouse_repo:${{ env.TAG }}
+            docker compose -f ${{ env.COMPOSE_FILE }} up -d

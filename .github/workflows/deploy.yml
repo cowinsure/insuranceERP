@@ -52,6 +52,6 @@ jobs:
           script: |
             whoami
             hostname
-            cd /var/www/insuranceERP
+            cd /var/www/testERP/insuranceERP
             docker pull insurecow/insurecow_warehouse_repo:${{ env.TAG }}
             docker compose -f ${{ env.COMPOSE_FILE }} up -d

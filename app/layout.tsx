@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 import { Urbanist } from "next/font/google";
 import "./globals.css";
-import DesktopSideBar from "@/components/Navigation/DesktopSideBar";
-import MobileNav from "@/components/Navigation/MobileNav";
 import "animate.css";
 import { AuthProvider } from "@/core/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { LocalizationProvider } from "@/core/context/LocalizationContext";
-import LocalizationToggle from "@/components/utils/LocalizationToggle";
-import { User } from "lucide-react";
-import TopNav from "@/components/TopNav";
 import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {

@@ -12,7 +12,12 @@ import {
 } from "react-icons/fa";
 import { MdOutlineFilterAlt } from "react-icons/md";
 import { FaDownload } from "react-icons/fa6";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { TbReportSearch } from "react-icons/tb";
 import { CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -459,7 +464,7 @@ export default function CropReportingDashboard({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="lg:col-span-3 bg-white p-3 md:p-4 rounded-lg md:rounded-2xl shadow-inner flex flex-col h-[73vh]"
+              className="lg:col-span-3 bg-white p-3 md:p-4 rounded-lg md:rounded-2xl shadow-inner flex flex-col h-[85vh] lg:h-[73vh]"
             >
               {/* Export CSV */}
               <div className="flex justify-between items-center mb-4 lg:mb-5">
@@ -488,7 +493,7 @@ export default function CropReportingDashboard({
               </div>
 
               {/* Cards for mobile (sm to lg) */}
-              <div className="block lg:hidden min-h-[400px] space-y-4 p-2 overflow-auto">
+              <div className="block lg:hidden min-h-[500px] space-y-4 p-2 overflow-auto">
                 {loading ? (
                   <div className="text-center p-6 text-sm text-gray-500">
                     Loading...
@@ -614,36 +619,36 @@ export default function CropReportingDashboard({
                 summary?.total_harvests >= 10 &&
                 pageSize !== -1 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-xs text-gray-600">
                       Showing {(page - 1) * pageSize + 1} -{" "}
                       {Math.min(page * pageSize, summary?.total_harvests || 0)}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        className="px-3 py-1 rounded-md border bg-indigo-600 text-white hover:bg-indigo-700"
-                        onClick={() => {
-                          setPageSize(-1);
-                          setPage(1);
-                        }}
-                      >
-                        View All
-                      </button>
-                      <button
-                        className="px-3 py-1 rounded-md border"
+                        className="px-3 text-sm py-1 rounded-md border"
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}
                       >
                         Prev
                       </button>
-                      <div className="px-3 py-1 border rounded">{page}</div>
+                      <div className="px-3 py-1 ">{page}</div>
                       <button
-                        className="px-3 py-1 rounded-md border"
+                        className="px-3 text-sm py-1 rounded-md border"
                         onClick={() => setPage((p) => p + 1)}
                         disabled={!hasMore}
                       >
                         Next
                       </button>
                     </div>
+                    <button
+                      className="px-3 text-sm py-1 rounded-md border "
+                      onClick={() => {
+                        setPageSize(-1);
+                        setPage(1);
+                      }}
+                    >
+                      Show All
+                    </button>
                   </div>
                 )}
               {pageSize === -1 && summary?.total_harvests && (

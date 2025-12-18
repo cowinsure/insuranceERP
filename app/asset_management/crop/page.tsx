@@ -18,6 +18,7 @@ import { toast, Toaster } from "sonner";
 import { useLocalization } from "@/core/context/LocalizationContext";
 import { useAuth } from "@/core/context/AuthContext";
 import { FaPlus } from "react-icons/fa6";
+import { MoreVertical, X } from "lucide-react";
 
 type StageAccess = {
   stage1Enabled: boolean;
@@ -51,6 +52,7 @@ const CropsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(6);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const totalPages =
     pageSize === "All"
@@ -228,8 +230,6 @@ const CropsPage = () => {
           currentPage * (pageSize as number)
         );
 
-  console.log(crops);
-
   return (
     <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
       {/* Page header */}
@@ -240,11 +240,11 @@ const CropsPage = () => {
               {t("asset_management")}
             </h1>
             <IoIosArrowForward size={30} className="hidden lg:inline-block" />
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
+            <h1 className="text-[21px] lg:text-2xl font-bold text-gray-700">
               {t("crop_registration")}
             </h1>
           </div>
-          <p className="text-gray-500 mt-1 text-sm">
+          <p className="text-gray-500 mt-1 text-sm lg:text-lg">
             {t("register_crop_details")}
           </p>
         </div>
@@ -264,10 +264,10 @@ const CropsPage = () => {
       <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5 grid grid-cols-4">
           <div className="col-span-2">
-            <CardTitle className="text-lg font-semibold text-gray-700 mb-1 pt-0">
+            <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
               {t("registered_crops")}
             </CardTitle>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm lg:text-base font-medium text-gray-400">
               {totalRecords} {t("crops_found")}
             </p>
           </div>
@@ -286,7 +286,8 @@ const CropsPage = () => {
                 onClick={() => setIsModal(true)}
               >
                 <FaPlus className="w- h-" size={16} />
-                {t("add_crop")}
+                <span className="hidden lg:inline-block">{t("add_crop")}</span>
+                <span className="inline-block lg:hidden">Add</span>
               </button>
             </div>
           </div>
@@ -499,11 +500,11 @@ const CropsPage = () => {
               return (
                 <div
                   key={idx}
-                  className="border rounded-lg p-3 shadow-sm bg-linear-to-tl from-gray-100 via-white to-gray-100 animate__animated animate__fadeIn"
+                  className="relative border rounded-lg p-3 shadow-sm bg-linear-to-tl from-gray-100 via-white to-gray-100 overflow-hidden animate__animated animate__fadeIn"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   {/* Header */}
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-base font-semibold text-gray-900">
                         {crop.crop_name || "N/A"}
@@ -516,74 +517,85 @@ const CropsPage = () => {
                       </p>
                     </div>
 
+                    {/* Master Action Button */}
+                    <div className="">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setOpenMenuId(
+                            openMenuId === crop.crop_id ? null : crop.crop_id
+                          )
+                        }
+                        className="relative z-20"
+                      >
+                        {openMenuId === crop.crop_id ? (
+                          <X className="w-4 h-4" />
+                        ) : (
+                          <MoreVertical className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* 🔥 Absolute Horizontal Action Tray */}
+                  <div
+                    className={` absolute right-14 top-1/2 -translate-y-1/2 flex gap-2 bg-white/90 backdrop-blur-sm border rounded-lg shadow-lg p-2 transition-all duration-300 ease-in-out ${
+                      openMenuId === crop.crop_id
+                        ? "opacity-100 translate-x-0"
+                        : "opacity-0 translate-x-16 pointer-events-none"
+                    }
+    `}
+                  >
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      onClick={() => handleView(crop.crop_id)}
+                      onClick={() => {
+                        handleView(crop.crop_id);
+                        setOpenMenuId(null);
+                      }}
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
-                  </div>
 
-                  {/* Details */}
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">
-                        {t("planting_date")}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {crop.planting_date || "N/A"}
-                      </p>
-                    </div>
-
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">
-                        {t("land_name")}
-                      </p>
-                      <p className="text-sm font-medium capitalize truncate">
-                        {crop.land_name || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    {/* Stage 1 */}
                     <Button
-                      variant="secondary"
-                      className={`flex-1 py-2 ${
+                      variant="ghost"
+                      size="sm"
+                      className={
                         stage1Enabled
-                          ? "text-blue-900 bg-blue-50"
-                          : "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      }`}
+                          ? "text-blue-700"
+                          : "text-gray-400 cursor-not-allowed"
+                      }
                       onClick={() => {
                         if (!stage1Enabled) {
                           toast.error(t("stage_1_cannot_edit"));
                         } else {
                           handleAddCropDetails(crop.crop_id);
                         }
+                        setOpenMenuId(null);
                       }}
                     >
-                      <FilePlus className="w-4 h-4 mr-2" /> {t("stage_1")}
+                      <FilePlus className="w-4 h-4" />
                     </Button>
 
-                    {/* Stage 2 */}
                     <Button
-                      variant="secondary"
-                      className={`flex-1 py-2 ${
+                      variant="ghost"
+                      size="sm"
+                      className={
                         stage2Enabled
-                          ? "text-blue-900 bg-blue-50"
-                          : "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      }`}
+                          ? "text-blue-700"
+                          : "text-gray-400 cursor-not-allowed"
+                      }
                       onClick={() => {
                         if (!stage2Enabled) {
                           toast.error(t("complete_stage_1_first"));
                         } else {
                           handleRevisitData(crop.crop_id);
                         }
+                        setOpenMenuId(null);
                       }}
                     >
-                      <ClipboardCheck className="w-4 h-4 mr-2" /> {t("stage_2")}
+                      <ClipboardCheck className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

@@ -11,7 +11,7 @@ import { SearchFilter } from "@/components/utils/SearchFilter";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
 import { log } from "console";
-import { ClipboardCheck, Eye, FilePlus, Sparkles } from "lucide-react";
+import { ClipboardCheck, Eye, FilePlus, Info, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
@@ -53,6 +53,8 @@ const CropsPage = () => {
   const [pageSize, setPageSize] = useState<number | "All">(6);
   const [totalRecords, setTotalRecords] = useState(0);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [isInfoModal, setIsInfoModal] = useState(false);
+  const [showCoach, setShowCoach] = useState(false);
 
   const totalPages =
     pageSize === "All"
@@ -80,6 +82,15 @@ const CropsPage = () => {
   useEffect(() => {
     fetchCropData();
   }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("seen-stage-info");
+    const isMobile = window.innerWidth < 1024;
+
+    if (!hasSeen && isMobile) {
+      setShowCoach(true);
+    }
+  }, []);
 
   // GET all crop data from API
   const fetchCropData = async () => {
@@ -255,13 +266,46 @@ const CropsPage = () => {
       <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5 grid grid-cols-4">
           <div className="col-span-2">
-            <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
-              {t("registered_crops")}
-            </CardTitle>
+            <div className="flex items-center gap-2 relative">
+              <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
+                {t("registered_crops")}
+              </CardTitle>
+              <button
+                id="stage-info-btn"
+                className="lg:hidden relative z-20"
+                onClick={() => {
+                  setIsInfoModal(true);
+                  localStorage.setItem("seen-stage-info", "true");
+                  setShowCoach(false);
+                }}
+              >
+                <Info className="w-5 h-5 text-gray-400" />
+              </button>
+              {showCoach && (
+                <div className="fixed inset-0 z-40 pointer-events-none">
+                  {/* Dim overlay */}
+                  <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+
+                  {/* Tooltip */}
+                  <div className="absolute right-6 top-48 bg-white rounded-xl shadow-xl p-3 w-[220px] text-sm pointer-events-auto">
+                    <p className="font-semibold text-gray-800">
+                      ℹ️ What do these icons mean?
+                    </p>
+                    <p className="text-gray-600 mt-1">
+                      Tap here to understand planting & harvesting stages.
+                    </p>
+
+                    {/* Arrow */}
+                    <div className="absolute -top-2 right-6 w-4 h-4 bg-white rotate-45" />
+                  </div>
+                </div>
+              )}
+            </div>
             <p className="text-sm lg:text-base font-medium text-gray-400">
               {totalRecords} {t("crops_found")}
             </p>
           </div>
+
           <div className="col-span-2 flex justify-end gap-5 items-center">
             <div className="flex-1 hidden lg:block">
               <SearchFilter
@@ -498,13 +542,23 @@ const CropsPage = () => {
                       )
                     }
                   >
-                    <div className="flex items-center gap-5">
-                      <p className="text-2xl font-semibold text-gray-300">
-                        {(currentPage - 1) *
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl font-semibold text-gray-300">
+                        {/* {(currentPage - 1) *
                           (pageSize === "All" ? 0 : pageSize) +
                           idx +
-                          1}
-                      </p>
+                          1} */}
+
+                        <img
+                          src={
+                            crop.stage_name === "Planting & Cultivation"
+                              ? "/seeding.png"
+                              : "/harvest.png"
+                          }
+                          alt=""
+                          className="w-8 h-8"
+                        />
+                      </div>
 
                       <div>
                         <h3 className="text-base font-semibold text-gray-900">
@@ -541,8 +595,12 @@ const CropsPage = () => {
                       </button>
                     </div>
 
-                    <div className={`absolute inset-0 bg-black/10 backdrop-blur-xs transition-all duration-700 ease-in-out ${
-      openMenuId === crop.crop_id ? "opacity-100" : "opacity-0 pointer-events-none backdrop-blur-0" }`}
+                    <div
+                      className={`absolute inset-0 bg-black/10 backdrop-blur-xs transition-all duration-700 ease-in-out ${
+                        openMenuId === crop.crop_id
+                          ? "opacity-100"
+                          : "opacity-0 pointer-events-none backdrop-blur-0"
+                      }`}
                     />
                   </div>
 
@@ -785,6 +843,28 @@ const CropsPage = () => {
           widthValue="sm:w-[35%] md:min-w-[90%] lg:min-w-[60%] lg:max-w-[70%]"
         >
           <CropStageModalTabs data={selectedCrop} />
+        </GenericModal>
+      )}
+
+      {/* Info Modal */}
+      {isInfoModal && (
+        <GenericModal
+          title="Stage Icons Meaning"
+          closeModal={() => setIsInfoModal(false)}
+          widthValue="w-[200px]"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <img src="/seeding.png" alt="Seeding" className="w-8 h-8" />
+              <span className="text-sm font-medium">
+                Planting & Cultivation
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <img src="/harvest.png" alt="Harvest" className="w-8 h-8" />
+              <span className="text-sm font-medium">Harvesting</span>
+            </div>
+          </div>
         </GenericModal>
       )}
 

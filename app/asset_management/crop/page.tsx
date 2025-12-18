@@ -505,16 +505,22 @@ const CropsPage = () => {
                 >
                   {/* Header */}
                   <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-base font-semibold text-gray-900">
-                        {crop.crop_name || "N/A"}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {t("stage_label")}{" "}
-                        <span className="font-medium text-gray-700">
-                          {crop.stage_name || "N/A"}
-                        </span>
+                    <div className="flex items-center gap-5">
+                      <p className="text-2xl font-semibold text-gray-300">
+                        {idx + 1}
                       </p>
+
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-900">
+                          {crop.crop_name || "N/A"}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {t("stage_label")}{" "}
+                          <span className="font-medium text-gray-700">
+                            {crop.stage_name || "N/A"}
+                          </span>
+                        </p>
+                      </div>
                     </div>
 
                     {/* Master Action Button */}

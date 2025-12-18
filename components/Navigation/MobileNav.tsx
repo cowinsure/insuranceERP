@@ -177,7 +177,7 @@ const MobileNav = () => {
       <button
         className={`lg:hidden fixed top-3 right-3 z-[100] ${
           drawerOpen ? "bg-red-600" : "bg-blue-950"
-        } backdrop-blur-sm p-2 rounded-lg shadow-lg transition-all duration-200`}
+        } backdrop-blur-sm p-1 rounded-sm shadow-lg transition-all duration-200`}
         onClick={() => setDrawerOpen(!drawerOpen)}
       >
         {drawerOpen ? (

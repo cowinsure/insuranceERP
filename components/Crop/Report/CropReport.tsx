@@ -466,7 +466,7 @@ export default function CropReportingDashboard({
               animate={{ opacity: 1 }}
               className="lg:col-span-3 bg-white p-3 md:p-4 rounded-lg md:rounded-2xl shadow-inner flex flex-col h-[85vh] lg:h-[73vh]"
             >
-              {/* Export CSV */}
+              {/* Header */}
               <div className="flex justify-between items-center mb-4 lg:mb-5">
                 <div>
                   <CardTitle className="text-lg font-semibold text-gray-700 pt-0 flex items-center gap-2">

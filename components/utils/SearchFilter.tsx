@@ -90,7 +90,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
             placeholder={placeholder}
             value={query}
             onChange={handleSearch}
-            className="pl-8 pr-6 bg-white border-blue-300"
+            className="pl-8 pr-6 bg-white border-2 border-blue-300 focus-within:bg-amber-400"
           />
         </div>
       </div>

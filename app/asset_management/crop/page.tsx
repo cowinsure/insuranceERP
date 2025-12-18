@@ -236,7 +236,7 @@ const CropsPage = () => {
       <div className="flex items-center justify-between">
         <div className="mb-5">
           <div className="flex items-center gap-2">
-            <h1 className="hidden lg:inline-block text-xl lg:text-3xl font-bold text-gray-900">
+            <h1 className="hidden lg:inline-block text-xl lg:text-2xl font-bold text-gray-700">
               {t("asset_management")}
             </h1>
             <IoIosArrowForward size={30} className="hidden lg:inline-block" />
@@ -244,19 +244,10 @@ const CropsPage = () => {
               {t("crop_registration")}
             </h1>
           </div>
-          <p className="text-gray-500 mt-1 text-sm lg:text-lg">
+          <p className="text-gray-400 mt-1 text-sm lg:text-base font-medium lg:tracking-wide">
             {t("register_crop_details")}
           </p>
         </div>
-        {/* <div className="flex">
-          <Button
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            onClick={() => setIsModal(true)}
-          >
-            <Plus className="w-4 h-4" />
-            {t('add_crop')}
-          </Button>
-        </div> */}
       </div>
       {/* Body */}
 
@@ -292,12 +283,7 @@ const CropsPage = () => {
             </div>
           </div>
         </div>
-        {/* <div className="mb-5">
-          <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
-            {t('registered_crops')}
-          </CardTitle>
-          <p className="text-sm text-gray-600">{crops.length} {t('crops_found')}</p>
-        </div> */}
+
         <div className="hidden lg:block max-h-[550px] overflow-auto">
           <table className="w-full">
             <thead>
@@ -504,10 +490,20 @@ const CropsPage = () => {
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   {/* Header */}
-                  <div className="flex justify-between items-center">
+                  <div
+                    className="flex justify-between items-center"
+                    onClick={() =>
+                      setOpenMenuId(
+                        openMenuId === crop.crop_id ? null : crop.crop_id
+                      )
+                    }
+                  >
                     <div className="flex items-center gap-5">
                       <p className="text-2xl font-semibold text-gray-300">
-                        {idx + 1}
+                        {(currentPage - 1) *
+                          (pageSize === "All" ? 0 : pageSize) +
+                          idx +
+                          1}
                       </p>
 
                       <div>
@@ -525,23 +521,29 @@ const CropsPage = () => {
 
                     {/* Master Action Button */}
                     <div className="">
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      <button
                         onClick={() =>
                           setOpenMenuId(
                             openMenuId === crop.crop_id ? null : crop.crop_id
                           )
                         }
-                        className="relative z-20"
+                        className={`relative z-20 ${
+                          openMenuId === crop.crop_id
+                            ? "bg-white text-red-600 p-2 rounded-lg border border-red-400"
+                            : "bg-gray-200 text-black p-2 rounded-lg"
+                        }`}
                       >
                         {openMenuId === crop.crop_id ? (
                           <X className="w-4 h-4" />
                         ) : (
                           <MoreVertical className="w-4 h-4" />
                         )}
-                      </Button>
+                      </button>
                     </div>
+
+                    <div className={`absolute inset-0 bg-black/10 backdrop-blur-xs transition-all duration-700 ease-in-out ${
+      openMenuId === crop.crop_id ? "opacity-100" : "opacity-0 pointer-events-none backdrop-blur-0" }`}
+                    />
                   </div>
 
                   {/* 🔥 Absolute Horizontal Action Tray */}

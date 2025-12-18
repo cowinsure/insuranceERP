@@ -70,27 +70,29 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg">
-      <h1 className="font-bold text-gray-800 text-xl">{t("search")}</h1>
-      <div className="relative w-full ">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        {query && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500"
-            onClick={clearSearch}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
-        <Input
-          placeholder={placeholder}
-          value={query}
-          onChange={handleSearch}
-          className="pl-10 pr-10 bg-white border-gray-200"
-        />
+    <div className="">
+      {/* <h1 className="font-bold text-gray-800 lg:text-xl">{t("search")}</h1> */}
+      <div className="">
+        <div className="relative w-full ">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-4 h-4" />
+          {query && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500"
+              onClick={clearSearch}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+          <Input
+            placeholder={placeholder}
+            value={query}
+            onChange={handleSearch}
+            className="pl-8 pr-6 bg-white border-blue-300"
+          />
+        </div>
       </div>
 
       {query && (
@@ -110,4 +112,3 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
     </div>
   );
 };
-  

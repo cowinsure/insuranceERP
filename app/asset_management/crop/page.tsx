@@ -11,12 +11,13 @@ import { SearchFilter } from "@/components/utils/SearchFilter";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
 import { log } from "console";
-import { ClipboardCheck, Eye, FilePlus, Plus, Sparkles } from "lucide-react";
+import { ClipboardCheck, Eye, FilePlus, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
 import { useLocalization } from "@/core/context/LocalizationContext";
 import { useAuth } from "@/core/context/AuthContext";
+import { FaPlus } from "react-icons/fa6";
 
 type StageAccess = {
   stage1Enabled: boolean;
@@ -230,10 +231,10 @@ const CropsPage = () => {
   console.log(crops);
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
+    <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
       {/* Page header */}
       <div className="flex items-center justify-between">
-        <div>
+        <div className="mb-5">
           <div className="flex items-center gap-2">
             <h1 className="hidden lg:inline-block text-xl lg:text-3xl font-bold text-gray-900">
               {t("asset_management")}
@@ -243,7 +244,9 @@ const CropsPage = () => {
               {t("crop_registration")}
             </h1>
           </div>
-          <p className="text-gray-500 mt-1">{t("register_crop_details")}</p>
+          <p className="text-gray-500 mt-1 text-sm">
+            {t("register_crop_details")}
+          </p>
         </div>
         {/* <div className="flex">
           <Button
@@ -256,33 +259,36 @@ const CropsPage = () => {
         </div> */}
       </div>
       {/* Body */}
-      <SearchFilter
-        placeholder={t("search_farmer_mobile")}
-        data={crops}
-        setFilteredData={setFilteredCrops}
-        searchKeys={["farmer_name", "mobile_number"]}
-      />
 
       {/* Table */}
-      <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
+      <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg animate__animated animate__fadeIn">
+        <div className="mb-5 grid grid-cols-4">
+          <div className="col-span-2">
+            <CardTitle className="text-lg font-semibold text-gray-700 mb-1 pt-0">
               {t("registered_crops")}
             </CardTitle>
             <p className="text-sm text-gray-600">
               {totalRecords} {t("crops_found")}
             </p>
           </div>
-
-          <div className="flex">
-            <Button
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-              onClick={() => setIsModal(true)}
-            >
-              <Plus className="w-4 h-4" />
-              {t("add_crop")}
-            </Button>
+          <div className="col-span-2 flex justify-end gap-5 items-center">
+            <div className="flex-1 hidden lg:block">
+              <SearchFilter
+                placeholder={t("search_farmer_mobile")}
+                data={crops}
+                setFilteredData={setFilteredCrops}
+                searchKeys={["farmer_name", "mobile_number"]}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                className="bg-blue-500 hover:bg-blue-400 drop-shadow-md text-white text-sm lg:text-[15px] flex items-center gap-2 px-2 lg:px-4 py-2 rounded-md font-medium cursor-pointer"
+                onClick={() => setIsModal(true)}
+              >
+                <FaPlus className="w- h-" size={16} />
+                {t("add_crop")}
+              </button>
+            </div>
           </div>
         </div>
         {/* <div className="mb-5">
@@ -472,9 +478,16 @@ const CropsPage = () => {
             </div>
           </div>
         </div>
-
+        <div className="flex-1 block lg:hidden">
+          <SearchFilter
+            placeholder={t("search_farmer_mobile")}
+            data={crops}
+            setFilteredData={setFilteredCrops}
+            searchKeys={["farmer_name", "mobile_number"]}
+          />
+        </div>
         {/* MOBILE / TABLET VIEW — CARDS */}
-        <div className="grid gap-4 lg:hidden mt-4">
+        <div className="grid gap-4 lg:hidden mt-2 max-h-[60vh] overflow-auto">
           {isLoading ? (
             <Loading />
           ) : (
@@ -486,7 +499,7 @@ const CropsPage = () => {
               return (
                 <div
                   key={idx}
-                  className="border rounded-xl p-5 shadow-sm bg-white animate__animated animate__fadeIn"
+                  className="border rounded-lg p-3 shadow-sm bg-linear-to-tl from-gray-100 via-white to-gray-100 animate__animated animate__fadeIn"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   {/* Header */}
@@ -578,9 +591,10 @@ const CropsPage = () => {
             })
           )}
         </div>
+
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4 lg:hidden">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-3 lg:mt-6 gap-4 lg:hidden">
+          <div className="lg:flex hidden items-center gap-2">
             <span className="text-sm text-gray-600">Rows per page:</span>
             <select
               className="border rounded px-2 py-1"
@@ -757,7 +771,7 @@ const CropsPage = () => {
       {/* Full Screen Loader */}
       {isFullScreenLoading && (
         <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
-          <Loading text="Wait a moment"/>
+          <Loading text="Wait a moment" />
         </div>
       )}
 

@@ -155,9 +155,9 @@ const DesktopSideBar = () => {
   const sidebarWidth = pinned ? "w-64" : "w-[75px] hover:w-64";
   const iconSize = pinned ? "w-6 h-6" : "w-6 h-6";
 
-  // const handleLogout = () => {
-  //   logout();
-  // };
+  const handleLogout = () => {
+    logout();
+  };
 
   const filteredMenuItems = mainMenuItems
     .filter((item) => item.roles?.includes(role as UserRole))
@@ -305,7 +305,7 @@ const DesktopSideBar = () => {
           </nav>
 
           {/* Logout Button */}
-          {/* <div className="group relative">
+          <div className="group relative">
             <button
               onClick={handleLogout}
               className={`flex items-center justify-center gap-2 w-full cursor-pointer ${
@@ -321,7 +321,7 @@ const DesktopSideBar = () => {
                 Logout
               </span>
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>

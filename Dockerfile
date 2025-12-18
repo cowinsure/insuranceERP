@@ -13,9 +13,11 @@ RUN npm install
 # Copy all source files
 COPY . .
 
-# Pass build-time environment
-# ARG ENVIRONMENT=production
-ENV ENVIRONMENT=$ENVIRONMENT
+# Pass build-time argument
+ARG NODE_ENV
+ENV ENVIRONMENT=$NODE_ENV
+
+
 
 # Debug: show which env will be used
 RUN echo "========================"

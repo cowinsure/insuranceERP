@@ -6,4 +6,4 @@ services:
     ports:
       - "3011:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=

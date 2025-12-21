@@ -265,48 +265,118 @@ const CropsPage = () => {
       {/* Table */}
       <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg animate__animated animate__fadeIn">
         <div className="mb-5 grid grid-cols-4">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 relative">
+          <div className="col-span-3 lg:col-span-2">
+            <div className="flex items-center gap-2">
               <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
-                {t("registered_crops")}
+                {t("registered_crops")} 
               </CardTitle>
-              <button
-                id="stage-info-btn"
-                className="lg:hidden relative z-20"
-                onClick={() => {
-                  setIsInfoModal(true);
-                  localStorage.setItem("seen-stage-info", "true");
-                  setShowCoach(false);
-                }}
-              >
-                <Info className="w-5 h-5 text-gray-400" />
-              </button>
-              {showCoach && (
-                <div className="fixed inset-0 z-40 pointer-events-none">
-                  {/* Dim overlay */}
-                  <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+              <div className="relative flex items-center">
+                <button
+                  id="stage-info-btn"
+                  className={`lg:hidden relative  ${
+                    showCoach && "z-50 bg-white rounded-full"
+                  }`}
+                  onClick={() => {
+                    setIsInfoModal(true);
+                    localStorage.setItem("seen-stage-info", "true");
+                    setShowCoach(false);
+                  }}
+                >
+                  <Info
+                    className={`w-5 h-5 ${
+                      showCoach
+                        ? "animate-pulse text-blue-500"
+                        : "text-gray-400"
+                    }`}
+                  />
+                </button>
 
-                  {/* Tooltip */}
-                  <div className="absolute right-6 top-48 bg-white rounded-xl shadow-xl p-3 w-[220px] text-sm pointer-events-auto">
-                    <p className="font-semibold text-gray-800">
-                      ℹ️ What do these icons mean?
-                    </p>
-                    <p className="text-gray-600 mt-1">
-                      Tap here to understand planting & harvesting stages.
-                    </p>
+                {showCoach && (
+                  <>
+                    {/* Dim background */}
+                    <div
+                      className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-30"
+                      onClick={() => setShowCoach(false)}
+                    />
 
-                    {/* Arrow */}
-                    <div className="absolute -top-2 right-6 w-4 h-4 bg-white rotate-45" />
-                  </div>
-                </div>
-              )}
+                    {/* Tooltip anchored to button */}
+                    <div className="absolute z-40 top-full left-3 -translate-x-1/2 mt-3 w-[220px] bg-white rounded-xl shadow-xl p-3 text-sm">
+                      <p className="font-semibold text-gray-800">
+                        ℹ️ What do these icons mean?
+                      </p>
+                      <p className="text-gray-600 mt-1">
+                        Tap here to understand planting & harvesting stages.
+                      </p>
+
+                      {/* Arrow */}
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45" />
+                    </div>
+                  </>
+                )}
+
+                {/* Info Modal */}
+                {isInfoModal && (
+                  <>
+                    {/* Dark background inset */}
+                    <div
+                      className="fixed inset-0 bg-black/40 z-40"
+                      onClick={() => setIsInfoModal(false)}
+                    />
+
+                    {/* Info Popover */}
+                    <div className="absolute -left-10 top-full mt-3 z-50 w-[240px] rounded-xl bg-white shadow-2xl border border-gray-200 p-4 space-y-4 animate-fade-in">
+                      {/* Close button */}
+                      <button
+                        onClick={() => setIsInfoModal(false)}
+                        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      {/* Arrow */}
+                      <div className="absolute -top-2 left-10 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-200" />
+
+                      {/* Content */}
+                      <div className="">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900">
+                            Stage 1
+                          </span>
+
+                          <span className="text-gray-400">→</span>
+
+                          <img
+                            src="/seeding.png"
+                            alt="Planting & Cultivation"
+                            className="w-14 h-14"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900">
+                            Stage 2
+                          </span>
+
+                          <span className="text-gray-400">→</span>
+
+                          <img
+                            src="/harvest.png"
+                            alt="Harvesting"
+                            className="w-14 h-14"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             <p className="text-sm lg:text-base font-medium text-gray-400">
               {totalRecords} {t("crops_found")}
             </p>
           </div>
 
-          <div className="col-span-2 flex justify-end gap-5 items-center">
+          <div className="lg:col-span-2 flex justify-end gap-5 items-center">
             <div className="flex-1 hidden lg:block">
               <SearchFilter
                 placeholder={t("search_farmer_mobile")}
@@ -843,28 +913,6 @@ const CropsPage = () => {
           widthValue="sm:w-[35%] md:min-w-[90%] lg:min-w-[60%] lg:max-w-[70%]"
         >
           <CropStageModalTabs data={selectedCrop} />
-        </GenericModal>
-      )}
-
-      {/* Info Modal */}
-      {isInfoModal && (
-        <GenericModal
-          title="Stage Icons Meaning"
-          closeModal={() => setIsInfoModal(false)}
-          widthValue="w-[200px]"
-        >
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img src="/seeding.png" alt="Seeding" className="w-8 h-8" />
-              <span className="text-sm font-medium">
-                Planting & Cultivation
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <img src="/harvest.png" alt="Harvest" className="w-8 h-8" />
-              <span className="text-sm font-medium">Harvesting</span>
-            </div>
-          </div>
         </GenericModal>
       )}
 

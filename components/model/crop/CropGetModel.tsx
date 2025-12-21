@@ -14,6 +14,8 @@ export interface CropGetData {
   planting_date: string;
   estimated_yield: number;
   current_stage_id: number;
+  farmer_name: string;
+  mobile_number: string;
 
   // ✅ New + existing arrays
   crop_harvest_info: CropHarvestInfo[];

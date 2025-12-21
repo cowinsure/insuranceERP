@@ -10,7 +10,6 @@ import Loading from "@/components/utils/Loading";
 import { SearchFilter } from "@/components/utils/SearchFilter";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
-import { log } from "console";
 import { ClipboardCheck, Eye, FilePlus, Info, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
@@ -19,6 +18,7 @@ import { useLocalization } from "@/core/context/LocalizationContext";
 import { useAuth } from "@/core/context/AuthContext";
 import { FaPlus } from "react-icons/fa6";
 import { MoreVertical, X } from "lucide-react";
+import Pagination from "@/components/utils/Pagination";
 
 type StageAccess = {
   stage1Enabled: boolean;
@@ -241,6 +241,8 @@ const CropsPage = () => {
           currentPage * (pageSize as number)
         );
 
+  console.log(crops);
+
   return (
     <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
       {/* Page header */}
@@ -264,11 +266,12 @@ const CropsPage = () => {
 
       {/* Table */}
       <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg animate__animated animate__fadeIn">
+        {/* Table header */}
         <div className="mb-5 grid grid-cols-4">
           <div className="col-span-3 lg:col-span-2">
             <div className="flex items-center gap-2">
               <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
-                {t("registered_crops")} 
+                {t("registered_crops")}
               </CardTitle>
               <div className="relative flex items-center">
                 <button
@@ -376,6 +379,7 @@ const CropsPage = () => {
             </p>
           </div>
 
+          {/* Search and add btn */}
           <div className="lg:col-span-2 flex justify-end gap-5 items-center">
             <div className="flex-1 hidden lg:block">
               <SearchFilter
@@ -398,6 +402,7 @@ const CropsPage = () => {
           </div>
         </div>
 
+        {/* Desktop table */}
         <div className="hidden lg:block max-h-[550px] overflow-auto">
           <table className="w-full">
             <thead>
@@ -535,50 +540,9 @@ const CropsPage = () => {
               )}
             </tbody>
           </table>
-          {/* Pagination */}
-          <div className="hidden lg:flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Rows per page:</span>
-              <select
-                className="border rounded px-2 py-1"
-                value={pageSize}
-                onChange={(e) => {
-                  const value =
-                    e.target.value === "All" ? "All" : Number(e.target.value);
-                  setPageSize(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value={6}>6</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value="All">All</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Prev
-              </Button>
-
-              <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPages}
-              </span>
-
-              <Button
-                variant="outline"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
         </div>
+
+        {/* Search for mobile */}
         <div className="flex-1 block lg:hidden">
           <SearchFilter
             placeholder={t("search_farmer_mobile")}
@@ -587,6 +551,7 @@ const CropsPage = () => {
             searchKeys={["farmer_name", "mobile_number"]}
           />
         </div>
+
         {/* MOBILE / TABLET VIEW — CARDS */}
         <div className="grid gap-4 lg:hidden mt-2 max-h-[60vh] overflow-auto">
           {isLoading ? (
@@ -634,10 +599,14 @@ const CropsPage = () => {
                         <h3 className="text-base font-semibold text-gray-900">
                           {crop.crop_name || "N/A"}
                         </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t("stage_label")}{" "}
-                          <span className="font-medium text-gray-700">
-                            {crop.stage_name || "N/A"}
+
+                        <p className="text-[13px] text-gray-500 mt-1">
+                          <span className="font-medium text-gray-800">
+                            {crop.farmer_name || "N/A"}
+                          </span>
+                          <span className="mx-1 text-gray-300">-</span>
+                          <span className="text-gray-700">
+                            {crop.mobile_number || "N/A"}
                           </span>
                         </p>
                       </div>
@@ -674,7 +643,7 @@ const CropsPage = () => {
                     />
                   </div>
 
-                  {/* 🔥 Absolute Horizontal Action Tray */}
+                  {/* Absolute Horizontal Action Tray */}
                   <div
                     className={` absolute right-14 top-1/2 -translate-y-1/2 flex gap-2 bg-white/90 backdrop-blur-sm border rounded-lg shadow-lg p-2 transition-all duration-300 ease-in-out ${
                       openMenuId === crop.crop_id
@@ -741,48 +710,16 @@ const CropsPage = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-3 lg:mt-6 gap-4 lg:hidden">
-          <div className="lg:flex hidden items-center gap-2">
-            <span className="text-sm text-gray-600">Rows per page:</span>
-            <select
-              className="border rounded px-2 py-1"
-              value={pageSize}
-              onChange={(e) => {
-                const value =
-                  e.target.value === "All" ? "All" : Number(e.target.value);
-                setPageSize(value);
-                setCurrentPage(1);
-              }}
-            >
-              <option value={6}>6</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value="All">All</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-            >
-              Prev
-            </Button>
-
-            <span className="text-sm text-gray-700">
-              Page {currentPage} of {totalPages}
-            </span>
-
-            <Button
-              variant="outline"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* Register Crop Modal */}
@@ -812,15 +749,10 @@ const CropsPage = () => {
                       "Crop"}
                   </span>
                 </div>
-                <small className="font-medium text-gray-500 tracking-wide">
-                  {t("variety")}{" "}
-                  {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
-                    selectedCrop?.variety}
-                </small>
               </span>
             }
             closeModal={() => setIsStageOneModal(false)}
-            widthValue={"w-full min-w-sm md:max-w-3xl"}
+            widthValue={"w-full md:max-w-3xl"}
           >
             <AddCropDetailsModal crop={selectedCrop!} onClose={runOnClose} />
           </GenericModal>

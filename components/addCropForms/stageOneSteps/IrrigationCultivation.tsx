@@ -136,8 +136,8 @@ const IrrigationCultivation = ({
   };
 //(cultivationSystemOptions);
   return (
-    <form className="p-3">
-      <h2 className="text-xl font-semibold mb-5 text-center underline">
+    <form className="lg:p-3">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 text-center underline">
         {t('cultivation_details')}
       </h2>
       <div className="space-y-5">

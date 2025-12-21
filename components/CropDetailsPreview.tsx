@@ -113,8 +113,8 @@ export default function CropDetailsPreview({ data, attachments }: CropDetailsPre
   //("🌾 data passed to preview from parent:", data);
 
   return (
-    <div className="max-w-4xl mx-auto text-gray-700 max-h-[75vh] overflow-y-auto p-6 bg-white rounded-2xl shadow-md border border-gray-100 space-y-6">
-      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
+    <div className="max-w-4xl mx-auto text-gray-700 max-h-[75vh] overflow-y-auto lg:p-6 bg-white rounded-2xl shadow-md border border-gray-100 space-y-6">
+      <h2 className="text-lg lg:text-xl font-semibold text-center text-gray-800 mb-4">
         {t('crop_details_preview')}
       </h2>
 

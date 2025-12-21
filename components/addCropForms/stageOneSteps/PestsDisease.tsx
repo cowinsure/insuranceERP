@@ -116,19 +116,21 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
     );
   };
-console.log(data);
+  console.log(data);
   return (
-    <div className="p-3">
-      <h2 className="text-xl font-semibold mb-5 underline text-center">
-        {t('pest_disease_observations')}
+    <div className="lg:p-3">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
+        {t("pest_disease_observations")}
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            {t('pest_attack_observations')}{" "}
-            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+            {t("pest_attack_observations")}{" "}
+            <span className="text-sm text-gray-400">
+              {t("multiple_selection")}
+            </span>
           </h3>
 
           {loading ? (
@@ -138,7 +140,7 @@ console.log(data);
               {pestOptions.map((pest) => (
                 <div
                   key={pest.id}
-                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                  className="flex items-center gap-2 space-y-2 font-medium lg:text-[15px]"
                 >
                   <input
                     type="checkbox"
@@ -162,8 +164,10 @@ console.log(data);
         {/* Disease Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            {t('disease_attack_observations')}{" "}
-            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+            {t("disease_attack_observations")}{" "}
+            <span className="text-sm text-gray-400">
+              {t("multiple_selection")}
+            </span>
           </h3>
 
           {loading ? (
@@ -173,7 +177,7 @@ console.log(data);
               {diseaseOptions.map((disease) => (
                 <div
                   key={disease.id}
-                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                  className="flex items-center gap-2 space-y-2 font-medium lg:text-[15px]"
                 >
                   <input
                     type="checkbox"

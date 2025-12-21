@@ -82,7 +82,7 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
   };
 
   return (
-    <div className="space-y-5 bg-white rounded-lg p-5">
+    <div className="space-y-5 bg-white rounded-lg lg:p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
         {t('attachments')}
       </h2>
@@ -90,7 +90,7 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
       {/* Previous Images Section - API Data */}
       {previousImages.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-gray-700 border-b-2 border-blue-500 pb-2">
+          <h3 className="text-lg lg:text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2">
             Previous Images
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

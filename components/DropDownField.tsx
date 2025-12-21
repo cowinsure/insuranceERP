@@ -45,7 +45,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
       <div className="flex flex-col">
         <label
           htmlFor={id}
-          className="mb-1 text-sm font-bold text-gray-400 tracking-wide"
+          className="mb-1 text-xs lg:text-sm font-medium lg:font-semibold text-gray-400 tracking-wide"
         >
           {label}
         </label>
@@ -57,7 +57,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
           required={required}
           disabled={disabled}
           className={clsx(
-            "p-2 border rounded-md bg-gray-50 font-semibold",
+            "p-2 border rounded-md bg-gray-50 font-medium text-sm",
             "focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-blue-50",
             "hover:bg-blue-50 hover:border-blue-300 cursor-pointer",
             error ? "border-red-600" : "border-gray-300"

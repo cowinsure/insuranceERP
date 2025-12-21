@@ -65,54 +65,10 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center mt-10 w-full gap-4">
-      {/* Page Navigation */}
-      <div className="flex items-center w-full justify-center gap-2">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="px-3 py-1 rounded-lg border disabled:opacity-50 cursor-pointer shrink-0 text-sm"
-        >
-          Prev
-        </button>
-
-        {/* Responsive Scrollable Page Numbers */}
-        <div className="flex gap-2 max-w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-1 whitespace-nowrap">
-          {showPageNumbers &&
-            pagesToShow.map((page, index) => (
-              <React.Fragment key={index}>
-                {page === "..." ? (
-                  <span className="px-3 py-1 rounded-lg border text-gray-600 text-sm shrink-0">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => onPageChange(Number(page))}
-                    className={`px-3 py-1 rounded-lg border text-sm shrink-0 ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white"
-                        : "bg-white"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )}
-              </React.Fragment>
-            ))}
-        </div>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 rounded-lg border disabled:opacity-50 cursor-pointer shrink-0 text-sm"
-        >
-          Next
-        </button>
-      </div>
-
+    <div className="flex flex-col sm:flex-row items-center justify-between mt-3 lg:mt-6 w-full gap-4">
       {/* Page Size Selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Show:</span>
+      <div className="lg:flex hidden items-center gap-2">
+        <span className="text-sm text-gray-600">Rows per page:</span>
         <Select
           value={pageSize.toString()}
           onValueChange={(value) => {
@@ -120,7 +76,7 @@ const Pagination: React.FC<PaginationProps> = ({
             onPageChange(1);
           }}
         >
-          <SelectTrigger className="border rounded px-2 py-1 text-sm">
+          <SelectTrigger className="border border-gray-300 rounded px-2 py-1 text-sm w-[80px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -131,6 +87,29 @@ const Pagination: React.FC<PaginationProps> = ({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handlePrev}
+          disabled={currentPage === 1}
+          className="border border-gray-300 rounded px-3 py-1 text-sm text-gray-700 disabled:opacity-50"
+        >
+          Prev
+        </button>
+
+        <span className="text-sm text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className="border border-gray-300 rounded px-3 py-1 text-sm text-gray-700 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

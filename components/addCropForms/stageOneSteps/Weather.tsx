@@ -85,8 +85,8 @@ const Weather = ({ data, onChange }: WeatherProps) => {
   console.log(data);
 
   return (
-    <form className="p-3 max-h-[60vh] overflow-auto space-y-5">
-      <h2 className="text-xl font-semibold mb-5 underline text-center">
+    <form className="lg:p-3 max-h-[60vh] overflow-auto space-y-5">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
         {t('weather_details')}
       </h2>
 
@@ -113,9 +113,9 @@ const Weather = ({ data, onChange }: WeatherProps) => {
                   htmlFor={`weather_${w.id}`}
                   className="flex flex-col cursor-pointer"
                 >
-                  <strong className="text-[15px] text-gray-700">
+                  <p className="lg:text-[15px] font-medium text-gray-700">
                     {w.weather_effect_type_name}
-                  </strong>
+                  </p>
                   {w.desc && (
                     <span className="text-gray-400 text-sm">{w.desc}</span>
                   )}
@@ -128,7 +128,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
       {/* ✅ Period of Adverse Weather */}
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{t('period_of_adverse_weather')}</h3>
+        <h3 className="text-[16px] lg:text-lg font-semibold">{t('period_of_adverse_weather')}</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <InputField
             label={t('from')}

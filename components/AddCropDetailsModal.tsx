@@ -525,9 +525,7 @@ export default function AddCropDetailsModal({
         />
       </div>
 
-      <div className="overflow-y-auto bg-white rounded-b-xl">
-        {renderStep()}
-      </div>
+      <div className=" bg-white rounded-b-xl">{renderStep()}</div>
 
       <div
         className={`flex mt-4 ${

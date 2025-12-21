@@ -141,8 +141,8 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
   // //("Seed Details Data:", data);
 
   return (
-    <div className="p-3">
-      <h2 className="text-xl font-semibold mb-5 text-center underline">
+    <div className="lg:p-3">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 text-center underline">
         {t('seed_details')}
       </h2>
 

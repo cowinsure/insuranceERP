@@ -83,7 +83,7 @@ const GenericModal = ({
         }`}
       >
         <div className="flex items-center justify-between lg:mb-6">
-          <h1 className="lg:text-lg font-semibold text-gray-800">{title}</h1>
+          <h1 className="text-lg font-semibold text-gray-800 pb-2">{title}</h1>
           <button
             onClick={triggerClose}
             className="text-gray-500 hover:text-gray-800 transition"

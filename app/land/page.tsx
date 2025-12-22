@@ -8,19 +8,31 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
-import { Bell, Search, Plus, Sparkles, Badge, MapPin, Eye } from "lucide-react";
+import {
+  Bell,
+  Search,
+  Plus,
+  Sparkles,
+  Badge,
+  MapPin,
+  Eye,
+  Phone,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GenericModal from "@/components/ui/GenericModal";
 import { useState, useEffect } from "react";
 import { ProductsTable } from "@/components/products-table";
 import { CreatePlotDialog } from "@/components/dialogs/land/CreatePlotDialog";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import PlotDetailsDialog from "@/components/dialogs/land/PlotDetailsDialog";
 import PlotCoordinatesDialog from "@/components/dialogs/land/PlotCoordinatesDialog";
 import useApi from "@/hooks/use_api";
 import { group } from "console";
 import { useLocalization } from "../../core/context/LocalizationContext";
+import { SearchFilter } from "@/components/utils/SearchFilter";
+import Loading from "@/components/utils/Loading";
+import Pagination from "@/components/utils/Pagination";
 
 interface LandData {
   image: string | null;
@@ -101,7 +113,36 @@ export default function CropPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlot, setSelectedPlot] = useState<any | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [filteredPlots, setFilteredPlots] = useState(landData);
+  const [landSuitabilityId, setLandSuitabilityId] = useState<
+    string | number | null
+  >(null);
+  const [openPanel, setOpenPanel] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "All">(6);
+
   const { get, loading, error } = useApi();
+
+  useEffect(() => {
+    setFilteredPlots(landData);
+    setCurrentPage(1); // Reset to first page when data changes
+  }, [landData]);
+
+  // Pagination logic
+  const dataToPaginate = filteredPlots;
+  const totalPages =
+    pageSize === "All"
+      ? 1
+      : Math.ceil(dataToPaginate.length / (pageSize as number));
+  const paginatedPlots =
+    pageSize === "All"
+      ? dataToPaginate
+      : dataToPaginate.slice(
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
 
   useEffect(() => {
     const fetchLandData = async () => {
@@ -119,12 +160,20 @@ export default function CropPage() {
     fetchLandData();
   }, [get]);
 
-  const filteredPlots = landData.filter(
-    (plot) =>
-      plot.land_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plot.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      plot.mobile_number?.trim().includes(searchTerm.toLowerCase())
-  );
+  const showSuitabilityReasons = (land: number) => {
+    console.log(land);
+    if (land) {
+      setOpenPanel(true);
+      setLandSuitabilityId(land);
+    }
+  };
+
+  // const filteredPlots = landData.filter(
+  //   (plot) =>
+  //     plot.land_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     plot.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     plot.mobile_number?.trim().includes(searchTerm.toLowerCase())
+  // );
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
 
@@ -256,219 +305,264 @@ export default function CropPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+    <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
+      {/* Page Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="col-span-2">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-700">
             {t("land_management")}
           </h1>
-          <p className="text-gray-600">{t("sub_title")}</p>
+          <p className="text-gray-400 mt-1 text-sm lg:text-base font-medium lg:tracking-wide">
+            {t("sub_title")}
+          </p>
         </div>
       </div>
 
-      <div className="animate__animated animate__fadeIn flex flex-col">
-        <Card className="mb-4">
-          <CardContent className="py-6 px-5">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {t("search")}
-            </h2>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder={t("search_placeholder")}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+      <div className="animate__animated animate__fadeIn">
+        <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg">
+          {/* Table header */}
+          <div className="mb-5 grid grid-cols-4">
+            {/* Table name */}
+            <div className="col-span-3 lg:col-span-2">
+              <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
+                {t("land_list")}
+              </CardTitle>
+              <p className="text-sm lg:text-base font-medium text-gray-400">
+                {dataToPaginate.length} {t("land_found")}
+              </p>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-medium text-gray-900">
-                  {t("land_list")}
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {filteredPlots.length} {t("land_found")}
-                </span>
+            {/* Search and add btn */}
+            <div className="lg:col-span-2 flex justify-end gap-5 items-center">
+              <div className="flex-1 hidden lg:block">
+                <SearchFilter
+                  placeholder={t("search_placeholder")}
+                  data={landData}
+                  setFilteredData={setFilteredPlots}
+                  searchKeys={["land_name", "farmer_name", "mobile_number"]}
+                />
               </div>
               <div className="flex justify-end">
+                {" "}
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 text-white"
                   onClick={() => setIsCreateDialogOpen(true)}
                 >
                   <Plus className="w-4 h-4" />
-                  {t("create_land")}
+                  <span className="hidden lg:block"> {t("create_land")}</span>
+                  <span className="block lg:hidden">New Land</span>
                 </Button>
               </div>
             </div>
+          </div>
 
-            {loading ? (
-              <div className="text-center py-12">
-                <p>{t("loading")}</p>
+          {/* Search for mobile */}
+          <div className="flex-1 block lg:hidden">
+            <SearchFilter
+              placeholder={t("search_placeholder")}
+              data={landData}
+              setFilteredData={setFilteredPlots}
+              searchKeys={["land_name", "farmer_name", "mobile_number"]}
+            />
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <Loading />
+            </div>
+          ) : filteredPlots.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8 text-gray-400" />
               </div>
-            ) : filteredPlots.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {t("no_lands_found")}
-                </h3>
-                <p className="text-gray-500 mb-4">
-                  {searchTerm
-                    ? t("try_adjusting_search")
-                    : t("create_first_land_entry")}
-                </p>
-                {!searchTerm && (
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t("create_land")}
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Mobile: card list */}
-                <div className="space-y-4 lg:hidden">
-                  {filteredPlots.map((plot) => (
-                    <div
-                      key={plot.land_id}
-                      className="border rounded-lg p-4 bg-white shadow-sm flex items-start gap-3"
-                    >
-                      <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                        <img
-                          src={
-                            `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${plot.image}` ||
-                            "/placeholder.svg"
-                          }
-                          alt={plot.land_name}
-                          className="w-auto object-fit"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {plot.land_name}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {t("owner")}: {plot.farmer_name}
-                            </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {t("no_lands_found")}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchTerm
+                  ? t("try_adjusting_search")
+                  : t("create_first_land_entry")}
+              </p>
+              {!searchTerm && (
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t("create_land")}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* MOBILE/TABLET CARD VIEW ---- */}
+              <div className="space-y-4 lg:hidden">
+                {paginatedPlots.map((plot, idx) => (
+                  <div
+                    key={idx}
+                    className="group relative overflow-hidden rounded-2xl bg-blue-50 shadow-md hover:shadow-xl transition-all duration-300 animate__animated animate__fadeIn"
+                    style={{ animationDelay: `${idx * 80}ms` }}
+                    onClick={() => {
+                      setOpenPanel(!openPanel);
+                    }}
+                  >
+                    {/* Image */}
+                    <div className="relative h-40 w-full bg-gray-100 overflow-hidden">
+                      <img
+                        src={
+                          plot.image
+                            ? `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${plot.image}`
+                            : "/placeholder.svg"
+                        }
+                        alt={plot.land_name}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex items-center justify-between p-4">
+                      <div className="space-y-2">
+                        {/* Title */}
+                        <h3 className="text-base font-semibold text-gray-900 truncate">
+                          {plot.land_name}
+                        </h3>
+
+                        {/* Owner */}
+                        <p className="text-sm text-gray-600 truncate">
+                          👤 {plot.farmer_name}
+                        </p>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between pt-2">
+                          {/* Phone */}
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Phone className="w-4 h-4 text-gray-500" />
+                            <span>{plot.mobile_number}</span>
                           </div>
                         </div>
+                      </div>
+                      {/* View action */}
+                      <button
+                        onClick={() => handleViewDetails(plot)}
+                        className=" bg-white/90 backdrop-blur-md rounded-lg p-2 shadow hover:bg-white z-20"
+                      >
+                        <Eye className="w-4 h-4 text-gray-700" />
+                      </button>
+                    </div>
 
-                        <div className="mt-2 flex items-center justify-between">
+                    {/* ---------------- Suitability Pull Tab ---------------- */}
+                    {plot.land_suitability_details?.length > 0 && (
+                      <>
+                        {/* Pull Button */}
+                        <button
+                          onClick={() => showSuitabilityReasons(plot.land_id)}
+                          className={`absolute top-1/3 -translate-y-1/2 right-0 z-30 bg-amber-500 text-white px-1 py-1 rounded-l-md shadow-md text-xs font-semibold ${
+                            openPanel && landSuitabilityId === plot.land_id
+                              ? "hidden"
+                              : "animate__animated animate__slideInRight "
+                          }`}
+                          style={{ writingMode: "vertical-rl" }}
+                        >
+                          Suitability
+                        </button>
+
+                        {/* Slide Panel */}
+                        {openPanel && (
+                          <div
+                            className={`absolute top-0 right-0 h-full bg-white border-l shadow-xl transition-all duration-300 z-20 overflow-hidden ${
+                              landSuitabilityId === plot.land_id
+                                ? "w-52 animate__animated animate__slideInRight"
+                                : "w-0"
+                            }`}
+                          >
+                            {landSuitabilityId === plot.land_id && (
+                              <div className="p-4 space-y-2">
+                                <h4 className="text-sm font-semibold text-gray-800 mb-2">
+                                  Suitability
+                                </h4>
+
+                                {plot.land_suitability_details.map((s) => (
+                                  <div
+                                    key={s.land_suitable_details_id}
+                                    className="text-xs px-2 py-1 rounded-md bg-amber-100 text-amber-800"
+                                  >
+                                    {s.land_suitability_name}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* DESKTOP TABLE VIEW --------- */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        {t("land_name")}
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        {t("farmer_name")}
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        {t("contact_number")}
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        {t("area_acres")}
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        {t("ownership")}
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        {t("actions")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedPlots.map((plot) => (
+                      <tr
+                        key={plot.land_id}
+                        className="border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-gray-900">
+                            {plot.land_name}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-sm text-gray-600">
+                            {plot.farmer_name}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
                           <div className="text-sm text-gray-600">
                             {plot.mobile_number}
                           </div>
-                          <div className="flex flex-col items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewDetails(plot)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            {/* <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewDetails(plot)}
-                            >
-                              <Eye />
-                            </Button>*/}
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-sm text-gray-600">
+                            {plot.area_in_acre}
                           </div>
-                        </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-sm text-gray-600">
+                            {plot.ownership_type}
+                          </div>
+                        </td>
 
-                        {plot.land_suitability_details &&
-                          plot.land_suitability_details.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {plot.land_suitability_details
-                                .slice(0, 3)
-                                .map((s) => (
-                                  <span
-                                    key={s.land_suitable_details_id}
-                                    className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded"
-                                  >
-                                    {s.land_suitability_name}
-                                  </span>
-                                ))}
-                            </div>
-                          )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        <td className="py-4 px-4 flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewDetails(plot)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
 
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          {t("land_name")}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          {t("farmer_name")}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          {t("contact_number")}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          {t("area_acres")}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          {t("ownership")}
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          {t("actions")}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPlots.map((plot) => (
-                        <tr
-                          key={plot.land_id}
-                          className="border-b border-gray-100 hover:bg-gray-50"
-                        >
-                          <td className="py-4 px-4">
-                            <div className="font-medium text-gray-900">
-                              {plot.land_name}
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm text-gray-600">
-                              {plot.farmer_name}
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm text-gray-600">
-                              {plot.mobile_number}
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm text-gray-600">
-                              {plot.area_in_acre}
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm text-gray-600">
-                              {plot.ownership_type}
-                            </div>
-                          </td>
-
-                          <td className="py-4 px-4 flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewDetails(plot)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-
-                            {/* <Button
+                          {/* <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
@@ -479,17 +573,31 @@ export default function CropPage() {
                               <MapPin className="w-4 h-4 mr-2" />
                               Plot Entry
                             </Button> */}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+          <div className="w-[250px] mx-auto md:w-full">
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
+
       {isOpen && (
         <GenericModal closeModal={onClose}>
           <div className="w-full mx-auto text-center p-6 space-y-5">
@@ -519,12 +627,15 @@ export default function CropPage() {
         onSave={handleSaveCoordinatesPlot}
       />
 
-      <PlotDetailsDialog
-        open={isDetailsDialogOpen}
-        onOpenChange={setIsDetailsDialogOpen}
-        plot={selectedPlot}
-        onDelete={handleDeletePlot}
-      />
+      {isDetailsDialogOpen && (
+        <GenericModal
+          closeModal={() => setIsDetailsDialogOpen(false)}
+          title={`${selectedPlot.plotName}`}
+          height={true}
+        >
+          <PlotDetailsDialog plot={selectedPlot} onDelete={handleDeletePlot} />
+        </GenericModal>
+      )}
     </div>
   );
 }

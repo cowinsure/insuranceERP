@@ -229,7 +229,7 @@ export function FarmersTable() {
                       style={{ animationDelay: `${idx * 100}ms` }}
                     >
                       <td className="py-4 px-4">
-                        <div className="text-base font-semibold text-gray-900">
+                        <div className="text-sm font-semibold text-gray-900">
                           {!farmer.farmer_name ||
                           farmer.farmer_name.trim() === ""
                             ? "Name Not found"

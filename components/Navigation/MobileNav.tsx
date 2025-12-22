@@ -215,7 +215,7 @@ const MobileNav = () => {
         </div>
 
         {/* Drawer Content */}
-        <div className="h-auto">
+        <div className="h-auto transition-all duration-300 ease-in-out">
           {/* Visible Items */}
           {visibleItems.map((item) => {
             const isActive =
@@ -234,7 +234,7 @@ const MobileNav = () => {
                 {hasChildren ? (
                   <button
                     onClick={() => handleToggle(item.url)}
-                    className={`flex items-center justify-between w-full px-4 py-3 text-sm ${
+                    className={`flex items-center justify-between w-full px-4 py-3 text-sm  ${
                       isActive ? "text-blue-700 font-semibold" : "text-gray-600"
                     }`}
                   >
@@ -265,7 +265,7 @@ const MobileNav = () => {
 
                 {/* Child Dropdown */}
                 {hasChildren && isExpanded && (
-                  <div className="pl-10 pr-4 pb-2 space-y-1">
+                  <div className="pl-10 pr-4 pb-2 space-y-1 animate__animated animate__fadeIn">
                     {item.children.map((child) => {
                       const isChildActive = pathname === child.url;
                       return (
@@ -313,7 +313,7 @@ const MobileNav = () => {
                 </button>
 
                 {openMore && (
-                  <div className="pl-10 pr-4 pb-2 space-y-1">
+                  <div className="pl-10 pr-4 pb-2 space-y-1 animate__animated animate__fadeIn">
                     {moreItems.map((item) => {
                       const isActive =
                         pathname === item.url ||

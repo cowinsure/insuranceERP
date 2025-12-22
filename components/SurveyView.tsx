@@ -35,8 +35,16 @@ const SurveyView: React.FC<SurveyViewProps> = ({ survey }) => {
     >
       {/* Basic Info */}
       <Section title="Basic Information" icon={<User className="w-5 h-5" />}>
-        <InfoRow icon={<User size={16} />} label="Farmer Name" value={survey.farmer_name} />
-        <InfoRow icon={<Phone size={16} />} label="Mobile Number" value={survey.mobile_number} />
+        <InfoRow
+          icon={<User size={16} />}
+          label="Farmer Name"
+          value={survey.farmer_name}
+        />
+        <InfoRow
+          icon={<Phone size={16} />}
+          label="Mobile Number"
+          value={survey.mobile_number}
+        />
         <InfoRow
           icon={<CalendarDays size={16} />}
           label="Survey Date"
@@ -134,7 +142,7 @@ const Section = ({
 }) => (
   <motion.div
     // whileHover={{ scale: 1.01 }}
-    className="bg-gray-50 rounded-2xl border p-5 space-y-4"
+    className="bg-gray-50 rounded-2xl border p-5 lg:space-y-4"
   >
     <div className="flex items-center gap-3 border-b pb-3">
       <div className="p-2 rounded-xl bg-blue-50 text-blue-600">{icon}</div>
@@ -163,7 +171,7 @@ const InfoRow = ({
 );
 
 const ListItem = ({ text }: { text: string }) => (
-  <div className="flex items-start gap-2 text-gray-700 text-sm bg-gray-50 rounded-lg px-3 py-2">
+  <div className="flex items-start gap-2 text-gray-700 text-sm bg-gray-50 rounded-lg px-3 py-1 lg:py-2">
     <span className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
     <span>{text}</span>
   </div>

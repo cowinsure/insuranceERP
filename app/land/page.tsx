@@ -33,6 +33,7 @@ import { useLocalization } from "../../core/context/LocalizationContext";
 import { SearchFilter } from "@/components/utils/SearchFilter";
 import Loading from "@/components/utils/Loading";
 import Pagination from "@/components/utils/Pagination";
+import PageHeader from "@/components/PageHeader";
 
 interface LandData {
   image: string | null;
@@ -307,16 +308,7 @@ export default function CropPage() {
   return (
     <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="col-span-2">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-700">
-            {t("land_management")}
-          </h1>
-          <p className="text-gray-400 mt-1 text-sm lg:text-base font-medium lg:tracking-wide">
-            {t("sub_title")}
-          </p>
-        </div>
-      </div>
+      <PageHeader heading="land_management" description="sub_title" />
 
       <div className="animate__animated animate__fadeIn">
         <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg">

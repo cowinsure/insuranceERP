@@ -98,11 +98,11 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
       {query && (
         <div className="absolute">
           {noResults ? (
-            <p className="text-sm text-red-500 animate-fadeIn">
+            <p className="text-xs text-red-500 animate-fadeIn mt-2 font-medium">
               {t("no_results_found")}
             </p>
           ) : (
-            <p className="text-sm text-gray-500 animate-fadeIn">
+            <p className="text-xs text-gray-500 animate-fadeIn mt-2 font-medium">
               {resultCount}{" "}
               {t(resultCount === 1 ? "result_found" : "results_found")}
             </p>

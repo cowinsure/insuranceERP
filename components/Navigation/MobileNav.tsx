@@ -264,28 +264,32 @@ const MobileNav = () => {
                 )}
 
                 {/* Child Dropdown */}
-                {hasChildren && isExpanded && (
-                  <div className="pl-10 pr-4 pb-2 space-y-1 animate__animated animate__fadeIn">
-                    {item.children.map((child) => {
-                      const isChildActive = pathname === child.url;
-                      return (
-                        <Link
-                          key={child.url}
-                          href={child.url}
-                          onClick={handleCloseMenus}
-                          className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md ${
-                            isChildActive
-                              ? "bg-blue-950 text-blue-200 font-bold"
-                              : "text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          {child.icon}
-                          {child.title}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+                <div
+                  className={`pl-10 pr-4 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${
+                    isExpanded
+                      ? "max-h-96 opacity-100 translate-y-0 pb-2"
+                      : "max-h-0 opacity-0 -translate-y-2 pb-0"
+                  }`}
+                >
+                  {item?.children?.map((child) => {
+                    const isChildActive = pathname === child.url;
+                    return (
+                      <Link
+                        key={child.url}
+                        href={child.url}
+                        onClick={handleCloseMenus}
+                        className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md transition-colors ${
+                          isChildActive
+                            ? "bg-blue-950 text-blue-200 font-bold"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {child.icon}
+                        {child.title}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
@@ -312,33 +316,38 @@ const MobileNav = () => {
                   )}
                 </button>
 
-                {openMore && (
-                  <div className="pl-10 pr-4 pb-2 space-y-1 animate__animated animate__fadeIn">
-                    {moreItems.map((item) => {
-                      const isActive =
-                        pathname === item.url ||
-                        (item.children &&
-                          item.children.some((child) =>
-                            pathname.startsWith(child.url)
-                          ));
-                      return (
-                        <Link
-                          key={item.url || item.title}
-                          href={item.url || ""}
-                          onClick={handleCloseMenus}
-                          className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md ${
-                            isActive
-                              ? "bg-blue-950 text-blue-200 font-bold"
-                              : "text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          {item.icon && <item.icon className="w-5 h-5" />}
-                          {item.title}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+                <div
+                  className={`pl-10 pr-4 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${
+                    openMore
+                      ? "max-h-96 opacity-100 translate-y-0 pb-2"
+                      : "max-h-0 opacity-0 -translate-y-2 pb-0"
+                  }`}
+                >
+                  {moreItems.map((item) => {
+                    const isActive =
+                      pathname === item.url ||
+                      (item.children &&
+                        item.children.some((child) =>
+                          pathname.startsWith(child.url)
+                        ));
+
+                    return (
+                      <Link
+                        key={item.url || item.title}
+                        href={item.url || ""}
+                        onClick={handleCloseMenus}
+                        className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md transition-colors ${
+                          isActive
+                            ? "bg-blue-950 text-blue-200 font-bold"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {item.icon && <item.icon className="w-5 h-5" />}
+                        {item.title}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Language Toggle */}

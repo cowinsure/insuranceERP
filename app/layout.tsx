@@ -6,6 +6,8 @@ import { AuthProvider } from "@/core/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { LocalizationProvider } from "@/core/context/LocalizationContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import { NetworkProvider } from "@/core/context/NetworkContext";
+import NetworkListener from "@/core/listeners/NetworkListener";
 
 export const metadata: Metadata = {
   title: "Insurance ERP",
@@ -31,10 +33,15 @@ export default function RootLayout({
         className={`${urbanist.className} bg-gradient-to-br from-sky-50 via-blue-200 to-blue-50 relative`}
       >
         <LocalizationProvider>
-          <AuthProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
-            <Toaster />
-          </AuthProvider>
+          <NetworkProvider>
+            <AuthProvider>
+              <LayoutWrapper>
+                <NetworkListener />
+                {children}
+              </LayoutWrapper>
+              <Toaster />
+            </AuthProvider>
+          </NetworkProvider>
         </LocalizationProvider>
       </body>
     </html>

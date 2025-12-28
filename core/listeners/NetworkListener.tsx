@@ -7,6 +7,8 @@ import { useNetwork } from "../context/NetworkContext";
 export default function NetworkListener() {
   const { status } = useNetwork();
 
+  console.log(status);
+
   useEffect(() => {
     if (status === "offline") {
       toast.error("No Internet Connection", {

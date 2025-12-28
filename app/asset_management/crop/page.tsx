@@ -340,7 +340,20 @@ const CropsPage = () => {
                       <div className="absolute -top-2 left-10 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-200" />
 
                       {/* Content */}
-                      <div className="">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900">
+                            Initialization
+                          </span>
+
+                          <span className="text-gray-400">→</span>
+
+                          <img
+                            src="/initialization.png"
+                            alt="Planting & Cultivation"
+                            className="w-14 h-14"
+                          />
+                        </div>
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-gray-900">
                             Stage 1
@@ -578,7 +591,7 @@ const CropsPage = () => {
                     }
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-2xl font-semibold text-gray-300">
+                      <div className="text-2xl font-semibold text-gray-300 absolute -left-7">
                         {/* {(currentPage - 1) *
                           (pageSize === "All" ? 0 : pageSize) +
                           idx +
@@ -588,26 +601,40 @@ const CropsPage = () => {
                           src={
                             crop.stage_name === "Planting & Cultivation"
                               ? "/seeding.png"
-                              : "/harvest.png"
+                              : crop.stage_name === "Harvest & Observation"
+                              ? "/harvest.png"
+                              : ""
                           }
                           alt=""
-                          className="w-8 h-8"
+                          className="w-24 object-cover rotate-y-180"
                         />
-                      </div>
 
-                      <div>
+                        {crop.stage_name === "Crop Initialization" && (
+                          <img
+                            src={"/initialization.png"}
+                            alt=""
+                            className="w-24 object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="absolute -left-7 w-22 h-full -z-10 rounded-r-full" />
+
+                      <div className="ml-16">
                         <h3 className="text-base font-semibold text-gray-900">
                           {crop.crop_name || "N/A"}
                         </h3>
 
-                        <p className="text-[13px] text-gray-500 mt-1">
-                          <span className="font-medium text-gray-800">
+                        <p className="text-[13px] font-medium ">
+                          <span className=" text-gray-800">
                             {crop.farmer_name || "N/A"}
                           </span>
-                          <span className="mx-1 text-gray-300">-</span>
+                          <span className="mx-1 text-gray-400">-</span>
                           <span className="text-gray-700">
                             {crop.mobile_number || "N/A"}
                           </span>
+                        </p>
+                        <p className="text-gray-400 font-semibold text-[13px] mt-2">
+                          {crop.stage_name}
                         </p>
                       </div>
                     </div>

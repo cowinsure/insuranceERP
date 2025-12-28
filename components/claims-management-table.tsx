@@ -242,7 +242,7 @@ export function ClaimsManagementTable() {
                   <div className="my-3 border-t border-gray-100" />
 
                   {/* Money Section */}
-                  <div className="flex justify-between text-sm mb-3">
+                  <div className="grid grid-cols-2 text-sm mb-3">
                     <div>
                       <p className="text-xs text-gray-500">Sum Insured</p>
                       <p className="font-semibold text-gray-900">
@@ -261,31 +261,33 @@ export function ClaimsManagementTable() {
                   {/* Divider */}
                   <div className="my-2 border-t border-gray-100" />
 
+                  <div className="grid grid-cols-2 text-sm mb-3">
                   {/* Period */}
-                  <div className="text-sm">
-                    <p className="text-xs text-gray-500">Period</p>
-                    <p className="font-medium text-gray-900">
-                      {claim.period_name}
-                    </p>
+                    <div>
+                      <p className="text-xs text-gray-500">Period</p>
+                      <p className="font-medium text-gray-900">
+                        {claim.period_name}
+                      </p>
+                    </div>
 
-                    <p className="text-xs text-gray-500 mt-1">
+                    {/* <p className="text-xs text-gray-500 mt-1">
                       {formatDate(claim.insurance_start_date)} →{" "}
                       {formatDate(claim.insurance_end_date)}
+                    </p> */}
+
+                    {/* Insurance Type */}
+                    <p className="text-sm">
+                      <span className="text-xs text-gray-500 block">
+                        Insurance Type
+                      </span>
+                      <span className="font-medium text-gray-900">
+                        {claim.insurance_type_name}
+                      </span>
                     </p>
                   </div>
 
                   {/* Divider */}
-                  <div className="my-2 border-t border-gray-100" />
-
-                  {/* Insurance Type */}
-                  <p className="text-sm">
-                    <span className="text-xs text-gray-500 block">
-                      Insurance Type
-                    </span>
-                    <span className="font-medium text-gray-900">
-                      {claim.insurance_type_name}
-                    </span>
-                  </p>
+                  {/* <div className="my-2 border-t border-gray-100" /> */}
                 </div>
               ))
             )}

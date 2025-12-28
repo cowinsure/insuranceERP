@@ -32,7 +32,7 @@ export default function ClaimDetailsModal({ data }: ModalProps) {
       placeholder
   );
   return (
-    <div className="flex flex-col min-h-full items-center justify-center p-4 w-full">
+    <div className="flex flex-col min-h-full items-center justify-center w-full">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-5 overflow-x-hidden overflow-y-auto md:overflow-y-hidden max-h-[80vh] md:max-h-auto w-full">
         {/* Left Sticky Panel */}
         <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 md:col-span-2 shadow-xs md:sticky md:top-0 h-full md:self-start overflow-y-scroll md:max-h-[80vh]">

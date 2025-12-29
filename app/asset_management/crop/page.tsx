@@ -305,7 +305,7 @@ const CropsPage = () => {
                     {/* Tooltip anchored to button */}
                     <div className="absolute z-40 top-full left-3 -translate-x-1/2 mt-3 w-[220px] bg-white rounded-xl shadow-xl p-3 text-sm">
                       <p className="font-semibold text-gray-800">
-                        ℹ️ What do these icons mean?
+                        ℹ️ What do these icon means?
                       </p>
                       <p className="text-gray-600 mt-1">
                         Tap here to understand planting & harvesting stages.
@@ -606,7 +606,7 @@ const CropsPage = () => {
                               : ""
                           }
                           alt=""
-                          className="w-24 object-cover rotate-y-180"
+                          className="w-24 object-cover rotate-y-180 drop-shadow-xl"
                         />
 
                         {crop.stage_name === "Crop Initialization" && (
@@ -633,7 +633,7 @@ const CropsPage = () => {
                             {crop.mobile_number || "N/A"}
                           </span>
                         </p>
-                        <p className="text-gray-400 font-semibold text-[13px] mt-2">
+                        <p className="text-gray-400 font- text-[13px] mt-2">
                           {crop.stage_name}
                         </p>
                       </div>

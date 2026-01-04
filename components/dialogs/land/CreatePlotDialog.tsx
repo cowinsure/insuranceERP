@@ -1390,7 +1390,7 @@ export function CreatePlotDialog({
           ) : (
             <>
               {/* Results Display */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                 {/* Plot Image */}
                 <Card>
                   <CardHeader>
@@ -1402,10 +1402,7 @@ export function CreatePlotDialog({
                   <CardContent>
                     <div className="aspect-video w-full overflow-hidden rounded-lg border">
                       <img
-                        src={
-                          "https://insuranceportal-backend.insurecow.com/" +
-                            plotData?.imageUrl || "/placeholder.svg"
-                        }
+                       src={`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${plotData?.imageUrl}`}
                         alt="Generated plot"
                         className="h-full w-full object-cover"
                       />

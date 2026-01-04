@@ -132,14 +132,14 @@ const Login: React.FC<LoginProps> = ({
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
-        const message = error.response.data?.message;
+        const message = error.response.data.data?.message;
 
         if (status === 400 || status === 401) {
           toast.error("Invalid phone number or password.");
           setPhoneError(" ");
           setPasswordError(" ");
         } else if (status >= 500) {
-          toast.error("Server error. Please try again later.");
+          toast.error(message);
         } else {
           toast.error(message || "Something went wrong.");
         }

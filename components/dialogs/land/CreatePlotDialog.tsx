@@ -112,9 +112,10 @@ export function CreatePlotDialog({
   onPlotCreated,
 }: CreatePlotDialogProps) {
   const { t } = useLocalization();
-  const [coordinates, setCoordinates] = useState<Coordinate[]>([
-    { lat: "", lng: "" },
-  ]);
+  const [coordinates, setCoordinates] = useState<
+    { lat: string; lng: string }[]
+  >([]);
+
   const [plotName, setPlotName] = useState("");
   const [landName, setLandName] = useState("");
   const [plotDescription, setPlotDescription] = useState("");
@@ -172,8 +173,8 @@ export function CreatePlotDialog({
   );
   const [measureSWSE, setMeasureSWSE] = useState("");
   const [measureSWNW, setMeasureSWNW] = useState("");
-  const [measureNWNE, setMeasureNWNE] = useState("randomly generated width");
-  const [measureSENE, setMeasureSENE] = useState("randomly generated length");
+  const [measureNWNE, setMeasureNWNE] = useState("Randomly generated width");
+  const [measureSENE, setMeasureSENE] = useState("Randomly generated length");
   const [isGenerating, setIsGenerating] = useState(false);
   // farmers list and selection
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
@@ -197,31 +198,59 @@ export function CreatePlotDialog({
     );
   }, [farmers, farmerQuery]);
 
-  useEffect(() => {
-    function generateRandomNumber(maxNumber: number): number {
-      if (maxNumber <= 0) return 0;
+  // Old one
+  // useEffect(() => {
+  //   function generateRandomNumber(maxNumber: number): number {
+  //     if (maxNumber <= 0) return 0;
+  //     const range = Math.floor(maxNumber * 0.3);
+  //     return Math.floor(Math.random() * range) + 1;
+  //   }
+  //   const randomLength = generateRandomNumber(parseInt(measureSWSE)) + 7;
+  //   setMeasureSENE(randomLength.toString());
+  // }, [measureSWSE]);
 
-      const range = Math.floor(maxNumber * 0.3); // 50% of the limit
-      return Math.floor(Math.random() * range) + 1; // between 1 and range
+  useEffect(() => {
+    const base = Number(measureSWSE);
+
+    // ⛔ stop if value is not a valid number yet
+    if (!Number.isFinite(base) || base <= 0) {
+      setMeasureSENE("Randomly generated length");
+      return;
     }
-    // create random number and asignt it to random length field
-    const randomLength = generateRandomNumber(parseInt(measureSWSE)) + 7;
+
+    function generateRandomNumber(maxNumber: number): number {
+      const range = Math.floor(maxNumber * 0.3);
+      return Math.floor(Math.random() * range) + 1;
+    }
+
+    const randomLength = generateRandomNumber(base) + 7;
     setMeasureSENE(randomLength.toString());
-    //("measuring lenght" + randomLength);
   }, [measureSWSE]);
 
-  useEffect(() => {
-    function generateRandomNumber(maxNumber: number): number {
-      if (maxNumber <= 0) return 0;
+  // old one
+  // useEffect(() => {
+  //   function generateRandomNumber(maxNumber: number): number {
+  //     if (maxNumber <= 0) return 0;
+  //     const range = Math.floor(maxNumber * 0.3);
+  //     return Math.floor(Math.random() * range) + 1;
+  //   }
+  //   const randomWidth = generateRandomNumber(parseInt(measureSWNW)) + 7;
+  //   setMeasureNWNE(randomWidth.toString());
+  // }, [measureSWNW]);
 
-      const range = Math.floor(maxNumber * 0.3); // 50% of the limit
-      return Math.floor(Math.random() * range) + 1; // between 1 and range
+  useEffect(() => {
+    const base = Number(measureSWNW);
+
+    // ⛔ Guard: no calculation until valid input exists
+    if (!Number.isFinite(base) || base <= 0) {
+      setMeasureNWNE("Randomly generated width");
+      return;
     }
-    // create random number and asignt it to random length field
-    const randomWidth = generateRandomNumber(parseInt(measureSWNW)) + 7;
+
+    const range = Math.max(1, Math.floor(base * 0.3));
+    const randomWidth = Math.floor(Math.random() * range) + 1 + 7;
 
     setMeasureNWNE(randomWidth.toString());
-    //("measuring width" + randomWidth);
   }, [measureSWNW]);
 
   useEffect(() => {
@@ -332,7 +361,7 @@ export function CreatePlotDialog({
 
   const getCurrentLocation = (index: number) => {
     if (!navigator.geolocation) {
-      alert(t('geolocation_not_supported'));
+      alert(t("geolocation_not_supported"));
       return;
     }
 
@@ -344,7 +373,7 @@ export function CreatePlotDialog({
       },
       (error) => {
         console.error(error);
-        alert(t('unable_retrieve_location'));
+        alert(t("unable_retrieve_location"));
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -422,9 +451,7 @@ export function CreatePlotDialog({
   };
 
   const removeCoordinate = (index: number) => {
-    if (coordinates.length > 1) {
-      setCoordinates(coordinates.filter((_, i) => i !== index));
-    }
+    setCoordinates((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateCoordinate = (
@@ -477,8 +504,8 @@ export function CreatePlotDialog({
   const generatePlot = async () => {
     if (!plotName.trim()) {
       toast({
-        title: t('land_name_required_toast'),
-        description: t('enter_name_for_land_plot'),
+        title: t("land_name_required_toast"),
+        description: t("enter_name_for_land_plot"),
         variant: "default",
       });
       return;
@@ -489,16 +516,16 @@ export function CreatePlotDialog({
     const swnwVal = Number(measureSWNW);
     if (!measureSWSE.trim() || isNaN(swseVal) || swseVal <= 0) {
       toast({
-        title: t('invalid_measurement'),
-        description: t('enter_valid_numeric_sw_se'),
+        title: t("invalid_measurement"),
+        description: t("enter_valid_numeric_sw_se"),
         variant: "default",
       });
       return;
     }
     if (!measureSWNW.trim() || isNaN(swnwVal) || swnwVal <= 0) {
       toast({
-        title: t('invalid_measurement'),
-        description: t('enter_valid_numeric_sw_nw'),
+        title: t("invalid_measurement"),
+        description: t("enter_valid_numeric_sw_nw"),
         variant: "default",
       });
       return;
@@ -506,8 +533,8 @@ export function CreatePlotDialog({
 
     if (farmerQuery.trim() === "" || selectedFarmerId === null) {
       toast({
-        title: t('please_select_farmer'),
-        description: t('select_farmer_from_list'),
+        title: t("please_select_farmer"),
+        description: t("select_farmer_from_list"),
         variant: "default",
       });
       return;
@@ -515,8 +542,8 @@ export function CreatePlotDialog({
 
     if (!validateCoordinates()) {
       toast({
-        title: t('invalid_coordinates'),
-        description: t('check_coordinates_valid'),
+        title: t("invalid_coordinates"),
+        description: t("check_coordinates_valid"),
         variant: "default",
       });
       return;
@@ -561,7 +588,7 @@ export function CreatePlotDialog({
         } catch {}
         setApiErrorMessage(errorMsg);
         toast({
-          title: t('generation_failed'),
+          title: t("generation_failed"),
           description: errorMsg,
           variant: "default",
         });
@@ -675,14 +702,14 @@ export function CreatePlotDialog({
       setShowResults(true);
 
       toast({
-        title: t('plot_generated_successfully'),
-        description: t('crop_plot_processed'),
+        title: t("plot_generated_successfully"),
+        description: t("crop_plot_processed"),
       });
     } catch (error) {
       console.error("Error generating plot:", error);
       toast({
-        title: t('generation_failed'),
-        description: t('failed_to_generate_plot'),
+        title: t("generation_failed"),
+        description: t("failed_to_generate_plot"),
         variant: "default",
       });
     } finally {
@@ -694,10 +721,8 @@ export function CreatePlotDialog({
     if (apiPayload) {
       onPlotCreated(apiPayload, plotName, plotDescription);
       toast({
-        title: t('plot_saved'),
-        description: `${
-          plotData?.plotName ?? ""
-        } ${t('added_to_plots')}`,
+        title: t("plot_saved"),
+        description: `${plotData?.plotName ?? ""} ${t("added_to_plots")}`,
       });
 
       //plot coordinate mapping
@@ -826,8 +851,8 @@ export function CreatePlotDialog({
         if (resp?.status === "success") {
           const landId = resp.data?.land_id ?? null;
           toast({
-            title: t('land_saved'),
-            description: `${t('land_saved_successfully')} ${landId})`,
+            title: t("land_saved"),
+            description: `${t("land_saved_successfully")} ${landId})`,
           });
           // close dialog and reset
           handleClose();
@@ -835,7 +860,7 @@ export function CreatePlotDialog({
           // API returned a failure status - resp.message may contain reason
           const errMsg = resp?.message || "Failed to save land";
           toast({
-            title: t('save_failed'),
+            title: t("save_failed"),
             description: errMsg,
             variant: "default",
           });
@@ -843,7 +868,11 @@ export function CreatePlotDialog({
       } catch (err: any) {
         console.error("Error saving land submission:", err);
         const msg = err?.message || "Network or server error while saving land";
-        toast({ title: t('save_failed'), description: msg, variant: "default" });
+        toast({
+          title: t("save_failed"),
+          description: msg,
+          variant: "default",
+        });
       }
     }
   };
@@ -911,10 +940,10 @@ export function CreatePlotDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            {t('create_new_land')}
+            {t("create_new_land")}
           </DialogTitle>
           <div className="text-sm text-muted-foreground mt-1">
-            {t('create_manage_land_entries')}
+            {t("create_manage_land_entries")}
           </div>
         </DialogHeader>
 
@@ -923,10 +952,10 @@ export function CreatePlotDialog({
             <>
               {/* Land Name */}
               <div className="space-y-2">
-                <Label htmlFor="plotName">{t('land_name_required')}</Label>
+                <Label htmlFor="plotName">{t("land_name_required")}</Label>
                 <Input
                   id="plotName"
-                  placeholder={t('enter_plot_name')}
+                  placeholder={t("enter_plot_name")}
                   value={plotName}
                   onChange={(e) => setPlotName(e.target.value)}
                 />
@@ -934,15 +963,15 @@ export function CreatePlotDialog({
 
               {/* Farmer selector (optional) */}
               <div className="space-y-2">
-                <Label htmlFor="plotFarmer">{t('farmer')}</Label>
+                <Label htmlFor="plotFarmer">{t("farmer")}</Label>
                 <div className="relative" ref={containerRef}>
                   {/* Combobox input (acts like trigger) */}
                   <Input
                     id="plotFarmer"
                     placeholder={
                       farmersLoading
-                        ? t('loading_farmers')
-                        : t('search_select_farmer')
+                        ? t("loading_farmers")
+                        : t("search_select_farmer")
                     }
                     value={farmerQuery}
                     onChange={(e) => {
@@ -981,11 +1010,11 @@ export function CreatePlotDialog({
                     }`}
                   >
                     <div className="p-2 text-sm text-muted-foreground">
-                      {t('search_results')}
+                      {t("search_results")}
                     </div>
                     <div className="divide-y">
                       {filteredFarmers.length === 0 ? (
-                        <div className="p-2 text-sm">{t('no_results')}</div>
+                        <div className="p-2 text-sm">{t("no_results")}</div>
                       ) : (
                         filteredFarmers.map((f, idx) => (
                           <div
@@ -1015,10 +1044,10 @@ export function CreatePlotDialog({
 
               {/* Land Description */}
               <div className="space-y-2">
-                <Label htmlFor="plotDescription">{t('land_description')}</Label>
+                <Label htmlFor="plotDescription">{t("land_description")}</Label>
                 <Textarea
                   id="plotDescription"
-                  placeholder={t('enter_land_description')}
+                  placeholder={t("enter_land_description")}
                   value={plotDescription}
                   onChange={(e) => setPlotDescription(e.target.value)}
                 />
@@ -1026,27 +1055,27 @@ export function CreatePlotDialog({
 
               {/* Ownership Type */}
               <div className="space-y-2">
-                <Label htmlFor="ownershipType">{t('ownership_type')}</Label>
+                <Label htmlFor="ownershipType">{t("ownership_type")}</Label>
                 <Select
                   value={ownershipType}
                   onValueChange={(value: string) => setOwnershipType(value)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('select_ownership_type')} />
+                    <SelectValue placeholder={t("select_ownership_type")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Owned">{t('owned')}</SelectItem>
-                    <SelectItem value="Rented">{t('rented')}</SelectItem>
+                    <SelectItem value="Owned">{t("owned")}</SelectItem>
+                    <SelectItem value="Rented">{t("rented")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Land Suitability */}
               <div className="space-y-2">
-                <Label>{t('land_suitability')}</Label>
-                <div className="text-sm text-muted-foreground">
-                  {t('is_land_suitable')}
-                </div>
+                <Label>{t("land_suitability")}</Label>
+                {/* <div className="text-sm text-muted-foreground">
+                  {t("is_land_suitable")}
+                </div> */}
                 <div className="pt-2">
                   <Select
                     value={overallSuitability}
@@ -1061,11 +1090,13 @@ export function CreatePlotDialog({
                     }}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('select_suitability')} />
+                      <SelectValue placeholder={t("select_suitability")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="suitable">{t('suitable')}</SelectItem>
-                      <SelectItem value="not_suitable">{t('not_suitable')}</SelectItem>
+                      <SelectItem value="suitable">{t("suitable")}</SelectItem>
+                      <SelectItem value="not_suitable">
+                        {t("not_suitable")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1164,16 +1195,16 @@ export function CreatePlotDialog({
               </div>
 
               {/* Land Measurements */}
-              <div className="space-y-2">
-                <Label>{t('land_measurements')}</Label>
+              <div className="space-y-2 mt-10">
+                <Label>{t("land_measurements")}</Label>
 
                 <div className="flex flex-row gap-4">
                   <div className="">
                     <div className="text-sm text-muted-foreground">
-                      {t('sw_se_meters')}
+                      {t("sw_se_meters")}
                     </div>
                     <Input
-                      placeholder={t('enter_measurement')}
+                      placeholder={t("enter_measurement")}
                       value={measureSWSE}
                       onChange={(e) => {
                         setMeasureSWSE(e.target.value);
@@ -1183,10 +1214,10 @@ export function CreatePlotDialog({
 
                   <div>
                     <div className="text-sm text-muted-foreground">
-                      {t('length_meters')}
+                      {t("length_meters")}
                     </div>
                     <Input
-                      placeholder={t('random_length')}
+                      placeholder={t("random_length")}
                       disabled
                       value={measureSENE}
                       onChange={(e) => setMeasureSENE(e.target.value)}
@@ -1203,10 +1234,10 @@ export function CreatePlotDialog({
                 <div className="flex flex-row gap-4">
                   <div>
                     <div className="text-sm text-muted-foreground">
-                      {t('sw_nw_meters')}
+                      {t("sw_nw_meters")}
                     </div>
                     <Input
-                      placeholder={t('enter_measurement')}
+                      placeholder={t("enter_measurement")}
                       value={measureSWNW}
                       onChange={(e) => setMeasureSWNW(e.target.value)}
                     />
@@ -1214,10 +1245,10 @@ export function CreatePlotDialog({
 
                   <div>
                     <div className="text-sm text-muted-foreground">
-                      {t('width_meters')}
+                      {t("width_meters")}
                     </div>
                     <Input
-                      placeholder={t('random_width')}
+                      placeholder={t("random_width")}
                       disabled
                       value={measureNWNE}
                       onChange={(e) => setMeasureNWNE(e.target.value)}
@@ -1227,9 +1258,9 @@ export function CreatePlotDialog({
               </div>
 
               {/* Coordinates Input */}
-              <div className="space-y-4">
+              <div className="space-y-4 lg:h-72">
                 <div className="flex items-center justify-between">
-                  <Label>{t('coordinates_lat_lng')}</Label>
+                  <Label>{t("coordinates_lat_lng")}</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -1237,59 +1268,64 @@ export function CreatePlotDialog({
                     onClick={addCoordinate}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    {t('add_point')}
+                    {t("add_point")}
                   </Button>
                 </div>
 
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {coordinates.map((coord, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 p-3 border rounded-lg"
-                    >
-                      <Badge variant="outline">{index + 1}</Badge>
-                      <div className="flex-1 grid grid-cols-2 gap-3">
-                        <div>
-                          <Input
-                            placeholder={t('latitude_example')}
-                            value={coord.lat}
-                            onChange={(e) =>
-                              updateCoordinate(index, "lat", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            placeholder={t('longitude_example')}
-                            value={coord.lng}
-                            onChange={(e) =>
-                              updateCoordinate(index, "lng", e.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => getCurrentLocation(index)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <LocateFixed className="h-4 w-4" />
-                      </Button>
-                      {coordinates.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCoordinate(index)}
-                          className="text-destructive hover:text-destructive"
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {coordinates.length === 0 ? (
+                      <p className="text-sm text-muted-foreground h-full text-center">
+                        No Coordintes Added
+                      </p>
+                    ) : (
+                      coordinates.map((coord, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-3 border rounded-lg"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
+                          <Badge variant="outline">{index + 1}</Badge>
+
+                          <div className="flex-1 grid grid-cols-2 gap-3">
+                            <Input
+                              placeholder={t("latitude_example")}
+                              value={coord.lat}
+                              onChange={(e) =>
+                                updateCoordinate(index, "lat", e.target.value)
+                              }
+                            />
+                            <Input
+                              placeholder={t("longitude_example")}
+                              value={coord.lng}
+                              onChange={(e) =>
+                                updateCoordinate(index, "lng", e.target.value)
+                              }
+                            />
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => getCurrentLocation(index)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <LocateFixed className="h-4 w-4" />
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeCoordinate(index)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1300,11 +1336,11 @@ export function CreatePlotDialog({
                     <CardHeader className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         <MapPin className="h-5 w-5" />
-                        {t('map_preview')}
+                        {t("map_preview")}
                       </CardTitle>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
-                          {t('show_my_location')}
+                          {t("show_my_location")}
                         </span>
                         <Switch
                           checked={showMyLocation}
@@ -1377,13 +1413,13 @@ export function CreatePlotDialog({
               {/* Generate Button */}
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={handleClose}>
-                  {t('cancel')}
+                  {t("cancel")}
                 </Button>
                 <Button onClick={generatePlot} disabled={isGenerating}>
                   {isGenerating && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  {t('generate_plot')}
+                  {t("generate_plot")}
                 </Button>
               </div>
             </>
@@ -1396,23 +1432,23 @@ export function CreatePlotDialog({
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ImageIcon className="h-5 w-5" />
-                      {t('plot_visualization')}
+                      {t("plot_visualization")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="aspect-video w-full overflow-hidden rounded-lg border">
                       <img
-                       src={`${process.env.NEXT_PUBLIC_API_BASE_IMAGE_URL}/${plotData?.imageUrl}`}
+                        src={plotData?.imageUrl}
                         alt="Generated plot"
                         className="h-full w-full object-cover"
                       />
                     </div>
                     <div className="mt-3 text-sm text-muted-foreground">
                       <p>
-                        <strong>{t('area')}</strong> {plotData?.area}
+                        <strong>{t("area")}</strong> {plotData?.area}
                       </p>
                       <p>
-                        <strong>{t('points')}</strong>{" "}
+                        <strong>{t("points")}</strong>{" "}
                         {plotData?.plotCoordinates?.length ?? 0} coordinates
                       </p>
                     </div>
@@ -1423,7 +1459,7 @@ export function CreatePlotDialog({
                 <div className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>{t('land_coordinates')}</CardTitle>
+                      <CardTitle>{t("land_coordinates")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -1449,7 +1485,7 @@ export function CreatePlotDialog({
 
                   <Card>
                     <CardHeader>
-                      <CardTitle>{t('plot_coordinates')}</CardTitle>
+                      <CardTitle>{t("plot_coordinates")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -1488,9 +1524,9 @@ export function CreatePlotDialog({
               {/* Save Button */}
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={handleClose}>
-                  {t('cancel')}
+                  {t("cancel")}
                 </Button>
-                <Button onClick={savePlot}>{t('save_land')}</Button>
+                <Button onClick={savePlot}>{t("save_land")}</Button>
               </div>
             </>
           )}
@@ -1502,7 +1538,7 @@ export function CreatePlotDialog({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    {t('plot_location')}
+                    {t("plot_location")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1701,7 +1737,7 @@ export function CreatePlotDialog({
                           >
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {t('plot_point')} {idx + 1}
+                                {t("plot_point")} {idx + 1}
                               </div>
                               <div className="font-mono">
                                 {coord.lat}, {coord.lng}
@@ -1725,7 +1761,7 @@ export function CreatePlotDialog({
                           >
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {t('land_point')} {idx + 1}
+                                {t("land_point")} {idx + 1}
                               </div>
                               <div className="font-mono">
                                 {coord.lat}, {coord.lng}
@@ -1743,7 +1779,7 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('sw_mark')}</div>
+                          <div className="font-semibold">{t("sw_mark")}</div>
                           <div className="font-mono">
                             {plotData.swMark.lat}, {plotData.swMark.lng}
                           </div>
@@ -1759,7 +1795,7 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('n_corner')}</div>
+                          <div className="font-semibold">{t("n_corner")}</div>
                           <div className="font-mono">
                             {plotData.nCorner.lat}, {plotData.nCorner.lng}
                           </div>
@@ -1775,7 +1811,7 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('e_corner')}</div>
+                          <div className="font-semibold">{t("e_corner")}</div>
                           <div className="font-mono">
                             {plotData.eCorner.lat}, {plotData.eCorner.lng}
                           </div>
@@ -1792,9 +1828,9 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('n_mark')}</div>
+                          <div className="font-semibold">{t("n_mark")}</div>
                           <div>
-                            {(plotData.nMarkDist ?? 0).toFixed(2)} {t('meters')}
+                            {(plotData.nMarkDist ?? 0).toFixed(2)} {t("meters")}
                           </div>
                         </div>
                       </InfoWindow>
@@ -1808,9 +1844,9 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('e_mark')}</div>
+                          <div className="font-semibold">{t("e_mark")}</div>
                           <div>
-                            {(plotData.eMarkDist ?? 0).toFixed(2)} {t('meters')}
+                            {(plotData.eMarkDist ?? 0).toFixed(2)} {t("meters")}
                           </div>
                         </div>
                       </InfoWindow>
@@ -1825,7 +1861,7 @@ export function CreatePlotDialog({
             <div className="mt-3 flex flex-wrap gap-3 items-center justify-center">
               <div className="flex items-center gap-2 text-sm">
                 <img src={getMarkerIcon("sw")} alt="sw" className="w-4 h-4" />{" "}
-                <span>{t('sw_mark')}</span>
+                <span>{t("sw_mark")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1833,7 +1869,7 @@ export function CreatePlotDialog({
                   alt="n_corner"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('n_corner')}</span>
+                <span>{t("n_corner")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1841,7 +1877,7 @@ export function CreatePlotDialog({
                   alt="e_corner"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('e_corner')}</span>
+                <span>{t("e_corner")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1849,7 +1885,7 @@ export function CreatePlotDialog({
                   alt="n_mark"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('n_mark')}</span>
+                <span>{t("n_mark")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1857,7 +1893,7 @@ export function CreatePlotDialog({
                   alt="e_mark"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('e_mark')}</span>
+                <span>{t("e_mark")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1865,7 +1901,7 @@ export function CreatePlotDialog({
                   alt="intersection"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('intersection')}</span>
+                <span>{t("intersection")}</span>
               </div>
             </div>
           )}

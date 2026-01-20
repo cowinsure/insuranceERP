@@ -34,16 +34,16 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   >([]);
 
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data.pestIds || []
+    data.pestIds || [],
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data.diseaseIds || []
+    data.diseaseIds || [],
   );
   const [manageable, setManageable] = useState(
-    data.is_manageable_harvest ? "Yes" : "No"
+    data.is_manageable_harvest ? "Yes" : "No",
   );
   const [remarks, setRemarks] = useState(
-    data.reason_for_is_manageable_harvest || ""
+    data.reason_for_is_manageable_harvest || "",
   );
 
   console.log(data.reason_for_is_manageable_harvest);
@@ -74,7 +74,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
             pestRes.data.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
-            }))
+            })),
           );
         }
 
@@ -83,7 +83,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
             diseaseRes.data.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
-            }))
+            })),
           );
         }
       } catch (err) {
@@ -185,23 +185,25 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
               {t("no_pest_options_available")}
             </p>
           ) : (
-            pestOptions.map((pest) => (
-              <div
-                key={pest.id}
-                className="flex items-center gap-2 font-semibold text-[15px]"
-              >
-                <input
-                  type="checkbox"
-                  id={`pest-${pest.id}`}
-                  checked={selectedPests.includes(pest.id)}
-                  onChange={() => togglePest(pest.id)}
-                  className="cursor-pointer accent-blue-600 custom-checkbox mt-2 shrink-0"
-                />
-                <label htmlFor={`pest-${pest.id}`} className="cursor-pointer">
-                  {pest.name}
-                </label>
-              </div>
-            ))
+            <div className="space-y-4">
+              {pestOptions.map((pest) => (
+                <div
+                  key={pest.id}
+                  className="flex items-center gap-2 font-semibold text-[15px]"
+                >
+                  <input
+                    type="checkbox"
+                    id={`pest-${pest.id}`}
+                    checked={selectedPests.includes(pest.id)}
+                    onChange={() => togglePest(pest.id)}
+                    className="cursor-pointer accent-blue-600 custom-checkbox shrink-0"
+                  />
+                  <label htmlFor={`pest-${pest.id}`} className="cursor-pointer">
+                    {pest.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
@@ -221,26 +223,28 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
               {t("no_disease_options_available")}
             </p>
           ) : (
-            diseaseOptions.map((disease) => (
-              <div
-                key={disease.id}
-                className="flex items-center gap-2 font-semibold text-[15px]"
-              >
-                <input
-                  type="checkbox"
-                  id={`disease-${disease.id}`}
-                  checked={selectedDiseases.includes(disease.id)}
-                  onChange={() => toggleDisease(disease.id)}
-                  className="cursor-pointer accent-green-600 custom-checkbox mt-2 shrink-0"
-                />
-                <label
-                  htmlFor={`disease-${disease.id}`}
-                  className="cursor-pointer"
+            <div className="space-y-4">
+              {diseaseOptions.map((disease) => (
+                <div
+                  key={disease.id}
+                  className="flex items-center gap-2 font-semibold text-[15px]"
                 >
-                  {disease.name}
-                </label>
-              </div>
-            ))
+                  <input
+                    type="checkbox"
+                    id={`disease-${disease.id}`}
+                    checked={selectedDiseases.includes(disease.id)}
+                    onChange={() => toggleDisease(disease.id)}
+                    className="cursor-pointer accent-green-600 custom-checkbox shrink-0"
+                  />
+                  <label
+                    htmlFor={`disease-${disease.id}`}
+                    className="cursor-pointer"
+                  >
+                    {disease.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 

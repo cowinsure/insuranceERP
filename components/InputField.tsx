@@ -68,7 +68,7 @@ const InputField: React.FC<InputFieldProps> = ({
             type === "date" &&
               "appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0",
             error ? "border-red-600" : "border-gray-300",
-            `${className}`
+            `${className}`,
           )}
         />
       </div>

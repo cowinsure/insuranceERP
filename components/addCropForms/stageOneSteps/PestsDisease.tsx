@@ -11,7 +11,7 @@ interface PestsDiseaseProps {
     pestIds: number[],
     diseaseIds: number[],
     pestDetails?: { id: number; name: string }[],
-    diseaseDetails?: { id: number; name: string }[]
+    diseaseDetails?: { id: number; name: string }[],
   ) => void;
 }
 
@@ -28,10 +28,10 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
   >([]);
 
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data.pestIds || []
+    data.pestIds || [],
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data.diseaseIds || []
+    data.diseaseIds || [],
   );
 
   // Sync with parent when data changes (for persistence)
@@ -58,7 +58,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             pestRes.data.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
-            }))
+            })),
           );
 
         if (diseaseRes.status === "success")
@@ -66,7 +66,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             diseaseRes.data.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
-            }))
+            })),
           );
       } catch (err) {
         console.error(err);
@@ -86,7 +86,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
 
     const pestDetails = pestOptions.filter((p) => updated.includes(p.id));
     const diseaseDetails = diseaseOptions.filter((d) =>
-      selectedDiseases.includes(d.id)
+      selectedDiseases.includes(d.id),
     );
 
     // ✅ Send IDs + names for preview
@@ -94,7 +94,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       updated,
       selectedDiseases,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
-      diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
     );
   };
 
@@ -113,10 +113,10 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       selectedPests,
       updated,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
-      diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
     );
   };
-  console.log(data);
+
   return (
     <div className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
@@ -136,18 +136,18 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
           {loading ? (
             <Loading />
           ) : (
-            <>
+                  <div className="space-y-4">
               {pestOptions.map((pest) => (
                 <div
                   key={pest.id}
-                  className="flex items-center gap-2 space-y-2 font-medium lg:text-[15px]"
+                  className="flex items-center gap-2 font-medium lg:text-[15px]"
                 >
                   <input
                     type="checkbox"
                     id={`pest-${pest.id}`} // ✅ add this line
                     checked={selectedPests.includes(pest.id)}
                     onChange={() => togglePest(pest.id)}
-                    className="cursor-pointer accent-blue-600 custom-checkbox mt-2 shrink-0"
+                    className="cursor-pointer accent-blue-600 custom-checkbox shrink-0"
                   />
                   <label
                     htmlFor={`pest-${pest.id}`} // ✅ connect label to input
@@ -157,7 +157,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
                   </label>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
 
@@ -173,18 +173,18 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
           {loading ? (
             <Loading />
           ) : (
-            <>
+            <div className="space-y-4">
               {diseaseOptions.map((disease) => (
                 <div
                   key={disease.id}
-                  className="flex items-center gap-2 space-y-2 font-medium lg:text-[15px]"
+                  className="flex items-center gap-2 font-medium lg:text-[15px]"
                 >
                   <input
                     type="checkbox"
                     id={`disease-${disease.id}`}
                     checked={selectedDiseases.includes(disease.id)}
                     onChange={() => toggleDisease(disease.id)}
-                    className="cursor-pointer accent-green-600 custom-checkbox mt-2 shrink-0"
+                    className="cursor-pointer accent-green-600 custom-checkbox shrink-0"
                   />
                   <label
                     htmlFor={`disease-${disease.id}`} // ✅ connect label to input
@@ -194,7 +194,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
                   </label>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>

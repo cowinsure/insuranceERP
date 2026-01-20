@@ -137,7 +137,7 @@ export default function AddCropDetailsModal({
                 date_to: w.date_to,
               })) || [];
 
-          console.log(weatherEffects);
+          // console.log(weatherEffects);
 
           // ------------------------------
           // SET NORMALIZED DATA
@@ -168,11 +168,11 @@ export default function AddCropDetailsModal({
             chemicals: {
               fertilizers:
                 d.crop_asset_chemical_usage_details?.filter(
-                  (c: any) => c.chemical_type_id === 1
+                  (c: any) => c.chemical_type_id === 1,
                 ) || [],
               pesticides:
                 d.crop_asset_chemical_usage_details?.filter(
-                  (c: any) => c.chemical_type_id === 2
+                  (c: any) => c.chemical_type_id === 2,
                 ) || [],
             },
             attachments: d.crop_asset_attachment_details || [],
@@ -288,7 +288,7 @@ export default function AddCropDetailsModal({
 
         // WEATHER: filter out placeholder / "not provided" entries (id===0 / falsy / name === "Not Provided")
         crop_asset_weather_effect_history: Array.isArray(
-          cropData.weather?.weather_effects
+          cropData.weather?.weather_effects,
         )
           ? cropData.weather.weather_effects
               .filter((w: any) => {
@@ -333,14 +333,14 @@ export default function AddCropDetailsModal({
               .map((idOrObj: any) => {
                 const id =
                   typeof idOrObj === "object"
-                    ? idOrObj.pest_attack_type_id ?? idOrObj.id
+                    ? (idOrObj.pest_attack_type_id ?? idOrObj.id)
                     : idOrObj;
                 const date =
                   typeof idOrObj === "object"
-                    ? idOrObj.attack_date ?? idOrObj.date ?? null
+                    ? (idOrObj.attack_date ?? idOrObj.date ?? null)
                     : null;
                 const remarks =
-                  typeof idOrObj === "object" ? idOrObj.remarks ?? "" : "";
+                  typeof idOrObj === "object" ? (idOrObj.remarks ?? "") : "";
                 return {
                   crop_pest_attack_id: 0,
                   pest_attack_type_id: id,
@@ -369,14 +369,14 @@ export default function AddCropDetailsModal({
               .map((idOrObj: any) => {
                 const id =
                   typeof idOrObj === "object"
-                    ? idOrObj.disease_attack_type_id ?? idOrObj.id
+                    ? (idOrObj.disease_attack_type_id ?? idOrObj.id)
                     : idOrObj;
                 const date =
                   typeof idOrObj === "object"
-                    ? idOrObj.attack_date ?? idOrObj.date ?? null
+                    ? (idOrObj.attack_date ?? idOrObj.date ?? null)
                     : null;
                 const remarks =
-                  typeof idOrObj === "object" ? idOrObj.remarks ?? "" : "";
+                  typeof idOrObj === "object" ? (idOrObj.remarks ?? "") : "";
                 return {
                   crop_disease_attack_id: 0,
                   disease_attack_type_id: id,
@@ -420,8 +420,8 @@ export default function AddCropDetailsModal({
           : [],
       };
 
-      console.log("Submitting payload:", payload);
-      console.log(JSON.stringify(payload));
+      // console.log("Submitting payload:", payload);
+      // console.log(JSON.stringify(payload));
       const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });
@@ -506,7 +506,7 @@ export default function AddCropDetailsModal({
           <CropDetailsPreview
             data={cropData}
             attachments={cropData.attachments.filter((att: any) =>
-              att.attachment_path.startsWith("data:")
+              att.attachment_path.startsWith("data:"),
             )}
           />
         );
@@ -514,6 +514,8 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
+
+  console.log(cropData);
 
   return (
     <div>

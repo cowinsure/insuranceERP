@@ -31,7 +31,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   const { t } = useLocalization();
 
   const [goodPracticesList, setGoodPracticesList] = useState<PracticeItem[]>(
-    []
+    [],
   );
   const [harvestSeedVarietyOptions, setHarvestSeedVarietyOptions] = useState<
     { value: string; label: string }[]
@@ -50,7 +50,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
     try {
       const res = await get(
         "/cms/crop-harvest-good-agricultural-practices-service/",
-        { params: { page_size: 50, start_record: 1 } }
+        { params: { page_size: 50, start_record: 1 } },
       );
       if (res.status === "success" && Array.isArray(res.data)) {
         const formatted = res.data.map((item: any) => ({
@@ -68,7 +68,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
     try {
       const res = await get(
         "/cms/crop-harvest-seed-variety-observation-service/",
-        { params: { page_size: 50, start_record: 1 } }
+        { params: { page_size: 50, start_record: 1 } },
       );
       if (res.status === "success" && Array.isArray(res.data)) {
         const formatted = res.data.map((item: any) => ({
@@ -102,7 +102,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   /** Handlers */
   const handleVarietyChange = (value: number) => {
     const selected = harvestSeedVarietyOptions.find(
-      (opt) => Number(opt.value) === value
+      (opt) => Number(opt.value) === value,
     );
     onChange({
       ...data,
@@ -114,14 +114,14 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   const toggleGoodPractice = (id: number) => {
     const practice = goodPracticesList.find((p) => p.id === id);
     const exists = data.crop_harvest_details?.some(
-      (d) => d.good_agricultural_practices_type_id === id
+      (d) => d.good_agricultural_practices_type_id === id,
     );
     let updated = data.crop_harvest_details
       ? [...data.crop_harvest_details]
       : [];
     if (exists) {
       updated = updated.filter(
-        (d) => d.good_agricultural_practices_type_id !== id
+        (d) => d.good_agricultural_practices_type_id !== id,
       );
     } else {
       updated.push({
@@ -134,7 +134,7 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
 
   const handleTimingChange = (value: number) => {
     const selected = harvestTimingOptions.find(
-      (opt) => Number(opt.value) === value
+      (opt) => Number(opt.value) === value,
     );
     onChange({
       ...data,
@@ -146,13 +146,13 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
   return (
     <div className="bg-white rounded-xl space-y-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        {t('harvesting_observations')}
+        {t("harvesting_observations")}
       </h2>
 
       <DropdownField
         id="seedVarietyObservation"
         name="seedVarietyObservation"
-        label={t('seed_variety_observation')}
+        label={t("seed_variety_observation")}
         value={data.harvest_seed_variety_observation_id || ""}
         onChange={(e) => handleVarietyChange(Number(e.target.value))}
         options={harvestSeedVarietyOptions}
@@ -160,47 +160,51 @@ const Observation: React.FC<ObservationProps> = ({ data, onChange }) => {
 
       <div className="bg-gray-50 p-4 border rounded-lg space-y-2 mt-4">
         <h3 className="font-semibold">
-          {t('good_agricultural_practices')}{" "}
-          <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+          {t("good_agricultural_practices")}{" "}
+          <span className="text-sm text-gray-400">
+            {t("multiple_selection")}
+          </span>
         </h3>
         {goodPracticesList.length === 0 ? (
           <Loading />
         ) : (
-          goodPracticesList.map((practice) => {
-            const checked = data.crop_harvest_details?.some(
-              (d) => d.good_agricultural_practices_type_id === practice.id
-            );
-            return (
-              <div
-                key={practice.id}
-                className="flex items-center gap-2 font-semibold text-[15px]"
-              >
-                <input
-                  id={`practice-${practice.id}`}
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggleGoodPractice(practice.id)}
-                  className="cursor-pointer accent-green-600 custom-checkbox mt-2"
-                />
-                <label
-                  htmlFor={`practice-${practice.id}`}
-                  className="flex items-center gap-2 cursor-pointer"
-                  title={practice.label}
+          <div className="space-y-4">
+            {goodPracticesList.map((practice) => {
+              const checked = data.crop_harvest_details?.some(
+                (d) => d.good_agricultural_practices_type_id === practice.id,
+              );
+              return (
+                <div
+                  key={practice.id}
+                  className="flex items-center gap-2 font-semibold text-[15px]"
                 >
-                  {practice.label.length > 90
-                    ? practice.label.slice(0, 90) + "..."
-                    : practice.label}
-                </label>
-              </div>
-            );
-          })
+                  <input
+                    id={`practice-${practice.id}`}
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleGoodPractice(practice.id)}
+                    className="cursor-pointer accent-green-600 custom-checkbox "
+                  />
+                  <label
+                    htmlFor={`practice-${practice.id}`}
+                    className="flex items-center gap-2 cursor-pointer"
+                    title={practice.label}
+                  >
+                    {practice.label.length > 90
+                      ? practice.label.slice(0, 90) + "..."
+                      : practice.label}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
       <DropdownField
         id="harvestTiming"
         name="harvestTiming"
-        label={t('harvesting_timing')}
+        label={t("harvesting_timing")}
         value={data.harvesting_timing_id || ""}
         onChange={(e) => handleTimingChange(Number(e.target.value))}
         options={harvestTimingOptions}

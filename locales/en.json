@@ -124,7 +124,7 @@
   "crop_registration": "Crop Registration",
   "register_crop_details": "Register your crop details for tracking and management",
   "add_crop": "Add Crop",
-  "search_farmer_mobile": "Search by farmer name or mobile number",
+  "search_farmer_mobile": "Search by farmer name or mobile number or crop name",
   "registered_crops": "Registered Crops",
   "crops_found": "crops found",
   "sl": "SL",
@@ -331,5 +331,6 @@
   "attachments": "Attachments",
   "add_photo": "Add Photo",
   "capture_or_upload_photo": "Capture or Upload Photo",
-  "no_photos_added_yet": "No photos added yet."
+  "no_photos_added_yet": "No photos added yet.",
+  "irrigation_status": "Irrigation Status"
 }

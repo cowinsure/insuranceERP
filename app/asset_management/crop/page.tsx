@@ -8,9 +8,23 @@ import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
 import Loading from "@/components/utils/Loading";
 import { SearchFilter } from "@/components/utils/SearchFilter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
-import { ClipboardCheck, Eye, FilePlus, Info, Sparkles } from "lucide-react";
+import {
+  ClipboardCheck,
+  Eye,
+  FilePlus,
+  Info,
+  Sparkles,
+  Filter,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
@@ -47,7 +61,7 @@ const CropsPage = () => {
   const [crops, setCrops] = useState<CropGetData[]>([]);
   const [filteredCrops, setFilteredCrops] = useState<CropGetData[]>([]);
   const [stageOnePayloads, setStageOnePayloads] = useState<Record<number, any>>(
-    {}
+    {},
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(6);
@@ -55,6 +69,8 @@ const CropsPage = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [isInfoModal, setIsInfoModal] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
+  const [cropFilter, setCropFilter] = useState("All");
+  const [filteredByCrop, setFilteredByCrop] = useState<CropGetData[]>([]);
 
   const totalPages =
     pageSize === "All"
@@ -91,6 +107,19 @@ const CropsPage = () => {
       setShowCoach(true);
     }
   }, []);
+
+  useEffect(() => {
+    const filtered = crops.filter(
+      (crop) =>
+        cropFilter === "All" ||
+        crop.crop_name?.toLowerCase().includes(cropFilter.toLowerCase()),
+    );
+    setFilteredByCrop(filtered);
+  }, [crops, cropFilter]);
+
+  useEffect(() => {
+    setTotalRecords(filteredCrops.length);
+  }, [filteredCrops]);
 
   // GET all crop data from API
   const fetchCropData = async () => {
@@ -238,10 +267,8 @@ const CropsPage = () => {
       ? filteredCrops
       : filteredCrops.slice(
           (currentPage - 1) * (pageSize as number),
-          currentPage * (pageSize as number)
+          currentPage * (pageSize as number),
         );
-
-  console.log(crops);
 
   return (
     <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
@@ -392,19 +419,36 @@ const CropsPage = () => {
             </p>
           </div>
 
-          {/* Search and add btn */}
-          <div className="lg:col-span-2 flex justify-end gap-5 items-center">
+          {/* Desktop Search and add btn */}
+          <div className="lg:col-span-2 flex items-center gap-5">
             <div className="flex-1 hidden lg:block">
               <SearchFilter
                 placeholder={t("search_farmer_mobile")}
-                data={crops}
+                data={filteredByCrop}
                 setFilteredData={setFilteredCrops}
-                searchKeys={["farmer_name", "mobile_number"]}
+                searchKeys={["farmer_name", "mobile_number", "crop_name"]}
               />
             </div>
-            <div className="flex justify-end">
+            <div className="hidden lg:block">
+              <Select value={cropFilter} onValueChange={setCropFilter}>
+                <SelectTrigger className="w-[120px]">
+                  <div className="flex items-center">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Filter by Crop" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  <SelectItem value="Boro">Boro</SelectItem>
+                  <SelectItem value="Aus">Aus</SelectItem>
+                  <SelectItem value="Aman">Aman</SelectItem>
+                  <SelectItem value="Potato">Potato</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-full lg:w-auto lg:justify-end">
               <button
-                className="bg-blue-500 hover:bg-blue-400 drop-shadow-md text-white text-sm lg:text-[15px] flex items-center gap-2 px-2 lg:px-4 py-2 rounded-md font-medium cursor-pointer"
+                className="bg-blue-500 hover:bg-blue-400 drop-shadow-md text-white text-sm lg:text-[15px] flex items-center justify-center gap-2 px-2 lg:px-4 py-2 rounded-md font-medium cursor-pointer w-full"
                 onClick={() => setIsModal(true)}
               >
                 <FaPlus className="w- h-" size={16} />
@@ -458,7 +502,7 @@ const CropsPage = () => {
                   {paginatedCrops.map((crop, idx) => {
                     // const seed = crop.crop_asset_seed_details?.[0];
                     const { stage1Enabled, stage2Enabled } = getStageAccess(
-                      crop.current_stage_id
+                      crop.current_stage_id,
                     );
                     return (
                       <tr
@@ -556,13 +600,32 @@ const CropsPage = () => {
         </div>
 
         {/* Search for mobile */}
-        <div className="flex-1 block lg:hidden">
-          <SearchFilter
-            placeholder={t("search_farmer_mobile")}
-            data={crops}
-            setFilteredData={setFilteredCrops}
-            searchKeys={["farmer_name", "mobile_number"]}
-          />
+        <div className="flex-1 lg:hidden flex items-center justify-between gap-5">
+          <div className="flex-1">
+            <SearchFilter
+              placeholder={t("search_farmer_mobile")}
+              data={crops}
+              setFilteredData={setFilteredCrops}
+              searchKeys={["farmer_name", "mobile_number"]}
+            />
+          </div>
+          <div className="lg:hidden">
+            <Select value={cropFilter} onValueChange={setCropFilter}>
+              <SelectTrigger className="w-[120px]">
+                <div className="flex items-center">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter by Crop" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="Boro">Boro</SelectItem>
+                <SelectItem value="Aus">Aus</SelectItem>
+                <SelectItem value="Aman">Aman</SelectItem>
+                <SelectItem value="Potato">Potato</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* MOBILE / TABLET VIEW — CARDS */}
@@ -572,7 +635,7 @@ const CropsPage = () => {
           ) : (
             paginatedCrops.map((crop, idx) => {
               const { stage1Enabled, stage2Enabled } = getStageAccess(
-                crop.current_stage_id
+                crop.current_stage_id,
               );
 
               return (
@@ -586,7 +649,7 @@ const CropsPage = () => {
                     className="flex justify-between items-center"
                     onClick={() =>
                       setOpenMenuId(
-                        openMenuId === crop.crop_id ? null : crop.crop_id
+                        openMenuId === crop.crop_id ? null : crop.crop_id,
                       )
                     }
                   >
@@ -602,8 +665,8 @@ const CropsPage = () => {
                             crop.stage_name === "Planting & Cultivation"
                               ? "/seeding.png"
                               : crop.stage_name === "Harvest & Observation"
-                              ? "/harvest.png"
-                              : ""
+                                ? "/harvest.png"
+                                : ""
                           }
                           alt=""
                           className="w-24 object-cover rotate-y-180 drop-shadow-xl"
@@ -644,7 +707,7 @@ const CropsPage = () => {
                       <button
                         onClick={() =>
                           setOpenMenuId(
-                            openMenuId === crop.crop_id ? null : crop.crop_id
+                            openMenuId === crop.crop_id ? null : crop.crop_id,
                           )
                         }
                         className={`relative z-20 ${
@@ -748,6 +811,8 @@ const CropsPage = () => {
           }}
         />
       </div>
+
+      {/* MODALS */}
 
       {/* Register Crop Modal */}
       {isModal && (

@@ -148,7 +148,7 @@ const DesktopSideBar = () => {
   const isLogin = pathname === "/login";
   const { logout, userId, isLoading } = useAuth();
 
-  const role = userId;
+  const role = userId?.trim();
 
   const sidebarBase =
     "group sticky top-5 h-[95vh] z-40 transition-all duration-300 ease-in-out drop-shadow-xl";
@@ -159,18 +159,17 @@ const DesktopSideBar = () => {
     logout();
   };
 
-  const filteredMenuItems = mainMenuItems
-    .filter((item) => item.roles?.includes(role as UserRole))
-    .map((item) => {
-      if (!item.children) return item;
-
-      return {
+const filteredMenuItems = role
+  ? mainMenuItems
+      .filter((item) => item.roles?.includes(role as UserRole))
+      .map((item) => ({
         ...item,
-        children: item.children.filter((child) =>
+        children: item.children?.filter((child) =>
           child.roles?.includes(role as UserRole)
         ),
-      };
-    });
+      }))
+  : [];
+
 
   if (isLoading) {
     return (
@@ -181,7 +180,7 @@ const DesktopSideBar = () => {
 
           {/* Navigation Skeletons */}
           <div className="flex flex-col gap-3 flex-1">
-            {filteredMenuItems.map((_, i) => (
+            {mainMenuItems.map((_, i) => (
               <Skeleton key={i} className="h-10 w-full rounded-md" />
             ))}
           </div>
@@ -227,7 +226,7 @@ const DesktopSideBar = () => {
                 pathname === item.url ||
                 (item.children &&
                   item.children.some((child) =>
-                    pathname.startsWith(child.url)
+                    pathname.startsWith(child.url),
                   ));
               const IconToRender =
                 isActive && item.activeIcon ? item.activeIcon : item.icon;
@@ -280,7 +279,7 @@ const DesktopSideBar = () => {
                     <div
                       className={`top-10 left-0 mt-1 bg-blue-100 rounded-sm shadow-lg overflow-hidden transition-all duration-300 z-50 min-w-[180px] hidden group-hover/item:block animate__animated animate__fadeIn`}
                     >
-                      {item.children.map((child) => {
+                      {item?.children?.map((child) => {
                         const isChildActive = pathname === child.url;
                         return (
                           <Link key={child.url} href={child.url}>

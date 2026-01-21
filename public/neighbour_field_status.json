@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "irrigation_status": "আক্রান্ত নয় (Not Affected)। পাশের জমিগুলোও সুস্থ।"
+  },
+  {
+    "id": 2,
+    "irrigation_status": "আংশিক আক্রান্ত (Partially Affected)।  পাশের কিছু জমিতে রোগ বা পোকা দেখা যাচ্ছে।"
+  },
+  {
+    "id": 3,
+    "irrigation_status": "ব্যাপক আক্রান্ত (Widely Affected)।  এলাকার অধিকাংশ জমিতে সমস্যা বিদ্যমান।"
+  }
+]

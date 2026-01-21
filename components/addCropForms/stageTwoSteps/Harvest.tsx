@@ -125,8 +125,6 @@ const Harvest = ({ data, onChange }: HarvestProps) => {
     }
   };
 
-  console.log(productionValues.length);
-
   return (
     <div className="space-y-5 bg-white rounded-lg p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">

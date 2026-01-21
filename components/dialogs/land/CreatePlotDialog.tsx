@@ -57,6 +57,48 @@ const defaultCenter = {
   lng: 90.4125,
 };
 
+const AGRI_DROPDOWN_OPTIONS = {
+  soilType: [
+    { label: "বেলে (Sandy)", value: "sandy" },
+    { label: "বেলে দোআঁশ (Sandy Loam)", value: "sandy_loam" },
+    { label: "দোআঁশ (Loam)", value: "loam" },
+    { label: "এঁটেল (Clay)", value: "clay" }
+  ],
+
+  landType: [
+    { label: "উঁচু জমি (High land – পানি জমে না)", value: "high_land" },
+    { label: "মাঝারি উঁচু (Medium High Land – অল্প সময় পানি থাকে)", value: "medium_high_land" },
+    { label: "নিচু জমি (Low land – সহজে পানি জমে)", value: "low_land" },
+    { label: "জলাবদ্ধ প্রবণ (Waterlogging-prone – দীর্ঘ সময় পানি থাকে)", value: "waterlogging_prone" }
+  ],
+
+  landPreparation: [
+    {
+      label: "যথাযথ (Well Prepared) – মাটি একদম ঝুরঝুরে ও সমতল",
+      value: "well_prepared"
+    },
+    {
+      label: "আংশিক (Partially Prepared) – কিছু ছোট ঢেলা ও আংশিক অসমতল",
+      value: "partially_prepared"
+    },
+    {
+      label: "অপর্যাপ্ত (Poorly Prepared) – শক্ত ঢেলা, আগাছা ও অসমতল",
+      value: "poorly_prepared"
+    }
+  ],
+
+  cropPlantingType: [
+    {
+      label: "শুধু আলু চাষ (Sole Cropping – Potato Only)",
+      value: "sole_cropping"
+    },
+    {
+      label: "মিশ্র চাষ (Intercropping – আলুর সাথে অন্যান্য ফসল)",
+      value: "intercropping"
+    }
+  ]
+};
+
 interface Coordinate {
   lat: string;
   lng: string;
@@ -88,6 +130,10 @@ interface PlotData {
   area: string;
   description: string;
   LandManualMeasurements?: LandManualMeasurements;
+  soilType?: string;
+  landType?: string;
+  landPreparation?: string;
+  cropPlantingType?: string;
 }
 
 interface CreatePlotDialogProps {
@@ -120,6 +166,10 @@ export function CreatePlotDialog({
   const [landName, setLandName] = useState("");
   const [plotDescription, setPlotDescription] = useState("");
   const [ownershipType, setOwnershipType] = useState("");
+  const [soilType, setSoilType] = useState("");
+  const [landType, setLandType] = useState("");
+  const [landPreparation, setLandPreparation] = useState("");
+  const [cropPlantingType, setCropPlantingType] = useState("");
   const [suitabilityReasons, setSuitabilityReasons] = useState<
     LandSuitabilityRemark[]
   >([]);
@@ -696,6 +746,10 @@ export function CreatePlotDialog({
           nw_sw: parseInt(measureSWNW),
         },
         plotManualEntry: null,
+        soilType,
+        landType,
+        landPreparation,
+        cropPlantingType,
       };
 
       setPlotData(apiPlotData);
@@ -835,6 +889,10 @@ export function CreatePlotDialog({
             longitude: intersection ? intersection.longitude : "",
           },
         ],
+        soil_type: soilType,
+        land_type: landType,
+        land_preparation: landPreparation,
+        crop_planting_type: cropPlantingType,
       };
 
       //(landSubmissionModel);
@@ -1192,6 +1250,86 @@ export function CreatePlotDialog({
                     </div>
                   ))}
                 </div> */}
+              </div>
+
+              {/* Soil Type */}
+              <div className="space-y-2">
+                <Label htmlFor="soilType">Soil Type</Label>
+                <Select
+                  value={soilType}
+                  onValueChange={(value: string) => setSoilType(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("select_soil_type")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGRI_DROPDOWN_OPTIONS.soilType.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Land Type */}
+              <div className="space-y-2">
+                <Label htmlFor="landType">Land Type</Label>
+                <Select
+                  value={landType}
+                  onValueChange={(value: string) => setLandType(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select land type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGRI_DROPDOWN_OPTIONS.landType.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Land Preparation */}
+              <div className="space-y-2">
+                <Label htmlFor="landPreparation">Land Preparation</Label>
+                <Select
+                  value={landPreparation}
+                  onValueChange={(value: string) => setLandPreparation(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select land preparation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGRI_DROPDOWN_OPTIONS.landPreparation.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Crop Planting Type */}
+              <div className="space-y-2">
+                <Label htmlFor="cropPlantingType">Crop Planting Type</Label>
+                <Select
+                  value={cropPlantingType}
+                  onValueChange={(value: string) => setCropPlantingType(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select crop planting type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGRI_DROPDOWN_OPTIONS.cropPlantingType.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Land Measurements */}

@@ -54,6 +54,7 @@ interface PestsDiseaseData {
   diseaseIds: number[];
   is_manageable_harvest?: boolean;
   reason_for_is_manageable_harvest?: string;
+  neighbour_field_status_id?: number | undefined;
 }
 
 interface WeatherData {
@@ -117,6 +118,7 @@ const AddCropStageTwoModal = ({
       diseaseIds: [],
       is_manageable_harvest: true,
       reason_for_is_manageable_harvest: "",
+      neighbour_field_status_id: undefined,
     },
     weather: [],
     attachments: [],
@@ -269,7 +271,7 @@ const AddCropStageTwoModal = ({
       const mergedWeather = [
         // Keep previous records that are NOT stage 3
         ...(selectedCrop.crop_asset_weather_effect_history || []).filter(
-          (w: any) => w.stage_id !== 3
+          (w: any) => w.stage_id !== 3,
         ),
         // Add the current stage 3 weather data (from mapWeather)
         ...weather.map((w) => ({ ...w, stage_id: 3 })), // ensure stage_id is 3
@@ -411,7 +413,7 @@ const AddCropStageTwoModal = ({
           <StageTwoPreview
             data={stageTwoData}
             attachments={stageTwoData.attachments.filter((att: any) =>
-              att.attachment_path.startsWith("data:")
+              att.attachment_path.startsWith("data:"),
             )}
           />
         );

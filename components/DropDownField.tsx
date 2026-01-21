@@ -5,7 +5,7 @@ interface DropdownFieldProps {
   label: string;
   id: string;
   name: string;
-  value: string | number;
+  value: string | number | undefined;
   onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   required?: boolean;
   disabled?: boolean;

@@ -63,6 +63,10 @@ interface AddCropData {
   // 🆕 Optional preview-only fields
   pestDetails?: { id: number; name: string }[];
   diseaseDetails?: { id: number; name: string }[];
+
+  // 🆕 NEW
+  diseaseControlId?: number | null;
+  neighbourFieldStatusId?: number | null;
 }
 
 interface AddCropDetailsModalProps {
@@ -220,6 +224,9 @@ export default function AddCropDetailsModal({
     attachments: [],
     pestDetails: [],
     diseaseDetails: [],
+    // 🆕
+    diseaseControlId: null,
+    neighbourFieldStatusId: null,
   });
 
   const handleNext = () => {
@@ -472,14 +479,29 @@ export default function AddCropDetailsModal({
       case 4:
         return (
           <PestsDisease
-            data={{ pestIds: cropData.pests, diseaseIds: cropData.diseases }}
-            onChange={(p, d, pestDetails, diseaseDetails) => {
+            data={{
+              pestIds: cropData.pests,
+              diseaseIds: cropData.diseases,
+              diseaseControlId: cropData.diseaseControlId ?? undefined,
+              neighbourFieldStatusId:
+                cropData.neighbourFieldStatusId ?? undefined,
+            }}
+            onChange={(
+              p,
+              d,
+              pestDetails,
+              diseaseDetails,
+              diseaseControlId,
+              neighbourFieldStatusId,
+            ) => {
               setCropData({
                 ...cropData,
                 pests: p,
                 diseases: d,
-                pestDetails, // optional, for preview
-                diseaseDetails, // optional, for preview
+                pestDetails,
+                diseaseDetails,
+                diseaseControlId,
+                neighbourFieldStatusId,
               });
             }}
           />

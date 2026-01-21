@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import DropdownField from "@/components/DropDownField";
 
 interface PestsDiseaseProps {
   data: {
@@ -11,14 +12,21 @@ interface PestsDiseaseProps {
     diseaseIds?: number[];
     is_manageable_harvest?: boolean;
     reason_for_is_manageable_harvest?: string;
+
+    // 🆕 New
+    neighbour_field_status_id?: number;
   };
+
   onChange: (updatedData: {
     pestIds: number[];
-    pestNames?: string[]; // for preview
+    pestNames?: string[];
     diseaseIds: number[];
-    diseaseNames?: string[]; // for preview
+    diseaseNames?: string[];
     is_manageable_harvest?: boolean;
     reason_for_is_manageable_harvest?: string;
+
+    // 🆕 New
+    neighbour_field_status_id?: number;
   }) => void;
 }
 
@@ -46,7 +54,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     data.reason_for_is_manageable_harvest || "",
   );
 
-  console.log(data.reason_for_is_manageable_harvest);
+  const [neighbourStatusOptions, setNeighbourStatusOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+
+  const [neighbourStatusId, setNeighbourStatusId] = useState<
+    number | undefined
+  >(data.neighbour_field_status_id);
+
+  console.log(data);
 
   /** Sync with parent data if it changes */
   useEffect(() => {
@@ -54,7 +70,24 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     setSelectedDiseases(data.diseaseIds || []);
     setManageable(data.is_manageable_harvest ? "Yes" : "No");
     setRemarks(data.reason_for_is_manageable_harvest || "");
+    setNeighbourStatusId(data.neighbour_field_status_id);
   }, [data]);
+
+  useEffect(() => {
+    const fetchNeighbourStatus = async () => {
+      const res = await fetch("/neighbour_field_status.json");
+      const json = await res.json();
+
+      setNeighbourStatusOptions(
+        json.map((item: any) => ({
+          value: item.id,
+          label: item.irrigation_status,
+        })),
+      );
+    };
+
+    fetchNeighbourStatus();
+  }, []);
 
   /** Fetch pest & disease options from API */
   useEffect(() => {
@@ -107,6 +140,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
         .map((d) => d.name),
       is_manageable_harvest: manageable === "Yes",
       reason_for_is_manageable_harvest: manageable === "No" ? remarks : "",
+      neighbour_field_status_id: neighbourStatusId,
       ...updated,
     });
   };
@@ -162,6 +196,19 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     });
   };
 
+  const handleNeighbourStatusChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const value = e.target.value;
+    const numericValue = value === "" ? undefined : Number(value);
+
+    setNeighbourStatusId(numericValue);
+
+    updateParent({
+      neighbour_field_status_id: numericValue,
+    });
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-5 underline text-center">
@@ -169,6 +216,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
+        <DropdownField
+          label="Neighbour Field Status"
+          id="neighbourFieldStatus"
+          name="neighbour_field_status_id"
+          value={neighbourStatusId ?? ""}
+          onChange={handleNeighbourStatusChange}
+          options={neighbourStatusOptions}
+        />
+
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">

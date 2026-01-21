@@ -4,15 +4,28 @@ import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import DropdownField from "@/components/DropDownField";
 
 interface PestsDiseaseProps {
-  data: { pestIds?: number[]; diseaseIds?: number[] };
+  data: {
+    pestIds?: number[];
+    diseaseIds?: number[];
+    diseaseControlId?: number | undefined;
+    neighbourFieldStatusId?: number | undefined;
+  };
   onChange: (
     pestIds: number[],
     diseaseIds: number[],
     pestDetails?: { id: number; name: string }[],
     diseaseDetails?: { id: number; name: string }[],
+    diseaseControlId?: number,
+    neighbourFieldStatusId?: number,
   ) => void;
+}
+
+interface DropdownOption {
+  value: number;
+  label: string;
 }
 
 const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
@@ -27,30 +40,54 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     { id: number; name: string }[]
   >([]);
 
+  const [diseaseControlOptions, setDiseaseControlOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+
+  const [neighbourFieldStatusOptions, setNeighbourFieldStatusOptions] =
+    useState<{ value: number; label: string }[]>([]);
+
   const [selectedPests, setSelectedPests] = useState<number[]>(
     data.pestIds || [],
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
     data.diseaseIds || [],
   );
+  const [diseaseControlId, setDiseaseControlId] = useState<
+    number | undefined
+  >();
+
+  const [neighbourFieldStatusId, setNeighbourFieldStatusId] = useState<
+    number | undefined
+  >();
 
   // Sync with parent when data changes (for persistence)
   useEffect(() => {
     setSelectedPests(data.pestIds || []);
     setSelectedDiseases(data.diseaseIds || []);
+    setDiseaseControlId(data.diseaseControlId ?? undefined);
+    setNeighbourFieldStatusId(data.neighbourFieldStatusId ?? undefined);
   }, [data]);
 
   // Fetch options from API
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [pestRes, diseaseRes] = await Promise.all([
+        const [
+          pestRes,
+          diseaseRes,
+          diseaseControlRes,
+          neighbourFieldStatusRes,
+        ] = await Promise.all([
           get("/cms/crop-pest-attack-observations-type-service/", {
             params: { page_size: 50, start_record: 1 },
           }),
           get("/cms/crop-disease-attack-observations-type-service/", {
             params: { page_size: 50, start_record: 1 },
           }),
+          //Fetch for local files JSON
+          fetch("/disease_control.json").then((res) => res.json()),
+          fetch("/neighbour_field_status.json").then((res) => res.json()),
         ]);
 
         if (pestRes.status === "success")
@@ -68,6 +105,20 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
               name: item.disease_attack_observations_type_name,
             })),
           );
+
+        //for local jsons
+        setDiseaseControlOptions(
+          diseaseControlRes.map((item: any) => ({
+            value: item.id,
+            label: item.irrigation_status,
+          })),
+        );
+        setNeighbourFieldStatusOptions(
+          neighbourFieldStatusRes.map((item: any) => ({
+            value: item.id,
+            label: item.irrigation_status,
+          })),
+        );
       } catch (err) {
         console.error(err);
       }
@@ -95,6 +146,8 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       selectedDiseases,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
       diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
+      diseaseControlId,
+      neighbourFieldStatusId,
     );
   };
 
@@ -114,8 +167,42 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       updated,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
       diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
+      diseaseControlId,
+      neighbourFieldStatusId,
     );
   };
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    const numericValue = value === "" ? undefined : Number(value);
+
+    let newDiseaseControl = diseaseControlId;
+    let newNeighbourStatus = neighbourFieldStatusId;
+
+    if (name === "disease_control_id") {
+      newDiseaseControl = numericValue;
+      setDiseaseControlId(numericValue);
+    } else if (name === "neighbour_field_status_id") {
+      newNeighbourStatus = numericValue;
+      setNeighbourFieldStatusId(numericValue);
+    }
+
+    const pestDetails = pestOptions.filter((p) => selectedPests.includes(p.id));
+    const diseaseDetails = diseaseOptions.filter((d) =>
+      selectedDiseases.includes(d.id),
+    );
+
+    onChange(
+      selectedPests,
+      selectedDiseases,
+      pestDetails.map((p) => ({ id: p.id, name: p.name })),
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
+      newDiseaseControl,
+      newNeighbourStatus,
+    );
+  };
+
+  console.log(data);
 
   return (
     <div className="lg:p-3">
@@ -124,6 +211,22 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
+        <DropdownField
+          label="Disease Control"
+          id="diseaseControl"
+          name="disease_control_id"
+          value={diseaseControlId}
+          onChange={handleChange}
+          options={diseaseControlOptions}
+        />
+        <DropdownField
+          label="Neighbour Field Status"
+          id="neighbourFieldStatus"
+          name="neighbour_field_status_id"
+          value={neighbourFieldStatusId}
+          onChange={handleChange}
+          options={neighbourFieldStatusOptions}
+        />
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
@@ -136,7 +239,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
           {loading ? (
             <Loading />
           ) : (
-                  <div className="space-y-4">
+            <div className="space-y-4">
               {pestOptions.map((pest) => (
                 <div
                   key={pest.id}

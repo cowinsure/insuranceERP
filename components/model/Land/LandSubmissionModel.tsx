@@ -60,10 +60,10 @@ export interface LandSubmissionModel {
     image?: string | null; // base64 data uri or file reference
 
     // agricultural fields
-    soil_type?: string;
-    land_type?: string;
-    land_preparation?: string;
-    crop_planting_type?: string;
+    soil_type_id?: string;
+    land_type_id?: string;
+    land_preparation_type_id?: string;
+    crop_planting_type_id?: string;
 
     land_measurement_info: LandMeasurementInfo;
     land_coordinate_point: LandCoordinatePoint[];
@@ -133,10 +133,10 @@ export function normalizeLandSubmission(
         image: input.image ?? null,
 
         // agricultural fields
-        soil_type: input.soil_type ?? '',
-        land_type: input.land_type ?? '',
-        land_preparation: input.land_preparation ?? '',
-        crop_planting_type: input.crop_planting_type ?? '',
+        soil_type_id: input.soil_type_id ?? '',
+        land_type_id: input.land_type_id ?? '',
+        land_preparation_type_id: input.land_preparation_type_id ?? '',
+        crop_planting_type_id: input.crop_planting_type_id ?? '',
 
         land_measurement_info: measurement,
         land_coordinate_point: coords,

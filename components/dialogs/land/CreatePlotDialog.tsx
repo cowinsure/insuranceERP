@@ -97,10 +97,10 @@ interface PlotData {
   area: string;
   description: string;
   LandManualMeasurements?: LandManualMeasurements;
-  soilType?: string;
-  landType?: string;
-  landPreparation?: string;
-  cropPlantingType?: string;
+  soil_type_id?: number;
+  land_type_id?: number;
+  land_preparation_type_id?: number;
+  crop_planting_type_id?: number;
 }
 
 interface CreatePlotDialogProps {
@@ -818,10 +818,10 @@ export function CreatePlotDialog({
           nw_sw: parseInt(measureSWNW),
         },
         plotManualEntry: null,
-        soilType,
-        landType,
-        landPreparation,
-        cropPlantingType,
+        soil_type_id: soilType ? parseInt(soilType) : undefined,
+        land_type_id: landType ? parseInt(landType) : undefined,
+        land_preparation_type_id: landPreparation ? parseInt(landPreparation) : undefined,
+        crop_planting_type_id: cropPlantingType ? parseInt(cropPlantingType) : undefined,
       };
 
       setPlotData(apiPlotData);
@@ -961,10 +961,10 @@ export function CreatePlotDialog({
             longitude: intersection ? intersection.longitude : "",
           },
         ],
-        soil_type: soilType,
-        land_type: landType,
-        land_preparation: landPreparation,
-        crop_planting_type: cropPlantingType,
+        soil_type_id: soilType,
+        land_type_id: landType,
+        land_preparation_type_id: landPreparation,
+        crop_planting_type_id: cropPlantingType,
       };
 
       const payload = normalizeLandSubmission(apiPayload);

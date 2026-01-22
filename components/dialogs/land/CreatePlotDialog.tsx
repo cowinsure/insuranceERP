@@ -65,47 +65,6 @@ const defaultCenter = {
   lng: 90.4125,
 };
 
-const AGRI_DROPDOWN_OPTIONS = {
-  soilType: [
-    { label: "বেলে (Sandy)", value: "sandy" },
-    { label: "বেলে দোআঁশ (Sandy Loam)", value: "sandy_loam" },
-    { label: "দোআঁশ (Loam)", value: "loam" },
-    { label: "এঁটেল (Clay)", value: "clay" }
-  ],
-
-  landType: [
-    { label: "উঁচু জমি (High land – পানি জমে না)", value: "high_land" },
-    { label: "মাঝারি উঁচু (Medium High Land – অল্প সময় পানি থাকে)", value: "medium_high_land" },
-    { label: "নিচু জমি (Low land – সহজে পানি জমে)", value: "low_land" },
-    { label: "জলাবদ্ধ প্রবণ (Waterlogging-prone – দীর্ঘ সময় পানি থাকে)", value: "waterlogging_prone" }
-  ],
-
-  landPreparation: [
-    {
-      label: "যথাযথ (Well Prepared) – মাটি একদম ঝুরঝুরে ও সমতল",
-      value: "well_prepared"
-    },
-    {
-      label: "আংশিক (Partially Prepared) – কিছু ছোট ঢেলা ও আংশিক অসমতল",
-      value: "partially_prepared"
-    },
-    {
-      label: "অপর্যাপ্ত (Poorly Prepared) – শক্ত ঢেলা, আগাছা ও অসমতল",
-      value: "poorly_prepared"
-    }
-  ],
-
-  cropPlantingType: [
-    {
-      label: "শুধু আলু চাষ (Sole Cropping – Potato Only)",
-      value: "sole_cropping"
-    },
-    {
-      label: "মিশ্র চাষ (Intercropping – আলুর সাথে অন্যান্য ফসল)",
-      value: "intercropping"
-    }
-  ]
-};
 
 interface Coordinate {
   lat: string;
@@ -205,6 +164,18 @@ export function CreatePlotDialog({
     []
   );
   const [lsLoading, setLsLoading] = useState(false);
+
+  const [soilTypes, setSoilTypes] = useState<{id: number, soil_type_name: string}[]>([]);
+  const [soilTypesLoading, setSoilTypesLoading] = useState(false);
+
+  const [landTypes, setLandTypes] = useState<{id: number, land_type_name: string}[]>([]);
+  const [landTypesLoading, setLandTypesLoading] = useState(false);
+
+  const [landPreparationTypes, setLandPreparationTypes] = useState<{id: number, land_preparation_type_name: string}[]>([]);
+  const [landPreparationTypesLoading, setLandPreparationTypesLoading] = useState(false);
+
+  const [cropPlantingTypes, setCropPlantingTypes] = useState<{id: number, crop_planting_type_name: string}[]>([]);
+  const [cropPlantingTypesLoading, setCropPlantingTypesLoading] = useState(false);
 
   // derive suitable / not suitable lists for the UI
   const SUITABILITY_OPTIONS = useMemo(
@@ -393,6 +364,118 @@ export function CreatePlotDialog({
       }
     };
     fetchSuitability();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchSoilTypes = async () => {
+      setSoilTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-soil-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setSoilTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setSoilTypesLoading(false);
+      }
+    };
+    fetchSoilTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchLandTypes = async () => {
+      setLandTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setLandTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setLandTypesLoading(false);
+      }
+    };
+    fetchLandTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchLandPreparationTypes = async () => {
+      setLandPreparationTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-preparation-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setLandPreparationTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setLandPreparationTypesLoading(false);
+      }
+    };
+    fetchLandPreparationTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchCropPlantingTypes = async () => {
+      setCropPlantingTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-crop-planting-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setCropPlantingTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setCropPlantingTypesLoading(false);
+      }
+    };
+    fetchCropPlantingTypes();
     return () => {
       cancelled = true;
     };
@@ -1149,11 +1232,15 @@ export function CreatePlotDialog({
                           <SelectValue placeholder={t("select_soil_type")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {AGRI_DROPDOWN_OPTIONS.soilType.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
+                          {soilTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            soilTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.soil_type_name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1169,11 +1256,15 @@ export function CreatePlotDialog({
                           <SelectValue placeholder="Select land type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {AGRI_DROPDOWN_OPTIONS.landType.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
+                          {landTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            landTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.land_type_name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1189,11 +1280,15 @@ export function CreatePlotDialog({
                           <SelectValue placeholder="Select land preparation" />
                         </SelectTrigger>
                         <SelectContent>
-                          {AGRI_DROPDOWN_OPTIONS.landPreparation.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
+                          {landPreparationTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            landPreparationTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.land_preparation_type_name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1209,11 +1304,15 @@ export function CreatePlotDialog({
                           <SelectValue placeholder="Select crop planting type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {AGRI_DROPDOWN_OPTIONS.cropPlantingType.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
+                          {cropPlantingTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            cropPlantingTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.crop_planting_type_name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

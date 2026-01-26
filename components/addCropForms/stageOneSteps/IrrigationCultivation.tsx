@@ -65,11 +65,15 @@ const IrrigationCultivation = ({
           get("/cms/crop-irrigation-source-service/", {
             params: { page_size: 50, start_record: 1 },
           }),
-
-          //Fetch for local files JSON
-          fetch("/irrigation_status.json").then((res) => res.json()),
-          fetch("/earthing_up.json").then((res) => res.json()),
-          fetch("/weed_presence.json").then((res) => res.json()),
+          get("/cms/irrigation-status-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+          get("/cms/earthing-up-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+          get("/cms/weed-presence-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
         ]);
 
         if (irrigationRes.status === "success") {
@@ -108,34 +112,32 @@ const IrrigationCultivation = ({
           );
         }
 
-        // Actual API will need this block. Comment the one down below and uncomment this one after caliing original API
+        if (irrigationStatusRes.status === "success") {
+          setIrrigationStatusOptions(
+            irrigationStatusRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.irrigation_status,
+            })),
+          );
+        }
 
-        // if (irrigationStatusRes.status === "success") {
-        //   setIrrigationStatusOptions(
-        //     irrigationStatusRes.data.map((item: any) => ({
-        //       value: item.id,
-        //       label: item.irrigation_source,
-        //     })),
-        //   );
-        // }
-        setIrrigationStatusOptions(
-          irrigationStatusRes.map((item: any) => ({
-            value: item.id,
-            label: item.irrigation_status,
-          })),
-        );
-        setEarthingUpOptions(
-          earthingUpRes.map((item: any) => ({
-            value: item.id,
-            label: item.irrigation_status,
-          })),
-        );
-        setWeedPresenceOptions(
-          weedPresenceRes.map((item: any) => ({
-            value: item.id,
-            label: item.irrigation_status,
-          })),
-        );
+        if (earthingUpRes.status === "success") {
+          setEarthingUpOptions(
+            earthingUpRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.earthing_up_type,
+            })),
+          );
+        }
+
+        if (weedPresenceRes.status === "success") {
+          setWeedPresenceOptions(
+            weedPresenceRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.weed_presence_type,
+            })),
+          );
+        }
       } catch (err) {
         console.error("Failed to fetch crop CMS options", err);
       }
@@ -202,7 +204,7 @@ const IrrigationCultivation = ({
       <h2 className="text-lg lg:text-xl font-semibold mb-5 text-center underline">
         {t("cultivation_details")}
       </h2>
-      <div className="space-y-8">
+      <div className="space-y-8 max-h-[400px] overflow-auto">
         {/* Irrigation Section */}
         <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
           <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">

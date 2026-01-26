@@ -294,8 +294,11 @@ export default function CropDetailsPreview({
             <div className="mb-3  rounded-xl bg-white shadow-sm p-3">
               <h4 className="font-semibold text-gray-700">{t("pests")}</h4>
               <ul className="list-disc list-inside text-gray-600">
-                {data.pestDetails.map((p: any, idx: number) => (
-                  <li key={idx}>{p.name}</li>
+                {removeDuplicates(data.pestDetails, {
+                  idKey: "id",
+                  nameKey: "name",
+                }).map((d: any, idx: number) => (
+                  <li key={idx}>{d.name}</li>
                 ))}
               </ul>
             </div>
@@ -306,8 +309,11 @@ export default function CropDetailsPreview({
           {data.diseaseDetails?.length ? (
             <div className=" rounded-xl bg-white shadow-sm p-3">
               <h4 className="font-semibold text-gray-700">{t("diseases")}</h4>
-              <ul className="list-disc list-inside text-gray-600 ">
-                {data.diseaseDetails.map((d: any, idx: number) => (
+              <ul className="list-disc list-inside text-gray-600">
+                {removeDuplicates(data.diseaseDetails, {
+                  idKey: "id",
+                  nameKey: "name",
+                }).map((d: any, idx: number) => (
                   <li key={idx}>{d.name}</li>
                 ))}
               </ul>
@@ -411,4 +417,35 @@ export default function CropDetailsPreview({
       </p>
     </div>
   );
+}
+
+type DedupOptions<T> = {
+  idKey?: keyof T;
+  nameKey?: keyof T;
+};
+
+export function removeDuplicates<T extends Record<string, any>>(
+  items: T[] = [],
+  options: DedupOptions<T> = {},
+): T[] {
+  const { idKey, nameKey } = options;
+  const seen = new Set<string>();
+
+  return items.filter((item) => {
+    if (!item) return false;
+
+    const idVal = idKey ? item[idKey] : null;
+    const nameVal = nameKey
+      ? String(item[nameKey] ?? "")
+          .trim()
+          .toLowerCase()
+      : "";
+
+    const uniqueKey = `${idVal ?? "no-id"}-${nameVal}`;
+
+    if (seen.has(uniqueKey)) return false;
+
+    seen.add(uniqueKey);
+    return true;
+  });
 }

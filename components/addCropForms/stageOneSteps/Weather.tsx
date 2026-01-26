@@ -85,13 +85,13 @@ const Weather = ({ data, onChange }: WeatherProps) => {
   console.log(data);
 
   return (
-    <form className="lg:p-3 max-h-[60vh] overflow-auto space-y-5">
+    <form className="lg:p-3 space-y-5">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
         {t("weather_details")}
       </h2>
 
       {/* ✅ Adverse Weather Effects */}
-      <div className="space-y-3 bg-gray-50 p-3 border rounded-lg">
+      <div className="space-y-3 bg-gray-50 p-3 border rounded-lg max-h-[400px] overflow-auto">
         <h3 className="font-semibold">
           {t("adverse_weather_type")}{" "}
           <span className="text-sm text-gray-400">

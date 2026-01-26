@@ -87,9 +87,6 @@ export default function AddCropDetailsModal({
                 date_from: w.date_from,
                 date_to: w.date_to,
               })) || [];
-
-          // console.log(weatherEffects);
-
           // ------------------------------
           // SET NORMALIZED DATA
           // ------------------------------
@@ -222,6 +219,11 @@ export default function AddCropDetailsModal({
               cropData.cultivation?.cultivation_system_id ?? null,
             land_suitability_id:
               cropData.cultivation?.land_suitability_id ?? null,
+            // new propertyies added
+            irrigation_status_id: cropData.cultivation.irrigation_status_id,
+            earthing_up_type_id: cropData.cultivation.earthing_up_id,
+            number_of_irrigations: cropData.cultivation.number_of_irrigations,
+            weed_presence_type_id: cropData.cultivation.weed_presence_id,
           },
         ],
 
@@ -307,35 +309,18 @@ export default function AddCropDetailsModal({
         // DISEASES: same treatment as pests
         crop_asset_disease_attack_details: Array.isArray(cropData.diseases)
           ? cropData.diseases
-              .filter((idOrObj: any) => {
-                if (idOrObj == null) return false;
-                if (typeof idOrObj === "object") {
-                  const id =
-                    idOrObj.disease_attack_type_id ?? idOrObj.id ?? null;
-                  const name = (idOrObj.name ?? "").toString();
-                  if (!id) return false;
-                  if (name.trim().toLowerCase() === "not provided")
-                    return false;
-                  return true;
-                }
-                return Boolean(idOrObj) && Number(idOrObj) !== 0;
-              })
-              .map((idOrObj: any) => {
-                const id =
-                  typeof idOrObj === "object"
-                    ? (idOrObj.disease_attack_type_id ?? idOrObj.id)
-                    : idOrObj;
-                const date =
-                  typeof idOrObj === "object"
-                    ? (idOrObj.attack_date ?? idOrObj.date ?? null)
-                    : null;
-                const remarks =
-                  typeof idOrObj === "object" ? (idOrObj.remarks ?? "") : "";
+              .filter((id: any) => Boolean(id) && Number(id) !== 0)
+              .map((diseaseId: number, index: number) => {
+                const detail = cropData.diseaseDetails?.[index] ?? {};
+
                 return {
                   crop_disease_attack_id: 0,
-                  disease_attack_type_id: id,
-                  attack_date: date,
-                  remarks: remarks,
+                  disease_attack_type_id: diseaseId,
+                  disease_control_type_id: cropData.diseaseControlId ?? null,
+                  neighbour_field_status_id:
+                    cropData.neighbourFieldStatusId ?? null,
+                  // attack_date: detail?.date ?? null,
+                  // remarks: detail?.remarks ?? "",
                 };
               })
           : [],
@@ -374,8 +359,8 @@ export default function AddCropDetailsModal({
           : [],
       };
 
-      // console.log("Submitting payload:", payload);
-      // console.log(JSON.stringify(payload));
+      console.log("Payload submittion", payload);
+
       const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
       });
@@ -483,8 +468,6 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
-
-  console.log(cropData);
 
   return (
     <div>

@@ -85,9 +85,12 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
           get("/cms/crop-disease-attack-observations-type-service/", {
             params: { page_size: 50, start_record: 1 },
           }),
-          //Fetch for local files JSON
-          fetch("/disease_control.json").then((res) => res.json()),
-          fetch("/neighbour_field_status.json").then((res) => res.json()),
+          get("/cms/disease-control-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+          get("/cms/neighbour-field-status-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
         ]);
 
         if (pestRes.status === "success")
@@ -106,19 +109,20 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             })),
           );
 
-        //for local jsons
-        setDiseaseControlOptions(
-          diseaseControlRes.map((item: any) => ({
-            value: item.id,
-            label: item.irrigation_status,
-          })),
-        );
-        setNeighbourFieldStatusOptions(
-          neighbourFieldStatusRes.map((item: any) => ({
-            value: item.id,
-            label: item.irrigation_status,
-          })),
-        );
+        if (neighbourFieldStatusRes.status === "success")
+          setNeighbourFieldStatusOptions(
+            neighbourFieldStatusRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.field_status_type,
+            })),
+          );
+        if (diseaseControlRes.status === "success")
+          setDiseaseControlOptions(
+            diseaseControlRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.disease_control_type,
+            })),
+          );
       } catch (err) {
         console.error(err);
       }
@@ -202,15 +206,13 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     );
   };
 
-  console.log(data);
-
   return (
     <div className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
         {t("pest_disease_observations")}
       </h2>
 
-      <div className="space-y-6 max-h-[500px] overflow-auto">
+      <div className="space-y-6 max-h-[400px] overflow-auto">
         <DropdownField
           label="Disease Control"
           id="diseaseControl"

@@ -81,7 +81,7 @@ const History = ({ data, onChange }: HistoryProps) => {
         {t('history')}
       </h2>
 
-      <div className="space-y-5 max-h-[400px] overflow-auto">
+      <div className="space-y-5 max-h-[500px] overflow-auto">
         <InputField
           placeholder={t('ex_boro_rice')}
           label={t('immediate_previous_crop')}

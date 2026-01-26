@@ -29,7 +29,12 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
 
   // Initialize previousImages only once on mount, filtering by stageId
   useEffect(() => {
-    if (!isInitialized.current && data && data.length > 0 && stageId !== undefined) {
+    if (
+      !isInitialized.current &&
+      data &&
+      data.length > 0 &&
+      stageId !== undefined
+    ) {
       // Filter data to only include items with matching stageId
       const filteredData = data.filter((item) => item.stage_id === stageId);
       setPreviousImages(filteredData);
@@ -84,22 +89,29 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
   return (
     <div className="space-y-5 bg-white rounded-lg lg:p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
-        {t('attachments')}
+        {t("attachments")}
       </h2>
 
       {/* Previous Images Section - API Data */}
       {previousImages.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[400px] overflow-auto">
           <h3 className="text-lg lg:text-xl font-semibold text-gray-700 border-b-2 border-blue-500 pb-2">
             Previous Images
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {previousImages.map((image, index) => (
-              <div key={`previous-${index}`} className="relative border rounded-lg overflow-hidden shadow-sm">
+              <div
+                key={`previous-${index}`}
+                className="relative border rounded-lg overflow-hidden shadow-sm"
+              >
                 <img
                   // src={"https://dev-backend.insurecow.com/" + image?.attachment_path}
-                  src={image?.attachment_path.startsWith("data:") ? image?.attachment_path :process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL + image?.attachment_path}
-
+                  src={
+                    image?.attachment_path.startsWith("data:")
+                      ? image?.attachment_path
+                      : process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL +
+                        image?.attachment_path
+                  }
                   alt={`Previous Attachment ${index + 1}`}
                   className="w-full h-32 object-cover"
                 />
@@ -124,7 +136,10 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {recentUploads.map((image, index) => (
-              <div key={`recent-${index}`} className="relative border rounded-lg overflow-hidden shadow-sm">
+              <div
+                key={`recent-${index}`}
+                className="relative border rounded-lg overflow-hidden shadow-sm"
+              >
                 <img
                   src={image?.attachment_path}
                   alt={`Recent Upload ${index + 1}`}
@@ -147,14 +162,14 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
       <div className="flex justify-center">
         <PhotoCaptureModal
           onPhotoCapture={handlePhotoCapture}
-          triggerText={t('add_photo')}
-          title={t('capture_or_upload_photo')}
+          triggerText={t("add_photo")}
+          title={t("capture_or_upload_photo")}
         />
       </div>
 
       {previousImages.length === 0 && recentUploads.length === 0 && (
         <p className="text-center text-gray-500 italic">
-          {t('no_photos_added_yet')}
+          {t("no_photos_added_yet")}
         </p>
       )}
     </div>

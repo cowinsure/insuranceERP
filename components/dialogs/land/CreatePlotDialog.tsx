@@ -165,16 +165,16 @@ export function CreatePlotDialog({
   );
   const [lsLoading, setLsLoading] = useState(false);
 
-  const [soilTypes, setSoilTypes] = useState<{id: number, soil_type_name: string}[]>([]);
+  const [soilTypes, setSoilTypes] = useState<{id: number, name: string}[]>([]);
   const [soilTypesLoading, setSoilTypesLoading] = useState(false);
 
-  const [landTypes, setLandTypes] = useState<{id: number, land_type_name: string}[]>([]);
+  const [landTypes, setLandTypes] = useState<{id: number, name: string}[]>([]);
   const [landTypesLoading, setLandTypesLoading] = useState(false);
 
-  const [landPreparationTypes, setLandPreparationTypes] = useState<{id: number, land_preparation_type_name: string}[]>([]);
+  const [landPreparationTypes, setLandPreparationTypes] = useState<{id: number, name: string}[]>([]);
   const [landPreparationTypesLoading, setLandPreparationTypesLoading] = useState(false);
 
-  const [cropPlantingTypes, setCropPlantingTypes] = useState<{id: number, crop_planting_type_name: string}[]>([]);
+  const [cropPlantingTypes, setCropPlantingTypes] = useState<{id: number, name: string}[]>([]);
   const [cropPlantingTypesLoading, setCropPlantingTypesLoading] = useState(false);
 
   // derive suitable / not suitable lists for the UI
@@ -1237,7 +1237,7 @@ export function CreatePlotDialog({
                           ) : (
                             soilTypes.map((option) => (
                               <SelectItem key={option.id} value={String(option.id)}>
-                                {option.soil_type_name}
+                                {option.name}
                               </SelectItem>
                             ))
                           )}
@@ -1261,7 +1261,7 @@ export function CreatePlotDialog({
                           ) : (
                             landTypes.map((option) => (
                               <SelectItem key={option.id} value={String(option.id)}>
-                                {option.land_type_name}
+                                {option.name}
                               </SelectItem>
                             ))
                           )}
@@ -1285,7 +1285,7 @@ export function CreatePlotDialog({
                           ) : (
                             landPreparationTypes.map((option) => (
                               <SelectItem key={option.id} value={String(option.id)}>
-                                {option.land_preparation_type_name}
+                                {option.name}
                               </SelectItem>
                             ))
                           )}
@@ -1309,7 +1309,7 @@ export function CreatePlotDialog({
                           ) : (
                             cropPlantingTypes.map((option) => (
                               <SelectItem key={option.id} value={String(option.id)}>
-                                {option.crop_planting_type_name}
+                                {option.name}
                               </SelectItem>
                             ))
                           )}

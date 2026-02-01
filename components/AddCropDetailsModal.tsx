@@ -314,6 +314,7 @@ export default function AddCropDetailsModal({
                 const detail = cropData.diseaseDetails?.[index] ?? {};
 
                 return {
+                  
                   crop_disease_attack_id: 0,
                   disease_attack_type_id: diseaseId,
                   disease_control_type_id: cropData.diseaseControlId ?? null,

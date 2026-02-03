@@ -37,7 +37,9 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
         <Grid>
           <InputField
             label={t("seed_name")}
-            value={safeArray(data?.crop_asset_seed_details)[0]?.seed_common_name}
+            value={
+              safeArray(data?.crop_asset_seed_details)[0]?.seed_common_name
+            }
           />
           <InputField
             label={t("variety")}
@@ -74,6 +76,20 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             }
           />
           <InputField
+            label={"Irrigation Status"}
+            value={
+              safeArray(data?.crop_asset_irrigation_cultivation_details)[0]
+                ?.irrigation_status
+            }
+          />
+          <InputField
+            label={"Number of Irrigation"}
+            value={
+              safeArray(data?.crop_asset_irrigation_cultivation_details)[0]
+                ?.number_of_irrigations
+            }
+          />
+          <InputField
             label={t("cultivation_system")}
             value={
               safeArray(data?.crop_asset_irrigation_cultivation_details)[0]
@@ -85,6 +101,20 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             value={
               safeArray(data?.crop_asset_irrigation_cultivation_details)[0]
                 ?.crop_land_suitability_name
+            }
+          />
+          <InputField
+            label={"Earthing Up type"}
+            value={
+              safeArray(data?.crop_asset_irrigation_cultivation_details)[0]
+                ?.earthing_up_type
+            }
+          />
+          <InputField
+            label={"Weed Presence"}
+            value={
+              safeArray(data?.crop_asset_irrigation_cultivation_details)[0]
+                ?.weed_presence_type
             }
           />
         </Grid>
@@ -104,7 +134,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             label={t("harvest_date")}
             value={formatDate(
               safeArray(data?.crop_asset_previous_season_history_details)[0]
-                ?.harvest_date
+                ?.harvest_date,
             )}
           />
           <InputField
@@ -117,7 +147,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
           <InputField
             label={t("last_year_production")}
             value={safeArray(
-              data?.crop_asset_previous_season_history_details
+              data?.crop_asset_previous_season_history_details,
             )[0]?.last_year_production?.toString()}
           />
           <InputField
@@ -146,8 +176,8 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               value={formatDate(
                 filterByItemStage(
                   data?.crop_asset_weather_effect_history,
-                  2
-                )[0]?.date_from?.slice(0, 10)
+                  2,
+                )[0]?.date_from?.slice(0, 10),
               )}
             />
             <InputField
@@ -155,8 +185,8 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
               value={formatDate(
                 filterByItemStage(
                   data?.crop_asset_weather_effect_history,
-                  2
-                )[0]?.date_to?.slice(0, 10)
+                  2,
+                )[0]?.date_to?.slice(0, 10),
               )}
             />
           </div>
@@ -166,7 +196,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             items={uniqueByIdAndName(
               filterByItemStage(data?.crop_asset_weather_effect_history, 2),
               "weather_effect_type_id",
-              "weather_effect_type_name"
+              "weather_effect_type_name",
             ).map((item) => ({
               name: item.weather_effect_type_name,
             }))}
@@ -176,13 +206,29 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
 
       {/* 🐛 Pest & Disease Attacks */}
       <Section title={t("pest_disease_attacks")}>
+        <div className="space-y-3 mb-5">
+          <InputField
+            label={"Disease Control Type"}
+            value={
+              safeArray(data?.crop_asset_disease_attack_details)[0]
+                ?.disease_control_type
+            }
+          />
+          <InputField
+            label={"Neighbour Field Status"}
+            value={
+              safeArray(data?.crop_asset_disease_attack_details)[0]
+                ?.field_status_type
+            }
+          />
+        </div>
         <Grid>
           <ArrayDisplay
             title={t("Pests")}
             items={uniqueByIdAndName(
               filterByItemStage(data?.crop_asset_pest_attack_details, 2),
               "pest_attack_type_id",
-              "pest_attack_observations_type_name"
+              "pest_attack_observations_type_name",
             ).map((item) => ({
               name: item.pest_attack_observations_type_name,
             }))}
@@ -193,7 +239,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
             items={uniqueByIdAndName(
               filterByItemStage(data?.crop_asset_disease_attack_details, 2),
               "disease_attack_type_id",
-              "disease_attack_observations_type_name"
+              "disease_attack_observations_type_name",
             ).map((item) => ({
               name: item.disease_attack_observations_type_name,
             }))}
@@ -214,7 +260,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
                   : undefined,
               remarks: c?.remarks,
               date: c?.created_at,
-            })
+            }),
           )}
         />
       </Section>
@@ -249,7 +295,7 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
                     </div>
                   </div>
                 );
-              }
+              },
             )}
           </div>
 
@@ -284,7 +330,7 @@ const InputField = ({ label, value }: { label: string; value: any }) => {
   const { t } = useLocalization();
   return (
     <div className="flex flex-col">
-      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-sm font-semibold mb-1 text-gray-400">{label}</span>
       <div className="border border-gray-200 rounded-md p-2 bg-gray-50">
         {value && value !== "null" ? (
           value

@@ -45,6 +45,8 @@ export interface AddCropData {
   // 🆕 NEW
   diseaseControlId?: number | null;
   neighbourFieldStatusId?: number | null;
+  diseaseControlLabel?: string;
+  neighbourFieldLabel?: string;
 }
 
 export interface AddCropDetailsModalProps {

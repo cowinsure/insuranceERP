@@ -138,6 +138,8 @@ export default function CropDetailsPreview({
     fetchLookups();
   }, []);
 
+  console.log(data);
+
   if (loading) return <Loading className="h-[400px]" />;
 
   return (
@@ -199,9 +201,19 @@ export default function CropDetailsPreview({
                   data.cultivation.irrigation_facility,
               )}
               {renderRow(
+                "Irrigation Status",
+                data.cultivation.irrigation_status ||
+                  data.cultivation.irrigation_status,
+              )}
+              {renderRow(
                 t("irrigation_source"),
                 data.cultivation.irrigation_source_id_name ||
                   data.cultivation.irrigation_source,
+              )}
+              {renderRow(
+                "Number of Irrigations",
+                data.cultivation.number_of_irrigations ||
+                  data.cultivation.number_of_irrigations,
               )}
               {renderRow(
                 t("cultivation_system"),
@@ -212,6 +224,16 @@ export default function CropDetailsPreview({
                 t("land_suitability"),
                 data.cultivation.land_suitability_id_name ||
                   data.cultivation.crop_land_suitability_name,
+              )}
+              {renderRow(
+                "Earthing Up",
+                data.cultivation.earthing_up_type_id_name ||
+                  data.cultivation.earthing_up_type,
+              )}
+              {renderRow(
+                "Weed Presence",
+                data.cultivation.weed_presence_type_id_name ||
+                  data.cultivation.weed_presence_type,
               )}
             </div>
           ) : (
@@ -288,6 +310,8 @@ export default function CropDetailsPreview({
 
         {/* 🐛 Pests & Diseases */}
         <AccordionSection title={t("pest_disease_observations")}>
+          {renderRow(t("Disease Control Type"), data.diseaseControlLabel)}
+          {renderRow(t("Neighbour Field Status"), data.neighbourFieldLabel)}
           {data.pestDetails?.length ? (
             <div className="mb-3  rounded-xl bg-white shadow-sm p-3">
               <h4 className="font-semibold text-gray-700">{t("pests")}</h4>
@@ -394,13 +418,15 @@ export default function CropDetailsPreview({
                   className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
                 >
                   <img
-                    src={attachment.attachment_path}
+                    src={`${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment.attachment_path}`}
                     alt={`Attachment ${index + 1}`}
                     className="w-full h-48 object-cover"
                   />
-                  <div className="p-2 bg-gray-50 border-t">
+                  <div
+                    className={`p-2 bg-gray-50 border-t ${attachment.remarks ? "block" : "hidden"}`}
+                  >
                     <p className="text-xs text-gray-600">
-                      {attachment.remarks || "No remarks"}
+                      {attachment.remarks}
                     </p>
                   </div>
                 </div>

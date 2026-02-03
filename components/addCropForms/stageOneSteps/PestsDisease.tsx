@@ -12,6 +12,8 @@ interface PestsDiseaseProps {
     diseaseIds?: number[];
     diseaseControlId?: number | undefined;
     neighbourFieldStatusId?: number | undefined;
+    diseaseControlLabel?: string;
+    neighbourFieldLabel?: string;
   };
   onChange: (
     pestIds: number[],
@@ -20,6 +22,8 @@ interface PestsDiseaseProps {
     diseaseDetails?: { id: number; name: string }[],
     diseaseControlId?: number,
     neighbourFieldStatusId?: number,
+    diseaseControlLabel?: string, // Add this
+    neighbourFieldLabel?: string, // Add this
   ) => void;
 }
 
@@ -61,12 +65,18 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     number | undefined
   >();
 
+  const [diseaseControlLabel, setDiseaseControlLabel] = useState<string>("");
+
+  const [neighbourFieldLabel, setNeighbourFieldLabel] = useState<string>("");
+
   // Sync with parent when data changes (for persistence)
   useEffect(() => {
     setSelectedPests(data.pestIds || []);
     setSelectedDiseases(data.diseaseIds || []);
     setDiseaseControlId(data.diseaseControlId ?? undefined);
     setNeighbourFieldStatusId(data.neighbourFieldStatusId ?? undefined);
+    setDiseaseControlLabel(data.diseaseControlLabel || "");
+    setNeighbourFieldLabel(data.neighbourFieldLabel || "");
   }, [data]);
 
   // Fetch options from API
@@ -175,6 +185,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       neighbourFieldStatusId,
     );
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
 
@@ -182,13 +193,25 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
 
     let newDiseaseControl = diseaseControlId;
     let newNeighbourStatus = neighbourFieldStatusId;
+    let newDiseaseControlLabel = diseaseControlLabel;
+    let newNeighbourFieldLabel = neighbourFieldLabel;
 
     if (name === "disease_control_id") {
       newDiseaseControl = numericValue;
       setDiseaseControlId(numericValue);
+      const selectedOption = diseaseControlOptions.find(
+        (opt) => opt.value === numericValue,
+      );
+      newDiseaseControlLabel = selectedOption?.label || "";
+      setDiseaseControlLabel(newDiseaseControlLabel);
     } else if (name === "neighbour_field_status_id") {
       newNeighbourStatus = numericValue;
       setNeighbourFieldStatusId(numericValue);
+      const selectedOption = neighbourFieldStatusOptions.find(
+        (opt) => opt.value === numericValue,
+      );
+      newNeighbourFieldLabel = selectedOption?.label || "";
+      setNeighbourFieldLabel(newNeighbourFieldLabel);
     }
 
     const pestDetails = pestOptions.filter((p) => selectedPests.includes(p.id));
@@ -201,11 +224,13 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       selectedDiseases,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
       diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
-      newDiseaseControl,
-      newNeighbourStatus,
+      newDiseaseControl, // diseaseControlId ✅
+      newNeighbourStatus, // neighbourFieldStatusId ✅
+      newDiseaseControlLabel, // diseaseControlLabel ✅
+      newNeighbourFieldLabel, // neighbourFieldLabel ✅
     );
   };
-
+  console.log(data);
   return (
     <div className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">

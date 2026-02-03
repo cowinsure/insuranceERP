@@ -36,7 +36,7 @@ export default function AddCropDetailsModal({
 }: AddCropDetailsModalProps) {
   const { get, put } = useApi();
   const { t } = useLocalization();
-    const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -59,8 +59,10 @@ export default function AddCropDetailsModal({
     pestDetails: [],
     diseaseDetails: [],
     // 🆕
-    diseaseControlId: null,
-    neighbourFieldStatusId: null,
+    diseaseControlId: undefined,
+    neighbourFieldStatusId: undefined,
+    diseaseControlLabel: "",
+    neighbourFieldLabel: "",
   });
 
   // This function fetchs and puts data on the forms for selected crop
@@ -73,6 +75,10 @@ export default function AddCropDetailsModal({
         const res = await get(`/cms/crop-info-service/?crop_id=${cropId}`);
         if (res.status === "success" && res.data) {
           const d = res.data[0];
+
+          const firstDisease = d.crop_asset_disease_attack_details?.find(
+            (dd: any) => dd.stage_id === 2,
+          );
 
           // -----------------------------
           // 🌾 FILTER PESTS (stage_id = 2)
@@ -141,6 +147,13 @@ export default function AddCropDetailsModal({
             diseases: stage2DiseaseIds,
             diseaseDetails: stage2Diseases,
 
+            diseaseControlId:
+              firstDisease?.disease_control_type_id ?? undefined,
+            neighbourFieldStatusId:
+              firstDisease?.neighbour_field_status_id ?? undefined,
+            diseaseControlLabel: firstDisease?.disease_control_type ?? "",
+            neighbourFieldLabel: firstDisease?.field_status_type ?? "",
+
             chemicals: {
               fertilizers:
                 d.crop_asset_chemical_usage_details?.filter(
@@ -176,8 +189,6 @@ export default function AddCropDetailsModal({
     t("attachments"),
     t("preview"),
   ];
-
-
 
   const handleNext = () => {
     setCompletedSteps((prev) => new Set(prev).add(currentStep));
@@ -227,9 +238,9 @@ export default function AddCropDetailsModal({
               cropData.cultivation?.land_suitability_id ?? null,
             // new propertyies added
             irrigation_status_id: cropData.cultivation.irrigation_status_id,
-            earthing_up_type_id: cropData.cultivation.earthing_up_id,
+            earthing_up_type_id: cropData.cultivation.earthing_up_type_id,
             number_of_irrigations: cropData.cultivation.number_of_irrigations,
-            weed_presence_type_id: cropData.cultivation.weed_presence_id,
+            weed_presence_type_id: cropData.cultivation.weed_presence_type_id,
           },
         ],
 
@@ -320,7 +331,6 @@ export default function AddCropDetailsModal({
                 const detail = cropData.diseaseDetails?.[index] ?? {};
 
                 return {
-                  
                   crop_disease_attack_id: 0,
                   disease_attack_type_id: diseaseId,
                   disease_control_type_id: cropData.diseaseControlId ?? null,
@@ -438,6 +448,8 @@ export default function AddCropDetailsModal({
                 diseaseControlId: cropData.diseaseControlId ?? undefined,
                 neighbourFieldStatusId:
                   cropData.neighbourFieldStatusId ?? undefined,
+                diseaseControlLabel: cropData.diseaseControlLabel,
+                neighbourFieldLabel: cropData.neighbourFieldLabel,
               }}
               onChange={(
                 p,
@@ -446,6 +458,8 @@ export default function AddCropDetailsModal({
                 diseaseDetails,
                 diseaseControlId,
                 neighbourFieldStatusId,
+                diseaseControlLabel,
+                neighbourFieldLabel,
               ) => {
                 setCropData({
                   ...cropData,
@@ -455,6 +469,8 @@ export default function AddCropDetailsModal({
                   diseaseDetails,
                   diseaseControlId,
                   neighbourFieldStatusId,
+                  diseaseControlLabel,
+                  neighbourFieldLabel,
                 });
               }}
             />
@@ -486,9 +502,7 @@ export default function AddCropDetailsModal({
           <div className="animate-fadeIn">
             <CropDetailsPreview
               data={cropData}
-              attachments={cropData.attachments.filter((att: any) =>
-                att.attachment_path.startsWith("data:"),
-              )}
+              attachments={cropData.attachments.filter((att: any) => att)}
             />
           </div>
         );
@@ -496,7 +510,7 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
-
+  console.log(cropData);
   return (
     <div>
       <div className="bg-white rounded-xl mb-4">

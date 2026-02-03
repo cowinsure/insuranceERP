@@ -183,12 +183,12 @@ const IrrigationCultivation = ({
           irrigationStatusOptions.find((opt) => opt.value === numericValue)
             ?.label || "";
         break;
-      case "earthing_up_id":
+      case "earthing_up_type_id":
         selectedLabel =
           earthingUpOptions.find((opt) => opt.value === numericValue)?.label ||
           "";
         break;
-      case "weed_presence_id":
+      case "weed_presence_type_id":
         selectedLabel =
           weedPresenceOptions.find((opt) => opt.value === numericValue)
             ?.label || "";
@@ -203,6 +203,8 @@ const IrrigationCultivation = ({
     });
   };
 
+  console.log(data);
+  
   return (
     <form className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 text-center underline">
@@ -319,9 +321,9 @@ const IrrigationCultivation = ({
             ) : (
               <DropdownField
                 label={t("Earthing Up")}
-                id="earthing_up_id"
-                name="earthing_up_id"
-                value={data.earthing_up_id || ""}
+                id="earthing_up_type_id"
+                name="earthing_up_type_id"
+                value={data.earthing_up_type_id || ""}
                 onChange={handleChange}
                 options={earthingUpOptions}
               />
@@ -332,9 +334,9 @@ const IrrigationCultivation = ({
             ) : (
               <DropdownField
                 label={t("Weed Presence")}
-                id="weed_presence_id"
-                name="weed_presence_id"
-                value={data.weed_presence_id || ""}
+                id="weed_presence_type_id"
+                name="weed_presence_type_id"
+                value={data.weed_presence_type_id || ""}
                 onChange={handleChange}
                 options={weedPresenceOptions}
               />

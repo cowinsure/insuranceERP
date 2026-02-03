@@ -12,6 +12,7 @@ export default function Home() {
   const router = useRouter();
   
 
+
   useEffect(() => {
     AOS.init();
     "main layout" + auth?.accessToken + localStorage.getItem("accessToken");

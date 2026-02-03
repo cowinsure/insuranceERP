@@ -154,6 +154,7 @@ export default function CropPage() {
 
   interface GroupedCoordinates {
     [key: string]: LandCoordinate[];
+    
   }
 
   function groupByCoordinateType(data: LandCoordinate[]): GroupedCoordinates {

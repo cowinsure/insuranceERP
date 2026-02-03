@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import { useLocalization } from "@/core/context/LocalizationContext";
 import InputField from "@/components/InputField";
+import { DropdownSkeleton } from "@/components/ui/form-skeleton";
 
 interface IrrigationCultivationProps {
   data: any;
@@ -39,6 +40,7 @@ const IrrigationCultivation = ({
   const [weedPresenceOptions, setWeedPresenceOptions] = useState<
     { value: number; label: string }[]
   >([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
 
   // Fetch options from API
   useEffect(() => {
@@ -140,6 +142,8 @@ const IrrigationCultivation = ({
         }
       } catch (err) {
         console.error("Failed to fetch crop CMS options", err);
+      } finally {
+        setIsLoadingOptions(false);
       }
     };
 
@@ -212,32 +216,44 @@ const IrrigationCultivation = ({
           </h3>
 
           <div className="space-y-5">
-            <DropdownField
-              label={t("irrigation_facility")}
-              id="irrigationFacility"
-              name="irrigation_facility_id"
-              value={data.irrigation_facility_id || ""}
-              onChange={handleChange}
-              options={irrigationFacilityOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("irrigation_facility")}
+                id="irrigationFacility"
+                name="irrigation_facility_id"
+                value={data.irrigation_facility_id || ""}
+                onChange={handleChange}
+                options={irrigationFacilityOptions}
+              />
+            )}
 
-            <DropdownField
-              label={t("irrigation_source")}
-              id="irrigationSource"
-              name="irrigation_source_id"
-              value={data.irrigation_source_id || ""}
-              onChange={handleChange}
-              options={irrigationSourceOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("irrigation_source")}
+                id="irrigationSource"
+                name="irrigation_source_id"
+                value={data.irrigation_source_id || ""}
+                onChange={handleChange}
+                options={irrigationSourceOptions}
+              />
+            )}
 
-            <DropdownField
-              label={t("irrigation_status")}
-              id="irrigationStatus"
-              name="irrigation_status_id"
-              value={data.irrigation_status_id || ""}
-              onChange={handleChange}
-              options={irrigationStatusOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("irrigation_status")}
+                id="irrigationStatus"
+                name="irrigation_status_id"
+                value={data.irrigation_status_id || ""}
+                onChange={handleChange}
+                options={irrigationStatusOptions}
+              />
+            )}
 
             <InputField
               type="number"
@@ -263,14 +279,18 @@ const IrrigationCultivation = ({
           </h3>
 
           <div className="space-y-5">
-            <DropdownField
-              label={t("cultivation_system")}
-              id="cultivationSystem"
-              name="cultivation_system_id"
-              value={data.cultivation_system_id || ""}
-              onChange={handleChange}
-              options={cultivationSystemOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("cultivation_system")}
+                id="cultivationSystem"
+                name="cultivation_system_id"
+                value={data.cultivation_system_id || ""}
+                onChange={handleChange}
+                options={cultivationSystemOptions}
+              />
+            )}
           </div>
         </div>
 
@@ -281,32 +301,44 @@ const IrrigationCultivation = ({
           </h3>
 
           <div className="space-y-5">
-            <DropdownField
-              label={t("land_suitability_for_commercial")}
-              id="landSuitability"
-              name="land_suitability_id"
-              value={data.land_suitability_id || ""}
-              onChange={handleChange}
-              options={landSuitabilityOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("land_suitability_for_commercial")}
+                id="landSuitability"
+                name="land_suitability_id"
+                value={data.land_suitability_id || ""}
+                onChange={handleChange}
+                options={landSuitabilityOptions}
+              />
+            )}
 
-            <DropdownField
-              label={t("Earthing Up")}
-              id="earthing_up_id"
-              name="earthing_up_id"
-              value={data.earthing_up_id || ""}
-              onChange={handleChange}
-              options={earthingUpOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("Earthing Up")}
+                id="earthing_up_id"
+                name="earthing_up_id"
+                value={data.earthing_up_id || ""}
+                onChange={handleChange}
+                options={earthingUpOptions}
+              />
+            )}
 
-            <DropdownField
-              label={t("Weed Presence")}
-              id="weed_presence_id"
-              name="weed_presence_id"
-              value={data.weed_presence_id || ""}
-              onChange={handleChange}
-              options={weedPresenceOptions}
-            />
+            {isLoadingOptions ? (
+              <DropdownSkeleton />
+            ) : (
+              <DropdownField
+                label={t("Weed Presence")}
+                id="weed_presence_id"
+                name="weed_presence_id"
+                value={data.weed_presence_id || ""}
+                onChange={handleChange}
+                options={weedPresenceOptions}
+              />
+            )}
           </div>
         </div>
       </div>

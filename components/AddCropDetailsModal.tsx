@@ -20,6 +20,7 @@ import {
   AddCropData,
   AddCropDetailsModalProps,
 } from "@/core/model/CropDetails/StageOneModels/interfaces";
+import { FormSkeleton } from "./ui/form-skeleton";
 
 export default function AddCropDetailsModal({
   crop: {
@@ -35,12 +36,39 @@ export default function AddCropDetailsModal({
 }: AddCropDetailsModalProps) {
   const { get, put } = useApi();
   const { t } = useLocalization();
+    const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // ✅ Step data state with proper chemical structure
+  const [cropData, setCropData] = useState<AddCropData>({
+    seed: [],
+    cultivation: {},
+    history: {},
+    weather: {
+      remarks: "",
+      weather_effects: [],
+      date_from: "",
+      date_to: "",
+    },
+    pests: [],
+    diseases: [],
+    chemicals: { fertilizers: [], pesticides: [] },
+    attachments: [],
+    pestDetails: [],
+    diseaseDetails: [],
+    // 🆕
+    diseaseControlId: null,
+    neighbourFieldStatusId: null,
+  });
 
   // This function fetchs and puts data on the forms for selected crop
   useEffect(() => {
     const fetchExistingCropData = async () => {
       if (!cropId) return;
 
+      setIsInitialLoading(true);
       try {
         const res = await get(`/cms/crop-info-service/?crop_id=${cropId}`);
         if (res.status === "success" && res.data) {
@@ -130,6 +158,8 @@ export default function AddCropDetailsModal({
         }
       } catch (err) {
         console.error("❌ Failed to fetch crop data:", err);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -147,31 +177,7 @@ export default function AddCropDetailsModal({
     t("preview"),
   ];
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Step data state with proper chemical structure
-  const [cropData, setCropData] = useState<AddCropData>({
-    seed: [],
-    cultivation: {},
-    history: {},
-    weather: {
-      remarks: "",
-      weather_effects: [],
-      date_from: "",
-      date_to: "",
-    },
-    pests: [],
-    diseases: [],
-    chemicals: { fertilizers: [], pesticides: [] },
-    attachments: [],
-    pestDetails: [],
-    diseaseDetails: [],
-    // 🆕
-    diseaseControlId: null,
-    neighbourFieldStatusId: null,
-  });
 
   const handleNext = () => {
     setCompletedSteps((prev) => new Set(prev).add(currentStep));
@@ -379,91 +385,112 @@ export default function AddCropDetailsModal({
   };
 
   const renderStep = () => {
+    // Show skeleton for all steps during initial load
+    if (isInitialLoading) {
+      return <FormSkeleton type="form-with-dropdowns" />;
+    }
+
     switch (currentStep) {
       case 0:
         return (
-          <CropDetailsForm
-            selectedCropId={cropId}
-            data={cropData.seed}
-            onChange={(d) => setCropData({ ...cropData, seed: d })}
-          />
+          <div className="animate-fadeIn">
+            <CropDetailsForm
+              selectedCropId={cropId}
+              data={cropData.seed}
+              onChange={(d) => setCropData({ ...cropData, seed: d })}
+            />
+          </div>
         );
       case 1:
         return (
-          <IrrigationCultivation
-            data={cropData.cultivation}
-            onChange={(d) => setCropData({ ...cropData, cultivation: d })}
-          />
+          <div className="animate-fadeIn">
+            <IrrigationCultivation
+              data={cropData.cultivation}
+              onChange={(d) => setCropData({ ...cropData, cultivation: d })}
+            />
+          </div>
         );
       case 2:
         return (
-          <History
-            data={cropData.history}
-            onChange={(d) => setCropData({ ...cropData, history: d })}
-          />
+          <div className="animate-fadeIn">
+            <History
+              data={cropData.history}
+              onChange={(d) => setCropData({ ...cropData, history: d })}
+            />
+          </div>
         );
       case 3:
         return (
-          <Weather
-            data={cropData.weather}
-            onChange={(d) => setCropData({ ...cropData, weather: d })}
-          />
+          <div className="animate-fadeIn">
+            <Weather
+              data={cropData.weather}
+              onChange={(d) => setCropData({ ...cropData, weather: d })}
+            />
+          </div>
         );
       case 4:
         return (
-          <PestsDisease
-            data={{
-              pestIds: cropData.pests,
-              diseaseIds: cropData.diseases,
-              diseaseControlId: cropData.diseaseControlId ?? undefined,
-              neighbourFieldStatusId:
-                cropData.neighbourFieldStatusId ?? undefined,
-            }}
-            onChange={(
-              p,
-              d,
-              pestDetails,
-              diseaseDetails,
-              diseaseControlId,
-              neighbourFieldStatusId,
-            ) => {
-              setCropData({
-                ...cropData,
-                pests: p,
-                diseases: d,
+          <div className="animate-fadeIn">
+            <PestsDisease
+              data={{
+                pestIds: cropData.pests,
+                diseaseIds: cropData.diseases,
+                diseaseControlId: cropData.diseaseControlId ?? undefined,
+                neighbourFieldStatusId:
+                  cropData.neighbourFieldStatusId ?? undefined,
+              }}
+              onChange={(
+                p,
+                d,
                 pestDetails,
                 diseaseDetails,
                 diseaseControlId,
                 neighbourFieldStatusId,
-              });
-            }}
-          />
+              ) => {
+                setCropData({
+                  ...cropData,
+                  pests: p,
+                  diseases: d,
+                  pestDetails,
+                  diseaseDetails,
+                  diseaseControlId,
+                  neighbourFieldStatusId,
+                });
+              }}
+            />
+          </div>
         );
 
       case 5:
         return (
-          <Chemicals
-            data={cropData.chemicals} // ✅ always object with 2 arrays
-            onChange={(d) => setCropData({ ...cropData, chemicals: d })}
-          />
+          <div className="animate-fadeIn">
+            <Chemicals
+              data={cropData.chemicals}
+              onChange={(d) => setCropData({ ...cropData, chemicals: d })}
+            />
+          </div>
         );
       case 6:
         return (
-          <AttachmentStepOne
-            stageId={2}
-            data={cropData.attachments}
-            onChange={(d) => setCropData({ ...cropData, attachments: d })}
-          />
+          <div className="animate-fadeIn">
+            <AttachmentStepOne
+              stageId={2}
+              data={cropData.attachments}
+              onChange={(d) => setCropData({ ...cropData, attachments: d })}
+            />
+          </div>
         );
 
       case 7:
         return (
-          <CropDetailsPreview
-            data={cropData}
-            attachments={cropData.attachments.filter((att: any) =>
-              att.attachment_path.startsWith("data:"),
-            )}
-          />
+          <div className="animate-fadeIn">
+            <CropDetailsPreview
+              data={cropData}
+              attachments={cropData.attachments.filter((att: any) =>
+                att.attachment_path.startsWith("data:"),
+              )}
+            />
+          </div>
         );
       default:
         return null;

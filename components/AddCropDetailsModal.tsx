@@ -312,6 +312,7 @@ export default function AddCropDetailsModal({
                 is_active: true,
               }))
           : [],
+          
 
         // PESTS: filter out falsy/0 ids (preserve original field names)
         crop_asset_pest_attack_details: Array.isArray(cropData.pests)

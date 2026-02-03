@@ -10,6 +10,7 @@ import { MdOutlineCancel } from "react-icons/md";
 export default function Home() {
   const auth = useAuth();
   const router = useRouter();
+  
 
   useEffect(() => {
     AOS.init();

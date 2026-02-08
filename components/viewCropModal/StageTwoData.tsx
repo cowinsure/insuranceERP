@@ -175,6 +175,12 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       )?.label
     : "";
 
+  const neighbourFIeldType = crop?.neighbour_field_status_id
+    ? harvestTimingOptions?.find(
+        (opt) => opt.value === crop?.harvesting_timing_id
+      )?.label
+    : "";
+
   const goodPracticeNames =
     Array.isArray(crop?.crop_harvest_details) &&
     crop?.crop_harvest_details.length > 0
@@ -202,6 +208,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
     return Array.from(map.values());
   };
+  console.log(cropData);
 
   /* ---------- Render ---------- */
   return (
@@ -278,7 +285,13 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           {t("pest_disease_attacks")}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <DisplayField
+          label={"Neighbour Field Type"}
+          value={
+            cropData?.crop_asset_disease_attack_details[0]?.field_status_type
+          }
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-7">
           {/* ✅ Stage-filtered Pest */}
           <ArrayDisplay
             title={t("Pests")}

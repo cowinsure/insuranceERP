@@ -28,6 +28,14 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
     return Array.from(map.values());
   };
 
+  const diseaseAttackDetails = safeArray(
+    data?.crop_asset_disease_attack_details,
+  );
+
+  const latestWithControl = [...diseaseAttackDetails]
+    .reverse()
+    .find((item) => item?.disease_control_type || item?.field_status_type);
+
   console.log("Stage one data", data);
 
   return (
@@ -208,18 +216,13 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
       <Section title={t("pest_disease_attacks")}>
         <div className="space-y-3 mb-5">
           <InputField
-            label={"Disease Control Type"}
-            value={
-              safeArray(data?.crop_asset_disease_attack_details)[0]
-                ?.disease_control_type
-            }
+            label="Disease Control Type"
+            value={latestWithControl?.disease_control_type ?? "-"}
           />
+
           <InputField
-            label={"Neighbour Field Status"}
-            value={
-              safeArray(data?.crop_asset_disease_attack_details)[0]
-                ?.field_status_type
-            }
+            label="Neighbour Field Status"
+            value={latestWithControl?.field_status_type ?? "-"}
           />
         </div>
         <Grid>

@@ -41,54 +41,7 @@ const Login: React.FC<LoginProps> = ({
   const [phoneError, setPhoneError] = useState<string | boolean>(false);
   const [passwordError, setPasswordError] = useState<string | boolean>(false);
 
-  // useEffect(() => {
-  //   AOS.init({ duration: 800, once: true });
-  // }, []);
-
-  // Old function
-  // const handleSubmit = async (event: React.FormEvent) => {
-  //   event.preventDefault();
-
-  //   // Reset errors before validation
-  //   setPhoneError(false);
-  //   setPasswordError(false);
-
-  //   let valid = true;
-
-  //   if (!phone) {
-  //     setPhoneError("Phone number cannot be empty.");
-  //     valid = false;
-  //   } else if (!/^[0-9]{11}$/.test(phone)) {
-  //     setPhoneError("Please enter a valid 11-digit phone number.");
-  //     valid = false;
-  //   }
-
-  //   if (!password) {
-  //     setPasswordError("Password cannot be empty.");
-  //     valid = false;
-  //   }
-
-  //   if (!valid) return;
-
-  //   try {
-  //     const response = await post("v1/auth/public/login/", {
-  //       mobile_number: phone,
-  //       password,
-  //     });
-
-  //     const data = await response.data;
-  //     const { role: userId, access_token: accessToken } = data;
-
-  //     login(userId, phone, accessToken);
-  //     toast.success("Login successful!");
-  //     router.push(redirectUrl);
-  //   } catch (error) {
-  //     console.error("Login failed:", error);
-  //     toast.error("Login failed. Please check your credentials and try again.");
-  //     setPhoneError(true);
-  //     setPasswordError(true);
-  //   }
-  // };
+ 
 
   // New function with improved error handling
   

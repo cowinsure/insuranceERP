@@ -5,6 +5,7 @@ import InputField from "./InputField";
 import DropdownField from "./DropDownField";
 import useApi from "@/hooks/use_api";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import { DropdownSkeleton } from "./ui/form-skeleton";
 
 interface SeedDetailsProps {
   selectedCropId: number;
@@ -22,6 +23,7 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
   const [seedTypeOptions, setSeedTypeOptions] = useState<
     { value: number; label: string }[]
   >([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
 
   const seedCompanyTypeOptions = [
     { value: 1, label: t("government") },
@@ -84,6 +86,8 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         }
       } catch (err) {
         console.error("Failed to fetch seed types", err);
+      } finally {
+        setIsLoadingOptions(false);
       }
     };
     fetchSeedTypes();
@@ -138,8 +142,6 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
     onChange(updated);
   };
 
-  // //("Seed Details Data:", data);
-
   return (
     <div className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 text-center underline">
@@ -159,16 +161,20 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         />
 
         {/* Variety of Seed */}
-        <DropdownField
-          label={t("variety_of_seed")}
-          id="seed_variety_id"
-          name="seed_variety_id"
-          value={data[0]?.seed_variety_id || 0}
-          onChange={(e) =>
-            handleChange(0, "seed_variety_id", Number(e.target.value))
-          }
-          options={seedVarietyOptions}
-        />
+        {isLoadingOptions ? (
+          <DropdownSkeleton />
+        ) : (
+          <DropdownField
+            label={t("variety_of_seed")}
+            id="seed_variety_id"
+            name="seed_variety_id"
+            value={data[0]?.seed_variety_id || 0}
+            onChange={(e) =>
+              handleChange(0, "seed_variety_id", Number(e.target.value))
+            }
+            options={seedVarietyOptions}
+          />
+        )}
 
         {/* Seed Company Name */}
         <InputField
@@ -194,16 +200,20 @@ const SeedDetails = ({ selectedCropId, data, onChange }: SeedDetailsProps) => {
         />
 
         {/* Seed Type */}
-        <DropdownField
-          label={t("type_of_the_seed_used")}
-          id="seed_type_id"
-          name="seed_type_id"
-          value={data[0]?.seed_type_id || 0}
-          onChange={(e) =>
-            handleChange(0, "seed_type_id", Number(e.target.value))
-          }
-          options={seedTypeOptions}
-        />
+        {isLoadingOptions ? (
+          <DropdownSkeleton />
+        ) : (
+          <DropdownField
+            label={t("type_of_the_seed_used")}
+            id="seed_type_id"
+            name="seed_type_id"
+            value={data[0]?.seed_type_id || 0}
+            onChange={(e) =>
+              handleChange(0, "seed_type_id", Number(e.target.value))
+            }
+            options={seedTypeOptions}
+          />
+        )}
       </div>
     </div>
   );

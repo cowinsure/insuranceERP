@@ -140,8 +140,6 @@ export default function CropDetailsPreview({
 
   if (loading) return <Loading className="h-[400px]" />;
 
-  console.log(data);
-
   return (
     <div className="max-w-4xl mx-auto text-gray-700 bg-white space-y-6">
       <h2 className="text-lg lg:text-xl font-semibold text-center text-gray-800 mb-4">

@@ -61,7 +61,7 @@ const CropsPage = () => {
   const [crops, setCrops] = useState<CropGetData[]>([]);
   const [filteredCrops, setFilteredCrops] = useState<CropGetData[]>([]);
   const [stageOnePayloads, setStageOnePayloads] = useState<Record<number, any>>(
-    {},
+    {}
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(6);
@@ -112,7 +112,7 @@ const CropsPage = () => {
     const filtered = crops.filter(
       (crop) =>
         cropFilter === "All" ||
-        crop.crop_name?.toLowerCase().includes(cropFilter.toLowerCase()),
+        crop.crop_name?.toLowerCase().includes(cropFilter.toLowerCase())
     );
     setFilteredByCrop(filtered);
   }, [crops, cropFilter]);
@@ -267,7 +267,7 @@ const CropsPage = () => {
       ? filteredCrops
       : filteredCrops.slice(
           (currentPage - 1) * (pageSize as number),
-          currentPage * (pageSize as number),
+          currentPage * (pageSize as number)
         );
 
   return (
@@ -502,7 +502,7 @@ const CropsPage = () => {
                   {paginatedCrops.map((crop, idx) => {
                     // const seed = crop.crop_asset_seed_details?.[0];
                     const { stage1Enabled, stage2Enabled } = getStageAccess(
-                      crop.current_stage_id,
+                      crop.current_stage_id
                     );
                     return (
                       <tr
@@ -635,7 +635,7 @@ const CropsPage = () => {
           ) : (
             paginatedCrops.map((crop, idx) => {
               const { stage1Enabled, stage2Enabled } = getStageAccess(
-                crop.current_stage_id,
+                crop.current_stage_id
               );
 
               return (
@@ -649,7 +649,7 @@ const CropsPage = () => {
                     className="flex justify-between items-center"
                     onClick={() =>
                       setOpenMenuId(
-                        openMenuId === crop.crop_id ? null : crop.crop_id,
+                        openMenuId === crop.crop_id ? null : crop.crop_id
                       )
                     }
                   >
@@ -665,8 +665,8 @@ const CropsPage = () => {
                             crop.stage_name === "Planting & Cultivation"
                               ? "/seeding.png"
                               : crop.stage_name === "Harvest & Observation"
-                                ? "/harvest.png"
-                                : ""
+                              ? "/harvest.png"
+                              : ""
                           }
                           alt=""
                           className="w-24 object-cover rotate-y-180 drop-shadow-xl"
@@ -707,7 +707,7 @@ const CropsPage = () => {
                       <button
                         onClick={() =>
                           setOpenMenuId(
-                            openMenuId === crop.crop_id ? null : crop.crop_id,
+                            openMenuId === crop.crop_id ? null : crop.crop_id
                           )
                         }
                         className={`relative z-20 ${
@@ -742,18 +742,9 @@ const CropsPage = () => {
                     }
     `}
                   >
+                    {/* Stage 1 btn */}
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        handleView(crop.crop_id);
-                        setOpenMenuId(null);
-                      }}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-
-                    <Button
+                      title="Stage 1"
                       variant="ghost"
                       size="sm"
                       className={
@@ -773,7 +764,9 @@ const CropsPage = () => {
                       <FilePlus className="w-4 h-4" />
                     </Button>
 
+                    {/* Stage 2 btn */}
                     <Button
+                      title="Stage 2"
                       variant="ghost"
                       size="sm"
                       className={
@@ -791,6 +784,18 @@ const CropsPage = () => {
                       }}
                     >
                       <ClipboardCheck className="w-4 h-4" />
+                    </Button>
+
+                    {/* View btn */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        handleView(crop.crop_id);
+                        setOpenMenuId(null);
+                      }}
+                    >
+                      <Eye className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

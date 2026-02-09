@@ -15,6 +15,7 @@ interface PestsDiseaseProps {
 
     // 🆕 New
     neighbour_field_status_id?: number;
+    neighbour_field_status_label?: string;
   };
 
   onChange: (updatedData: {
@@ -27,6 +28,7 @@ interface PestsDiseaseProps {
 
     // 🆕 New
     neighbour_field_status_id?: number;
+    neighbour_field_status_label?: string;
   }) => void;
 }
 
@@ -42,16 +44,16 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   >([]);
 
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data.pestIds || [],
+    data.pestIds || []
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data.diseaseIds || [],
+    data.diseaseIds || []
   );
   const [manageable, setManageable] = useState(
-    data.is_manageable_harvest ? "Yes" : "No",
+    data.is_manageable_harvest ? "Yes" : "No"
   );
   const [remarks, setRemarks] = useState(
-    data.reason_for_is_manageable_harvest || "",
+    data.reason_for_is_manageable_harvest || ""
   );
 
   const [neighbourStatusOptions, setNeighbourStatusOptions] = useState<
@@ -62,6 +64,10 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     number | undefined
   >(data.neighbour_field_status_id);
 
+  const [neighbourStatusLabel, setNeighbourStatusLabel] = useState<
+    string | undefined
+  >(data.neighbour_field_status_label);
+
   console.log(data);
 
   /** Sync with parent data if it changes */
@@ -71,6 +77,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     setManageable(data.is_manageable_harvest ? "Yes" : "No");
     setRemarks(data.reason_for_is_manageable_harvest || "");
     setNeighbourStatusId(data.neighbour_field_status_id);
+    setNeighbourStatusLabel(data.neighbour_field_status_label);
   }, [data]);
 
   useEffect(() => {
@@ -82,7 +89,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
         json.map((item: any) => ({
           value: item.id,
           label: item.irrigation_status,
-        })),
+        }))
       );
     };
 
@@ -107,7 +114,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
             pestRes.data.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
-            })),
+            }))
           );
         }
 
@@ -116,7 +123,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
             diseaseRes.data.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
-            })),
+            }))
           );
         }
       } catch (err) {
@@ -141,6 +148,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       is_manageable_harvest: manageable === "Yes",
       reason_for_is_manageable_harvest: manageable === "No" ? remarks : "",
       neighbour_field_status_id: neighbourStatusId,
+      neighbour_field_status_label: neighbourStatusLabel,
       ...updated,
     });
   };
@@ -197,15 +205,23 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   };
 
   const handleNeighbourStatusChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const value = e.target.value;
     const numericValue = value === "" ? undefined : Number(value);
 
+    // Get the label for the selected value
+    const selectedOption = neighbourStatusOptions.find(
+      (opt) => opt.value === numericValue
+    );
+    const labelValue = selectedOption ? selectedOption.label : undefined;
+
     setNeighbourStatusId(numericValue);
+    setNeighbourStatusLabel(labelValue);
 
     updateParent({
       neighbour_field_status_id: numericValue,
+      neighbour_field_status_label: labelValue,
     });
   };
 

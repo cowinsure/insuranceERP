@@ -55,6 +55,7 @@ interface PestsDiseaseData {
   is_manageable_harvest?: boolean;
   reason_for_is_manageable_harvest?: string;
   neighbour_field_status_id?: number | undefined;
+  neighbour_field_status_label?: string | undefined;
 }
 
 interface WeatherData {
@@ -119,6 +120,7 @@ const AddCropStageTwoModal = ({
       is_manageable_harvest: true,
       reason_for_is_manageable_harvest: "",
       neighbour_field_status_id: undefined,
+      neighbour_field_status_label: undefined,
     },
     weather: [],
     attachments: [],
@@ -140,6 +142,13 @@ const AddCropStageTwoModal = ({
       .filter((d: any) => d.stage_id === 3)
       .map((d: any) => d.disease_attack_type_id);
 
+    // Get neighbour_field_status_id from stage 2 disease details
+    const stage2NeighbourStatus = (
+      selectedCrop.crop_asset_disease_attack_details || []
+    )
+      .filter((d: any) => d.stage_id === 3)
+      .map((d: any) => d.neighbour_field_status_id)[0] || undefined;
+
     const stage2Weather = (selectedCrop.crop_asset_weather_effect_history || [])
       .filter((w: any) => w.stage_id === 3)
       .map((w: any) => ({
@@ -149,7 +158,6 @@ const AddCropStageTwoModal = ({
         date_from: w.date_from,
         date_to: w.date_to,
       }));
-    console.log(stage2Weather);
 
     setStageTwoData((prev) => ({
       harvest: {
@@ -169,6 +177,11 @@ const AddCropStageTwoModal = ({
         reason_for_is_manageable_harvest:
           selectedCrop.crop_harvest_info?.[0]
             ?.reason_for_is_manageable_harvest || "",
+        neighbour_field_status_id: stage2NeighbourStatus,
+        neighbour_field_status_label:
+          selectedCrop.crop_asset_disease_attack_details?.find(
+            (d: any) => d.stage_id === 3
+          )?.field_status_type,
       },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
       attachments: selectedCrop.crop_asset_attachment_details || [],
@@ -182,11 +195,13 @@ const AddCropStageTwoModal = ({
       pestIds,
       diseaseIds,
       is_manageable_harvest,
+      neighbour_field_status_id,
       reason_for_is_manageable_harvest,
     } = data || {
       pestIds: [],
       diseaseIds: [],
       is_manageable_harvest: true,
+      neighbour_field_status_id: undefined,
       reason_for_is_manageable_harvest: "",
     };
 
@@ -205,6 +220,7 @@ const AddCropStageTwoModal = ({
       ? diseaseIds.filter(Boolean).map((id) => ({
           crop_disease_attack_id: 0,
           disease_attack_type_id: id,
+          neighbour_field_status_id: neighbour_field_status_id || 0,
           attack_date: null,
           remarks: "",
         }))
@@ -262,7 +278,7 @@ const AddCropStageTwoModal = ({
     const weather = mapWeather(stageTwoData.weather);
     return [
       ...(selectedCrop.crop_asset_weather_effect_history || []).filter(
-        (w: any) => w.stage_id !== 3,
+        (w: any) => w.stage_id !== 3
       ),
       ...weather.map((w) => ({ ...w, stage_id: 3 })),
     ];
@@ -414,7 +430,7 @@ const AddCropStageTwoModal = ({
           <StageTwoPreview
             data={stageTwoData}
             attachments={stageTwoData.attachments.filter((att: any) =>
-              att.attachment_path.startsWith("data:"),
+              att.attachment_path.startsWith("data:")
             )}
           />
         );

@@ -79,7 +79,7 @@ export default function CropDetailsPreview({
   // Lookup tables
   const [seedVarieties, setSeedVarieties] = useState<LookupMap>({});
   const [irrigationFacilities, setIrrigationFacilities] = useState<LookupMap>(
-    {}
+    {},
   );
   const [cultivationSystems, setCultivationSystems] = useState<LookupMap>({});
   const [landSuitability, setLandSuitability] = useState<LookupMap>({});
@@ -87,12 +87,15 @@ export default function CropDetailsPreview({
 
   const toMap = (arr: any[], key: string, label: string) =>
     Array.isArray(arr)
-      ? arr.reduce((acc, cur) => {
-          if (cur && cur[key] !== undefined && cur[label] !== undefined) {
-            acc[cur[key]] = cur[label];
-          }
-          return acc;
-        }, {} as Record<string, string>)
+      ? arr.reduce(
+          (acc, cur) => {
+            if (cur && cur[key] !== undefined && cur[label] !== undefined) {
+              acc[cur[key]] = cur[label];
+            }
+            return acc;
+          },
+          {} as Record<string, string>,
+        )
       : {};
 
   useEffect(() => {
@@ -118,10 +121,10 @@ export default function CropDetailsPreview({
 
         setSeedVarieties(toMap(varietyData, "id", "seed_variety"));
         setIrrigationFacilities(
-          toMap(irrigationData, "id", "irrigation_facility_name")
+          toMap(irrigationData, "id", "irrigation_facility_name"),
         );
         setCultivationSystems(
-          toMap(cultivationData, "id", "cultivation_system_name")
+          toMap(cultivationData, "id", "cultivation_system_name"),
         );
         // setLandSuitability(toMap(landData, "id", "land_suitability_name"));
         // setWeatherEffects(toMap(weatherData, "id", "weather_effect_type_name"));
@@ -134,8 +137,6 @@ export default function CropDetailsPreview({
 
     fetchLookups();
   }, []);
-
-  console.log(data);
 
   if (loading) return <Loading className="h-[400px]" />;
 
@@ -164,7 +165,7 @@ export default function CropDetailsPreview({
                   {renderRow(t("company"), s.seed_company_name)}
                   {renderRow(
                     t("variety"),
-                    s.seed_variety_name || seedVarieties[s.seed_variety_id]
+                    s.seed_variety_name || seedVarieties[s.seed_variety_id],
                   )}
                   {renderRow(t("seed_company_type"), s.seed_company_type_name)}
                   <div className="grid grid-cols-2 border-b border-gray-100 p-2 text-sm">
@@ -195,42 +196,42 @@ export default function CropDetailsPreview({
               {renderRow(
                 t("irrigation_facility"),
                 data.cultivation.irrigation_facility_id_name ||
-                  data.cultivation.irrigation_facility
+                  data.cultivation.irrigation_facility,
               )}
               {renderRow(
                 "Irrigation Status",
                 data.cultivation.irrigation_status ||
-                  data.cultivation.irrigation_status
+                  data.cultivation.irrigation_status,
               )}
               {renderRow(
                 t("irrigation_source"),
                 data.cultivation.irrigation_source_id_name ||
-                  data.cultivation.irrigation_source
+                  data.cultivation.irrigation_source,
               )}
               {renderRow(
                 "Number of Irrigations",
                 data.cultivation.number_of_irrigations ||
-                  data.cultivation.number_of_irrigations
+                  data.cultivation.number_of_irrigations,
               )}
               {renderRow(
                 t("cultivation_system"),
                 data.cultivation.cultivation_system_id_name ||
-                  data.cultivation.crop_cultivation_system_name
+                  data.cultivation.crop_cultivation_system_name,
               )}
               {renderRow(
                 t("land_suitability"),
                 data.cultivation.land_suitability_id_name ||
-                  data.cultivation.crop_land_suitability_name
+                  data.cultivation.crop_land_suitability_name,
               )}
               {renderRow(
                 "Earthing Up",
                 data.cultivation.earthing_up_type_id_name ||
-                  data.cultivation.earthing_up_type
+                  data.cultivation.earthing_up_type,
               )}
               {renderRow(
                 "Weed Presence",
                 data.cultivation.weed_presence_type_id_name ||
-                  data.cultivation.weed_presence_type
+                  data.cultivation.weed_presence_type,
               )}
             </div>
           ) : (
@@ -244,11 +245,11 @@ export default function CropDetailsPreview({
             <div className="rounded-lg bg-white shadow-sm p-3">
               {renderRow(
                 t("immediate_previous_crop"),
-                data.history.immediate_previous_crop
+                data.history.immediate_previous_crop,
               )}
               {renderRow(
                 t("last_years_crop"),
-                data.history.last_year_crop_type_name
+                data.history.last_year_crop_type_name,
               )}
               {/* {renderRow("Sowing Date", data.history.sowing_date)} */}
               {renderRow(t("harvest_date"), data.history.harvest_date)}
@@ -262,7 +263,7 @@ export default function CropDetailsPreview({
         {/* ☁️ Weather Effects */}
         <AccordionSection title={t("weather_effects")}>
           {data.weather?.weather_effects?.some(
-            (w: any) => w.weather_effect_type_id !== 0
+            (w: any) => w.weather_effect_type_id !== 0,
           ) ? (
             <>
               {data.weather ? (
@@ -282,7 +283,7 @@ export default function CropDetailsPreview({
                           >
                             {renderRow(
                               t("effect_type"),
-                              w.weather_effect_type_name
+                              w.weather_effect_type_name,
                             )}
                             {renderRow(t("remarks"), w.remarks || "")}
                           </div>
@@ -361,7 +362,7 @@ export default function CropDetailsPreview({
                       {renderRow(t("name"), f.chemical_name)}
                       {renderRow(
                         t("quantity"),
-                        `${f.qty || 0} ${f.qty_unit || ""}kg`
+                        `${f.qty || 0} ${f.qty_unit || ""}kg`,
                       )}
                       {renderRow(t("remarks"), truncate(f.remarks))}
                     </div>
@@ -386,7 +387,7 @@ export default function CropDetailsPreview({
                       {renderRow(t("name"), p.chemical_name)}
                       {renderRow(
                         t("quantity"),
-                        `${p.qty || 0} ${p.qty_unit || ""}kg`
+                        `${p.qty || 0} ${p.qty_unit || ""}kg`,
                       )}
                       {renderRow(t("remarks"), truncate(p.remarks))}
                     </div>
@@ -412,13 +413,15 @@ export default function CropDetailsPreview({
               {attachments.map((attachment, index) => (
                 <div
                   key={index}
-                  className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
+                  className={`${attachment.stage_id === 2 && "relative border rounded-lg overflow-hidden shadow-sm bg-white"}`}
                 >
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment.attachment_path}`}
-                    alt={`Attachment ${index + 1}`}
-                    className="w-full h-48 object-cover"
-                  />
+                  {attachment.stage_id === 2 && (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment.attachment_path}`}
+                      alt={`Attachment ${index + 1}`}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
                   <div
                     className={`p-2 bg-gray-50 border-t ${
                       attachment.remarks ? "block" : "hidden"
@@ -449,7 +452,7 @@ type DedupOptions<T> = {
 
 export function removeDuplicates<T extends Record<string, any>>(
   items: T[] = [],
-  options: DedupOptions<T> = {}
+  options: DedupOptions<T> = {},
 ): T[] {
   const { idKey, nameKey } = options;
   const seen = new Set<string>();

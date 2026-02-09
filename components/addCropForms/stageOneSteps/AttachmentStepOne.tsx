@@ -85,7 +85,9 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
     const combinedData = [...updatedPrevious, ...recentUploads];
     onChange(combinedData);
   };
-
+  console.log(data);
+  console.log(previousImages);
+  console.log(stageId);
   return (
     <div className="space-y-5 bg-white rounded-lg lg:p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">

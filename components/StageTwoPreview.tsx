@@ -24,7 +24,7 @@ const renderRow = (label: string, value: any) => (
     <span className="font-medium text-gray-600">{label}</span>
     <span
       className="text-gray-800 font-semibold tracking-wide col-span-2 text-right"
-      title={String(value || "")}
+      title={value || ""}
     >
       {value || <span className="text-gray-400">N/A</span>}
     </span>
@@ -71,7 +71,11 @@ export default function StageTwoPreview({
   const { t } = useLocalization();
   if (!data)
     return <p className="text-gray-400 italic">{t("no_data_available")}</p>;
-  
+
+  const stage3Attachments = attachments?.filter(
+    (attachment) => attachment.stage_id === 3,
+  );
+
   return (
     <div className="max-w-4xl mx-auto text-gray-700 bg-white space-y-6">
       <h2 className="text-lg lg:text-xl font-semibold text-center text-gray-800 mb-4">
@@ -105,7 +109,7 @@ export default function StageTwoPreview({
                       >
                         {val.production_kg} kg
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               ) : (
@@ -121,7 +125,7 @@ export default function StageTwoPreview({
                 {t("moisture_content_percent_cap")}
               </span>
               {Array.isArray(
-                data.harvest?.crop_harvest_moisture_content_details
+                data.harvest?.crop_harvest_moisture_content_details,
               ) &&
               data.harvest.crop_harvest_moisture_content_details.length > 0 ? (
                 <ul className="list-inside text-gray-800 font-semibold mt-1 text-right">
@@ -133,7 +137,7 @@ export default function StageTwoPreview({
                       >
                         {val.moisture_content_per} %
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               ) : (
@@ -190,7 +194,7 @@ export default function StageTwoPreview({
                       <li key={idx} className="py-2 font-semibold">
                         {d.good_agricultural_practices_type_name || "N/A"}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -215,7 +219,9 @@ export default function StageTwoPreview({
                   className="text-gray-800 font-semibold tracking-wide col-span-2 text-right"
                   title={data.pestsDisease?.neighbour_field_status_label}
                 >
-                  {data.pestsDisease?.neighbour_field_status_label || <span className="text-gray-400">N/A</span>}
+                  {data.pestsDisease?.neighbour_field_status_label || (
+                    <span className="text-gray-400">N/A</span>
+                  )}
                 </span>
               </div>
             )}
@@ -225,13 +231,13 @@ export default function StageTwoPreview({
               <>
                 {renderRow(
                   t("manageable_harvest"),
-                  data.pestsDisease.is_manageable_harvest ? "Yes" : "No"
+                  data.pestsDisease.is_manageable_harvest ? "Yes" : "No",
                 )}
                 {!data.pestsDisease.is_manageable_harvest &&
                   data.pestsDisease.reason_for_is_manageable_harvest &&
                   renderRow(
                     t("remarks"),
-                    data.pestsDisease.reason_for_is_manageable_harvest
+                    data.pestsDisease.reason_for_is_manageable_harvest,
                   )}
               </>
             )}
@@ -239,13 +245,13 @@ export default function StageTwoPreview({
             {renderList(
               t("pests"),
               data.pestsDisease?.pestNames?.map((name: string) => ({ name })) ||
-                []
+                [],
             )}
             {renderList(
               t("diseases"),
               data.pestsDisease?.diseaseNames?.map((name: string) => ({
                 name,
-              })) || []
+              })) || [],
             )}
           </div>
         </AccordionSection>
@@ -254,9 +260,9 @@ export default function StageTwoPreview({
         <AccordionSection title={t("weather_effects")}>
           {data.weather?.length ? (
             <div className="rounded-lg bg-white shadow-sm p-3 space-y-3">
-              {renderRow(t("period_from"), data.weather.date_from)}
-              {renderRow(t("period_to"), data.weather.date_to)}
-              {renderRow(t("general_remarks"), data.weather.remarks)}
+              {renderRow(t("period_from"), data.weather[0].date_from)}
+              {renderRow(t("period_to"), data.weather[0].date_to)}
+              {/* {renderRow(t("general_remarks"), data.weather.remarks)} */}
 
               {/* List of Weather Effects */}
               <div className="mt-2 space-y-2">
@@ -279,16 +285,16 @@ export default function StageTwoPreview({
         </AccordionSection>
 
         {/* 📎 Attachments */}
-        {attachments && attachments.length > 0 && (
+        {stage3Attachments?.length > 0 && (
           <AccordionSection title={t("attachments")}>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {attachments.map((attachment, index) => (
+              {stage3Attachments?.map((attachment, index) => (
                 <div
                   key={index}
                   className="relative border rounded-lg overflow-hidden shadow-sm bg-white"
                 >
                   <img
-                    src={attachment.attachment_path}
+                    src={`${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment.attachment_path}`}
                     alt={`Attachment ${index + 1}`}
                     className="w-full h-48 object-cover"
                   />

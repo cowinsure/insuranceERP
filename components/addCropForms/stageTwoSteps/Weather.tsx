@@ -41,7 +41,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
       try {
         const response = await get(
           "/cms/crop-adverse-weather-effect-type-service/",
-          { params: { page_size: 50, start_record: 1 } }
+          { params: { page_size: 50, start_record: 1 } },
         );
         if (response.status === "success") setWeatherOptions(response.data);
       } catch (err) {
@@ -61,11 +61,11 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
     const updatedWeatherEffects = updated.map((weather_effect_type_id) => {
       const existing = data.weather_effects.find(
-        (w) => w.weather_effect_type_id === weather_effect_type_id
+        (w) => w.weather_effect_type_id === weather_effect_type_id,
       );
 
       const weatherObj = weatherOptions.find(
-        (w) => w.id === weather_effect_type_id
+        (w) => w.id === weather_effect_type_id,
       );
 
       return {

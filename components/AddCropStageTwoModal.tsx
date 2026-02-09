@@ -143,11 +143,10 @@ const AddCropStageTwoModal = ({
       .map((d: any) => d.disease_attack_type_id);
 
     // Get neighbour_field_status_id from stage 2 disease details
-    const stage2NeighbourStatus = (
-      selectedCrop.crop_asset_disease_attack_details || []
-    )
-      .filter((d: any) => d.stage_id === 3)
-      .map((d: any) => d.neighbour_field_status_id)[0] || undefined;
+    const stage2NeighbourStatus =
+      (selectedCrop.crop_asset_disease_attack_details || [])
+        .filter((d: any) => d.stage_id === 3)
+        .map((d: any) => d.neighbour_field_status_id)[0] || undefined;
 
     const stage2Weather = (selectedCrop.crop_asset_weather_effect_history || [])
       .filter((w: any) => w.stage_id === 3)
@@ -180,7 +179,7 @@ const AddCropStageTwoModal = ({
         neighbour_field_status_id: stage2NeighbourStatus,
         neighbour_field_status_label:
           selectedCrop.crop_asset_disease_attack_details?.find(
-            (d: any) => d.stage_id === 3
+            (d: any) => d.stage_id === 3,
           )?.field_status_type,
       },
       weather: stage2Weather.length ? stage2Weather : prev.weather || [],
@@ -278,7 +277,7 @@ const AddCropStageTwoModal = ({
     const weather = mapWeather(stageTwoData.weather);
     return [
       ...(selectedCrop.crop_asset_weather_effect_history || []).filter(
-        (w: any) => w.stage_id !== 3
+        (w: any) => w.stage_id !== 3,
       ),
       ...weather.map((w) => ({ ...w, stage_id: 3 })),
     ];
@@ -405,9 +404,9 @@ const AddCropStageTwoModal = ({
                   ...prev.weather[i],
                   weather_effect_type_id: w.weather_effect_type_id,
                   weather_effect_type_name: w.weather_effect_type_name,
-                  remarks: w.remarks,
                   date_from: updatedData.date_from,
                   date_to: updatedData.date_to,
+                  remarks: updatedData.remarks,
                 })),
               }))
             }
@@ -429,9 +428,7 @@ const AddCropStageTwoModal = ({
         return (
           <StageTwoPreview
             data={stageTwoData}
-            attachments={stageTwoData.attachments.filter((att: any) =>
-              att.attachment_path.startsWith("data:")
-            )}
+            attachments={stageTwoData.attachments}
           />
         );
       default:

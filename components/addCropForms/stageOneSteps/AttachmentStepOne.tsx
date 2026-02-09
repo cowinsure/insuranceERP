@@ -85,9 +85,9 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
     const combinedData = [...updatedPrevious, ...recentUploads];
     onChange(combinedData);
   };
-  console.log(data);
-  console.log(previousImages);
-  console.log(stageId);
+  // console.log(data);
+  // console.log(previousImages);
+  // console.log(stageId);
   return (
     <div className="space-y-5 bg-white rounded-lg lg:p-5">
       <h2 className="text-xl font-semibold mb-5 text-center underline">
@@ -107,13 +107,7 @@ const AttachmentStepOne: React.FC<AttachmentStepOneProps> = ({
                 className="relative border rounded-lg overflow-hidden shadow-sm"
               >
                 <img
-                  // src={"https://dev-backend.insurecow.com/" + image?.attachment_path}
-                  src={
-                    image?.attachment_path.startsWith("data:")
-                      ? image?.attachment_path
-                      : process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL +
-                        image?.attachment_path
-                  }
+                  src={`${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${image.attachment_path}`}
                   alt={`Previous Attachment ${index + 1}`}
                   className="w-full h-32 object-cover"
                 />

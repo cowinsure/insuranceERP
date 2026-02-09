@@ -203,7 +203,7 @@ const IrrigationCultivation = ({
     });
   };
 
-  console.log(data);
+  // console.log(data);
   
   return (
     <form className="lg:p-3">

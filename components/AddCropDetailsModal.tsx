@@ -376,7 +376,7 @@ export default function AddCropDetailsModal({
           : [],
       };
 
-      console.log("Payload submittion", payload);
+      // console.log("Payload submittion", payload);
 
       const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: cropId },
@@ -510,7 +510,7 @@ export default function AddCropDetailsModal({
         return null;
     }
   };
-  console.log(cropData);
+  // console.log(cropData);
   return (
     <div>
       <div className="bg-white rounded-xl mb-4">

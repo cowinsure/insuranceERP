@@ -338,7 +338,7 @@ const AddCropStageTwoModal = ({
 
       const payload = buildFinalPayload();
 
-      console.log("Final PUT Payload:", payload);
+      // console.log("Final PUT Payload:", payload);
       const res = await put("/cms/crop-info-service/", payload, {
         params: { crop_id: selectedCrop?.crop_id },
       });
@@ -436,7 +436,7 @@ const AddCropStageTwoModal = ({
     }
   };
 
-  console.log("Stage two data received from childrens", stageTwoData);
+  // console.log("Stage two data received from childrens", stageTwoData);
 
   return (
     <div>

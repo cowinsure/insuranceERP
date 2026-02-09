@@ -230,7 +230,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       newNeighbourFieldLabel, // neighbourFieldLabel ✅
     );
   };
-  console.log(data);
+  // console.log(data);
   return (
     <div className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">

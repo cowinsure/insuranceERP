@@ -82,7 +82,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
     onChange({ ...data, [name]: value });
   };
 
-  console.log(data);
+  // console.log(data);
 
   return (
     <form className="lg:p-3 space-y-5">

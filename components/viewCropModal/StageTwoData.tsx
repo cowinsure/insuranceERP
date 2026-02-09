@@ -101,14 +101,14 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         "/cms/crop-harvest-seed-variety-observation-service/",
         {
           params: { page_size: 50, start_record: 1 },
-        }
+        },
       );
       if (res.status === "success" && Array.isArray(res.data)) {
         setHarvestSeedVarietyOptions(
           res.data.map((item: any) => ({
             value: item.harvest_seed_variety_observation_id,
             label: item.harvest_seed_variety_observation_type_name,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -122,14 +122,14 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         "/cms/crop-harvest-good-agricultural-practices-service/",
         {
           params: { page_size: 50, start_record: 1 },
-        }
+        },
       );
       if (res.status === "success" && Array.isArray(res.data)) {
         setGoodPracticesList(
           res.data.map((item: any) => ({
             id: item.good_agricultural_practices_type_id,
             label: item.good_agricultural_practices_type_name,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -147,7 +147,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           res.data.map((item: any) => ({
             value: item.harvesting_timing_id,
             label: item.harvesting_timing_name,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -165,19 +165,19 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
   /* ---------- Derived values ---------- */
   const seedVarietyName = crop?.harvest_seed_variety_observation_id
     ? harvestSeedVarietyOptions?.find(
-        (opt) => opt.value === crop?.harvest_seed_variety_observation_id
+        (opt) => opt.value === crop?.harvest_seed_variety_observation_id,
       )?.label
     : "";
 
   const harvestingTimingName = crop?.harvesting_timing_id
     ? harvestTimingOptions?.find(
-        (opt) => opt.value === crop?.harvesting_timing_id
+        (opt) => opt.value === crop?.harvesting_timing_id,
       )?.label
     : "";
 
   const neighbourFIeldType = crop?.neighbour_field_status_id
     ? harvestTimingOptions?.find(
-        (opt) => opt.value === crop?.harvesting_timing_id
+        (opt) => opt.value === crop?.harvesting_timing_id,
       )?.label
     : "";
 
@@ -187,7 +187,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       ? crop?.crop_harvest_details
           .map((detail: any) => {
             const match = goodPracticesList?.find(
-              (p) => p?.id === detail?.good_agricultural_practices_type_id
+              (p) => p?.id === detail?.good_agricultural_practices_type_id,
             );
             return match ? match.label : null;
           })
@@ -195,7 +195,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
       : [];
 
   const stage3Weather = filterStage3(
-    cropData.crop_asset_weather_effect_history || []
+    cropData.crop_asset_weather_effect_history || [],
   );
 
   const uniqueByIdAndName = (arr: any[], idKey: string, nameKey: string) => {
@@ -208,7 +208,6 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
     return Array.from(map.values());
   };
-  console.log(cropData);
 
   /* ---------- Render ---------- */
   return (
@@ -298,7 +297,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             items={uniqueByIdAndName(
               filterStage3(cropData.crop_asset_pest_attack_details || []),
               "pest_attack_type_id",
-              "pest_attack_observations_type_name"
+              "pest_attack_observations_type_name",
             ).map((p: any) => ({
               name: p.pest_attack_observations_type_name,
               remarks: p?.remarks,
@@ -312,7 +311,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
             items={uniqueByIdAndName(
               filterStage3(cropData.crop_asset_disease_attack_details || []),
               "disease_attack_type_id",
-              "disease_attack_observations_type_name"
+              "disease_attack_observations_type_name",
             ).map((d: any) => ({
               name: d.disease_attack_observations_type_name,
               remarks: d?.remarks,
@@ -330,19 +329,6 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* ✅ Stage-filtered Weather */}
-          <ArrayDisplay
-            title="Weather Effects"
-            items={uniqueByIdAndName(
-              filterStage3(cropData.crop_asset_weather_effect_history || []),
-              "weather_effect_type_id",
-              "weather_effect_type_name"
-            ).map((w: any) => ({
-              name: w.weather_effect_type_name,
-              remarks: w?.remarks,
-              date: w?.created_at || w?.modified_at,
-            }))}
-          />
-
           <DisplayField
             label="Period From"
             value={formatDate(stage3Weather[0]?.date_from) || "Not provided"}
@@ -350,6 +336,18 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
           <DisplayField
             label="Period To"
             value={formatDate(stage3Weather[0]?.date_to) || "Not provided"}
+          />
+          <ArrayDisplay
+            title="Weather Effects"
+            items={uniqueByIdAndName(
+              filterStage3(cropData.crop_asset_weather_effect_history || []),
+              "weather_effect_type_id",
+              "weather_effect_type_name",
+            ).map((w: any) => ({
+              name: w.weather_effect_type_name,
+              remarks: w?.remarks,
+              date: w?.created_at || w?.modified_at,
+            }))}
           />
         </div>
       </section>
@@ -365,7 +363,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
               {filterStage3(cropData.crop_asset_attachment_details).map(
                 (attachment: any, index: number) => {
                   const imageSrc = attachment?.attachment_path.startsWith(
-                    "data:"
+                    "data:",
                   )
                     ? attachment?.attachment_path
                     : `${process.env.NEXT_PUBLIC_API_ATTACHMENT_IMAGE_URL}${attachment?.attachment_path}`;
@@ -390,7 +388,7 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
                       </div>
                     </div>
                   );
-                }
+                },
               )}
             </div>
 

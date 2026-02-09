@@ -32,11 +32,11 @@ const StageOneData: React.FC<StageOneDataProps> = ({ data }) => {
     data?.crop_asset_disease_attack_details,
   );
 
-  const latestWithControl = [...diseaseAttackDetails]
-    .reverse()
-    .find((item) => item?.disease_control_type || item?.field_status_type);
+  const latestWithControl = [...diseaseAttackDetails].find(
+    (item) => item?.disease_control_type || item?.field_status_type,
+  );
 
-  console.log("Stage one data", data);
+  // console.log("Stage one data", data);
 
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">

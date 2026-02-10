@@ -17,9 +17,10 @@ export default function Home() {
   useEffect(() => {
     AOS.init();
     "main layout" + auth?.accessToken + localStorage.getItem("accessToken");
-    
+
 
     if (auth?.accessToken || localStorage.getItem("accessToken")) {
+      
       router.push("/dashboard");
     } else {
       router.push("/login");

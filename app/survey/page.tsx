@@ -9,11 +9,11 @@ import { toast, Toaster } from "sonner";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { FaCircleCheck } from "react-icons/fa6";
 import { SurveyTable, Survey as SurveyType } from "@/components/survey-table";
-import { SurveySearch } from "@/components/survey-search";
 import Survey from "@/components/addCropForms/stageTwoSteps/Survey";
 import { SurveyPostPayload } from "@/core/model/SurveyPost";
 import useApi from "@/hooks/use_api";
 import SurveyPreview from "@/components/surveyForms/SurveyPreview";
+import PageHeader from "@/components/PageHeader";
 
 // Type for GET API response
 type SurveyApiResponse = {
@@ -55,7 +55,6 @@ export default function SurveyPage() {
 
   // ------------------ GET data for table ------------------
   const [surveys, setSurveys] = useState<SurveyType[]>([]);
-  const [filteredSurveys, setFilteredSurveys] = useState<SurveyType[]>([]);
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -124,7 +123,6 @@ export default function SurveyPage() {
       }));
 
       setSurveys(mappedData);
-      setFilteredSurveys(mappedData);
     } catch (error: any) {
       toast.error(error?.message || "Failed to fetch surveys");
     }
@@ -225,8 +223,6 @@ export default function SurveyPage() {
     }
   };
 
-  console.log(surveys);
-
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -256,34 +252,16 @@ export default function SurveyPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
-      {/* Header */}
-      <div className="grid grid-cols-3 lg:flex items-center justify-between">
-        <div className="col-span-2">
-          <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
-            Survey Management
-          </h1>
-          <p className="text-gray-600 text-sm md:text-md">
-            Manage and conduct land surveys for insurance assessment
-          </p>
-        </div>
-
-        {/* <Button
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-          onClick={onOpen}
-        >
-          <Plus className="w-4 h-4" /> New Survey
-        </Button> */}
-      </div>
+    <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
+      {/* Page Header */}
+      <PageHeader
+        heading="Survey Management"
+        description="Manage and conduct land surveys for insurance assessment"
+      />
 
       {/* Search + Table */}
       <div className="space-y-4">
-        <SurveySearch data={surveys} setFilteredData={setFilteredSurveys} />
-        <SurveyTable
-          data={surveys}
-          filteredData={filteredSurveys}
-          setFilteredData={setFilteredSurveys}
-        />
+        <SurveyTable data={surveys} />
       </div>
 
       {/* Modal */}

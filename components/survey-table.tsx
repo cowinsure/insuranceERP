@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Pagination from "./utils/Pagination";
@@ -17,8 +17,8 @@ import useApi from "@/hooks/use_api";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Stepper } from "./Stepper";
 import { FaCircleCheck } from "react-icons/fa6";
-
-
+import { SurveySearch } from "./survey-search";
+import { SearchFilter } from "./utils/SearchFilter";
 
 export type SurveyYieldLoss = {
   survey_yield_loss_details_id: number;
@@ -76,56 +76,52 @@ export type Survey = {
   survey_varieties_of_seeds_details?: SurveySeedVariety[];
 };
 
-
-
 type SurveyTableProps = {
   data?: Survey[];
-  filteredData?: Survey[];
-  setFilteredData?: React.Dispatch<React.SetStateAction<Survey[]>>;
   loading?: boolean;
 };
 
-export function SurveyTable({
-  data,
-  filteredData,
-  setFilteredData,
-  loading = false,
-}: SurveyTableProps) {
-    const { get, post } = useApi();
+export function SurveyTable({ data, loading = false }: SurveyTableProps) {
+  const { get, post } = useApi();
+  const [filteredData, setFilteredData] = useState<Survey[]>(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(5);
+
+  useEffect(() => {
+    setFilteredData(data || []);
+  }, [data]);
   const [surveyView, setSurveyView] = useState(false);
   const [selectedSurvey, setSelectedSurvey] = useState(null);
 
-    const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [lat_long, setLatLong] = useState<{
     latitude: number;
     longitude: number;
   }>({ latitude: 0, longitude: 0 });
-   // ------------------ POST data for modal form ------------------
-    const [surveyData, setSurveyData] = useState<SurveyPostPayload>({
-      farmer_id: 0,
-      avg_prod_last_year: 0,
-      avg_prod_current_year: 0,
-      survey_date: "",
-      location_lat: 0,
-      location_long: 0,
-      survey_varieties_of_seeds_details: [],
-      survey_yield_loss_details: [],
-      survey_weather_event_details: [],
-      survey_pest_attack_details: [],
-      survey_disease_attack_details: [],
-    });
-    // Additional state for preview
+  // ------------------ POST data for modal form ------------------
+  const [surveyData, setSurveyData] = useState<SurveyPostPayload>({
+    farmer_id: 0,
+    avg_prod_last_year: 0,
+    avg_prod_current_year: 0,
+    survey_date: "",
+    location_lat: 0,
+    location_long: 0,
+    survey_varieties_of_seeds_details: [],
+    survey_yield_loss_details: [],
+    survey_weather_event_details: [],
+    survey_pest_attack_details: [],
+    survey_disease_attack_details: [],
+  });
+  // Additional state for preview
   const [surveyPreview, setSurveyPreview] = useState<any>({});
-    const [isOpen, setIsOpen] = useState(false);
-    const onOpen = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => {
     setIsOpen(true);
     resetForm();
   };
-   const onClose = () => setIsOpen(false);
+  const onClose = () => setIsOpen(false);
 
   const resetForm = () => {
     setSurveyData({
@@ -144,9 +140,9 @@ export function SurveyTable({
     setSurveyPreview({});
   };
 
-    const steps = ["Survey Details", "Preview"];
+  const steps = ["Survey Details", "Preview"];
 
-      const getCurrentLocation = () => {
+  const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       toast.warning("Geolocation is not supported by your browser.");
       return;
@@ -219,7 +215,7 @@ export function SurveyTable({
     }
   };
 
-    const renderStep = () => {
+  const renderStep = () => {
     switch (currentStep) {
       case 0:
         return (
@@ -247,8 +243,7 @@ export function SurveyTable({
     }
   };
 
-  const dataToPaginate =
-    filteredData && filteredData.length > 0 ? filteredData : data ?? [];
+  const dataToPaginate = filteredData;
 
   const totalPages =
     pageSize === "All"
@@ -259,34 +254,40 @@ export function SurveyTable({
     pageSize === "All"
       ? dataToPaginate
       : dataToPaginate.slice(
-        (currentPage - 1) * (pageSize as number),
-        currentPage * (pageSize as number)
-      );
+          (currentPage - 1) * (pageSize as number),
+          currentPage * (pageSize as number)
+        );
 
   const handleSurveyiew = (data: any) => {
     setSurveyView(true);
     setSelectedSurvey(data);
   };
 
-  console.log(data);
-
   return (
-    <Card className="border border-gray-200 py-3 lg:py-6">
-      <CardHeader>
-        <div className="flex justify-between">
-
-          <div>
-          <CardTitle className="text-lg font-semibold text-gray-900 py-0">
+    <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg">
+      {/* Table Header */}
+      <div className="mb-5 grid grid-cols-4">
+        {/* Table name */}
+        <div className="col-span-3 lg:col-span-2">
+          <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
             Registered Surveys
           </CardTitle>
 
-        
-        <p className="text-sm text-gray-600">
-          {dataToPaginate.length} surveys found
-        </p>
+          <p className="text-sm lg:text-base font-medium text-gray-400">
+            {filteredData.length} surveys found
+          </p>
+        </div>
 
+        <div className="lg:col-span-2 flex justify-end gap-5 items-center">
+          <div className="flex-1 hidden lg:block">
+            <SearchFilter
+              placeholder="Search farmers by Name, Location or Phone"
+              data={data || []}
+              setFilteredData={setFilteredData}
+              searchKeys={["farmer_name", "location", "mobile_number"]}
+            />
           </div>
-            <div className="flex justify-end items-center gap-2">
+          <div className="flex justify-end">
             <Button
               className="bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => onOpen()}
@@ -294,131 +295,137 @@ export function SurveyTable({
               <Plus className="w-4 h-4" /> New Survey
             </Button>
           </div>
-
         </div>
-      </CardHeader>
-      <CardContent>
-        {/* MOBILE VIEW — CARD LIST */}
-        <div className="grid gap-4 lg:hidden">
-          {loading || paginatedSurveys.length === 0 ? (
-            <Loading />
-          ) : (
-            paginatedSurveys.map((survey, idx) => (
-              <div
-                key={idx}
-                className="border rounded-lg p-4 shadow-sm bg-white animate__animated animate__fadeIn"
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <div className="flex justify-between items-center">
-                  <h3 className="font-semibold text-gray-900">
-                    {survey.farmer_name}
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSurveyiew(survey)}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
+      </div>
+
+      <div className="flex-1 block lg:hidden">
+        <SearchFilter
+          placeholder="Search farmers by Name, Location or Phone"
+          data={data || []}
+          setFilteredData={setFilteredData}
+          searchKeys={["farmer_name", "location", "mobile_number"]}
+        />
+      </div>
+
+      {/* MOBILE VIEW — CARD LIST */}
+      <div className="lg:hidden space-y-4">
+        {loading || paginatedSurveys.length === 0 ? (
+          <Loading />
+        ) : (
+          paginatedSurveys.map((survey, idx) => (
+            <div
+              key={idx}
+              className="border rounded-lg p-4 shadow-sm bg-white animate__animated animate__fadeIn"
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-gray-900">
+                  {survey.farmer_name}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSurveyiew(survey)}
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
+                <Phone className="w-4 h-4" /> {survey.mobile_number || "N/A"}
+              </p>
+
+              <p className="text-sm text-gray-600 flex items-center gap-2">
+                <Calendar className="w-4 h-4" /> {survey.survey_date}
+              </p>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div className="bg-gray-50 p-2 rounded">
+                  <p className="text-gray-500 text-xs">Avg Last Year</p>
+                  <p className="font-medium">
+                    {survey.avg_prod_last_year ?? "-"}
+                  </p>
                 </div>
 
-                <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
-                  <Phone className="w-4 h-4" /> {survey.mobile_number || "N/A"}
-                </p>
-
-                <p className="text-sm text-gray-600 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" /> {survey.survey_date}
-                </p>
-
-                <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                  <div className="bg-gray-50 p-2 rounded">
-                    <p className="text-gray-500 text-xs">Avg Last Year</p>
-                    <p className="font-medium">
-                      {survey.avg_prod_last_year ?? "-"}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 p-2 rounded">
-                    <p className="text-gray-500 text-xs">Avg Current Year</p>
-                    <p className="font-medium">
-                      {survey.avg_prod_current_year ?? "-"}
-                    </p>
-                  </div>
+                <div className="bg-gray-50 p-2 rounded">
+                  <p className="text-gray-500 text-xs">Avg Current Year</p>
+                  <p className="font-medium">
+                    {survey.avg_prod_current_year ?? "-"}
+                  </p>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            </div>
+          ))
+        )}
+      </div>
 
-        <div className="overflow-x-auto hidden lg:block">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Farmer Name
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Mobile
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                  Survey Date
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[150px]">
-                  Avg Last Year
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[180px]">
-                  Avg Current Year
-                </th>
-                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+      <div className="overflow-x-auto hidden lg:block">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                Farmer Name
+              </th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                Mobile
+              </th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                Survey Date
+              </th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[150px]">
+                Avg Last Year
+              </th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 lg:w-[180px]">
+                Avg Current Year
+              </th>
+              {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Status
                 </th> */}
-                <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
-                  Action
-                </th>
+              <th className="text-center py-3 px-4 text-sm font-medium text-gray-600">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading || paginatedSurveys.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-6 text-center">
+                  <Loading />
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {loading || paginatedSurveys.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-6 text-center">
-                    <Loading />
+            ) : (
+              paginatedSurveys.map((survey, idx) => (
+                <tr
+                  key={idx}
+                  className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  <td className="py-4 px-4">
+                    <div className="font-medium text-gray-900 text-sm">
+                      {survey.farmer_name === " " ? "N/A" : survey.farmer_name}
+                    </div>
                   </td>
-                </tr>
-              ) : (
-                paginatedSurveys.map((survey, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-b border-gray-100 hover:bg-gray-50 animate__animated animate__fadeIn"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <td className="py-4 px-4">
-                      <div className="font-medium text-gray-900 text-sm">
-                        {survey.farmer_name === " "
-                          ? "N/A"
-                          : survey.farmer_name}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
-                        {survey.mobile_number}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
-                        {survey.survey_date}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
-                        {survey.avg_prod_last_year ?? "-"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm text-gray-600">
-                        {survey.avg_prod_current_year ?? "-"}
-                      </span>
-                    </td>
-                    {/* <td className="py-4 px-4">
+                  <td className="py-4 px-4">
+                    <span className="text-sm text-gray-600">
+                      {survey.mobile_number}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sm text-gray-600">
+                      {survey.survey_date}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sm text-gray-600">
+                      {survey.avg_prod_last_year ?? "-"}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sm text-gray-600">
+                      {survey.avg_prod_current_year ?? "-"}
+                    </span>
+                  </td>
+                  {/* <td className="py-4 px-4">
                       <Badge
                         className={
                           survey.status === "completed"
@@ -431,39 +438,38 @@ export function SurveyTable({
                         {survey.status ?? "pending"}
                       </Badge>
                     </td> */}
-                    <td>
-                      <div className="flex items-center justify-center py-4 px-4">
-                        <Button
-                          variant={"outline"}
-                          onClick={() => handleSurveyiew(survey)}
-                        >
-                          <Eye />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          {totalPages > 1 && (
-            <div>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                pageSize={pageSize}
-                onPageSizeChange={(size: number | "All") => {
-                  setPageSize(size);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </CardContent>
+                  <td>
+                    <div className="flex items-center justify-center py-4 px-4">
+                      <Button
+                        variant={"outline"}
+                        onClick={() => handleSurveyiew(survey)}
+                      >
+                        <Eye />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+        {totalPages > 1 && (
+          <div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              pageSize={pageSize}
+              onPageSizeChange={(size: number | "All") => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
+      </div>
 
-           {/* Modal */}
+      {/* Modal */}
       {isOpen && (
         <GenericModal closeModal={onClose} title={"Add New Survey"}>
           <div>
@@ -523,6 +529,6 @@ export function SurveyTable({
           <SurveyView survey={selectedSurvey} />
         </GenericModal>
       )}
-    </Card>
+    </div>
   );
 }

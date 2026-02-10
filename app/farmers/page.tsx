@@ -23,6 +23,7 @@ import FinancialInfoForm, {
   FinancialInfoRef,
 } from "@/components/addFarmerForms/FinancialInfoForm";
 import PreviewSubmit from "@/components/PreviewForm";
+import PageHeader from "@/components/PageHeader";
 
 export default function FarmersPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -295,26 +296,12 @@ export default function FarmersPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
-      <div className="grid grid-cols-3 lg:flex items-center justify-between">
-        <div className="col-span-2">
-          <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
-            Farmers Management
-          </h1>
-          <p className="text-gray-600 text-sm md:text-md">
-            Manage farmer registrations and view their insurance portfolios
-          </p>
-        </div>
-        {/* <div className="flex justify-end">
-          <Button
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            onClick={onOpen}
-          >
-            <Plus className="w-4 h-4" />
-            Add Farmer
-          </Button>
-        </div> */}
-      </div>
+    <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
+      {/* Page Header */}
+      <PageHeader
+        heading="Farmers Management"
+        description=" Manage farmer registrations and view their insurance portfolios"
+      />
 
       <div className="animate__animated animate__fadeIn">
         <FarmersTable />

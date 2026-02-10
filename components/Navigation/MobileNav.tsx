@@ -21,30 +21,35 @@ import { PiFlowerTulipFill } from "react-icons/pi";
 import { BsClipboardCheck, BsClipboardCheckFill } from "react-icons/bs";
 import { GiCow } from "react-icons/gi";
 import { MdOutlineManageAccounts, MdOutlineSettings } from "react-icons/md";
-import { useAuth } from "@/core/context/AuthContext";
+import { useAuth, UserRole } from "@/core/context/AuthContext";
 import { RiSurveyLine } from "react-icons/ri";
+import { TbReportAnalytics } from "react-icons/tb";
 import LocalizationToggle from "@/components/utils/LocalizationToggle";
 
 const allNavItems = [
   {
     title: "Dashboard",
     url: "/dashboard",
+    roles: ["Farmer"],
     icon: LayoutDashboard,
   },
   {
     title: "Asset",
     url: "/asset_management",
+    roles: ["Farmer"],
     icon: BsClipboardCheck,
     activeIcon: BsClipboardCheckFill,
     children: [
       {
         title: "Crop",
         url: "/asset_management/crop",
+        roles: ["Farmer"],
         icon: <PiFlowerTulipFill size={18} />,
       },
       {
         title: "Livestock",
         url: "/asset_management/livestock",
+        roles: ["Farmer"],
         icon: <GiCow size={20} />,
       },
     ],
@@ -52,47 +57,71 @@ const allNavItems = [
   {
     title: "Farmers",
     url: "/farmers",
+    roles: ["Farmer"],
     icon: Users,
   },
   {
     title: "Lands",
     url: "/land",
+    roles: ["Farmer"],
     icon: PiFlowerTulipFill,
   },
   {
     title: "Surveys",
     url: "/survey",
+    roles: ["Farmer"],
     icon: RiSurveyLine,
     activeIcon: RiSurveyLine,
   },
   {
     title: "Products",
     url: "/products",
+    roles: ["Farmer"],
     icon: FileText,
   },
   {
     title: "Claims",
     url: "/claims",
+    roles: ["Farmer"],
     icon: ClipboardList,
   },
   {
     title: "Applications",
     url: "/applications",
+    roles: ["Farmer"],
     icon: Send,
   },
   {
     title: "Notifications",
     url: "/notifications",
+    roles: ["Farmer"],
     icon: Bell,
   },
   {
     title: "User Management",
     url: "/user_management",
+    roles: ["Farmer"],
     icon: MdOutlineManageAccounts,
+  },
+  {
+    title: "Reports",
+    url: null,
+    roles: ["Insurance Company"],
+    icon: TbReportAnalytics,
+    activeIcon: TbReportAnalytics,
+    children: [
+      {
+        title: "Crop",
+        url: "/reports/crop-report",
+        roles: ["Insurance Company"],
+        icon: <PiFlowerTulipFill size={18} />,
+      },
+    ],
   },
   {
     title: "Settings",
     url: "/settings",
+    roles: ["Farmer"],
     icon: MdOutlineSettings,
   },
 ];
@@ -104,20 +133,35 @@ const MobileNav = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openMore, setOpenMore] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { logout, userId } = useAuth();
+  const { logout, userId, isLoading } = useAuth();
+
+  const role = userId;
+
+  const filteredNavItems = allNavItems
+    .filter((item) => item.roles?.includes(role as UserRole))
+    .map((item) => {
+      if (!item.children) return item;
+
+      return {
+        ...item,
+        children: item.children.filter((child) =>
+          child.roles?.includes(role as UserRole)
+        ),
+      };
+    });
 
   const handleLogout = () => {
     logout();
     setDrawerOpen(false);
   };
 
-  const handleToggle = (url: string) => {
+  const handleToggle = (url: string | null) => {
     setOpenMenu((prev) => (prev === url ? null : url));
     setOpenMore(false);
   };
 
-  const visibleItems = allNavItems.slice(0, MAX_VISIBLE_ITEMS);
-  const moreItems = allNavItems.slice(MAX_VISIBLE_ITEMS);
+  const visibleItems = filteredNavItems.slice(0, MAX_VISIBLE_ITEMS);
+  const moreItems = filteredNavItems.slice(MAX_VISIBLE_ITEMS);
 
   const handleCloseMenus = () => {
     setOpenMenu(null);
@@ -133,7 +177,7 @@ const MobileNav = () => {
       <button
         className={`lg:hidden fixed top-3 right-3 z-[100] ${
           drawerOpen ? "bg-red-600" : "bg-blue-950"
-        } backdrop-blur-sm p-2 rounded-lg shadow-lg transition-all duration-200`}
+        } backdrop-blur-sm p-1 rounded-sm shadow-lg transition-all duration-200`}
         onClick={() => setDrawerOpen(!drawerOpen)}
       >
         {drawerOpen ? (
@@ -171,16 +215,9 @@ const MobileNav = () => {
         </div>
 
         {/* Drawer Content */}
-        <div className="h-auto">
+        <div className="h-auto transition-all duration-300 ease-in-out">
           {/* Visible Items */}
           {visibleItems.map((item) => {
-            if (item.title === "Reports" && userId == "Farmer") {
-              return null;
-            }
-            if (userId === "Insurance Company") {
-              // Show ONLY Reports
-              if (item.title !== "Reports") return null;
-            }
             const isActive =
               pathname === item.url ||
               (item.children &&
@@ -193,11 +230,11 @@ const MobileNav = () => {
             const isExpanded = openMenu === item.url;
 
             return (
-              <div key={item.url} className="">
+              <div key={item.url || item.title} className="">
                 {hasChildren ? (
                   <button
                     onClick={() => handleToggle(item.url)}
-                    className={`flex items-center justify-between w-full px-4 py-3 text-sm ${
+                    className={`flex items-center justify-between w-full px-4 py-3 text-sm  ${
                       isActive ? "text-blue-700 font-semibold" : "text-gray-600"
                     }`}
                   >
@@ -213,7 +250,7 @@ const MobileNav = () => {
                   </button>
                 ) : (
                   <Link
-                    href={item.url}
+                    href={item.url || ""}
                     onClick={handleCloseMenus}
                     className={`flex items-center justify-between w-full px-4 py-3 text-sm ${
                       isActive ? "text-blue-700 font-semibold" : "text-gray-600"
@@ -227,28 +264,32 @@ const MobileNav = () => {
                 )}
 
                 {/* Child Dropdown */}
-                {hasChildren && isExpanded && (
-                  <div className="pl-10 pr-4 pb-2 space-y-1">
-                    {item.children.map((child) => {
-                      const isChildActive = pathname === child.url;
-                      return (
-                        <Link
-                          key={child.url}
-                          href={child.url}
-                          onClick={handleCloseMenus}
-                          className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md ${
-                            isChildActive
-                              ? "bg-blue-950 text-blue-200 font-bold"
-                              : "text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          {child.icon}
-                          {child.title}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+                <div
+                  className={`pl-10 pr-4 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${
+                    isExpanded
+                      ? "max-h-96 opacity-100 translate-y-0 pb-2"
+                      : "max-h-0 opacity-0 -translate-y-2 pb-0"
+                  }`}
+                >
+                  {item?.children?.map((child) => {
+                    const isChildActive = pathname === child.url;
+                    return (
+                      <Link
+                        key={child.url}
+                        href={child.url}
+                        onClick={handleCloseMenus}
+                        className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md transition-colors ${
+                          isChildActive
+                            ? "bg-blue-950 text-blue-200 font-bold"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {child.icon}
+                        {child.title}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
@@ -275,33 +316,38 @@ const MobileNav = () => {
                   )}
                 </button>
 
-                {openMore && (
-                  <div className="pl-10 pr-4 pb-2 space-y-1">
-                    {moreItems.map((item) => {
-                      const isActive =
-                        pathname === item.url ||
-                        (item.children &&
-                          item.children.some((child) =>
-                            pathname.startsWith(child.url)
-                          ));
-                      return (
-                        <Link
-                          key={item.url}
-                          href={item.url}
-                          onClick={handleCloseMenus}
-                          className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md ${
-                            isActive
-                              ? "bg-blue-950 text-blue-200 font-bold"
-                              : "text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          {item.icon && <item.icon className="w-5 h-5" />}
-                          {item.title}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+                <div
+                  className={`pl-10 pr-4 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${
+                    openMore
+                      ? "max-h-96 opacity-100 translate-y-0 pb-2"
+                      : "max-h-0 opacity-0 -translate-y-2 pb-0"
+                  }`}
+                >
+                  {moreItems.map((item) => {
+                    const isActive =
+                      pathname === item.url ||
+                      (item.children &&
+                        item.children.some((child) =>
+                          pathname.startsWith(child.url)
+                        ));
+
+                    return (
+                      <Link
+                        key={item.url || item.title}
+                        href={item.url || ""}
+                        onClick={handleCloseMenus}
+                        className={`flex items-center gap-2 px-2 py-2 text-sm rounded-md transition-colors ${
+                          isActive
+                            ? "bg-blue-950 text-blue-200 font-bold"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {item.icon && <item.icon className="w-5 h-5" />}
+                        {item.title}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Language Toggle */}

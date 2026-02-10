@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "irrigation_status": "পর্যাপ্ত (Adequate) মাটিতে সঠিক আর্দ্রতা আছে।"
+  },
+  {
+    "id": 2,
+    "irrigation_status": "অপর্যাপ্ত (Insufficient) মাটি শুকনো, ফেটে গেছে।"
+  },
+  {
+    "id": 3,
+    "irrigation_status": "অতিরিক্ত/জলাবদ্ধতা (Excess/Standing Water)প্রয়োজনের চেয়ে বেশি পানি বা দীর্ঘক্ষণ পানি জমে থাকা।"
+  }
+]

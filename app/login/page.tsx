@@ -41,56 +41,10 @@ const Login: React.FC<LoginProps> = ({
   const [phoneError, setPhoneError] = useState<string | boolean>(false);
   const [passwordError, setPasswordError] = useState<string | boolean>(false);
 
-  // useEffect(() => {
-  //   AOS.init({ duration: 800, once: true });
-  // }, []);
-
-  // Old function
-  // const handleSubmit = async (event: React.FormEvent) => {
-  //   event.preventDefault();
-
-  //   // Reset errors before validation
-  //   setPhoneError(false);
-  //   setPasswordError(false);
-
-  //   let valid = true;
-
-  //   if (!phone) {
-  //     setPhoneError("Phone number cannot be empty.");
-  //     valid = false;
-  //   } else if (!/^[0-9]{11}$/.test(phone)) {
-  //     setPhoneError("Please enter a valid 11-digit phone number.");
-  //     valid = false;
-  //   }
-
-  //   if (!password) {
-  //     setPasswordError("Password cannot be empty.");
-  //     valid = false;
-  //   }
-
-  //   if (!valid) return;
-
-  //   try {
-  //     const response = await post("v1/auth/public/login/", {
-  //       mobile_number: phone,
-  //       password,
-  //     });
-
-  //     const data = await response.data;
-  //     const { role: userId, access_token: accessToken } = data;
-
-  //     login(userId, phone, accessToken);
-  //     toast.success("Login successful!");
-  //     router.push(redirectUrl);
-  //   } catch (error) {
-  //     console.error("Login failed:", error);
-  //     toast.error("Login failed. Please check your credentials and try again.");
-  //     setPhoneError(true);
-  //     setPasswordError(true);
-  //   }
-  // };
+ 
 
   // New function with improved error handling
+  
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
@@ -131,14 +85,14 @@ const Login: React.FC<LoginProps> = ({
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
-        const message = error.response.data?.message;
+        const message = error.response.data.data?.message;
 
         if (status === 400 || status === 401) {
           toast.error("Invalid phone number or password.");
           setPhoneError(" ");
           setPasswordError(" ");
         } else if (status >= 500) {
-          toast.error("Server error. Please try again later.");
+          toast.error(message);
         } else {
           toast.error(message || "Something went wrong.");
         }
@@ -190,7 +144,7 @@ const Login: React.FC<LoginProps> = ({
           </div>
         </div> */}
 
-        <div className="px-8 pt-22 md:p-8 rounded w-full max-w-md z-10">
+        <div className="px-8 lg:pt-22 md:p-8 rounded w-full max-w-md z-10">
           <h1 className="text-3xl md:text-4xl font-bold underline text-blue-800 mb-6 text-center">
             Login 
           </h1>

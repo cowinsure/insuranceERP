@@ -44,7 +44,7 @@ const InputField: React.FC<InputFieldProps> = ({
         {label && (
           <label
             htmlFor={id}
-            className="mb-1 text-sm font-bold text-gray-400 tracking-wide"
+            className="mb-1 text-xs lg:text-sm font-medium lg:font-semibold text-gray-400 tracking-wide"
           >
             {label}
           </label>
@@ -62,13 +62,13 @@ const InputField: React.FC<InputFieldProps> = ({
           readOnly={readOnly}
           onFocus={onFocus}
           className={clsx(
-            "p-2 border border-gray-300 bg-gray-50 rounded-md font-semibold",
+            "p-2 border border-gray-300 bg-gray-50 rounded-md font-medium",
             "focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-blue-50",
             "hover:bg-blue-50 hover:border-blue-300",
             type === "date" &&
               "appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0",
             error ? "border-red-600" : "border-gray-300",
-            `${className}`
+            `${className}`,
           )}
         />
       </div>

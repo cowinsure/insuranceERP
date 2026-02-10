@@ -238,12 +238,83 @@ input[type="number"] {
   letter-spacing: 0.3px;
 }
 
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
+}
+
+/* Animation for dropdown */
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.2s ease-out;
+}
+
+/* ============================
+   Skeleton Shimmer / Glare
+   ============================ */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #e5e7eb; /* light gray */
+  border-radius: 0.5rem;
+}
+
+/* Dark mode support (optional) */
+/* @media (prefers-color-scheme: dark) {
+  .skeleton {
+    background-color: #1f2937;
+  }
+} */
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+/* Dark mode glare */
+/* @media (prefers-color-scheme: dark) {
+  .skeleton::after {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+  }
+} */
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

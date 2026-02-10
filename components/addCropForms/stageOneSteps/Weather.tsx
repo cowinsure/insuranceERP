@@ -35,7 +35,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
           "/cms/crop-adverse-weather-effect-type-service/",
           {
             params: { page_size: 10, start_record: 1 },
-          }
+          },
         );
         if (response.status === "success") {
           setWeatherOptions(response.data);
@@ -62,7 +62,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
       ...data,
       weather_effects: updated.map((weather_effect_type_id) => {
         const weatherObj = weatherOptions.find(
-          (w) => w.id === weather_effect_type_id
+          (w) => w.id === weather_effect_type_id,
         );
         return {
           weather_effect_type_id,
@@ -82,56 +82,63 @@ const Weather = ({ data, onChange }: WeatherProps) => {
     onChange({ ...data, [name]: value });
   };
 
-  console.log(data);
+  // console.log(data);
 
   return (
-    <form className="p-3 max-h-[60vh] overflow-auto space-y-5">
-      <h2 className="text-xl font-semibold mb-5 underline text-center">
-        {t('weather_details')}
+    <form className="lg:p-3 space-y-5">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
+        {t("weather_details")}
       </h2>
 
       {/* ✅ Adverse Weather Effects */}
-      <div className="space-y-3 bg-gray-50 p-3 border rounded-lg">
+      <div className="space-y-3 bg-gray-50 p-3 border rounded-lg max-h-[400px] overflow-auto">
         <h3 className="font-semibold">
-          {t('adverse_weather_type')}{" "}
-          <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+          {t("adverse_weather_type")}{" "}
+          <span className="text-sm text-gray-400">
+            {t("multiple_selection")}
+          </span>
         </h3>
         {loading ? (
           <Loading />
         ) : (
-          <>
+          <div className="space-y-4">
             {weatherOptions.map((w) => (
-              <div key={w.id} className="flex items-start space-x-2">
+              <div
+                key={w.id}
+                className="flex items-center gap-2 font-medium lg:text-[15px]"
+              >
                 <input
                   type="checkbox"
                   id={`weather_${w.id}`}
                   checked={selectedWeatherEffects.includes(w.id)}
                   onChange={() => handleCheckboxChange(w.id)}
-                  className="mt-1 accent-green-600 custom-checkbox"
+                  className="cursor-pointer accent-green-600 custom-checkbox shrink-0"
                 />
                 <label
                   htmlFor={`weather_${w.id}`}
                   className="flex flex-col cursor-pointer"
                 >
-                  <strong className="text-[15px] text-gray-700">
+                  <p className="lg:text-[15px] font-semibold text-gray-700">
                     {w.weather_effect_type_name}
-                  </strong>
+                  </p>
                   {w.desc && (
                     <span className="text-gray-400 text-sm">{w.desc}</span>
                   )}
                 </label>
               </div>
             ))}
-          </>
+          </div>
         )}
       </div>
 
       {/* ✅ Period of Adverse Weather */}
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{t('period_of_adverse_weather')}</h3>
+        <h3 className="text-[16px] lg:text-lg font-semibold">
+          {t("period_of_adverse_weather")}
+        </h3>
         <div className="grid md:grid-cols-2 gap-4">
           <InputField
-            label={t('from')}
+            label={t("from")}
             id="date_from"
             name="date_from"
             type="date"
@@ -139,7 +146,7 @@ const Weather = ({ data, onChange }: WeatherProps) => {
             onChange={handleChange}
           />
           <InputField
-            label={t('to')}
+            label={t("to")}
             id="date_to"
             name="date_to"
             type="date"
@@ -151,11 +158,11 @@ const Weather = ({ data, onChange }: WeatherProps) => {
 
       {/* ✅ Remarks */}
       <InputField
-        label={t('remarks')}
+        label={t("remarks")}
         id="remarks"
         name="remarks"
         type="text"
-        placeholder={t('add_remarks_if_any')}
+        placeholder={t("add_remarks_if_any")}
         value={data.remarks || ""}
         onChange={handleChange}
       />

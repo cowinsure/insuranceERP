@@ -30,7 +30,7 @@ export default function LayoutWrapper({
         )}
 
         {/* remove margin if login */}
-        <main className={`flex-1 ${isLogin ? "mt-0" : "mt-5"}`}>
+        <main className={`flex-1 ${isLogin ? "mt-0" : "md:mt-5"}`}>
           {children}
         </main>
 

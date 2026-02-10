@@ -70,44 +70,45 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg">
-      <h1 className="font-bold text-gray-800 text-xl">{t("search")}</h1>
-      <div className="relative w-full ">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        {query && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500"
-            onClick={clearSearch}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
-        <Input
-          placeholder={placeholder}
-          value={query}
-          onChange={handleSearch}
-          className="pl-10 pr-10 bg-white border-gray-200"
-        />
+    <div className="">
+      {/* <h1 className="font-bold text-gray-800 lg:text-xl">{t("search")}</h1> */}
+      <div className="">
+        <div className="relative w-full group">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-4 h-4 group-focus-within:scale-150 z-50" />
+          {query && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500"
+              onClick={clearSearch}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+          <Input
+            placeholder={placeholder}
+            value={query}
+            onChange={handleSearch}
+            className="pl-8 pr-6 bg-white border-2 border-blue-300 focus-within:bg-blue-50 group-focus-within:border-blue-500 transition-all duration-200 ease-in-out"
+          />
+        </div>
       </div>
 
       {query && (
-        <>
+        <div className="absolute">
           {noResults ? (
-            <p className="text-sm text-red-500 animate-fadeIn">
+            <p className="text-xs text-red-500 animate-fadeIn mt-2 font-medium">
               {t("no_results_found")}
             </p>
           ) : (
-            <p className="text-sm text-gray-500 animate-fadeIn">
+            <p className="text-xs text-gray-500 animate-fadeIn mt-2 font-medium">
               {resultCount}{" "}
               {t(resultCount === 1 ? "result_found" : "results_found")}
             </p>
           )}
-        </>
+        </div>
       )}
     </div>
   );
 };
-  

@@ -22,12 +22,20 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Loader2,
   MapPin,
   ImageIcon,
   Trash2,
   Plus,
   LocateFixed,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +64,7 @@ const defaultCenter = {
   lat: 23.8103, // Dhaka, Bangladesh
   lng: 90.4125,
 };
+
 
 interface Coordinate {
   lat: string;
@@ -88,6 +97,10 @@ interface PlotData {
   area: string;
   description: string;
   LandManualMeasurements?: LandManualMeasurements;
+  soil_type_id?: number;
+  land_type_id?: number;
+  land_preparation_type_id?: number;
+  crop_planting_type_id?: number;
 }
 
 interface CreatePlotDialogProps {
@@ -112,13 +125,18 @@ export function CreatePlotDialog({
   onPlotCreated,
 }: CreatePlotDialogProps) {
   const { t } = useLocalization();
-  const [coordinates, setCoordinates] = useState<Coordinate[]>([
-    { lat: "", lng: "" },
-  ]);
+  const [coordinates, setCoordinates] = useState<
+    { lat: string; lng: string }[]
+  >([]);
+
   const [plotName, setPlotName] = useState("");
   const [landName, setLandName] = useState("");
   const [plotDescription, setPlotDescription] = useState("");
   const [ownershipType, setOwnershipType] = useState("");
+  const [soilType, setSoilType] = useState("");
+  const [landType, setLandType] = useState("");
+  const [landPreparation, setLandPreparation] = useState("");
+  const [cropPlantingType, setCropPlantingType] = useState("");
   const [suitabilityReasons, setSuitabilityReasons] = useState<
     LandSuitabilityRemark[]
   >([]);
@@ -147,6 +165,18 @@ export function CreatePlotDialog({
   );
   const [lsLoading, setLsLoading] = useState(false);
 
+  const [soilTypes, setSoilTypes] = useState<{id: number, name: string}[]>([]);
+  const [soilTypesLoading, setSoilTypesLoading] = useState(false);
+
+  const [landTypes, setLandTypes] = useState<{id: number, name: string}[]>([]);
+  const [landTypesLoading, setLandTypesLoading] = useState(false);
+
+  const [landPreparationTypes, setLandPreparationTypes] = useState<{id: number, name: string}[]>([]);
+  const [landPreparationTypesLoading, setLandPreparationTypesLoading] = useState(false);
+
+  const [cropPlantingTypes, setCropPlantingTypes] = useState<{id: number, name: string}[]>([]);
+  const [cropPlantingTypesLoading, setCropPlantingTypesLoading] = useState(false);
+
   // derive suitable / not suitable lists for the UI
   const SUITABILITY_OPTIONS = useMemo(
     () =>
@@ -172,8 +202,8 @@ export function CreatePlotDialog({
   );
   const [measureSWSE, setMeasureSWSE] = useState("");
   const [measureSWNW, setMeasureSWNW] = useState("");
-  const [measureNWNE, setMeasureNWNE] = useState("randomly generated width");
-  const [measureSENE, setMeasureSENE] = useState("randomly generated length");
+  const [measureNWNE, setMeasureNWNE] = useState("Randomly generated width");
+  const [measureSENE, setMeasureSENE] = useState("Randomly generated length");
   const [isGenerating, setIsGenerating] = useState(false);
   // farmers list and selection
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
@@ -197,31 +227,41 @@ export function CreatePlotDialog({
     );
   }, [farmers, farmerQuery]);
 
-  useEffect(() => {
-    function generateRandomNumber(maxNumber: number): number {
-      if (maxNumber <= 0) return 0;
+  // Updated useEffect for random length generation
 
-      const range = Math.floor(maxNumber * 0.3); // 50% of the limit
-      return Math.floor(Math.random() * range) + 1; // between 1 and range
+  useEffect(() => {
+    const base = Number(measureSWSE);
+
+    // ⛔ stop if value is not a valid number yet
+    if (!Number.isFinite(base) || base <= 0) {
+      setMeasureSENE("Randomly generated length");
+      return;
     }
-    // create random number and asignt it to random length field
-    const randomLength = generateRandomNumber(parseInt(measureSWSE)) + 7;
+
+    function generateRandomNumber(maxNumber: number): number {
+      const range = Math.floor(maxNumber * 0.3);
+      return Math.floor(Math.random() * range) + 1;
+    }
+
+    const randomLength = generateRandomNumber(base) + 7;
     setMeasureSENE(randomLength.toString());
-    //("measuring lenght" + randomLength);
   }, [measureSWSE]);
 
-  useEffect(() => {
-    function generateRandomNumber(maxNumber: number): number {
-      if (maxNumber <= 0) return 0;
+  // Updated useEffect for random width generation
 
-      const range = Math.floor(maxNumber * 0.3); // 50% of the limit
-      return Math.floor(Math.random() * range) + 1; // between 1 and range
+  useEffect(() => {
+    const base = Number(measureSWNW);
+
+    // ⛔ Guard: no calculation until valid input exists
+    if (!Number.isFinite(base) || base <= 0) {
+      setMeasureNWNE("Randomly generated width");
+      return;
     }
-    // create random number and asignt it to random length field
-    const randomWidth = generateRandomNumber(parseInt(measureSWNW)) + 7;
+
+    const range = Math.max(1, Math.floor(base * 0.3));
+    const randomWidth = Math.floor(Math.random() * range) + 1 + 7;
 
     setMeasureNWNE(randomWidth.toString());
-    //("measuring width" + randomWidth);
   }, [measureSWNW]);
 
   useEffect(() => {
@@ -281,7 +321,6 @@ export function CreatePlotDialog({
         const resp = await get(`ims/farmer-service`, {
           params: { start_record: 1 },
         });
-        //(resp);
 
         if (
           !cancelled &&
@@ -330,9 +369,121 @@ export function CreatePlotDialog({
     };
   }, [open, get]);
 
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchSoilTypes = async () => {
+      setSoilTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-soil-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setSoilTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setSoilTypesLoading(false);
+      }
+    };
+    fetchSoilTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchLandTypes = async () => {
+      setLandTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setLandTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setLandTypesLoading(false);
+      }
+    };
+    fetchLandTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchLandPreparationTypes = async () => {
+      setLandPreparationTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-preparation-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setLandPreparationTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setLandPreparationTypesLoading(false);
+      }
+    };
+    fetchLandPreparationTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const fetchCropPlantingTypes = async () => {
+      setCropPlantingTypesLoading(true);
+      try {
+        const resp = await get(`lams/land-crop-planting-type-service/`, {
+          params: { page_size: 10, start_record: 1 },
+        });
+        if (
+          !cancelled &&
+          resp?.status === "success" &&
+          Array.isArray(resp.data)
+        ) {
+          setCropPlantingTypes(resp.data);
+        }
+      } catch (err) {
+        // ignore for now
+      } finally {
+        if (!cancelled) setCropPlantingTypesLoading(false);
+      }
+    };
+    fetchCropPlantingTypes();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, get]);
+
   const getCurrentLocation = (index: number) => {
     if (!navigator.geolocation) {
-      alert(t('geolocation_not_supported'));
+      alert(t("geolocation_not_supported"));
       return;
     }
 
@@ -344,7 +495,7 @@ export function CreatePlotDialog({
       },
       (error) => {
         console.error(error);
-        alert(t('unable_retrieve_location'));
+        alert(t("unable_retrieve_location"));
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -417,14 +568,36 @@ export function CreatePlotDialog({
     };
   }, [showResults, showMyLocation]);
 
+  // Validation for accordion sections
+  const isBasicComplete = useMemo(() => {
+    return plotName.trim() && selectedFarmerId && plotDescription.trim() && ownershipType;
+  }, [plotName, selectedFarmerId, plotDescription, ownershipType]);
+
+  const isAgriComplete = useMemo(() => {
+    return soilType && landType && landPreparation && cropPlantingType;
+  }, [soilType, landType, landPreparation, cropPlantingType]);
+
+  const isSuitabilityComplete = useMemo(() => {
+    return overallSuitability && (
+      (overallSuitability === 'suitable' && suitabilityReasons.length > 0) ||
+      (overallSuitability === 'not_suitable' && nonSuitabilityReasons.length > 0)
+    );
+  }, [overallSuitability, suitabilityReasons, nonSuitabilityReasons]);
+
+  const isMeasurementsComplete = useMemo(() => {
+    return measureSWSE.trim() && measureSWNW.trim();
+  }, [measureSWSE, measureSWNW]);
+
+  const isCoordinatesComplete = useMemo(() => {
+    return coordinates.length > 0 && coordinates.every(coord => coord.lat.trim() && coord.lng.trim());
+  }, [coordinates]);
+
   const addCoordinate = () => {
     setCoordinates([...coordinates, { lat: "", lng: "" }]);
   };
 
   const removeCoordinate = (index: number) => {
-    if (coordinates.length > 1) {
-      setCoordinates(coordinates.filter((_, i) => i !== index));
-    }
+    setCoordinates((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateCoordinate = (
@@ -452,33 +625,12 @@ export function CreatePlotDialog({
     });
   };
 
-  // demo data
-  var apiPayloadDemo = {
-    land_area: [
-      {
-        latitude: 23.77059158003182,
-        longitude: 90.4059435510674,
-      },
-      {
-        latitude: 23.768004012086546,
-        longitude: 90.40556006776123,
-      },
-      {
-        latitude: 23.768386947388315,
-        longitude: 90.40291004522925,
-      },
-      {
-        latitude: 23.77093982059538,
-        longitude: 90.40333919867572,
-      },
-    ],
-  };
 
   const generatePlot = async () => {
     if (!plotName.trim()) {
       toast({
-        title: t('land_name_required_toast'),
-        description: t('enter_name_for_land_plot'),
+        title: t("land_name_required_toast"),
+        description: t("enter_name_for_land_plot"),
         variant: "default",
       });
       return;
@@ -489,16 +641,16 @@ export function CreatePlotDialog({
     const swnwVal = Number(measureSWNW);
     if (!measureSWSE.trim() || isNaN(swseVal) || swseVal <= 0) {
       toast({
-        title: t('invalid_measurement'),
-        description: t('enter_valid_numeric_sw_se'),
+        title: t("invalid_measurement"),
+        description: t("enter_valid_numeric_sw_se"),
         variant: "default",
       });
       return;
     }
     if (!measureSWNW.trim() || isNaN(swnwVal) || swnwVal <= 0) {
       toast({
-        title: t('invalid_measurement'),
-        description: t('enter_valid_numeric_sw_nw'),
+        title: t("invalid_measurement"),
+        description: t("enter_valid_numeric_sw_nw"),
         variant: "default",
       });
       return;
@@ -506,8 +658,8 @@ export function CreatePlotDialog({
 
     if (farmerQuery.trim() === "" || selectedFarmerId === null) {
       toast({
-        title: t('please_select_farmer'),
-        description: t('select_farmer_from_list'),
+        title: t("please_select_farmer"),
+        description: t("select_farmer_from_list"),
         variant: "default",
       });
       return;
@@ -515,8 +667,8 @@ export function CreatePlotDialog({
 
     if (!validateCoordinates()) {
       toast({
-        title: t('invalid_coordinates'),
-        description: t('check_coordinates_valid'),
+        title: t("invalid_coordinates"),
+        description: t("check_coordinates_valid"),
         variant: "default",
       });
       return;
@@ -532,8 +684,6 @@ export function CreatePlotDialog({
           longitude: parseFloat(coord.lng),
         })),
       };
-
-      //(requestBody);
       // https://cropploting.dev.insurecow.com/landmap/generate/
 
       // Make the API call
@@ -561,7 +711,7 @@ export function CreatePlotDialog({
         } catch {}
         setApiErrorMessage(errorMsg);
         toast({
-          title: t('generation_failed'),
+          title: t("generation_failed"),
           description: errorMsg,
           variant: "default",
         });
@@ -570,7 +720,6 @@ export function CreatePlotDialog({
       }
 
       const data = await response.json();
-      //(data);
 
       // Extract fields from the correct structure
       const plotCoordinatesRaw = data.data?.plot_coordinate ?? [];
@@ -669,20 +818,24 @@ export function CreatePlotDialog({
           nw_sw: parseInt(measureSWNW),
         },
         plotManualEntry: null,
+        soil_type_id: soilType ? parseInt(soilType) : undefined,
+        land_type_id: landType ? parseInt(landType) : undefined,
+        land_preparation_type_id: landPreparation ? parseInt(landPreparation) : undefined,
+        crop_planting_type_id: cropPlantingType ? parseInt(cropPlantingType) : undefined,
       };
 
       setPlotData(apiPlotData);
       setShowResults(true);
 
       toast({
-        title: t('plot_generated_successfully'),
-        description: t('crop_plot_processed'),
+        title: t("plot_generated_successfully"),
+        description: t("crop_plot_processed"),
       });
     } catch (error) {
       console.error("Error generating plot:", error);
       toast({
-        title: t('generation_failed'),
-        description: t('failed_to_generate_plot'),
+        title: t("generation_failed"),
+        description: t("failed_to_generate_plot"),
         variant: "default",
       });
     } finally {
@@ -694,10 +847,8 @@ export function CreatePlotDialog({
     if (apiPayload) {
       onPlotCreated(apiPayload, plotName, plotDescription);
       toast({
-        title: t('plot_saved'),
-        description: `${
-          plotData?.plotName ?? ""
-        } ${t('added_to_plots')}`,
+        title: t("plot_saved"),
+        description: `${plotData?.plotName ?? ""} ${t("added_to_plots")}`,
       });
 
       //plot coordinate mapping
@@ -810,9 +961,11 @@ export function CreatePlotDialog({
             longitude: intersection ? intersection.longitude : "",
           },
         ],
+        soil_type_id: soilType,
+        land_type_id: landType,
+        land_preparation_type_id: landPreparation,
+        crop_planting_type_id: cropPlantingType,
       };
-
-      //(landSubmissionModel);
 
       const payload = normalizeLandSubmission(apiPayload);
 
@@ -826,8 +979,8 @@ export function CreatePlotDialog({
         if (resp?.status === "success") {
           const landId = resp.data?.land_id ?? null;
           toast({
-            title: t('land_saved'),
-            description: `${t('land_saved_successfully')} ${landId})`,
+            title: t("land_saved"),
+            description: `${t("land_saved_successfully")} ${landId})`,
           });
           // close dialog and reset
           handleClose();
@@ -835,7 +988,7 @@ export function CreatePlotDialog({
           // API returned a failure status - resp.message may contain reason
           const errMsg = resp?.message || "Failed to save land";
           toast({
-            title: t('save_failed'),
+            title: t("save_failed"),
             description: errMsg,
             variant: "default",
           });
@@ -843,7 +996,11 @@ export function CreatePlotDialog({
       } catch (err: any) {
         console.error("Error saving land submission:", err);
         const msg = err?.message || "Network or server error while saving land";
-        toast({ title: t('save_failed'), description: msg, variant: "default" });
+        toast({
+          title: t("save_failed"),
+          description: msg,
+          variant: "default",
+        });
       }
     }
   };
@@ -911,387 +1068,512 @@ export function CreatePlotDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            {t('create_new_land')}
+            {t("create_new_land")}
           </DialogTitle>
           <div className="text-sm text-muted-foreground mt-1">
-            {t('create_manage_land_entries')}
+            {t("create_manage_land_entries")}
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
           {!showResults ? (
             <>
-              {/* Land Name */}
-              <div className="space-y-2">
-                <Label htmlFor="plotName">{t('land_name_required')}</Label>
-                <Input
-                  id="plotName"
-                  placeholder={t('enter_plot_name')}
-                  value={plotName}
-                  onChange={(e) => setPlotName(e.target.value)}
-                />
-              </div>
-
-              {/* Farmer selector (optional) */}
-              <div className="space-y-2">
-                <Label htmlFor="plotFarmer">{t('farmer')}</Label>
-                <div className="relative" ref={containerRef}>
-                  {/* Combobox input (acts like trigger) */}
-                  <Input
-                    id="plotFarmer"
-                    placeholder={
-                      farmersLoading
-                        ? t('loading_farmers')
-                        : t('search_select_farmer')
-                    }
-                    value={farmerQuery}
-                    onChange={(e) => {
-                      setFarmerQuery(e.target.value);
-                      setComboboxOpen(true);
-                    }}
-                    onFocus={() => setComboboxOpen(true)}
-                    onKeyDown={(e) => {
-                      const filtered = filteredFarmers;
-                      if (e.key === "ArrowDown") {
-                        e.preventDefault();
-                        setFocusedIndex((i) =>
-                          Math.min(i + 1, filtered.length - 1)
-                        );
-                      } else if (e.key === "ArrowUp") {
-                        e.preventDefault();
-                        setFocusedIndex((i) => Math.max(i - 1, 0));
-                      } else if (e.key === "Enter") {
-                        e.preventDefault();
-                        if (filtered.length > 0 && focusedIndex >= 0) {
-                          const f = filtered[focusedIndex];
-                          if (f) selectFarmer(f);
-                        } else if (filtered.length === 1) {
-                          selectFarmer(filtered[0]);
-                        }
-                      } else if (e.key === "Escape") {
-                        setComboboxOpen(false);
-                      }
-                    }}
-                  />
-
-                  {/* Dropdown list */}
-                  <div
-                    className={`absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-auto ${
-                      comboboxOpen ? "block" : "hidden"
-                    }`}
-                  >
-                    <div className="p-2 text-sm text-muted-foreground">
-                      {t('search_results')}
+              <Accordion type="single" collapsible className="w-full" defaultValue="basic">
+                <AccordionItem value="basic" className="border border-gray-200 rounded-lg shadow-sm bg-card mb-4">
+                  <AccordionTrigger className="px-4 flex items-center gap-2">
+                    {isBasicComplete ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                    )}
+                    Basic Information
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 px-2">
+                    {/* Land Name */}
+                    <div className="space-y-2">
+                      <Label htmlFor="plotName">{t("land_name_required")}</Label>
+                      <Input
+                        id="plotName"
+                        placeholder={t("enter_plot_name")}
+                        value={plotName}
+                        onChange={(e) => setPlotName(e.target.value)}
+                      />
                     </div>
-                    <div className="divide-y">
-                      {filteredFarmers.length === 0 ? (
-                        <div className="p-2 text-sm">{t('no_results')}</div>
-                      ) : (
-                        filteredFarmers.map((f, idx) => (
-                          <div
-                            key={String(f.user_id)}
-                            role="option"
-                            aria-selected={
-                              selectedFarmerId === String(f.user_id)
+
+                    {/* Farmer selector (optional) */}
+                    <div className="space-y-2">
+                      <Label htmlFor="plotFarmer">{t("farmer")}</Label>
+                      <div className="relative" ref={containerRef}>
+                        {/* Combobox input (acts like trigger) */}
+                        <Input
+                          id="plotFarmer"
+                          placeholder={
+                            farmersLoading
+                              ? t("loading_farmers")
+                              : t("search_select_farmer")
+                          }
+                          value={farmerQuery}
+                          onChange={(e) => {
+                            setFarmerQuery(e.target.value);
+                            setComboboxOpen(true);
+                          }}
+                          onFocus={() => setComboboxOpen(true)}
+                          onKeyDown={(e) => {
+                            const filtered = filteredFarmers;
+                            if (e.key === "ArrowDown") {
+                              e.preventDefault();
+                              setFocusedIndex((i) =>
+                                Math.min(i + 1, filtered.length - 1)
+                              );
+                            } else if (e.key === "ArrowUp") {
+                              e.preventDefault();
+                              setFocusedIndex((i) => Math.max(i - 1, 0));
+                            } else if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (filtered.length > 0 && focusedIndex >= 0) {
+                                const f = filtered[focusedIndex];
+                                if (f) selectFarmer(f);
+                              } else if (filtered.length === 1) {
+                                selectFarmer(filtered[0]);
+                              }
+                            } else if (e.key === "Escape") {
+                              setComboboxOpen(false);
                             }
-                            className={`px-3 py-2 cursor-pointer hover:bg-accent/20 ${
-                              idx === focusedIndex ? "bg-accent/25" : ""
-                            }`}
-                            onMouseEnter={() => setFocusedIndex(idx)}
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => selectFarmer(f)}
-                          >
-                            <div className="font-medium">{f.farmer_name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {f.mobile_number}
+                          }}
+                        />
+
+                        {/* Dropdown list */}
+                        <div
+                          className={`absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-auto ${
+                            comboboxOpen ? "block" : "hidden"
+                          }`}
+                        >
+                          <div className="p-2 text-sm text-muted-foreground">
+                            {t("search_results")}
+                          </div>
+                          <div className="divide-y">
+                            {filteredFarmers.length === 0 ? (
+                              <div className="p-2 text-sm">{t("no_results")}</div>
+                            ) : (
+                              filteredFarmers.map((f, idx) => (
+                                <div
+                                  key={String(f.user_id)}
+                                  role="option"
+                                  aria-selected={
+                                    selectedFarmerId === String(f.user_id)
+                                  }
+                                  className={`px-3 py-2 cursor-pointer hover:bg-accent/20 ${
+                                    idx === focusedIndex ? "bg-accent/25" : ""
+                                  }`}
+                                  onMouseEnter={() => setFocusedIndex(idx)}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => selectFarmer(f)}
+                                >
+                                  <div className="font-medium">{f.farmer_name}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {f.mobile_number}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Land Description */}
+                    <div className="space-y-2">
+                      <Label htmlFor="plotDescription">{t("land_description")}</Label>
+                      <Textarea
+                        id="plotDescription"
+                        placeholder={t("enter_land_description")}
+                        value={plotDescription}
+                        onChange={(e) => setPlotDescription(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Ownership Type */}
+                    <div className="space-y-2">
+                      <Label htmlFor="ownershipType">{t("ownership_type")}</Label>
+                      <Select
+                        value={ownershipType}
+                        onValueChange={(value: string) => setOwnershipType(value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={t("select_ownership_type")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Owned">{t("owned")}</SelectItem>
+                          <SelectItem value="Rented">{t("rented")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="agri" className="border border-gray-200 rounded-lg shadow-sm bg-card mb-4">
+                  <AccordionTrigger className="px-4 flex items-center gap-2">
+                    {isAgriComplete ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                    )}
+                    Agricultural Properties
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 px-2">
+                    {/* Soil Type */}
+                    <div className="space-y-2">
+                      <Label htmlFor="soilType">Soil Type</Label>
+                      <Select
+                        value={soilType}
+                        onValueChange={(value: string) => setSoilType(value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={t("select_soil_type")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {soilTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            soilTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Land Type */}
+                    <div className="space-y-2">
+                      <Label htmlFor="landType">Land Type</Label>
+                      <Select
+                        value={landType}
+                        onValueChange={(value: string) => setLandType(value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select land type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {landTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            landTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Land Preparation */}
+                    <div className="space-y-2">
+                      <Label htmlFor="landPreparation">Land Preparation</Label>
+                      <Select
+                        value={landPreparation}
+                        onValueChange={(value: string) => setLandPreparation(value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select land preparation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {landPreparationTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            landPreparationTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Crop Planting Type */}
+                    <div className="space-y-2">
+                      <Label htmlFor="cropPlantingType">Crop Planting Type</Label>
+                      <Select
+                        value={cropPlantingType}
+                        onValueChange={(value: string) => setCropPlantingType(value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select crop planting type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {cropPlantingTypesLoading ? (
+                            <SelectItem value="" disabled>Loading...</SelectItem>
+                          ) : (
+                            cropPlantingTypes.map((option) => (
+                              <SelectItem key={option.id} value={String(option.id)}>
+                                {option.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="suitability" className="border border-gray-200 rounded-lg shadow-sm bg-card mb-4">
+                  <AccordionTrigger className="px-4 flex items-center gap-2">
+                    {isSuitabilityComplete ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                    )}
+                    {t("land_suitability")}
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 px-2">
+                    <div className="pt-2">
+                      <Select
+                        value={overallSuitability}
+                        onValueChange={(val: string) => {
+                          // when switching modes, clear the opposite selections
+                          if (val === "suitable") {
+                            setNonSuitabilityReasons([]);
+                          } else if (val === "not_suitable") {
+                            setSuitabilityReasons([]);
+                          }
+                          setOverallSuitability(val);
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={t("select_suitability")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="suitable">{t("suitable")}</SelectItem>
+                          <SelectItem value="not_suitable">
+                            {t("not_suitable")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Conditional option lists based on overallSuitability */}
+                    {overallSuitability === "suitable" && (
+                      <div className="space-y-2 pt-2">
+                        {SUITABILITY_OPTIONS.map((opt) => (
+                          <div key={opt.id} className="flex items-center gap-2">
+                            <Checkbox
+                              checked={suitabilityReasons.some(
+                                (item) =>
+                                  item.land_suitability_id.toString() === opt.id
+                              )}
+                              onCheckedChange={(checked) => {
+                                if (checked)
+                                  setSuitabilityReasons((s) =>
+                                    Array.from(
+                                      new Set([
+                                        ...s,
+                                        {
+                                          land_suitability_id: opt.id,
+                                          remarks: opt.text,
+                                        },
+                                      ])
+                                    )
+                                  );
+                                else
+                                  setSuitabilityReasons((s) =>
+                                    s.filter(
+                                      (x) => x.land_suitability_id !== opt.id
+                                    )
+                                  );
+                              }}
+                            />
+                            <div className="flex-1 rounded-md bg-muted p-3 text-sm">
+                              {opt.text}
                             </div>
                           </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                        ))}
+                      </div>
+                    )}
+                    {overallSuitability === "not_suitable" && (
+                      <div className="space-y-2 pt-2">
+                        {NON_SUITABILITY_OPTIONS.map((opt) => (
+                          <div key={opt.id} className="flex items-center gap-2">
+                            <Checkbox
+                              checked={nonSuitabilityReasons.some(
+                                (item) =>
+                                  item.land_suitability_id.toString() === opt.id
+                              )}
+                              onCheckedChange={(checked) => {
+                                if (checked)
+                                  setNonSuitabilityReasons((s) =>
+                                    Array.from(
+                                      new Set([
+                                        ...s,
+                                        {
+                                          land_suitability_id: opt.id,
+                                          remarks: opt.text,
+                                        },
+                                      ])
+                                    )
+                                  );
+                                else
+                                  setNonSuitabilityReasons((s) =>
+                                    s.filter(
+                                      (x) => x.land_suitability_id !== opt.id
+                                    )
+                                  );
+                              }}
+                            />
+                            <div className="flex-1 rounded-md bg-muted p-3 text-sm">
+                              {opt.text}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
 
-              {/* Land Description */}
-              <div className="space-y-2">
-                <Label htmlFor="plotDescription">{t('land_description')}</Label>
-                <Textarea
-                  id="plotDescription"
-                  placeholder={t('enter_land_description')}
-                  value={plotDescription}
-                  onChange={(e) => setPlotDescription(e.target.value)}
-                />
-              </div>
-
-              {/* Ownership Type */}
-              <div className="space-y-2">
-                <Label htmlFor="ownershipType">{t('ownership_type')}</Label>
-                <Select
-                  value={ownershipType}
-                  onValueChange={(value: string) => setOwnershipType(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('select_ownership_type')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Owned">{t('owned')}</SelectItem>
-                    <SelectItem value="Rented">{t('rented')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Land Suitability */}
-              <div className="space-y-2">
-                <Label>{t('land_suitability')}</Label>
-                <div className="text-sm text-muted-foreground">
-                  {t('is_land_suitable')}
-                </div>
-                <div className="pt-2">
-                  <Select
-                    value={overallSuitability}
-                    onValueChange={(val: string) => {
-                      // when switching modes, clear the opposite selections
-                      if (val === "suitable") {
-                        setNonSuitabilityReasons([]);
-                      } else if (val === "not_suitable") {
-                        setSuitabilityReasons([]);
-                      }
-                      setOverallSuitability(val);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('select_suitability')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="suitable">{t('suitable')}</SelectItem>
-                      <SelectItem value="not_suitable">{t('not_suitable')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Conditional option lists based on overallSuitability */}
-                {overallSuitability === "suitable" && (
-                  <div className="space-y-2 pt-2">
-                    {SUITABILITY_OPTIONS.map((opt) => (
-                      <div key={opt.id} className="flex items-center gap-2">
-                        <Checkbox
-                          checked={suitabilityReasons.some(
-                            (item) =>
-                              item.land_suitability_id.toString() === opt.id
-                          )}
-                          onCheckedChange={(checked) => {
-                            if (checked)
-                              setSuitabilityReasons((s) =>
-                                Array.from(
-                                  new Set([
-                                    ...s,
-                                    {
-                                      land_suitability_id: opt.id,
-                                      remarks: opt.text,
-                                    },
-                                  ])
-                                )
-                              );
-                            else
-                              setSuitabilityReasons((s) =>
-                                s.filter(
-                                  (x) => x.land_suitability_id !== opt.id
-                                )
-                              );
+                <AccordionItem value="measurements" className="border border-gray-200 rounded-lg shadow-sm bg-card mb-4">
+                  <AccordionTrigger className="px-4 flex items-center gap-2">
+                    {isMeasurementsComplete ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                    )}
+                    {t("land_measurements")}
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 px-2">
+                    <div className="flex flex-row justify-between gap-4">
+                      <div className="">
+                        <div className="text-sm text-muted-foreground">
+                          {t("sw_se_meters")}
+                        </div>
+                        <Input
+                          placeholder={t("enter_measurement")}
+                          value={measureSWSE}
+                          onChange={(e) => {
+                            setMeasureSWSE(e.target.value);
                           }}
                         />
-                        <div className="flex-1 rounded-md bg-muted p-3 text-sm">
-                          {opt.text}
-                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-                {overallSuitability === "not_suitable" && (
-                  <div className="space-y-2 pt-2">
-                    {NON_SUITABILITY_OPTIONS.map((opt) => (
-                      <div key={opt.id} className="flex items-center gap-2">
-                        <Checkbox
-                          checked={nonSuitabilityReasons.some(
-                            (item) =>
-                              item.land_suitability_id.toString() === opt.id
-                          )}
-                          onCheckedChange={(checked) => {
-                            if (checked)
-                              setNonSuitabilityReasons((s) =>
-                                Array.from(
-                                  new Set([
-                                    ...s,
-                                    {
-                                      land_suitability_id: opt.id,
-                                      remarks: opt.text,
-                                    },
-                                  ])
-                                )
-                              );
-                            else
-                              setNonSuitabilityReasons((s) =>
-                                s.filter(
-                                  (x) => x.land_suitability_id !== opt.id
-                                )
-                              );
-                          }}
+
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          {t("length_meters")}
+                        </div>
+                        <Input
+                          placeholder={t("random_length")}
+                          disabled
+                          value={measureSENE}
+                          onChange={(e) => setMeasureSENE(e.target.value)}
                         />
-                        <div className="flex-1 rounded-md bg-muted p-3 text-sm">
-                          {opt.text}
-                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* <div className="mt-3 text-sm text-muted-foreground">Reasons for Non-Suitability (select all that apply)</div>
-                <div className="space-y-2 pt-2">
-                  {NON_SUITABILITY_OPTIONS.map((opt) => (
-                    <div key={opt.id} className="flex items-center gap-2">
-                      <Checkbox
-                        checked={nonSuitabilityReasons.includes(opt.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) setNonSuitabilityReasons((s) => Array.from(new Set([...s, opt.id])));
-                          else setNonSuitabilityReasons((s) => s.filter((x) => x !== opt.id));
-                        }}
-                      />
-                      <div className="flex-1 rounded-md bg-muted p-3 text-sm">{opt.text}</div>
                     </div>
-                  ))}
-                </div> */}
-              </div>
 
-              {/* Land Measurements */}
-              <div className="space-y-2">
-                <Label>{t('land_measurements')}</Label>
-
-                <div className="flex flex-row gap-4">
-                  <div className="">
-                    <div className="text-sm text-muted-foreground">
-                      {t('sw_se_meters')}
-                    </div>
-                    <Input
-                      placeholder={t('enter_measurement')}
-                      value={measureSWSE}
-                      onChange={(e) => {
-                        setMeasureSWSE(e.target.value);
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      {t('length_meters')}
-                    </div>
-                    <Input
-                      placeholder={t('random_length')}
-                      disabled
-                      value={measureSENE}
-                      onChange={(e) => setMeasureSENE(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* <div className="text-sm text-muted-foreground">SE → NE (meters)</div>
-                  <Input placeholder="Enter measurement" value={measureSENE} onChange={(e) => setMeasureSENE(e.target.value)} />
-
-                  <div className="text-sm text-muted-foreground"> NE → NW (meters)</div>
-                  <Input placeholder="Enter measurement" value={measureNWNE} onChange={(e) => setMeasureNWNE(e.target.value)} /> */}
-
-                <div className="flex flex-row gap-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      {t('sw_nw_meters')}
-                    </div>
-                    <Input
-                      placeholder={t('enter_measurement')}
-                      value={measureSWNW}
-                      onChange={(e) => setMeasureSWNW(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      {t('width_meters')}
-                    </div>
-                    <Input
-                      placeholder={t('random_width')}
-                      disabled
-                      value={measureNWNE}
-                      onChange={(e) => setMeasureNWNE(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Coordinates Input */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label>{t('coordinates_lat_lng')}</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addCoordinate}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('add_point')}
-                  </Button>
-                </div>
-
-                <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {coordinates.map((coord, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 p-3 border rounded-lg"
-                    >
-                      <Badge variant="outline">{index + 1}</Badge>
-                      <div className="flex-1 grid grid-cols-2 gap-3">
-                        <div>
-                          <Input
-                            placeholder={t('latitude_example')}
-                            value={coord.lat}
-                            onChange={(e) =>
-                              updateCoordinate(index, "lat", e.target.value)
-                            }
-                          />
+                    <div className="flex flex-row justify-between gap-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          {t("sw_nw_meters")}
                         </div>
-                        <div>
-                          <Input
-                            placeholder={t('longitude_example')}
-                            value={coord.lng}
-                            onChange={(e) =>
-                              updateCoordinate(index, "lng", e.target.value)
-                            }
-                          />
-                        </div>
+                        <Input
+                          placeholder={t("enter_measurement")}
+                          value={measureSWNW}
+                          onChange={(e) => setMeasureSWNW(e.target.value)}
+                        />
                       </div>
+
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          {t("width_meters")}
+                        </div>
+                        <Input
+                          placeholder={t("random_width")}
+                          disabled
+                          value={measureNWNE}
+                          onChange={(e) => setMeasureNWNE(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="coordinates" className="border border-gray-200 rounded-lg shadow-sm bg-card mb-4">
+                  <AccordionTrigger className="px-4 flex items-center gap-2">
+                    {isCoordinatesComplete ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                    )}
+                    {t("coordinates_lat_lng")}
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 px-2">
+                    <div className="flex items-center justify-between">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => getCurrentLocation(index)}
-                        className="text-destructive hover:text-destructive"
+                        onClick={addCoordinate}
                       >
-                        <LocateFixed className="h-4 w-4" />
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t("add_point")}
                       </Button>
-                      {coordinates.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCoordinate(index)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    </div>
+
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {coordinates.length === 0 ? (
+                        <p className="text-sm text-muted-foreground h-full text-center">
+                          No Coordinates Added
+                        </p>
+                      ) : (
+                        coordinates.map((coord, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 p-3 border rounded-lg"
+                          >
+                            <Badge variant="outline">{index + 1}</Badge>
+
+                            <div className="flex-1 grid grid-cols-2 gap-3">
+                              <Input
+                                placeholder={t("latitude_example")}
+                                value={coord.lat}
+                                onChange={(e) =>
+                                  updateCoordinate(index, "lat", e.target.value)
+                                }
+                              />
+                              <Input
+                                placeholder={t("longitude_example")}
+                                value={coord.lng}
+                                onChange={(e) =>
+                                  updateCoordinate(index, "lng", e.target.value)
+                                }
+                              />
+                            </div>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => getCurrentLocation(index)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <LocateFixed className="h-4 w-4" />
+                            </Button>
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeCoordinate(index)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
               {/* Google Map preview and coordinate selection */}
               {isLoaded && (
@@ -1300,11 +1582,11 @@ export function CreatePlotDialog({
                     <CardHeader className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         <MapPin className="h-5 w-5" />
-                        {t('map_preview')}
+                        {t("map_preview")}
                       </CardTitle>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
-                          {t('show_my_location')}
+                          {t("show_my_location")}
                         </span>
                         <Switch
                           checked={showMyLocation}
@@ -1377,45 +1659,42 @@ export function CreatePlotDialog({
               {/* Generate Button */}
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={handleClose}>
-                  {t('cancel')}
+                  {t("cancel")}
                 </Button>
                 <Button onClick={generatePlot} disabled={isGenerating}>
                   {isGenerating && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  {t('generate_plot')}
+                  {t("generate_plot")}
                 </Button>
               </div>
             </>
           ) : (
             <>
               {/* Results Display */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                 {/* Plot Image */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ImageIcon className="h-5 w-5" />
-                      {t('plot_visualization')}
+                      {t("plot_visualization")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="aspect-video w-full overflow-hidden rounded-lg border">
                       <img
-                        src={
-                          "https://insuranceportal-backend.insurecow.com/" +
-                            plotData?.imageUrl || "/placeholder.svg"
-                        }
+                        src={plotData?.imageUrl}
                         alt="Generated plot"
                         className="h-full w-full object-cover"
                       />
                     </div>
                     <div className="mt-3 text-sm text-muted-foreground">
                       <p>
-                        <strong>{t('area')}</strong> {plotData?.area}
+                        <strong>{t("area")}</strong> {plotData?.area}
                       </p>
                       <p>
-                        <strong>{t('points')}</strong>{" "}
+                        <strong>{t("points")}</strong>{" "}
                         {plotData?.plotCoordinates?.length ?? 0} coordinates
                       </p>
                     </div>
@@ -1426,7 +1705,7 @@ export function CreatePlotDialog({
                 <div className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>{t('land_coordinates')}</CardTitle>
+                      <CardTitle>{t("land_coordinates")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -1452,7 +1731,7 @@ export function CreatePlotDialog({
 
                   <Card>
                     <CardHeader>
-                      <CardTitle>{t('plot_coordinates')}</CardTitle>
+                      <CardTitle>{t("plot_coordinates")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -1476,24 +1755,15 @@ export function CreatePlotDialog({
                     </CardContent>
                   </Card>
 
-                  {/* Plot Description */}
-                  {/* <Card>
-                    <CardHeader>
-                      <CardTitle>Plot Description</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-sm text-muted-foreground">{plotData?.description}</div>
-                    </CardContent>
-                  </Card> */}
                 </div>
               </div>
 
               {/* Save Button */}
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={handleClose}>
-                  {t('cancel')}
+                  {t("cancel")}
                 </Button>
-                <Button onClick={savePlot}>{t('save_land')}</Button>
+                <Button onClick={savePlot}>{t("save_land")}</Button>
               </div>
             </>
           )}
@@ -1505,7 +1775,7 @@ export function CreatePlotDialog({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    {t('plot_location')}
+                    {t("plot_location")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1704,7 +1974,7 @@ export function CreatePlotDialog({
                           >
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {t('plot_point')} {idx + 1}
+                                {t("plot_point")} {idx + 1}
                               </div>
                               <div className="font-mono">
                                 {coord.lat}, {coord.lng}
@@ -1728,7 +1998,7 @@ export function CreatePlotDialog({
                           >
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {t('land_point')} {idx + 1}
+                                {t("land_point")} {idx + 1}
                               </div>
                               <div className="font-mono">
                                 {coord.lat}, {coord.lng}
@@ -1746,7 +2016,7 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('sw_mark')}</div>
+                          <div className="font-semibold">{t("sw_mark")}</div>
                           <div className="font-mono">
                             {plotData.swMark.lat}, {plotData.swMark.lng}
                           </div>
@@ -1762,7 +2032,7 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('n_corner')}</div>
+                          <div className="font-semibold">{t("n_corner")}</div>
                           <div className="font-mono">
                             {plotData.nCorner.lat}, {plotData.nCorner.lng}
                           </div>
@@ -1778,7 +2048,7 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('e_corner')}</div>
+                          <div className="font-semibold">{t("e_corner")}</div>
                           <div className="font-mono">
                             {plotData.eCorner.lat}, {plotData.eCorner.lng}
                           </div>
@@ -1795,9 +2065,9 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('n_mark')}</div>
+                          <div className="font-semibold">{t("n_mark")}</div>
                           <div>
-                            {(plotData.nMarkDist ?? 0).toFixed(2)} {t('meters')}
+                            {(plotData.nMarkDist ?? 0).toFixed(2)} {t("meters")}
                           </div>
                         </div>
                       </InfoWindow>
@@ -1811,9 +2081,9 @@ export function CreatePlotDialog({
                         onCloseClick={() => setOpenInfoFor(null)}
                       >
                         <div className="text-sm">
-                          <div className="font-semibold">{t('e_mark')}</div>
+                          <div className="font-semibold">{t("e_mark")}</div>
                           <div>
-                            {(plotData.eMarkDist ?? 0).toFixed(2)} {t('meters')}
+                            {(plotData.eMarkDist ?? 0).toFixed(2)} {t("meters")}
                           </div>
                         </div>
                       </InfoWindow>
@@ -1828,7 +2098,7 @@ export function CreatePlotDialog({
             <div className="mt-3 flex flex-wrap gap-3 items-center justify-center">
               <div className="flex items-center gap-2 text-sm">
                 <img src={getMarkerIcon("sw")} alt="sw" className="w-4 h-4" />{" "}
-                <span>{t('sw_mark')}</span>
+                <span>{t("sw_mark")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1836,7 +2106,7 @@ export function CreatePlotDialog({
                   alt="n_corner"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('n_corner')}</span>
+                <span>{t("n_corner")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1844,7 +2114,7 @@ export function CreatePlotDialog({
                   alt="e_corner"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('e_corner')}</span>
+                <span>{t("e_corner")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1852,7 +2122,7 @@ export function CreatePlotDialog({
                   alt="n_mark"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('n_mark')}</span>
+                <span>{t("n_mark")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1860,7 +2130,7 @@ export function CreatePlotDialog({
                   alt="e_mark"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('e_mark')}</span>
+                <span>{t("e_mark")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <img
@@ -1868,7 +2138,7 @@ export function CreatePlotDialog({
                   alt="intersection"
                   className="w-4 h-4"
                 />{" "}
-                <span>{t('intersection')}</span>
+                <span>{t("intersection")}</span>
               </div>
             </div>
           )}

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import DropdownField from "@/components/DropDownField";
 
 interface PestsDiseaseProps {
   data: {
@@ -11,14 +12,23 @@ interface PestsDiseaseProps {
     diseaseIds?: number[];
     is_manageable_harvest?: boolean;
     reason_for_is_manageable_harvest?: string;
+
+    // 🆕 New
+    neighbour_field_status_id?: number;
+    neighbour_field_status_label?: string;
   };
+
   onChange: (updatedData: {
     pestIds: number[];
-    pestNames?: string[]; // for preview
+    pestNames?: string[];
     diseaseIds: number[];
-    diseaseNames?: string[]; // for preview
+    diseaseNames?: string[];
     is_manageable_harvest?: boolean;
     reason_for_is_manageable_harvest?: string;
+
+    // 🆕 New
+    neighbour_field_status_id?: number;
+    neighbour_field_status_label?: string;
   }) => void;
 }
 
@@ -34,27 +44,57 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   >([]);
 
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data.pestIds || []
+    data.pestIds || [],
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data.diseaseIds || []
+    data.diseaseIds || [],
   );
   const [manageable, setManageable] = useState(
-    data.is_manageable_harvest ? "Yes" : "No"
+    data.is_manageable_harvest ? "Yes" : "No",
   );
   const [remarks, setRemarks] = useState(
-    data.reason_for_is_manageable_harvest || ""
+    data.reason_for_is_manageable_harvest || "",
   );
 
-  console.log(data.reason_for_is_manageable_harvest);
+  const [neighbourStatusOptions, setNeighbourStatusOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+
+  const [neighbourStatusId, setNeighbourStatusId] = useState<
+    number | undefined
+  >(data.neighbour_field_status_id);
+
+  const [neighbourStatusLabel, setNeighbourStatusLabel] = useState<
+    string | undefined
+  >(data.neighbour_field_status_label);
+
+  console.log(data);
 
   /** Sync with parent data if it changes */
   useEffect(() => {
     setSelectedPests(data.pestIds || []);
-    setSelectedDiseases(data.diseaseIds || []);
+    setSelectedDiseases(data.diseaseIds || []); 
     setManageable(data.is_manageable_harvest ? "Yes" : "No");
     setRemarks(data.reason_for_is_manageable_harvest || "");
+    setNeighbourStatusId(data.neighbour_field_status_id);
+    setNeighbourStatusLabel(data.neighbour_field_status_label);
   }, [data]);
+
+  useEffect(() => {
+    const fetchNeighbourStatus = async () => {
+      const res = await fetch("/neighbour_field_status.json");
+      const json = await res.json();
+
+      setNeighbourStatusOptions(
+        json.map((item: any) => ({
+          value: item.id,
+          label: item.irrigation_status,
+        })),
+      );
+    };
+
+    fetchNeighbourStatus();
+  }, []);
 
   /** Fetch pest & disease options from API */
   useEffect(() => {
@@ -74,7 +114,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
             pestRes.data.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
-            }))
+            })),
           );
         }
 
@@ -83,7 +123,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
             diseaseRes.data.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
-            }))
+            })),
           );
         }
       } catch (err) {
@@ -95,7 +135,7 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
   }, [get]);
 
   /** Handlers */
-  const updateParent = (updated: Partial<PestsDiseaseProps["data"]>) => {
+  const updateParent = (updated: Partial<PestsDiseaseProps["data"] & { pestNames?: string[]; diseaseNames?: string[] }>) => {
     onChange({
       pestIds: selectedPests,
       pestNames: pestOptions
@@ -107,6 +147,8 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
         .map((d) => d.name),
       is_manageable_harvest: manageable === "Yes",
       reason_for_is_manageable_harvest: manageable === "No" ? remarks : "",
+      neighbour_field_status_id: neighbourStatusId,
+      neighbour_field_status_label: neighbourStatusLabel,
       ...updated,
     });
   };
@@ -131,9 +173,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       : [...selectedDiseases, id];
     setSelectedDiseases(updatedIds);
 
+    // Use updatedIds directly for diseaseNames computation
+    const updatedDiseaseNames = diseaseOptions
+      .filter((d) => updatedIds.includes(d.id))
+      .map((d) => d.name);
+
     updateParent({
       pestIds: selectedPests,
       diseaseIds: updatedIds,
+      diseaseNames: updatedDiseaseNames,
       is_manageable_harvest: manageable === "Yes",
       reason_for_is_manageable_harvest: remarks || undefined,
     });
@@ -162,6 +210,27 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
     });
   };
 
+  const handleNeighbourStatusChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const value = e.target.value;
+    const numericValue = value === "" ? undefined : Number(value);
+
+    // Get the label for the selected value
+    const selectedOption = neighbourStatusOptions.find(
+      (opt) => opt.value === numericValue,
+    );
+    const labelValue = selectedOption ? selectedOption.label : undefined;
+
+    setNeighbourStatusId(numericValue);
+    setNeighbourStatusLabel(labelValue);
+
+    updateParent({
+      neighbour_field_status_id: numericValue,
+      neighbour_field_status_label: labelValue,
+    });
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-5 underline text-center">
@@ -169,6 +238,15 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
       </h2>
 
       <div className="space-y-6 max-h-[500px] overflow-auto">
+        <DropdownField
+          label="Neighbour Field Status"
+          id="neighbourFieldStatus"
+          name="neighbour_field_status_id"
+          value={neighbourStatusId ?? ""}
+          onChange={handleNeighbourStatusChange}
+          options={neighbourStatusOptions}
+        />
+
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
@@ -185,23 +263,25 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
               {t("no_pest_options_available")}
             </p>
           ) : (
-            pestOptions.map((pest) => (
-              <div
-                key={pest.id}
-                className="flex items-center gap-2 font-semibold text-[15px]"
-              >
-                <input
-                  type="checkbox"
-                  id={`pest-${pest.id}`}
-                  checked={selectedPests.includes(pest.id)}
-                  onChange={() => togglePest(pest.id)}
-                  className="cursor-pointer accent-blue-600 custom-checkbox mt-2 shrink-0"
-                />
-                <label htmlFor={`pest-${pest.id}`} className="cursor-pointer">
-                  {pest.name}
-                </label>
-              </div>
-            ))
+            <div className="space-y-4">
+              {pestOptions.map((pest) => (
+                <div
+                  key={pest.id}
+                  className="flex items-center gap-2 font-semibold text-[15px]"
+                >
+                  <input
+                    type="checkbox"
+                    id={`pest-${pest.id}`}
+                    checked={selectedPests.includes(pest.id)}
+                    onChange={() => togglePest(pest.id)}
+                    className="cursor-pointer accent-blue-600 custom-checkbox shrink-0"
+                  />
+                  <label htmlFor={`pest-${pest.id}`} className="cursor-pointer">
+                    {pest.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
@@ -221,26 +301,28 @@ const PestsDisease: React.FC<PestsDiseaseProps> = ({ data, onChange }) => {
               {t("no_disease_options_available")}
             </p>
           ) : (
-            diseaseOptions.map((disease) => (
-              <div
-                key={disease.id}
-                className="flex items-center gap-2 font-semibold text-[15px]"
-              >
-                <input
-                  type="checkbox"
-                  id={`disease-${disease.id}`}
-                  checked={selectedDiseases.includes(disease.id)}
-                  onChange={() => toggleDisease(disease.id)}
-                  className="cursor-pointer accent-green-600 custom-checkbox mt-2 shrink-0"
-                />
-                <label
-                  htmlFor={`disease-${disease.id}`}
-                  className="cursor-pointer"
+            <div className="space-y-4">
+              {diseaseOptions.map((disease) => (
+                <div
+                  key={disease.id}
+                  className="flex items-center gap-2 font-semibold text-[15px]"
                 >
-                  {disease.name}
-                </label>
-              </div>
-            ))
+                  <input
+                    type="checkbox"
+                    id={`disease-${disease.id}`}
+                    checked={selectedDiseases.includes(disease.id)}
+                    onChange={() => toggleDisease(disease.id)}
+                    className="cursor-pointer accent-green-600 custom-checkbox shrink-0"
+                  />
+                  <label
+                    htmlFor={`disease-${disease.id}`}
+                    className="cursor-pointer"
+                  >
+                    {disease.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 

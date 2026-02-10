@@ -47,10 +47,10 @@ export interface LandSubmissionModel {
     land_code?: string;
 
     area_in_acre: number;
-   
+
     ownership_type: string;
 
-   
+
 
     // can be multiple suitability ids (checkboxes)
     land_suitability_details: LandSuitabilityRemark[]; //this is accurate
@@ -58,7 +58,13 @@ export interface LandSubmissionModel {
 
     land_name: string;
     image?: string | null; // base64 data uri or file reference
- 
+
+    // agricultural fields
+    soil_type_id?: string;
+    land_type_id?: string;
+    land_preparation_type_id?: string;
+    crop_planting_type_id?: string;
+
     land_measurement_info: LandMeasurementInfo;
     land_coordinate_point: LandCoordinatePoint[];
     land_reference_point: LandReferencePoint[];
@@ -118,14 +124,20 @@ export function normalizeLandSubmission(
         farmer_id: input.farmer_id ?? 0,
         land_code: input.land_code ?? generateLandCode(input.farmer_id ?? null),
         area_in_acre: input.area_in_acre ?? 0,
- 
+
         ownership_type: input.ownership_type ?? 'Owned',
-       
-    
+
+
         land_suitability_details: land_suitability_details,
         land_name: input.land_name ?? 'Unnamed Land',
         image: input.image ?? null,
-       
+
+        // agricultural fields
+        soil_type_id: input.soil_type_id ?? '',
+        land_type_id: input.land_type_id ?? '',
+        land_preparation_type_id: input.land_preparation_type_id ?? '',
+        crop_planting_type_id: input.crop_planting_type_id ?? '',
+
         land_measurement_info: measurement,
         land_coordinate_point: coords,
         land_reference_point: refs,

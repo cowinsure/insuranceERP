@@ -4,15 +4,32 @@ import React, { useEffect, useState } from "react";
 import useApi from "@/hooks/use_api";
 import Loading from "@/components/utils/Loading";
 import { useLocalization } from "@/core/context/LocalizationContext";
+import DropdownField from "@/components/DropDownField";
 
 interface PestsDiseaseProps {
-  data: { pestIds?: number[]; diseaseIds?: number[] };
+  data: {
+    pestIds?: number[];
+    diseaseIds?: number[];
+    diseaseControlId?: number | undefined;
+    neighbourFieldStatusId?: number | undefined;
+    diseaseControlLabel?: string;
+    neighbourFieldLabel?: string;
+  };
   onChange: (
     pestIds: number[],
     diseaseIds: number[],
     pestDetails?: { id: number; name: string }[],
-    diseaseDetails?: { id: number; name: string }[]
+    diseaseDetails?: { id: number; name: string }[],
+    diseaseControlId?: number,
+    neighbourFieldStatusId?: number,
+    diseaseControlLabel?: string, // Add this
+    neighbourFieldLabel?: string, // Add this
   ) => void;
+}
+
+interface DropdownOption {
+  value: number;
+  label: string;
 }
 
 const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
@@ -27,28 +44,61 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
     { id: number; name: string }[]
   >([]);
 
+  const [diseaseControlOptions, setDiseaseControlOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+
+  const [neighbourFieldStatusOptions, setNeighbourFieldStatusOptions] =
+    useState<{ value: number; label: string }[]>([]);
+
   const [selectedPests, setSelectedPests] = useState<number[]>(
-    data.pestIds || []
+    data.pestIds || [],
   );
   const [selectedDiseases, setSelectedDiseases] = useState<number[]>(
-    data.diseaseIds || []
+    data.diseaseIds || [],
   );
+  const [diseaseControlId, setDiseaseControlId] = useState<
+    number | undefined
+  >();
+
+  const [neighbourFieldStatusId, setNeighbourFieldStatusId] = useState<
+    number | undefined
+  >();
+
+  const [diseaseControlLabel, setDiseaseControlLabel] = useState<string>("");
+
+  const [neighbourFieldLabel, setNeighbourFieldLabel] = useState<string>("");
 
   // Sync with parent when data changes (for persistence)
   useEffect(() => {
     setSelectedPests(data.pestIds || []);
     setSelectedDiseases(data.diseaseIds || []);
+    setDiseaseControlId(data.diseaseControlId ?? undefined);
+    setNeighbourFieldStatusId(data.neighbourFieldStatusId ?? undefined);
+    setDiseaseControlLabel(data.diseaseControlLabel || "");
+    setNeighbourFieldLabel(data.neighbourFieldLabel || "");
   }, [data]);
 
   // Fetch options from API
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [pestRes, diseaseRes] = await Promise.all([
+        const [
+          pestRes,
+          diseaseRes,
+          diseaseControlRes,
+          neighbourFieldStatusRes,
+        ] = await Promise.all([
           get("/cms/crop-pest-attack-observations-type-service/", {
             params: { page_size: 50, start_record: 1 },
           }),
           get("/cms/crop-disease-attack-observations-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+          get("/cms/disease-control-type-service/", {
+            params: { page_size: 50, start_record: 1 },
+          }),
+          get("/cms/neighbour-field-status-type-service/", {
             params: { page_size: 50, start_record: 1 },
           }),
         ]);
@@ -58,7 +108,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             pestRes.data.map((item: any) => ({
               id: item.id,
               name: item.pest_attack_observations_type_name,
-            }))
+            })),
           );
 
         if (diseaseRes.status === "success")
@@ -66,7 +116,22 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
             diseaseRes.data.map((item: any) => ({
               id: item.id,
               name: item.disease_attack_observations_type_name,
-            }))
+            })),
+          );
+
+        if (neighbourFieldStatusRes.status === "success")
+          setNeighbourFieldStatusOptions(
+            neighbourFieldStatusRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.field_status_type,
+            })),
+          );
+        if (diseaseControlRes.status === "success")
+          setDiseaseControlOptions(
+            diseaseControlRes.data.map((item: any) => ({
+              value: item.id,
+              label: item.disease_control_type,
+            })),
           );
       } catch (err) {
         console.error(err);
@@ -86,7 +151,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
 
     const pestDetails = pestOptions.filter((p) => updated.includes(p.id));
     const diseaseDetails = diseaseOptions.filter((d) =>
-      selectedDiseases.includes(d.id)
+      selectedDiseases.includes(d.id),
     );
 
     // ✅ Send IDs + names for preview
@@ -94,7 +159,9 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       updated,
       selectedDiseases,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
-      diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
+      diseaseControlId,
+      neighbourFieldStatusId,
     );
   };
 
@@ -113,74 +180,141 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       selectedPests,
       updated,
       pestDetails.map((p) => ({ id: p.id, name: p.name })),
-      diseaseDetails.map((d) => ({ id: d.id, name: d.name }))
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
+      diseaseControlId,
+      neighbourFieldStatusId,
     );
   };
-console.log(data);
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    const numericValue = value === "" ? undefined : Number(value);
+
+    let newDiseaseControl = diseaseControlId;
+    let newNeighbourStatus = neighbourFieldStatusId;
+    let newDiseaseControlLabel = diseaseControlLabel;
+    let newNeighbourFieldLabel = neighbourFieldLabel;
+
+    if (name === "disease_control_id") {
+      newDiseaseControl = numericValue;
+      setDiseaseControlId(numericValue);
+      const selectedOption = diseaseControlOptions.find(
+        (opt) => opt.value === numericValue,
+      );
+      newDiseaseControlLabel = selectedOption?.label || "";
+      setDiseaseControlLabel(newDiseaseControlLabel);
+    } else if (name === "neighbour_field_status_id") {
+      newNeighbourStatus = numericValue;
+      setNeighbourFieldStatusId(numericValue);
+      const selectedOption = neighbourFieldStatusOptions.find(
+        (opt) => opt.value === numericValue,
+      );
+      newNeighbourFieldLabel = selectedOption?.label || "";
+      setNeighbourFieldLabel(newNeighbourFieldLabel);
+    }
+
+    const pestDetails = pestOptions.filter((p) => selectedPests.includes(p.id));
+    const diseaseDetails = diseaseOptions.filter((d) =>
+      selectedDiseases.includes(d.id),
+    );
+
+    onChange(
+      selectedPests,
+      selectedDiseases,
+      pestDetails.map((p) => ({ id: p.id, name: p.name })),
+      diseaseDetails.map((d) => ({ id: d.id, name: d.name })),
+      newDiseaseControl, // diseaseControlId ✅
+      newNeighbourStatus, // neighbourFieldStatusId ✅
+      newDiseaseControlLabel, // diseaseControlLabel ✅
+      newNeighbourFieldLabel, // neighbourFieldLabel ✅
+    );
+  };
+  console.log(data);
   return (
-    <div className="p-3">
-      <h2 className="text-xl font-semibold mb-5 underline text-center">
-        {t('pest_disease_observations')}
+    <div className="lg:p-3">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
+        {t("pest_disease_observations")}
       </h2>
 
-      <div className="space-y-6 max-h-[500px] overflow-auto">
+      <div className="space-y-6 max-h-[400px] overflow-auto">
+        <DropdownField
+          label="Disease Control"
+          id="diseaseControl"
+          name="disease_control_id"
+          value={diseaseControlId}
+          onChange={handleChange}
+          options={diseaseControlOptions}
+        />
+        <DropdownField
+          label="Neighbour Field Status"
+          id="neighbourFieldStatus"
+          name="neighbour_field_status_id"
+          value={neighbourFieldStatusId}
+          onChange={handleChange}
+          options={neighbourFieldStatusOptions}
+        />
         {/* Pest Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            {t('pest_attack_observations')}{" "}
-            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+            {t("pest_attack_observations")}{" "}
+            <span className="text-sm text-gray-400">
+              {t("multiple_selection")}
+            </span>
           </h3>
 
           {loading ? (
             <Loading />
           ) : (
-            <>
+            <div className="space-y-4">
               {pestOptions.map((pest) => (
                 <div
                   key={pest.id}
-                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                  className="flex items-center gap-2 font-medium lg:text-[15px]"
                 >
                   <input
                     type="checkbox"
-                    id={`pest-${pest.id}`} // ✅ add this line
+                    id={`pest-${pest.id}`}
                     checked={selectedPests.includes(pest.id)}
                     onChange={() => togglePest(pest.id)}
-                    className="cursor-pointer accent-blue-600 custom-checkbox mt-2 shrink-0"
+                    className="cursor-pointer accent-blue-600 custom-checkbox shrink-0"
                   />
                   <label
-                    htmlFor={`pest-${pest.id}`} // ✅ connect label to input
+                    htmlFor={`pest-${pest.id}`}
                     className="cursor-pointer col-span-2"
                   >
                     {pest.name}
                   </label>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
 
         {/* Disease Section */}
         <div className="bg-gray-50 p-4 border rounded-lg space-y-2">
           <h3 className="font-semibold">
-            {t('disease_attack_observations')}{" "}
-            <span className="text-sm text-gray-400">{t('multiple_selection')}</span>
+            {t("disease_attack_observations")}{" "}
+            <span className="text-sm text-gray-400">
+              {t("multiple_selection")}
+            </span>
           </h3>
 
           {loading ? (
             <Loading />
           ) : (
-            <>
+            <div className="space-y-4">
               {diseaseOptions.map((disease) => (
                 <div
                   key={disease.id}
-                  className="flex items-center gap-2 space-y-2 font-semibold text-[15px]"
+                  className="flex items-center gap-2 font-medium lg:text-[15px]"
                 >
                   <input
                     type="checkbox"
                     id={`disease-${disease.id}`}
                     checked={selectedDiseases.includes(disease.id)}
                     onChange={() => toggleDisease(disease.id)}
-                    className="cursor-pointer accent-green-600 custom-checkbox mt-2 shrink-0"
+                    className="cursor-pointer accent-green-600 custom-checkbox shrink-0"
                   />
                   <label
                     htmlFor={`disease-${disease.id}`} // ✅ connect label to input
@@ -190,7 +324,7 @@ console.log(data);
                   </label>
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>

@@ -74,14 +74,14 @@ const History = ({ data, onChange }: HistoryProps) => {
     }
   }, [data.last_year_crop_type_id, cropType]);
 
-  //("History data:", data);
+  console.log("History data:", data);
   return (
-    <form className="p-3">
-      <h2 className="text-xl font-semibold mb-5 text-center underline">
+    <form className="lg:p-3">
+      <h2 className="text-lg lg:text-xl font-semibold mb-5 text-center underline">
         {t('history')}
       </h2>
 
-      <div className="space-y-5 max-h-[400px] overflow-auto">
+      <div className="space-y-5 max-h-[500px] overflow-auto">
         <InputField
           placeholder={t('ex_boro_rice')}
           label={t('immediate_previous_crop')}

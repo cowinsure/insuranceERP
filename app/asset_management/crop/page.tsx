@@ -8,15 +8,31 @@ import { CardTitle } from "@/components/ui/card";
 import GenericModal from "@/components/ui/GenericModal";
 import Loading from "@/components/utils/Loading";
 import { SearchFilter } from "@/components/utils/SearchFilter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import CropStageModalTabs from "@/components/viewCropModal/CropStageModalTabs";
 import useApi from "@/hooks/use_api";
-import { log } from "console";
-import { ClipboardCheck, Eye, FilePlus, Plus, Sparkles } from "lucide-react";
+import {
+  ClipboardCheck,
+  Eye,
+  FilePlus,
+  Info,
+  Sparkles,
+  Filter,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { toast, Toaster } from "sonner";
 import { useLocalization } from "@/core/context/LocalizationContext";
 import { useAuth } from "@/core/context/AuthContext";
+import { FaPlus } from "react-icons/fa6";
+import { MoreVertical, X } from "lucide-react";
+import Pagination from "@/components/utils/Pagination";
 
 type StageAccess = {
   stage1Enabled: boolean;
@@ -50,6 +66,11 @@ const CropsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number | "All">(6);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [isInfoModal, setIsInfoModal] = useState(false);
+  const [showCoach, setShowCoach] = useState(false);
+  const [cropFilter, setCropFilter] = useState("All");
+  const [filteredByCrop, setFilteredByCrop] = useState<CropGetData[]>([]);
 
   const totalPages =
     pageSize === "All"
@@ -77,6 +98,28 @@ const CropsPage = () => {
   useEffect(() => {
     fetchCropData();
   }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("seen-stage-info");
+    const isMobile = window.innerWidth < 1024;
+
+    if (!hasSeen && isMobile) {
+      setShowCoach(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const filtered = crops.filter(
+      (crop) =>
+        cropFilter === "All" ||
+        crop.crop_name?.toLowerCase().includes(cropFilter.toLowerCase())
+    );
+    setFilteredByCrop(filtered);
+  }, [crops, cropFilter]);
+
+  useEffect(() => {
+    setTotalRecords(filteredCrops.length);
+  }, [filteredCrops]);
 
   // GET all crop data from API
   const fetchCropData = async () => {
@@ -227,70 +270,196 @@ const CropsPage = () => {
           currentPage * (pageSize as number)
         );
 
-  console.log(crops);
-
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6 pb-16 lg:pb-0">
+    <div className="flex-1 lg:space-y-2 p-3 md:px-6 pb-16 lg:pb-0">
       {/* Page header */}
       <div className="flex items-center justify-between">
-        <div>
+        <div className="mb-5">
           <div className="flex items-center gap-2">
-            <h1 className="hidden lg:inline-block text-xl lg:text-3xl font-bold text-gray-900">
+            <h1 className="hidden lg:inline-block text-xl lg:text-2xl font-bold text-gray-700">
               {t("asset_management")}
             </h1>
             <IoIosArrowForward size={30} className="hidden lg:inline-block" />
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
+            <h1 className="text-[21px] lg:text-2xl font-bold text-gray-700">
               {t("crop_registration")}
             </h1>
           </div>
-          <p className="text-gray-500 mt-1">{t("register_crop_details")}</p>
+          <p className="text-gray-400 mt-1 text-sm lg:text-base font-medium lg:tracking-wide">
+            {t("register_crop_details")}
+          </p>
         </div>
-        {/* <div className="flex">
-          <Button
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            onClick={() => setIsModal(true)}
-          >
-            <Plus className="w-4 h-4" />
-            {t('add_crop')}
-          </Button>
-        </div> */}
       </div>
       {/* Body */}
-      <SearchFilter
-        placeholder={t("search_farmer_mobile")}
-        data={crops}
-        setFilteredData={setFilteredCrops}
-        searchKeys={["farmer_name", "mobile_number"]}
-      />
 
       {/* Table */}
-      <div className="flex flex-col space-y-2 border bg-white py-6 px-5 rounded-lg animate__animated animate__fadeIn">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
-              {t("registered_crops")}
-            </CardTitle>
-            <p className="text-sm text-gray-600">
+      <div className="flex flex-col space-y-2 border bg-white p-4 lg:py-6 lg:px-5 rounded-lg animate__animated animate__fadeIn">
+        {/* Table header */}
+        <div className="mb-5 grid grid-cols-4">
+          <div className="col-span-3 lg:col-span-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg lg:text-xl font-semibold text-gray-700 mb- pt-0">
+                {t("registered_crops")}
+              </CardTitle>
+              <div className="relative flex items-center">
+                <button
+                  id="stage-info-btn"
+                  className={`lg:hidden relative  ${
+                    showCoach && "z-50 bg-white rounded-full"
+                  }`}
+                  onClick={() => {
+                    setIsInfoModal(true);
+                    localStorage.setItem("seen-stage-info", "true");
+                    setShowCoach(false);
+                  }}
+                >
+                  <Info
+                    className={`w-5 h-5 ${
+                      showCoach
+                        ? "animate-pulse text-blue-500"
+                        : "text-gray-400"
+                    }`}
+                  />
+                </button>
+
+                {showCoach && (
+                  <>
+                    {/* Dim background */}
+                    <div
+                      className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-30"
+                      onClick={() => setShowCoach(false)}
+                    />
+
+                    {/* Tooltip anchored to button */}
+                    <div className="absolute z-40 top-full left-3 -translate-x-1/2 mt-3 w-[220px] bg-white rounded-xl shadow-xl p-3 text-sm">
+                      <p className="font-semibold text-gray-800">
+                        ℹ️ What do these icon means?
+                      </p>
+                      <p className="text-gray-600 mt-1">
+                        Tap here to understand planting & harvesting stages.
+                      </p>
+
+                      {/* Arrow */}
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45" />
+                    </div>
+                  </>
+                )}
+
+                {/* Info Modal */}
+                {isInfoModal && (
+                  <>
+                    {/* Dark background inset */}
+                    <div
+                      className="fixed inset-0 bg-black/40 z-40"
+                      onClick={() => setIsInfoModal(false)}
+                    />
+
+                    {/* Info Popover */}
+                    <div className="absolute -left-10 top-full mt-3 z-50 w-[240px] rounded-xl bg-white shadow-2xl border border-gray-200 p-4 space-y-4 animate-fade-in">
+                      {/* Close button */}
+                      <button
+                        onClick={() => setIsInfoModal(false)}
+                        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      {/* Arrow */}
+                      <div className="absolute -top-2 left-10 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-200" />
+
+                      {/* Content */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900">
+                            Initialization
+                          </span>
+
+                          <span className="text-gray-400">→</span>
+
+                          <img
+                            src="/initialization.png"
+                            alt="Planting & Cultivation"
+                            className="w-14 h-14"
+                          />
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900">
+                            Stage 1
+                          </span>
+
+                          <span className="text-gray-400">→</span>
+
+                          <img
+                            src="/seeding.png"
+                            alt="Planting & Cultivation"
+                            className="w-14 h-14"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-900">
+                            Stage 2
+                          </span>
+
+                          <span className="text-gray-400">→</span>
+
+                          <img
+                            src="/harvest.png"
+                            alt="Harvesting"
+                            className="w-14 h-14"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <p className="text-sm lg:text-base font-medium text-gray-400">
               {totalRecords} {t("crops_found")}
             </p>
           </div>
 
-          <div className="flex">
-            <Button
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-              onClick={() => setIsModal(true)}
-            >
-              <Plus className="w-4 h-4" />
-              {t("add_crop")}
-            </Button>
+          {/* Desktop Search and add btn */}
+          <div className="lg:col-span-2 flex items-center gap-5">
+            <div className="flex-1 hidden lg:block">
+              <SearchFilter
+                placeholder={t("search_farmer_mobile")}
+                data={filteredByCrop}
+                setFilteredData={setFilteredCrops}
+                searchKeys={["farmer_name", "mobile_number", "crop_name"]}
+              />
+            </div>
+            <div className="hidden lg:block">
+              <Select value={cropFilter} onValueChange={setCropFilter}>
+                <SelectTrigger className="w-[120px]">
+                  <div className="flex items-center">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Filter by Crop" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  <SelectItem value="Boro">Boro</SelectItem>
+                  <SelectItem value="Aus">Aus</SelectItem>
+                  <SelectItem value="Aman">Aman</SelectItem>
+                  <SelectItem value="Potato">Potato</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-full lg:w-auto lg:justify-end">
+              <button
+                className="bg-blue-500 hover:bg-blue-400 drop-shadow-md text-white text-sm lg:text-[15px] flex items-center justify-center gap-2 px-2 lg:px-4 py-2 rounded-md font-medium cursor-pointer w-full"
+                onClick={() => setIsModal(true)}
+              >
+                <FaPlus className="w- h-" size={16} />
+                <span className="hidden lg:inline-block">{t("add_crop")}</span>
+                <span className="inline-block lg:hidden">Add</span>
+              </button>
+            </div>
           </div>
         </div>
-        {/* <div className="mb-5">
-          <CardTitle className="text-lg font-semibold text-gray-900 mb-1 pt-0">
-            {t('registered_crops')}
-          </CardTitle>
-          <p className="text-sm text-gray-600">{crops.length} {t('crops_found')}</p>
-        </div> */}
+
+        {/* Desktop table */}
         <div className="hidden lg:block max-h-[550px] overflow-auto">
           <table className="w-full">
             <thead>
@@ -428,53 +597,39 @@ const CropsPage = () => {
               )}
             </tbody>
           </table>
-          {/* Pagination */}
-          <div className="hidden lg:flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Rows per page:</span>
-              <select
-                className="border rounded px-2 py-1"
-                value={pageSize}
-                onChange={(e) => {
-                  const value =
-                    e.target.value === "All" ? "All" : Number(e.target.value);
-                  setPageSize(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value={6}>6</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value="All">All</option>
-              </select>
-            </div>
+        </div>
 
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Prev
-              </Button>
-
-              <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPages}
-              </span>
-
-              <Button
-                variant="outline"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
+        {/* Search for mobile */}
+        <div className="flex-1 lg:hidden flex items-center justify-between gap-5">
+          <div className="flex-1">
+            <SearchFilter
+              placeholder={t("search_farmer_mobile")}
+              data={crops}
+              setFilteredData={setFilteredCrops}
+              searchKeys={["farmer_name", "mobile_number"]}
+            />
+          </div>
+          <div className="lg:hidden">
+            <Select value={cropFilter} onValueChange={setCropFilter}>
+              <SelectTrigger className="w-[120px]">
+                <div className="flex items-center">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter by Crop" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="Boro">Boro</SelectItem>
+                <SelectItem value="Aus">Aus</SelectItem>
+                <SelectItem value="Aman">Aman</SelectItem>
+                <SelectItem value="Potato">Potato</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         {/* MOBILE / TABLET VIEW — CARDS */}
-        <div className="grid gap-4 lg:hidden mt-4">
+        <div className="grid gap-4 lg:hidden mt-2 max-h-[60vh] overflow-auto">
           {isLoading ? (
             <Loading />
           ) : (
@@ -486,91 +641,161 @@ const CropsPage = () => {
               return (
                 <div
                   key={idx}
-                  className="border rounded-xl p-5 shadow-sm bg-white animate__animated animate__fadeIn"
+                  className="relative border rounded-lg p-3 shadow-sm bg-linear-to-tl from-gray-100 via-white to-gray-100 overflow-hidden animate__animated animate__fadeIn"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   {/* Header */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-base font-semibold text-gray-900">
-                        {crop.crop_name || "N/A"}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {t("stage_label")}{" "}
-                        <span className="font-medium text-gray-700">
-                          {crop.stage_name || "N/A"}
-                        </span>
-                      </p>
+                  <div
+                    className="flex justify-between items-center"
+                    onClick={() =>
+                      setOpenMenuId(
+                        openMenuId === crop.crop_id ? null : crop.crop_id
+                      )
+                    }
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl font-semibold text-gray-300 absolute -left-7">
+                        {/* {(currentPage - 1) *
+                          (pageSize === "All" ? 0 : pageSize) +
+                          idx +
+                          1} */}
+
+                        <img
+                          src={
+                            crop.stage_name === "Planting & Cultivation"
+                              ? "/seeding.png"
+                              : crop.stage_name === "Harvest & Observation"
+                              ? "/harvest.png"
+                              : ""
+                          }
+                          alt=""
+                          className="w-24 object-cover rotate-y-180 drop-shadow-xl"
+                        />
+
+                        {crop.stage_name === "Crop Initialization" && (
+                          <img
+                            src={"/initialization.png"}
+                            alt=""
+                            className="w-24 object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="absolute -left-7 w-22 h-full -z-10 rounded-r-full" />
+
+                      <div className="ml-16">
+                        <h3 className="text-base font-semibold text-gray-900">
+                          {crop.crop_name || "N/A"}
+                        </h3>
+
+                        <p className="text-[13px] font-medium ">
+                          <span className=" text-gray-800">
+                            {crop.farmer_name || "N/A"}
+                          </span>
+                          <span className="mx-1 text-gray-400">-</span>
+                          <span className="text-gray-700">
+                            {crop.mobile_number || "N/A"}
+                          </span>
+                        </p>
+                        <p className="text-gray-400 font- text-[13px] mt-2">
+                          {crop.stage_name}
+                        </p>
+                      </div>
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleView(crop.crop_id)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  {/* Details */}
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">
-                        {t("planting_date")}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {crop.planting_date || "N/A"}
-                      </p>
+                    {/* Master Action Button */}
+                    <div className="">
+                      <button
+                        onClick={() =>
+                          setOpenMenuId(
+                            openMenuId === crop.crop_id ? null : crop.crop_id
+                          )
+                        }
+                        className={`relative z-20 ${
+                          openMenuId === crop.crop_id
+                            ? "bg-white text-red-600 p-2 rounded-lg border border-red-400"
+                            : "bg-gray-200 text-black p-2 rounded-lg"
+                        }`}
+                      >
+                        {openMenuId === crop.crop_id ? (
+                          <X className="w-4 h-4" />
+                        ) : (
+                          <MoreVertical className="w-4 h-4" />
+                        )}
+                      </button>
                     </div>
 
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-[11px] text-gray-500">
-                        {t("land_name")}
-                      </p>
-                      <p className="text-sm font-medium capitalize truncate">
-                        {crop.land_name || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    {/* Stage 1 */}
-                    <Button
-                      variant="secondary"
-                      className={`flex-1 py-2 ${
-                        stage1Enabled
-                          ? "text-blue-900 bg-blue-50"
-                          : "text-gray-400 bg-gray-100 cursor-not-allowed"
+                    <div
+                      className={`absolute inset-0 bg-black/10 backdrop-blur-xs transition-all duration-700 ease-in-out ${
+                        openMenuId === crop.crop_id
+                          ? "opacity-100"
+                          : "opacity-0 pointer-events-none backdrop-blur-0"
                       }`}
+                    />
+                  </div>
+
+                  {/* Absolute Horizontal Action Tray */}
+                  <div
+                    className={` absolute right-14 top-1/2 -translate-y-1/2 flex gap-2 bg-white/90 backdrop-blur-sm border rounded-lg shadow-lg p-2 transition-all duration-300 ease-in-out ${
+                      openMenuId === crop.crop_id
+                        ? "opacity-100 translate-x-0"
+                        : "opacity-0 translate-x-16 pointer-events-none"
+                    }
+    `}
+                  >
+                    {/* Stage 1 btn */}
+                    <Button
+                      title="Stage 1"
+                      variant="ghost"
+                      size="sm"
+                      className={
+                        stage1Enabled
+                          ? "text-blue-700"
+                          : "text-gray-400 cursor-not-allowed"
+                      }
                       onClick={() => {
                         if (!stage1Enabled) {
                           toast.error(t("stage_1_cannot_edit"));
                         } else {
                           handleAddCropDetails(crop.crop_id);
                         }
+                        setOpenMenuId(null);
                       }}
                     >
-                      <FilePlus className="w-4 h-4 mr-2" /> {t("stage_1")}
+                      <FilePlus className="w-4 h-4" />
                     </Button>
 
-                    {/* Stage 2 */}
+                    {/* Stage 2 btn */}
                     <Button
-                      variant="secondary"
-                      className={`flex-1 py-2 ${
+                      title="Stage 2"
+                      variant="ghost"
+                      size="sm"
+                      className={
                         stage2Enabled
-                          ? "text-blue-900 bg-blue-50"
-                          : "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      }`}
+                          ? "text-blue-700"
+                          : "text-gray-400 cursor-not-allowed"
+                      }
                       onClick={() => {
                         if (!stage2Enabled) {
                           toast.error(t("complete_stage_1_first"));
                         } else {
                           handleRevisitData(crop.crop_id);
                         }
+                        setOpenMenuId(null);
                       }}
                     >
-                      <ClipboardCheck className="w-4 h-4 mr-2" /> {t("stage_2")}
+                      <ClipboardCheck className="w-4 h-4" />
+                    </Button>
+
+                    {/* View btn */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        handleView(crop.crop_id);
+                        setOpenMenuId(null);
+                      }}
+                    >
+                      <Eye className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -578,50 +803,21 @@ const CropsPage = () => {
             })
           )}
         </div>
+
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4 lg:hidden">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Rows per page:</span>
-            <select
-              className="border rounded px-2 py-1"
-              value={pageSize}
-              onChange={(e) => {
-                const value =
-                  e.target.value === "All" ? "All" : Number(e.target.value);
-                setPageSize(value);
-                setCurrentPage(1);
-              }}
-            >
-              <option value={6}>6</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value="All">All</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-            >
-              Prev
-            </Button>
-
-            <span className="text-sm text-gray-700">
-              Page {currentPage} of {totalPages}
-            </span>
-
-            <Button
-              variant="outline"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
       </div>
+
+      {/* MODALS */}
 
       {/* Register Crop Modal */}
       {isModal && (
@@ -650,15 +846,10 @@ const CropsPage = () => {
                       "Crop"}
                   </span>
                 </div>
-                <small className="font-medium text-gray-500 tracking-wide">
-                  {t("variety")}{" "}
-                  {selectedCrop?.crop_asset_seed_details?.[0]?.seed_variety ||
-                    selectedCrop?.variety}
-                </small>
               </span>
             }
             closeModal={() => setIsStageOneModal(false)}
-            widthValue={"w-full min-w-sm md:max-w-3xl"}
+            widthValue={"w-full md:max-w-3xl"}
           >
             <AddCropDetailsModal crop={selectedCrop!} onClose={runOnClose} />
           </GenericModal>
@@ -757,7 +948,7 @@ const CropsPage = () => {
       {/* Full Screen Loader */}
       {isFullScreenLoading && (
         <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50">
-          <Loading text="Wait a moment"/>
+          <Loading text="Wait a moment" />
         </div>
       )}
 

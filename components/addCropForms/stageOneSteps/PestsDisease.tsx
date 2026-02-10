@@ -230,7 +230,7 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
       newNeighbourFieldLabel, // neighbourFieldLabel ✅
     );
   };
-  // console.log(data);
+  console.log(data);
   return (
     <div className="lg:p-3">
       <h2 className="text-lg lg:text-xl font-semibold mb-5 underline text-center">
@@ -274,13 +274,13 @@ const PestsDisease = ({ data, onChange }: PestsDiseaseProps) => {
                 >
                   <input
                     type="checkbox"
-                    id={`pest-${pest.id}`} // ✅ add this line
+                    id={`pest-${pest.id}`}
                     checked={selectedPests.includes(pest.id)}
                     onChange={() => togglePest(pest.id)}
                     className="cursor-pointer accent-blue-600 custom-checkbox shrink-0"
                   />
                   <label
-                    htmlFor={`pest-${pest.id}`} // ✅ connect label to input
+                    htmlFor={`pest-${pest.id}`}
                     className="cursor-pointer col-span-2"
                   >
                     {pest.name}

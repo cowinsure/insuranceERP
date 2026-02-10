@@ -201,7 +201,7 @@ export default function CropDetailsPreview({
               {renderRow(
                 "Irrigation Status",
                 data.cultivation.irrigation_status ||
-                  data.cultivation.irrigation_status,
+                  data.cultivation.irrigation_status_id_name,
               )}
               {renderRow(
                 t("irrigation_source"),
@@ -253,7 +253,9 @@ export default function CropDetailsPreview({
               )}
               {/* {renderRow("Sowing Date", data.history.sowing_date)} */}
               {renderRow(t("harvest_date"), data.history.harvest_date)}
-              {renderRow(t("production"), data.history.last_year_production)}
+              {renderRow("Production Last Year", data.history.last_year_production)}
+              {renderRow("Reasons For Changing Seed", data.history.reason_for_changing_seed)}
+              {renderRow("Seed Used Last Year", data.history.seed_used_last_year)}
             </div>
           ) : (
             <p className="text-gray-400 italic">{t("no_history_data")}</p>

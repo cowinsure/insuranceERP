@@ -518,7 +518,9 @@ export default function AddCropDetailsModal({
           steps={steps}
           currentStep={currentStep}
           completedSteps={completedSteps}
+          onStepChange={(step) => setCurrentStep(step)}
         />
+        ;
       </div>
 
       <div className=" bg-white rounded-b-xl">{renderStep()}</div>

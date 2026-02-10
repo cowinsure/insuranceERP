@@ -209,6 +209,10 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
     return Array.from(map.values());
   };
 
+  const stageThreeDetail = cropData?.crop_asset_disease_attack_details?.find(
+    (item: { stage_id: number }) => item.stage_id === 3,
+  );
+
   /* ---------- Render ---------- */
   return (
     <div className="space-y-6 text-gray-700 overflow-y-auto">
@@ -285,11 +289,10 @@ const StageTwoData: React.FC<StageTwoDataProps> = ({ cropData }) => {
         </h2>
 
         <DisplayField
-          label={"Neighbour Field Type"}
-          value={
-            cropData?.crop_asset_disease_attack_details[0]?.field_status_type
-          }
+          label="Neighbour Field Type"
+          value={stageThreeDetail?.field_status_type ?? "N/A"}
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-7">
           {/* ✅ Stage-filtered Pest */}
           <ArrayDisplay

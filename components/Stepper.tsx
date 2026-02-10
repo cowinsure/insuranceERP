@@ -5,12 +5,14 @@ interface StepperProps {
   steps: string[];
   currentStep: number;
   completedSteps: Set<number>;
+  onStepChange?: (stepIndex: number) => void;
 }
 
 export const Stepper: React.FC<StepperProps> = ({
   steps,
   currentStep,
   completedSteps,
+  onStepChange,
 }) => {
   const progressPercent =
     steps.length === 1 ? 100 : (currentStep / (steps.length - 1)) * 100;
@@ -40,13 +42,31 @@ export const Stepper: React.FC<StepperProps> = ({
               style={{ left: `${leftPercent}%`, transform: "translateX(-50%)" }}
             >
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors custom-hover ${
-                  isCompleted ? "bg-blue-400 text-white" : ""
-                } ${
-                  isCurrent
-                    ? "bg-blue-100 text-blue-800 font-bold scale-125 border-4 border-blue-400"
-                    : "bg-gray-300 text-gray-700"
-                }`}
+                onClick={() => {
+                  if (!onStepChange) return;
+
+                  // Optional guard rules (pick what you want)
+                  // 1️⃣ allow only completed + current
+                  if (index <= currentStep || completedSteps.has(index)) {
+                    onStepChange(index);
+                  }
+
+                  // 2️⃣ OR allow jumping to ANY step
+                  // onStepChange(index);
+                }}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all
+    ${
+      index <= currentStep || completedSteps.has(index)
+        ? "cursor-pointer hover:scale-110"
+        : "cursor-not-allowed opacity-60"
+    }
+    ${isCompleted ? "bg-blue-400 text-white" : ""}
+    ${
+      isCurrent
+        ? "bg-blue-100 text-blue-800 font-bold scale-125 border-4 border-blue-400"
+        : "bg-gray-300 text-gray-700"
+    }
+  `}
               >
                 {isCompleted ? (
                   <Check

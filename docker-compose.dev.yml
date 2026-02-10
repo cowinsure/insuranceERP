@@ -1,0 +1,9 @@
+services:
+  frontend-dev:
+    image: insurecow/insurecow_warehouse_repo:frontend-insuranceERP-dev
+    container_name: frontend-insuranceERP-dev
+    restart: always
+    ports:
+      - "3011:3000"
+    environment:
+      - NODE_ENV=
